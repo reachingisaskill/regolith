@@ -58,8 +58,8 @@ namespace Regolith
       // Standard update operators
       Vector& operator+=( const Vector& ); // Plus-assign
       Vector& operator-=( const Vector& ); /// Minus-assign
-      Vector& operator*=( const Vector& ); // Multiply-assign
-      Vector& operator/=( const Vector& ); // Divide-assign
+      Vector& operator*=( float ); // Multiply-assign
+      Vector& operator/=( float ); // Divide-assign
 
 
       // Friend function operators

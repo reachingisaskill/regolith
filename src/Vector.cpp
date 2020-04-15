@@ -159,6 +159,22 @@ namespace Regolith
   }
 
 
+  Vector& Vector::operator*=( float f )
+  {
+    this->_x *= f;
+    this->_y *= f;
+    return *this;
+  }
+
+
+  Vector& Vector::operator/=( float f )
+  {
+    this->_x /= f;
+    this->_y /= f;
+    return *this;
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Friend Functions
 
@@ -170,9 +186,9 @@ namespace Regolith
 
   bool operator==( const Vector& v1, const Vector& v2 ) // Equal to
   {
-    if ( v1._x != v2._x )
+    if ( std::fabs(v1._x - v2._x) > epsilon )
       return false;
-    if ( v1._y != v2._y )
+    if ( std::fabs(v1._y - v2._y) > epsilon )
       return false;
     return true;
   }
@@ -180,7 +196,7 @@ namespace Regolith
 
   bool operator>( const Vector& v1, const Vector& v2 ) // Greater than
   {
-    return v1.square() > v2.square(); // Skip the square root. Slow!
+    return v1.square() - v2.square() > epsilon; // Skip the square root. Slow!
   }
 
 
@@ -192,7 +208,7 @@ namespace Regolith
 
   bool operator<( const Vector& v1, const Vector& v2 ) // Less Than
   {
-    return v1.square() < v2.square(); // Skip the square root. Slow!
+    return v2.square() - v1.square() > epsilon; // Skip the square root. Slow!
   }
 
 

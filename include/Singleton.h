@@ -15,8 +15,8 @@ class Singleton :
     static T* _theInstance;
 
   protected:
-    singleton() { }
-    virtual ~singleton() { }
+    Singleton() { }
+    virtual ~Singleton() { }
 
   public:
     static T* createInstance() { if ( _theInstance ) delete _theInstance; _theInstance = new T(); return _theInstance; }
@@ -28,7 +28,7 @@ class Singleton :
 };
 
 template < class T >
-T* singleton< T >::_theInstance = 0;
+T* Singleton< T >::_theInstance = 0;
 
 
 #endif // __REGOLITH__SINGLETON_H__
