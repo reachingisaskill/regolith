@@ -13,6 +13,20 @@
 namespace Regolith
 {
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Raw Texture Structure (Because SDL_Texture's don't store their dimensions).
+
+  struct RawTexture
+  {
+    SDL_Texture* texture;
+    int width;
+    int height;
+  };
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Texture class. The simplest for of renderable data.
+
   class Texture
   {
     Texture( const Texture& ) = delete; // Non-copy-constructable
@@ -22,9 +36,7 @@ namespace Regolith
 
     private:
       // Class owns this memory
-      SDL_Texture* _theTexture;
-      int _width;
-      int _height;
+      RawTexture _theTexture;
       float _angle;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
@@ -34,9 +46,10 @@ namespace Regolith
       SDL_Renderer* _theRenderer;
 
     protected:
-      virtual void _free(); // For derived classes to implement
-
       virtual void _setClip( SDL_Rect );
+
+      // For use by texture builder
+      Texture( RawTexture );
 
     public:
       Texture();
@@ -50,13 +63,10 @@ namespace Regolith
       void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
 
       // Accessors
-      virtual int getWidth() const { return _width; }
-      virtual int getHeight() const { return _height; }
+      virtual int getWidth() const;
+      virtual int getHeight() const;
       virtual float getAngle() const { return _angle; }
 
-
-      // Delete all the heap allocated memory and reset
-      void free();
 
       // Render with the current renderer object
       virtual void render();

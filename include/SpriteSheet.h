@@ -4,6 +4,8 @@
 
 #include "Texture.h"
 
+#include <SDL2/SDL.h>
+
 
 namespace Regolith
 {
@@ -12,6 +14,8 @@ namespace Regolith
   {
     SpriteSheet( const SpriteSheet& ) = delete; // Non-copy-constructable
     SpriteSheet& operator=( const SpriteSheet& ) = delete; // Non-copy-assignable
+
+    friend class TextureBuilder;
 
     private:
       int _currentSprite;
@@ -23,7 +27,7 @@ namespace Regolith
       SDL_Rect _spriteRect;
 
     protected:
-      virtual void _free();
+      SpriteSheet( RawTexture );
 
     public:
       SpriteSheet();

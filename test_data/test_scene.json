@@ -1,9 +1,28 @@
 {
+  "texture_files" :
+  [
+    {
+      "name" : "background",
+      "path" : "test_data/test_background.png"
+    },
+    {
+      "name" : "the_dot",
+      "path" : "test_data/test_ball.png"
+    }
+  ],
+  "texture_strings" :
+  [
+    {
+      "name" : "header_text",
+      "text" : "Press Return to toggle fullscreen",
+      "colour" : [ 0, 0, 0, 255 ],
+      "font" : "default"
+    }
+  ],
   "background" :
   {
-    "name" : "background",
-    "texture_type" : "simple_texture",
-    "texture_path" : "test_data/test_background.png"
+    "texture_name" : "background",
+    "texture_type" : "simple_texture"
   },
   "camera" :
   {
@@ -15,8 +34,7 @@
   "scene_elements" :
   [
     {
-      "name" : "the_dot",
-      "texture_path" : "test_data/test_background.png",
+      "texture_name" : "the_dot",
       "texture_type" : "spritesheet",
       "update_rate" : 1.0
     }
@@ -24,10 +42,8 @@
   "hud_elements" :
   [
     { 
-      "name" : "header_text",
-      "texture_type" : "text",
-      "texture_string" : "Press Return to toggle fullscreen",
-      "colour" : [ 0, 0, 0, 255 ]
+      "texture_name" : "header_text",
+      "texture_type" : "simple_texture"
     }
   ]
 }

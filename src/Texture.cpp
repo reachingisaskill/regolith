@@ -16,9 +16,16 @@ namespace Regolith
 {
 
   Texture::Texture() :
-    _theTexture( nullptr ),
-    _width( 0 ),
-    _height( 0 ),
+    _theTexture( { nullptr, 0, 0 } ),
+    _angle( 0.0 ),
+    _flipFlag( SDL_FLIP_NONE ),
+    _theRenderer( nullptr )
+  {
+  }
+
+
+  Texture::Texture( RawTexture tex) :
+    _theTexture( tex ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
     _theRenderer( nullptr )
@@ -27,9 +34,7 @@ namespace Regolith
 
 
   Texture::Texture( Texture&& other ) :
-    _theTexture( std::exchange( other._theTexture, nullptr ) ),
-    _width( std::move( other._width ) ),
-    _height( std::move( other._height ) ),
+    _theTexture( std::exchange( other._theTexture, { nullptr, 0, 0 } ) ),
     _angle( std::move( other._angle ) ),
     _flipFlag( std::move( other._flipFlag ) ),
     _theRenderer( std::move( other._theRenderer ) )
@@ -39,13 +44,8 @@ namespace Regolith
 
   Texture& Texture::operator=( Texture&& other ) 
   {
-    // Clear the class first
-    this->free();
-
     // Move the data memebers
-    _theTexture =  std::exchange( other._theTexture, nullptr );
-    _width = std::move( other._width );
-    _height = std::move( other._height );
+    _theTexture =  std::exchange( other._theTexture, { nullptr, 0, 0 } );
     _angle = std::move( other._angle );
     _flipFlag = std::move( other._flipFlag );
     _theRenderer = std::move( other._theRenderer );
@@ -56,26 +56,18 @@ namespace Regolith
 
   Texture::~Texture()
   {
-    // Delete all allocated memory
-    this->free();
   }
 
 
-  void Texture::free()
+  int Texture::getWidth() const
   {
-    this->_free();
-
-    if ( _theTexture != nullptr )
-    {
-      SDL_DestroyTexture( _theTexture );
-      _width = 0;
-      _height = 0;
-    }
+    return _theTexture.width;
   }
 
 
-  void Texture::_free()
+  int Texture::getHeight() const
   {
+    return _theTexture.height;
   }
 
 
@@ -84,11 +76,11 @@ namespace Regolith
     if ( _theRenderer == nullptr )
       ERROR_LOG( "No renderer present!" );
 
-    if ( _theTexture == nullptr )
+    if ( _theTexture.texture == nullptr )
       ERROR_LOG( "No texture present" );
 
     // Render it to the window
-    SDL_RenderCopyEx( _theRenderer, _theTexture, &_clip, &_destination, _angle, nullptr, _flipFlag );
+    SDL_RenderCopyEx( _theRenderer, _theTexture.texture, &_clip, &_destination, _angle, nullptr, _flipFlag );
   }
 
 
@@ -109,19 +101,19 @@ namespace Regolith
 
   void Texture::setColor( Uint8 red, Uint8 green, Uint8 blue )
   {
-    SDL_SetTextureColorMod( _theTexture, red, green, blue );
+    SDL_SetTextureColorMod( _theTexture.texture, red, green, blue );
   }
 
 
   void Texture::setAlpha( Uint8 alpha )
   {
-    SDL_SetTextureAlphaMod( _theTexture, alpha );
+    SDL_SetTextureAlphaMod( _theTexture.texture, alpha );
   }
 
 
   void Texture::setBlendMode( SDL_BlendMode blendmode )
   {
-    SDL_SetTextureBlendMode( _theTexture, blendmode );
+    SDL_SetTextureBlendMode( _theTexture.texture, blendmode );
   }
 
 

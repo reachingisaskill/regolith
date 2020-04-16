@@ -31,6 +31,8 @@ int main( int, char** )
     Manager* man = Manager::createInstance();
     man->init( test_config );
 
+    SDL_Renderer* theRenderer = man->getRendererPointer();
+    Window* theWindow = man->getWindowPointer();
 
     bool quit = false;
 
@@ -42,20 +44,16 @@ int main( int, char** )
         if ( e.type == SDL_QUIT )
           quit = true;
 
-        theWindow.handleEvent( e );
+        theWindow->handleEvent( e );
       }
 
       SDL_SetRenderDrawColor( theRenderer, default_render_red, default_render_green, default_render_blue, default_render_alpha );
       SDL_RenderClear( theRenderer );
 
       
-      testText1->setPosition( 0.5* ( theWindow.getWidth() - testText1->getWidth() ), 20 );
 
 
 
-      // Render all elements
-      testTexture1->render();
-      testText1->render();
 
       SDL_RenderPresent( theRenderer );
     }

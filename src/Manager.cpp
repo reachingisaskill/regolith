@@ -91,7 +91,7 @@ namespace Regolith
       int result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
       if ( result )
       {
-        ERROR_LOG( "Founnd errors parsing json" );
+        ERROR_LOG( "Manager::init() : Found errors parsing json" );
         ERROR_STREAM << errors;
       }
       delete reader;
@@ -107,6 +107,7 @@ namespace Regolith
       _theRenderer = _theWindow->init( screen_width, screen_height );
 
 
+
       // Set the default colour
       Json::Value color = json_data["default_color"];
       _defaultColor.r = color[0].asInt();
@@ -114,13 +115,6 @@ namespace Regolith
       _defaultColor.b = color[2].asInt();
       _defaultColor.a = color[3].asInt();
 
-      // Load all the scenes into memory
-      Json::Value scene_data = json_data["scenes"];
-      Json::ArrayIndex scenes_size = scene_data.size();
-      for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
-      {
-        _scenes.push_back( new Scene( _theWindow, _theRenderer, scene_data[ i ].asString() ) );
-      }
 
 
       // Find out what the default font is called
@@ -129,13 +123,15 @@ namespace Regolith
       // Load the listed fonts
       Json::Value font_data = json_data["fonts"];
       Json::ArrayIndex fonts_size = font_data.size();
+      INFO_STREAM << "Loading " << fonts_size << " fonts";
       for ( Json::ArrayIndex i = 0; i < fonts_size; ++i )
       {
         // Load the font details
-        std::string font_name = font_data["name"].asString();
-        std::string font_path = font_data["path"].asString();
-        int font_size = font_data["size"].asInt();
+        std::string font_name = font_data[i]["name"].asString();
+        std::string font_path = font_data[i]["path"].asString();
+        int font_size = font_data[i]["size"].asInt();
 
+        INFO_STREAM << "Opening TTF file from: " << font_path;
         // Try to open the TTF File
         TTF_Font* theFont = TTF_OpenFont( font_path.c_str(), font_size );
         if ( theFont == nullptr ) // Failed to open
@@ -151,6 +147,7 @@ namespace Regolith
           ERROR_STREAM << "Could not load font: " << font_name;
         }
         _fonts[ font_name ] = theFont;
+        INFO_STREAM << "Added font: " << font_name;
       }
 
       if ( _fonts.find( default_font ) == _fonts.end() ) // Default font must be loaded correctly
@@ -164,8 +161,18 @@ namespace Regolith
       {
         // Set the default font pointer
         _defaultFont = _fonts[ default_font ];
+        INFO_STREAM << "Default font, " << default_font << " identified " << _defaultFont;
       }
 
+
+
+      // Load all the scenes into memory
+      Json::Value scene_data = json_data["scenes"];
+      Json::ArrayIndex scenes_size = scene_data.size();
+      for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
+      {
+        _scenes.push_back( new Scene( _theWindow, _theRenderer, scene_data[ i ].asString() ) );
+      }
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream
     {

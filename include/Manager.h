@@ -51,6 +51,9 @@ namespace Regolith
       void init( std::string );
 
       // Get the pointer to the window
+      SDL_Renderer* getRendererPointer() { return _theRenderer; }
+
+      // Get the pointer to the window
       Window* getWindowPointer() { return _theWindow; }
 
       // Return a pointer to the required font data

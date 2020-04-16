@@ -3,23 +3,16 @@
 #define __REGOLITH__TEXTURE_BUILDER_H__
 
 #include "Texture.h"
+#include "SpriteSheet.h"
+
+#include <SDL2/SDL.h>
 
 #include <string>
-
 #include <json/json.h>
 
 
 namespace Regolith
 {
-
-  enum TextureBuildType
-  {
-    TEXTURE_BUILD_TEXTURE,
-    TEXTURE_BUILD_TEXT,
-    TEXTURE_BUILD_SPRITESHEET,
-    TEXTURE_BUILD_ANIMATEDSPRITE,
-    TEXTURE_BUILD_TOTAL
-  };
 
   class TextureBuilder
   {
@@ -28,16 +21,15 @@ namespace Regolith
 
     protected:
 
-      Texture* buildTexture( Json::Value& );
-      Texture* buildText( Json::Value& );
-      Texture* buildSpriteSheet( Json::Value& );
+      Texture* buildTexture( Texture*, Json::Value& );
+      Texture* buildSpriteSheet( SpriteSheet*, Json::Value& );
 
     public:
 
       TextureBuilder( SDL_Renderer* );
 
       // Only needs a json object containing all the relevant info
-      Texture* build( Json::Value );
+      Texture* build( RawTexture, Json::Value );
   };
 
 }

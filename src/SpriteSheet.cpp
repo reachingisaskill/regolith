@@ -16,6 +16,18 @@ namespace Regolith
   }
 
 
+  SpriteSheet::SpriteSheet( RawTexture tex ) :
+    Texture( tex ),
+    _currentSprite( 0 ),
+    _rows( 0 ),
+    _columns( 0 ),
+    _numSprites( 0 ),
+    _spriteWidth( 0 ),
+    _spriteHeight( 0 )
+  {
+  }
+
+
   // Move Constructor
   SpriteSheet::SpriteSheet( SpriteSheet&& sp ) :
     Texture( std::move( sp ) ),
@@ -46,12 +58,6 @@ namespace Regolith
 
 
   SpriteSheet::~SpriteSheet()
-  {
-    this->free();
-  }
-
-
-  void SpriteSheet::_free()
   {
   }
 

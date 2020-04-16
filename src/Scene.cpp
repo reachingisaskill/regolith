@@ -13,6 +13,7 @@ namespace Regolith
 {
   Scene::Scene( Window* window, SDL_Renderer* renderer ) :
     _theWindow( window ),
+    _theRenderer( renderer ),
     _builder( renderer ),
     _scene_elements(),
     _hud_elements(),
@@ -23,6 +24,7 @@ namespace Regolith
 
   Scene::Scene( Window* window, SDL_Renderer* renderer, std::string json_file ) :
     _theWindow( window ),
+    _theRenderer( renderer ),
     _builder( renderer ),
     _scene_elements(),
     _hud_elements(),
@@ -34,6 +36,9 @@ namespace Regolith
 
   void Scene::buildFromJson( std::string json_file )
   {
+    Manager* man = Manager::getInstance();
+
+    // Load the json data
     Json::Value json_data;
     try
     {
@@ -44,7 +49,7 @@ namespace Regolith
       int result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
       if ( result )
       {
-        ERROR_LOG( "Founnd errors parsing json" );
+        ERROR_LOG( "Scene::buildFromJson() : Found errors parsing json" );
         ERROR_STREAM << errors;
       }
       delete reader;
@@ -64,18 +69,84 @@ namespace Regolith
       throw ex;
     }
 
+    try
+    {
+      // Load and cache the individual texture files
+      Json::Value texture_files = json_data["texture_files"];
+      Json::ArrayIndex texture_files_size = texture_files.size();
+      for ( Json::ArrayIndex i = 0; i != texture_files_size; ++i )
+      {
+        std::string name = texture_files[i]["name"].asString();
+        std::string file_path = texture_files[i]["path"].asString();
 
+        _addTextureFromFile( name, file_path );
+      }
+
+
+      // Load and cache the individual text textures
+      Json::Value texture_strings = json_data["texture_strings"];
+      Json::ArrayIndex texture_strings_size = texture_strings.size();
+      for ( Json::ArrayIndex i = 0; i != texture_strings_size; ++i )
+      {
+        std::string name = texture_strings[i]["name"].asString();
+        std::string text = texture_strings[i]["text"].asString();
+        INFO_STREAM << "Loading creating text texture. Name: " << name;
+
+        // Define the text colour
+        SDL_Color color;
+        if ( texture_strings[i].isMember( "colour" ) )
+        {
+          color.r = texture_strings[i]["colour"][0].asInt();
+          color.g = texture_strings[i]["colour"][1].asInt();
+          color.b = texture_strings[i]["colour"][2].asInt();
+          color.a = texture_strings[i]["colour"][3].asInt();
+        }
+        else
+        {
+          color = man->getDefaultColour();
+        }
+
+        // Find the specified font
+        TTF_Font* font = nullptr;
+        if ( texture_strings[i].isMember( "font" ) )
+        {
+          font = man->getFontPointer( texture_strings[i]["font"].asString() );
+          INFO_STREAM << "Creating text using font: " << texture_strings[i]["font"].asString();
+        }
+        else
+        {
+          font = man->getDefaultFont();
+          INFO_LOG( "Using default font" );
+        }
+
+        // Add to cache
+        _addTextureFromText( name, text, font, color );
+      }
+
+
+    }
+    catch ( std::runtime_error& rt )
+    {
+      Exception ex( "Scene::buildFromJson()", "Json reading failure - building cache" );
+      ex.addDetail( "File name", json_file );
+      ex.addDetail( "What", rt.what() );
+      throw ex;
+    }
+
+    // Setup out the Texture objects that use the SDL_Texture data
     try
     {
       // Load the scene background
-      _background = _builder.build( json_data["background"] );
+      RawTexture raw_texture = _rawTextures[ json_data["background"]["texture_name"].asString() ];
+      _background = _builder.build( raw_texture, json_data["background"] );
 
       // Load all the individual scene elements
       Json::Value scene_data = json_data["scene_elements"];
       Json::ArrayIndex scene_size = scene_data.size();
       for ( Json::ArrayIndex i = 0; i != scene_size; ++i )
       {
-        _scene_elements.push_back( _builder.build( scene_data[i] ) );
+        RawTexture raw_texture = _rawTextures[ scene_data[i]["texture_name"].asString() ];
+        _scene_elements.push_back( _builder.build( raw_texture, scene_data[i] ) );
       }
 
       // Load all the HUD elements
@@ -83,7 +154,8 @@ namespace Regolith
       Json::ArrayIndex hud_size = hud_data.size();
       for ( Json::ArrayIndex i = 0; i != hud_size; ++i )
       {
-        _hud_elements.push_back( _builder.build( hud_data[i] ) );
+        RawTexture raw_texture = _rawTextures[ hud_data[i]["texture_name"].asString() ];
+        _hud_elements.push_back( _builder.build( raw_texture, hud_data[i] ) );
       }
 
     }
@@ -95,6 +167,68 @@ namespace Regolith
       throw ex;
     }
 
+  }
+
+
+  void Scene::_addTextureFromFile( std::string name, std::string path )
+  {
+    // Load the image into a surface
+    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
+    if ( loadedSurface == nullptr )
+    {
+      Exception ex( "Scene::addTextureFromFile()", "Could not load image data", false );
+      ex.addDetail( "Image path", path );
+      ex.addDetail( "SDL_img error", IMG_GetError() );
+      throw ex;
+    }
+
+    // Create SDL_Texture
+    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( _theRenderer, loadedSurface );
+    if ( loadedTexture == nullptr )
+    {
+      SDL_FreeSurface( loadedSurface );
+      Exception ex( "Scene::addTextureFromFile()", "Could not convert to texture", false );
+      ex.addDetail( "Image path", path );
+      ex.addDetail( "SDL error", SDL_GetError() );
+      throw ex;
+    }
+
+    RawTexture theTexture = { loadedTexture, loadedSurface->w, loadedSurface->h };
+    _rawTextures[name] = theTexture;
+
+    SDL_FreeSurface( loadedSurface );
+  }
+
+
+  void Scene::_addTextureFromText( std::string name, std::string text_string, TTF_Font* font, SDL_Color color )
+  {
+    // Render the text as TTF
+    SDL_Surface* textSurface = TTF_RenderText_Solid( font, text_string.c_str(), color );
+    if ( textSurface == nullptr )
+    {
+      Exception ex( "Texture::loadFromText()", "Could not render text", false );
+      ex.addDetail( "Text string", text_string );
+      ex.addDetail( "SDL_ttf error", TTF_GetError() );
+      throw ex;
+    }
+
+    // Create the texture from the surface
+    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( _theRenderer, textSurface );
+    if ( loadedTexture == nullptr )
+    {
+      // Remove before we throw
+      SDL_FreeSurface( textSurface );
+      // Throw the exception
+      Exception ex( "Texture::loadFromText()", "Could not convert to texture", false );
+      ex.addDetail( "Text string", text_string );
+      ex.addDetail( "SDL_ttf error", TTF_GetError() );
+      throw ex;
+    }
+
+    RawTexture theTexture = { loadedTexture, textSurface->w, textSurface->h };
+    _rawTextures[name] = theTexture;
+
+    SDL_FreeSurface( textSurface );
   }
 
 }
