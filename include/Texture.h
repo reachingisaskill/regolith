@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__TEXTURE_WRAPPER_H__
-#define __REGOLITH__TEXTURE_WRAPPER_H__
+#ifndef __REGOLITH__TEXTURE_H__
+#define __REGOLITH__TEXTURE_H__
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <string>
+
 
 namespace Regolith
 {
@@ -17,17 +18,25 @@ namespace Regolith
     Texture( const Texture& ) = delete; // Non-copy-constructable
     Texture& operator=( const Texture& ) = delete; // Non-copy-assignable
 
+    friend class TextureBuilder;
+
     private:
+      // Class owns this memory
       SDL_Texture* _theTexture;
       int _width;
       int _height;
-
-      double _angle;
+      float _angle;
       SDL_RendererFlip _flipFlag;
+      SDL_Rect _clip;
+      SDL_Rect _destination;
 
+      // Pointer to object owned by a manager class
       SDL_Renderer* _theRenderer;
 
     protected:
+      virtual void _free(); // For derived classes to implement
+
+      virtual void _setClip( SDL_Rect );
 
     public:
       Texture();
@@ -36,26 +45,23 @@ namespace Regolith
 
       Texture& operator=( Texture&& ); // Move assignment
 
-      ~Texture();
+      virtual ~Texture();
 
       void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
 
       // Accessors
-      int getWidth() const { return _width; }
-      int getHeight() const { return _height; }
+      virtual int getWidth() const { return _width; }
+      virtual int getHeight() const { return _height; }
+      virtual float getAngle() const { return _angle; }
 
 
       // Delete all the heap allocated memory and reset
       void free();
 
-      // Initialise from a texture file
-      void loadFromFile( std::string, SDL_Color* key = nullptr );
-
-      // Initialise from a string
-      void loadFromText( std::string, TTF_Font*, SDL_Color );
-
       // Render with the current renderer object
-      void render( int x, int y, SDL_Rect* clip = nullptr );
+      virtual void render();
+
+      virtual void setPosition( int, int );
 
       // Colour Modulation
       void setColor( Uint8, Uint8, Uint8 );
@@ -74,5 +80,5 @@ namespace Regolith
   };
 }
 
-#endif // __REGOLITH__TEXTURE_WRAPPER_H__
+#endif // __REGOLITH__TEXTURE_H__
 

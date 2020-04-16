@@ -38,6 +38,8 @@ namespace Regolith
       int getWidth() const { return _width; }
       int getHeight() const { return _height; }
 
+      SDL_Renderer* getRenderer() { return _theRenderer; }
+
 
       bool hasMouseFocus() const { return _mouseFocus; }
       bool hasKeyboardFocus() const { return _keyboardFocus; }

@@ -1,8 +1,8 @@
 
-#include <SDL2/SDL.h>
-
 #include "regolith.h"
 
+#include <SDL2/SDL.h>
+#include <json/json.h>
 #include "logtastic.h"
 
 
@@ -14,13 +14,9 @@ int default_render_green = 80;
 int default_render_blue = 80;
 int default_render_alpha = 255;
 
-const char* ball_texture_path = "test_data/test_ball.png";
-const char* background_texture_path = "test_data/test_background.png";
-
-const char* window_title = "Regolith Integration Test";
+const char* test_config = "test_data/test_config.json";
 
 
-void init();
 
 using namespace Regolith;
 
@@ -32,12 +28,9 @@ int main( int, char** )
 
   try
   {
-    init();
+    Manager* man = Manager::createInstance();
+    man->init( test_config );
 
-    Window theWindow( window_title );
-
-    SDL_Renderer* theRenderer = theWindow.init( screen_width, screen_height );
-    SDL_SetRenderDrawColor( theRenderer, 255, 255, 255, 255 );
 
     bool quit = false;
 
@@ -55,13 +48,20 @@ int main( int, char** )
       SDL_SetRenderDrawColor( theRenderer, default_render_red, default_render_green, default_render_blue, default_render_alpha );
       SDL_RenderClear( theRenderer );
 
+      
+      testText1->setPosition( 0.5* ( theWindow.getWidth() - testText1->getWidth() ), 20 );
+
+
+
+      // Render all elements
+      testTexture1->render();
+      testText1->render();
 
       SDL_RenderPresent( theRenderer );
     }
 
 
-    theWindow.free();
-    SDL_DestroyRenderer( theRenderer );
+    Manager::killInstance();
   }
   catch ( Exception& ex )
   {
@@ -72,31 +72,5 @@ int main( int, char** )
 
   logtastic::stop();
   return 0;
-}
-
-
-void init()
-{
-  if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
-  {
-    Exception ex( "init()", "Failed to initialise SDL" );
-    ex.addDetail( "SDL Error", SDL_GetError() );
-    throw ex;
-  }
-
-  if ( TTF_Init() == -1 )
-  {
-    Exception ex( "init()", "Failed to initialise TTF" );
-    ex.addDetail( "TTF Error", TTF_GetError() );
-    throw ex;
-  }
-
-  int imgFlags = IMG_INIT_PNG;
-  if ( ! ( IMG_Init( imgFlags ) & IMG_INIT_PNG ) )
-  {
-    Exception ex( "init()", "Failed to initialise IMG" );
-    ex.addDetail( "IMG Error", IMG_GetError() );
-    throw ex;
-  }
 }
 

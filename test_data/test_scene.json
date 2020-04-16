@@ -1,0 +1,33 @@
+{
+  "background" :
+  {
+    "name" : "background",
+    "texture_type" : "simple_texture",
+    "texture_path" : "test_data/test_background.png"
+  },
+  "camera" :
+  {
+    "type" : "flying",
+    "width" : 1024,
+    "height" : 768,
+    "start_position" : [ 100, 100 ]
+  },
+  "scene_elements" :
+  [
+    {
+      "name" : "the_dot",
+      "texture_path" : "test_data/test_background.png",
+      "texture_type" : "spritesheet",
+      "update_rate" : 1.0
+    }
+  ],
+  "hud_elements" :
+  [
+    { 
+      "name" : "header_text",
+      "texture_type" : "text",
+      "texture_string" : "Press Return to toggle fullscreen",
+      "colour" : [ 0, 0, 0, 255 ]
+    }
+  ]
+}

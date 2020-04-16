@@ -64,6 +64,9 @@ namespace Regolith
       throw ex;
     }
 
+    _width = width;
+    _height = height;
+
     return SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
   }
 

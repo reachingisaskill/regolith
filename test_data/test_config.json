@@ -1,0 +1,20 @@
+{
+  "screen_width" : 1024,
+  "screen_height" : 768,
+  "default_colour" : [ 150, 150, 500, 255 ],
+  "default_font" : "default",
+  "title" : "Regolith Integration Test",
+  "scenes" :
+  [
+    "test_data/test_scene.json"
+  ],
+  "fonts" :
+  [
+    {
+      "name" : "default",
+      "path" : "test_data/test_font.ttf",
+      "size" : 28
+    }
+  ]
+}
+

@@ -3,6 +3,8 @@
 
 #include "Exception.h"
 
+#include "logtastic.h"
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -61,6 +63,8 @@ namespace Regolith
 
   void Texture::free()
   {
+    this->_free();
+
     if ( _theTexture != nullptr )
     {
       SDL_DestroyTexture( _theTexture );
@@ -70,96 +74,36 @@ namespace Regolith
   }
 
 
-  void Texture::loadFromFile( std::string path, SDL_Color* key )
+  void Texture::_free()
   {
-    // Remove existing texture data
-    this->free();
-
-    // Load the image into a surface
-    SDL_Texture* loadedTexture = nullptr;
-    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
-
-    if ( loadedSurface == nullptr )
-    {
-      Exception ex( "Texture::loadFromFile()", "Could not load image data", false );
-      ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL_img error", IMG_GetError() );
-      throw ex;
-    }
-
-    if ( key != nullptr )
-    {
-      SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key->r, key->g, key->b ) );
-    }
-
-    loadedTexture = SDL_CreateTextureFromSurface( _theRenderer, loadedSurface );
-
-    if ( loadedTexture == nullptr )
-    {
-      SDL_FreeSurface( loadedSurface );
-      Exception ex( "Texture::loadFromFile()", "Could not convert to texture", false );
-      ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL error", SDL_GetError() );
-      throw ex;
-    }
-
-    _theTexture = loadedTexture;
-    _width = loadedSurface->w;
-    _height = loadedSurface->h;
-
-    SDL_FreeSurface( loadedSurface );
   }
 
 
-  void Texture::loadFromText( std::string textureString, TTF_Font* font, SDL_Color color )
+  void Texture::render()
   {
-    // Clear existing data
-    this->free();
+    if ( _theRenderer == nullptr )
+      ERROR_LOG( "No renderer present!" );
 
-    // Render the text as TTF
-    SDL_Surface* textSurface = TTF_RenderText_Solid( font, textureString.c_str(), color );
-    if ( textSurface == nullptr )
-    {
-      Exception ex( "Texture::loadFromText()", "Could not render text", false );
-      ex.addDetail( "Text string", textureString );
-      ex.addDetail( "SDL_ttf error", TTF_GetError() );
-      throw ex;
-    }
-
-    // Create the texture from the surface
-    _theTexture = SDL_CreateTextureFromSurface( _theRenderer, textSurface );
     if ( _theTexture == nullptr )
-    {
-      // Remove before we throw
-      SDL_FreeSurface( textSurface );
-      // Throw the exception
-      Exception ex( "Texture::loadFromText()", "Could not convert to texture", false );
-      ex.addDetail( "Text string", textureString );
-      ex.addDetail( "SDL_ttf error", TTF_GetError() );
-      throw ex;
-    }
-
-    _width = textSurface->w;
-    _height = textSurface->h;
-
-    // Remove the unneeded surface
-    SDL_FreeSurface( textSurface );
-  }
-
-
-  void Texture::render( int x, int y, SDL_Rect* clip )
-  {
-    // Specify dimensions & location
-    SDL_Rect renderRect = { x, y, _width, _height };
-
-    if ( clip != nullptr )
-    {
-      renderRect.w = clip->w;
-      renderRect.h = clip->h;
-    }
+      ERROR_LOG( "No texture present" );
 
     // Render it to the window
-    SDL_RenderCopyEx( _theRenderer, _theTexture, clip, &renderRect, _angle, nullptr, _flipFlag );
+    SDL_RenderCopyEx( _theRenderer, _theTexture, &_clip, &_destination, _angle, nullptr, _flipFlag );
+  }
+
+
+  void Texture::_setClip( SDL_Rect clip )
+  {
+    _clip = clip;
+    _destination.w = _clip.w;
+    _destination.h = _clip.h;
+  }
+
+
+  void Texture::setPosition( int x, int y )
+  {
+    _destination.x = x;
+    _destination.y = y;
   }
 
 
