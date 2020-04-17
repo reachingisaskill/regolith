@@ -17,7 +17,9 @@ namespace Regolith
     _builder( renderer ),
     _scene_elements(),
     _hud_elements(),
-    _background( nullptr )
+    _background( nullptr ),
+    _theCamera(),
+    _theHUD()
   {
   }
 
@@ -28,7 +30,9 @@ namespace Regolith
     _builder( renderer ),
     _scene_elements(),
     _hud_elements(),
-    _background( nullptr )
+    _background( nullptr ),
+    _theCamera(),
+    _theHUD()
   {
     this->buildFromJson( json_file );
   }
@@ -122,8 +126,6 @@ namespace Regolith
         // Add to cache
         _addTextureFromText( name, text, font, color );
       }
-
-
     }
     catch ( std::runtime_error& rt )
     {
@@ -132,6 +134,7 @@ namespace Regolith
       ex.addDetail( "What", rt.what() );
       throw ex;
     }
+
 
     // Setup out the Texture objects that use the SDL_Texture data
     try
@@ -158,6 +161,18 @@ namespace Regolith
         _hud_elements.push_back( _builder.build( raw_texture, hud_data[i] ) );
       }
 
+
+      // Configure the camera objects
+      int camera_x = json_data["camera"]["position"][0].asInt();
+      int camera_y = json_data["camera"]["position"][1].asInt();
+      int camera_width = json_data["camera"]["width"].asInt();
+      int camera_height = json_data["camera"]["height"].asInt();
+
+      INFO_LOG( "Configuring scene camera" );
+      _theCamera.configure( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
+      _theCamera.setPosition( camera_x, camera_y );
+      INFO_LOG( "Configuring HUD camera" );
+      _theHUD.configure( camera_width, camera_height, camera_width, camera_height );
     }
     catch ( std::runtime_error& rt )
     {
@@ -166,7 +181,6 @@ namespace Regolith
       ex.addDetail( "What", rt.what() );
       throw ex;
     }
-
   }
 
 
@@ -229,6 +243,29 @@ namespace Regolith
     _rawTextures[name] = theTexture;
 
     SDL_FreeSurface( textSurface );
+  }
+
+
+  void Scene::render()
+  {
+    // Draw the background first
+    _background->render( &_theCamera );
+
+
+    // Render all the elements with respect to the background
+    TextureList::iterator end = _scene_elements.end();
+    for ( TextureList::iterator it = _scene_elements.begin(); it != end; ++it )
+    {
+      (*it)->render( &_theCamera );
+    }
+
+
+    // Render all the elements with respect to the window
+    end = _hud_elements.end();
+    for ( TextureList::iterator it = _hud_elements.begin(); it != end; ++it )
+    {
+      (*it)->render( &_theHUD );
+    }
   }
 
 }

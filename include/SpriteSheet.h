@@ -9,6 +9,7 @@
 
 namespace Regolith
 {
+  class Camera;
 
   class SpriteSheet : public Texture
   {
@@ -29,6 +30,8 @@ namespace Regolith
     protected:
       SpriteSheet( RawTexture );
 
+      int& currentSpriteNumber() { return _currentSprite; }
+
     public:
       SpriteSheet();
 
@@ -44,7 +47,7 @@ namespace Regolith
       void configure( int, int, int number = 0 );
 
       // Render with the current renderer object
-      virtual void render();
+      virtual void render( Camera* );
 
       // Sprite details
       int getNumberSprites() const;

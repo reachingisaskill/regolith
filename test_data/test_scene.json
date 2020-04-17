@@ -8,6 +8,10 @@
     {
       "name" : "the_dot",
       "path" : "test_data/test_ball.png"
+    },
+    {
+      "name" : "the_spritesheet",
+      "path" : "test_data/test_spritesheet.png"
     }
   ],
   "texture_strings" :
@@ -35,15 +39,35 @@
   [
     {
       "texture_name" : "the_dot",
+      "texture_type" : "simple_texture",
+      "position" : [ 280, 150 ]
+    },
+    {
+      "texture_name" : "the_spritesheet",
       "texture_type" : "spritesheet",
-      "update_rate" : 1.0
+      "number_rows" : 2,
+      "number_columns" : 2,
+      "number_used" : 4,
+      "start_number" : 2,
+      "position" : [ 150, 150 ]
+    },
+    {
+      "texture_name" : "the_spritesheet",
+      "texture_type" : "spritesheet",
+      "update_rate" : 1.0,
+      "number_rows" : 2,
+      "number_columns" : 2,
+      "number_used" : 4,
+      "start_number" : 1,
+      "position" : [ 250, 200 ]
     }
   ],
   "hud_elements" :
   [
     { 
       "texture_name" : "header_text",
-      "texture_type" : "simple_texture"
+      "texture_type" : "simple_texture",
+      "position" : [ 20, 20 ]
     }
   ]
 }

@@ -2,6 +2,8 @@
 #ifndef __REGOLITH__TEXTURE_H__
 #define __REGOLITH__TEXTURE_H__
 
+#include "Definitions.h"
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
@@ -12,6 +14,8 @@
 
 namespace Regolith
 {
+  // Forward declaration
+  class Camera;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Raw Texture Structure (Because SDL_Texture's don't store their dimensions).
@@ -60,6 +64,8 @@ namespace Regolith
 
       virtual ~Texture();
 
+      virtual ObjectProperty getProperties() const { return OBJECT_SIMPLE; }
+
       void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
 
       // Accessors
@@ -69,7 +75,7 @@ namespace Regolith
 
 
       // Render with the current renderer object
-      virtual void render();
+      virtual void render( Camera* );
 
       virtual void setPosition( int, int );
 

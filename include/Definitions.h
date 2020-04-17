@@ -14,6 +14,15 @@ namespace Regolith
 
   const float epsilon = 1.0E-6;
 
+
+  enum ObjectProperty
+  {
+    OBJECT_SIMPLE = 0,
+    OBJECT_ANIMATED = 1,
+    OBJECT_HAS_COLLISION = 2,
+    OBJECT_HAS_INPUT = 4
+  };
+
 }
 
 #endif // __REGOLITH__DEFINITIONS_H__

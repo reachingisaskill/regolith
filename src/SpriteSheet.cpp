@@ -11,7 +11,8 @@ namespace Regolith
     _columns( 0 ),
     _numSprites( 0 ),
     _spriteWidth( 0 ),
-    _spriteHeight( 0 )
+    _spriteHeight( 0 ),
+    _spriteRect()
   {
   }
 
@@ -23,7 +24,8 @@ namespace Regolith
     _columns( 0 ),
     _numSprites( 0 ),
     _spriteWidth( 0 ),
-    _spriteHeight( 0 )
+    _spriteHeight( 0 ),
+    _spriteRect()
   {
   }
 
@@ -36,7 +38,8 @@ namespace Regolith
     _columns( std::move( sp._columns ) ),
     _numSprites( std::move( sp._numSprites ) ),
     _spriteWidth( std::move( sp._spriteWidth ) ),
-    _spriteHeight( std::move( sp._spriteHeight ) )
+    _spriteHeight( std::move( sp._spriteHeight ) ),
+    _spriteRect( std::move( sp._spriteRect ) )
   {
   }
 
@@ -52,6 +55,7 @@ namespace Regolith
     _numSprites = std::move( sp._numSprites );
     _spriteWidth = std::move( sp._spriteWidth );
     _spriteHeight = std::move( sp._spriteHeight );
+    _spriteRect = std::move( sp._spriteRect );
 
     return *this;
   }
@@ -62,7 +66,7 @@ namespace Regolith
   }
 
 
-  void SpriteSheet::render()
+  void SpriteSheet::render( Camera* camera )
   {
     int sprite_x = (_currentSprite % _columns) * _spriteWidth;
     int sprite_y = (_currentSprite / _columns) * _spriteHeight;
@@ -73,7 +77,7 @@ namespace Regolith
 //    _spriteRect.h = _spriteHeight;
 
     this->_setClip( _spriteRect );
-    Texture::render();
+    Texture::render( camera );
   }
 
 
@@ -99,6 +103,9 @@ namespace Regolith
 
     _spriteWidth = Texture::getWidth() / _columns;
     _spriteHeight = Texture::getHeight() / _rows;
+
+    _spriteRect.w = _spriteWidth;
+    _spriteRect.h = _spriteHeight;
   }
 
 }

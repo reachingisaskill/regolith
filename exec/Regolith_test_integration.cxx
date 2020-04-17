@@ -1,3 +1,4 @@
+//#define __DEBUG_OFF__
 
 #include "regolith.h"
 
@@ -28,15 +29,24 @@ int main( int, char** )
 
   try
   {
+    INFO_LOG( "Initialising the manager" );
     Manager* man = Manager::createInstance();
     man->init( test_config );
 
     SDL_Renderer* theRenderer = man->getRendererPointer();
     Window* theWindow = man->getWindowPointer();
 
+    Scene* test_scene = man->getScene( 0 );
+
     bool quit = false;
 
+    INFO_LOG( "Starting rendering loop" );
+#ifdef __DEBUG_OFF__
     while ( ! quit )
+#else
+    int counter = 0;
+    while ( counter++ < 100 )
+#endif
     {
       SDL_Event e;
       while ( SDL_PollEvent( &e ) != 0 )
@@ -50,7 +60,8 @@ int main( int, char** )
       SDL_SetRenderDrawColor( theRenderer, default_render_red, default_render_green, default_render_blue, default_render_alpha );
       SDL_RenderClear( theRenderer );
 
-      
+      test_scene->render();
+
 
 
 
@@ -65,6 +76,12 @@ int main( int, char** )
   {
     FAILURE_LOG( ex.what() );
     std::cerr << ex.elucidate();
+    return 0;
+  }
+  catch ( std::exception& ex )
+  {
+    FAILURE_LOG( "Unexpected exception occured:" );
+    FAILURE_STREAM << ex.what();
     return 0;
   }
 

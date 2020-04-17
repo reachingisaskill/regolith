@@ -11,6 +11,7 @@
 #include "SpriteSheet.h"
 #include "Window.h"
 #include "TextureBuilder.h"
+#include "Camera.h"
 #include "Scene.h"
 
 #include "Manager.h"

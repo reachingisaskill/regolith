@@ -1,7 +1,9 @@
+//#define __DEBUG_OFF__
 
 #include "Texture.h"
 
 #include "Exception.h"
+#include "Camera.h"
 
 #include "logtastic.h"
 
@@ -19,6 +21,8 @@ namespace Regolith
     _theTexture( { nullptr, 0, 0 } ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
+    _clip( { 0, 0, 0, 0 } ),
+    _destination( { 0, 0, 0, 0 } ),
     _theRenderer( nullptr )
   {
   }
@@ -28,6 +32,8 @@ namespace Regolith
     _theTexture( tex ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
+    _clip( { 0, 0, 0, 0 } ),
+    _destination( { 0, 0, 0, 0 } ),
     _theRenderer( nullptr )
   {
   }
@@ -37,6 +43,8 @@ namespace Regolith
     _theTexture( std::exchange( other._theTexture, { nullptr, 0, 0 } ) ),
     _angle( std::move( other._angle ) ),
     _flipFlag( std::move( other._flipFlag ) ),
+    _clip( std::move( other._clip ) ),
+    _destination( std::move( other._destination) ),
     _theRenderer( std::move( other._theRenderer ) )
   {
   }
@@ -48,6 +56,8 @@ namespace Regolith
     _theTexture =  std::exchange( other._theTexture, { nullptr, 0, 0 } );
     _angle = std::move( other._angle );
     _flipFlag = std::move( other._flipFlag );
+    _clip = std::move( other._clip );
+    _destination = std::move( other._destination );
     _theRenderer = std::move( other._theRenderer );
 
     return *this;
@@ -71,7 +81,7 @@ namespace Regolith
   }
 
 
-  void Texture::render()
+  void Texture::render( Camera* camera )
   {
     if ( _theRenderer == nullptr )
       ERROR_LOG( "No renderer present!" );
@@ -79,8 +89,12 @@ namespace Regolith
     if ( _theTexture.texture == nullptr )
       ERROR_LOG( "No texture present" );
 
+    DEBUG_LOG( "Placing destination rectangle" );
+    SDL_Rect newDestination = camera->place( _destination );
+    DEBUG_STREAM << "Destination : " << newDestination.x << ", " << newDestination.y << ", " << newDestination.w << ", " << newDestination.h;
+
     // Render it to the window
-    SDL_RenderCopyEx( _theRenderer, _theTexture.texture, &_clip, &_destination, _angle, nullptr, _flipFlag );
+    SDL_RenderCopyEx( _theRenderer, _theTexture.texture, &_clip, &newDestination, _angle, nullptr, _flipFlag );
   }
 
 

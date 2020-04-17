@@ -5,6 +5,7 @@
 #include "Texture.h"
 #include "TextureBuilder.h"
 #include "Window.h"
+#include "Camera.h"
 
 #include <SDL2/SDL.h>
 
@@ -33,6 +34,14 @@ namespace Regolith
       TextureList _hud_elements;
       Texture* _background;
 
+      // Can be change to accelerator structures in the future
+      // These do not own their memory. They are shortcut lists
+      TextureList _collision_elements;
+      TextureList _animated_elements;
+
+      Camera _theCamera;
+      Camera _theHUD;
+
     protected:
       void _addTextureFromFile( std::string, std::string );
       void _addTextureFromText( std::string, std::string, TTF_Font*, SDL_Color );
@@ -52,6 +61,12 @@ namespace Regolith
 
       // Render all the scene elements
       void render();
+
+      // Return the camera for the scene
+      Camera* getCamera() { return &_theCamera; }
+
+      // Return the camera for the HUD
+      Camera* getHUD() { return &_theHUD; }
 
   };
 
