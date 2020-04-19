@@ -1,0 +1,67 @@
+
+#ifndef __REGOLITH__FPS_STRING_H__
+#define __REGOLITH__FPS_STRING_H__
+
+#include "Texture.h"
+#include "Camera.h"
+
+#include <SDL2/SDL.h>
+
+#include <sstream>
+
+
+namespace Regolith
+{
+
+  class FPSString : public Drawable
+  {
+    private:
+      RawTexture _theTexture;
+      std::string _phrase;
+      unsigned int _frameCounter;
+      unsigned int _limit;
+      Uint32 _tickCount;
+      std::stringstream _stringstream;
+      TTF_Font* _theFont;
+      SDL_Color _theColor;
+      SDL_Rect _destination;
+
+    public:
+
+      FPSString();
+
+      virtual ~FPSString();
+
+      // Specify the properties of the object. (Moving, animated, collision, etc)
+      virtual ObjectProperty getProperties() const { return OBJECT_ANIMATED; }
+
+      // Perform the steps to call SDL_RenderCopy, etc
+      virtual void render( Camera* );
+
+      // Update the objects behaviour based on the provided timestep
+      virtual void update( Uint32 );
+
+      // Returns the collision object for the class;
+      virtual Collision* getCollision() { return nullptr; }
+
+      // Size accessors
+      virtual int getWidth() const { return _theTexture.width; }
+      virtual int getHeight() const { return _theTexture.height; }
+
+
+      void setPosition( int, int );
+
+      void setFrameCount( unsigned int n ) { _limit = n; }
+
+      void setFont( TTF_Font* f ) { _theFont = f; }
+
+      void setColor( SDL_Color c ) { _theColor = c; }
+
+      void updateString();
+
+  };
+
+}
+
+#endif // __REGOLITH__FPS_STRING_H__
+

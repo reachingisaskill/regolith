@@ -28,12 +28,13 @@ namespace Regolith
       SDL_Rect _spriteRect;
 
     protected:
-      SpriteSheet( RawTexture );
 
       int& currentSpriteNumber() { return _currentSprite; }
 
     public:
       SpriteSheet();
+
+      SpriteSheet( RawTexture );
 
       // Move-construct
       SpriteSheet( SpriteSheet&& );

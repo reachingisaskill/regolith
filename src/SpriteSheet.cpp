@@ -76,7 +76,7 @@ namespace Regolith
 //    _spriteRect.w = _spriteWidth;
 //    _spriteRect.h = _spriteHeight;
 
-    this->_setClip( _spriteRect );
+    this->setClip( _spriteRect );
     Texture::render( camera );
   }
 

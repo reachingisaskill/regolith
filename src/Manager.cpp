@@ -12,12 +12,18 @@ namespace Regolith
   Manager::Manager() :
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
+    _theBuilder( new TextureBuilder() ),
     _scenes(),
     _fonts(),
     _title(),
     _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } )
   {
+    // Set up the provided factories
+    _theBuilder->addFactory( new SimpleFactory() );
+    _theBuilder->addFactory( new SpriteSheetFactory() );
+    _theBuilder->addFactory( new AnimatedFactory() );
+    _theBuilder->addFactory( new FPSStringFactory() );
   }
 
 
@@ -30,6 +36,9 @@ namespace Regolith
     // Remove the renderer object
     SDL_DestroyRenderer( _theRenderer );
     _theRenderer = nullptr;
+
+    // Destroy the builder
+    delete _theBuilder;
 
     // Remove each of scenes and clear the vector
     for ( size_t i = 0; i < _scenes.size(); ++i )
@@ -88,11 +97,11 @@ namespace Regolith
       Json::CharReaderBuilder reader_builder;
       Json::CharReader* reader = reader_builder.newCharReader();
       std::string errors;
-      int result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
-      if ( result )
+      bool result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
+      if ( ! result )
       {
         ERROR_LOG( "Manager::init() : Found errors parsing json" );
-        ERROR_STREAM << errors;
+        ERROR_STREAM << "\"" << errors << "\"";
       }
       delete reader;
 
@@ -105,8 +114,7 @@ namespace Regolith
       // Create the window
       _theWindow = new Window( _title );
       _theRenderer = _theWindow->init( screen_width, screen_height );
-
-
+      _theBuilder->setRenderer( _theRenderer );
 
       // Set the default colour
       Json::Value color = json_data["default_color"];
@@ -171,7 +179,7 @@ namespace Regolith
       Json::ArrayIndex scenes_size = scene_data.size();
       for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
       {
-        _scenes.push_back( new Scene( _theWindow, _theRenderer, scene_data[ i ].asString() ) );
+        _scenes.push_back( new Scene( _theWindow, _theRenderer, _theBuilder, scene_data[ i ].asString() ) );
       }
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream

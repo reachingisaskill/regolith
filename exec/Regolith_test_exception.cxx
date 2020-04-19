@@ -16,9 +16,10 @@ void testFunc3();
 
 int main( int, char** )
 {
+  logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_exception.log" );
-  logtastic::init( "Regolith - Exception Tests", REGOLITH_VERSION_NUMBER );
+  logtastic::start( "Regolith - Exception Tests", REGOLITH_VERSION_NUMBER );
 
   testass::control::init( "Regolith", "Exceptions" );
   testass::control::get()->setVerbosity( testass::control::verb_short );

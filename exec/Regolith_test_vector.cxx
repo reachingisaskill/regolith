@@ -12,9 +12,10 @@ using namespace Regolith;
 
 int main( int, char** )
 {
+  logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_vector.log" );
-  logtastic::init( "Regolith - Vector Tests", REGOLITH_VERSION_NUMBER );
+  logtastic::start( "Regolith - Vector Tests", REGOLITH_VERSION_NUMBER );
 
   testass::control::init( "Regolith", "Vectors" );
   testass::control::get()->setVerbosity( testass::control::verb_short );

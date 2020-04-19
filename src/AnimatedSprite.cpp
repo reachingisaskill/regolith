@@ -1,5 +1,8 @@
+#define __DEBUG_OFF__
 
 #include "AnimatedSprite.h"
+
+#include "logtastic.h"
 
 namespace Regolith
 {
@@ -13,7 +16,7 @@ namespace Regolith
 
 
   AnimatedSprite::AnimatedSprite( RawTexture tex ) :
-    Texture( tex ),
+    SpriteSheet( tex ),
     _updateRate( 0 ),
     _count( 0 )
   {
@@ -22,7 +25,7 @@ namespace Regolith
 
   // Move Constructor
   AnimatedSprite::AnimatedSprite( AnimatedSprite&& ap ) :
-    Texture( std::move( ap ) ),
+    SpriteSheet( std::move( ap ) ),
     _updateRate( std::move( ap._updateRate ) ),
     _count( std::move( ap._count ) )
   {
@@ -46,12 +49,6 @@ namespace Regolith
   }
 
 
-  void AnimatedSprite::render( Camera* camera )
-  {
-    Texture::render( camera );
-  }
-
-
   void AnimatedSprite::setUpdateRate( Uint32 rate )
   {
     _updateRate = rate;
@@ -63,9 +60,11 @@ namespace Regolith
     _count += timestep;
     int frame_number = this->currentSpriteNumber();
     frame_number += _count / _updateRate;
-    frame_number = frame_number % this->getNUmberSprites();
+    frame_number = frame_number % this->getNumberSprites();
     this->setSpriteNumber( frame_number );
     _count = _count % _updateRate;
+
+    DEBUG_STREAM << "AnimatedSprite : _count : " << _count << ", frame No. : " << frame_number << ", update rate : " << _updateRate;
   }
 
 }

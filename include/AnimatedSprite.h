@@ -2,7 +2,7 @@
 #ifndef __REGOLITH__ANIMATED_SPRITE_H__
 #define __REGOLITH__ANIMATED_SPRITE_H__
 
-#include "Texture.h"
+#include "SpriteSheet.h"
 
 #include <SDL2/SDL.h>
 
@@ -23,10 +23,11 @@ namespace Regolith
       Uint32 _count;
 
     protected:
-      AnimatedSprite( RawTexture );
 
     public:
       AnimatedSprite();
+
+      AnimatedSprite( RawTexture );
 
       // Move-construct
       AnimatedSprite( AnimatedSprite&& );
@@ -44,7 +45,8 @@ namespace Regolith
       virtual void update( Uint32 );
 
       // Render with the current renderer object
-      virtual void render( Camera* );
+      // Use the SpriteSheet variant
+//      virtual void render( Camera* );
   };
 
 }

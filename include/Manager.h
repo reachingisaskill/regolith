@@ -33,6 +33,7 @@ namespace Regolith
     private:
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
+      TextureBuilder* _theBuilder;
       SceneList _scenes;
       FontMap _fonts;
 
@@ -49,6 +50,9 @@ namespace Regolith
 
       // Initialise the manager class from the configuration file
       void init( std::string );
+
+      // Return a pointer to the texture builder
+      TextureBuilder* getTextureBuilder() { return _theBuilder; }
 
       // Get the pointer to the window
       SDL_Renderer* getRendererPointer() { return _theRenderer; }

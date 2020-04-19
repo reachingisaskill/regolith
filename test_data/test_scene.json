@@ -11,7 +11,8 @@
     },
     {
       "name" : "the_spritesheet",
-      "path" : "test_data/test_spritesheet.png"
+      "path" : "test_data/test_spritesheet.png",
+      "colour_key" : [ 255, 255, 255 ]
     }
   ],
   "texture_strings" :
@@ -53,8 +54,8 @@
     },
     {
       "texture_name" : "the_spritesheet",
-      "texture_type" : "spritesheet",
-      "update_rate" : 1.0,
+      "texture_type" : "animated",
+      "update_rate" : 1000,
       "number_rows" : 2,
       "number_columns" : 2,
       "number_used" : 4,
@@ -64,9 +65,11 @@
   ],
   "hud_elements" :
   [
-    { 
-      "texture_name" : "header_text",
-      "texture_type" : "simple_texture",
+    {
+      "texture_name" : "fps_text",
+      "texture_type" : "fps_string",
+      "font" : "default",
+      "frame_count" : 100,
       "position" : [ 20, 20 ]
     }
   ]

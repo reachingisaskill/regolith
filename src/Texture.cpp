@@ -1,9 +1,10 @@
-//#define __DEBUG_OFF__
+#define __DEBUG_OFF__
 
 #include "Texture.h"
 
 #include "Exception.h"
 #include "Camera.h"
+#include "Manager.h"
 
 #include "logtastic.h"
 
@@ -18,47 +19,48 @@ namespace Regolith
 {
 
   Texture::Texture() :
+    Drawable(),
     _theTexture( { nullptr, 0, 0 } ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
     _clip( { 0, 0, 0, 0 } ),
-    _destination( { 0, 0, 0, 0 } ),
-    _theRenderer( nullptr )
+    _destination( { 0, 0, 0, 0 } )
   {
   }
 
 
   Texture::Texture( RawTexture tex) :
+    Drawable(),
     _theTexture( tex ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
     _clip( { 0, 0, 0, 0 } ),
-    _destination( { 0, 0, 0, 0 } ),
-    _theRenderer( nullptr )
+    _destination( { 0, 0, 0, 0 } )
   {
   }
 
 
   Texture::Texture( Texture&& other ) :
+    Drawable( std::move( other ) ),
     _theTexture( std::exchange( other._theTexture, { nullptr, 0, 0 } ) ),
     _angle( std::move( other._angle ) ),
     _flipFlag( std::move( other._flipFlag ) ),
     _clip( std::move( other._clip ) ),
-    _destination( std::move( other._destination) ),
-    _theRenderer( std::move( other._theRenderer ) )
+    _destination( std::move( other._destination) )
   {
   }
 
 
   Texture& Texture::operator=( Texture&& other ) 
   {
+    Drawable::operator=( std::move( other ) );
+
     // Move the data memebers
     _theTexture =  std::exchange( other._theTexture, { nullptr, 0, 0 } );
     _angle = std::move( other._angle );
     _flipFlag = std::move( other._flipFlag );
     _clip = std::move( other._clip );
     _destination = std::move( other._destination );
-    _theRenderer = std::move( other._theRenderer );
 
     return *this;
   }
@@ -83,7 +85,7 @@ namespace Regolith
 
   void Texture::render( Camera* camera )
   {
-    if ( _theRenderer == nullptr )
+    if ( getRenderer() == nullptr )
       ERROR_LOG( "No renderer present!" );
 
     if ( _theTexture.texture == nullptr )
@@ -94,11 +96,11 @@ namespace Regolith
     DEBUG_STREAM << "Destination : " << newDestination.x << ", " << newDestination.y << ", " << newDestination.w << ", " << newDestination.h;
 
     // Render it to the window
-    SDL_RenderCopyEx( _theRenderer, _theTexture.texture, &_clip, &newDestination, _angle, nullptr, _flipFlag );
+    SDL_RenderCopyEx( getRenderer(), _theTexture.texture, &_clip, &newDestination, _angle, nullptr, _flipFlag );
   }
 
 
-  void Texture::_setClip( SDL_Rect clip )
+  void Texture::setClip( SDL_Rect clip )
   {
     _clip = clip;
     _destination.w = _clip.w;
@@ -140,6 +142,39 @@ namespace Regolith
   void Texture::setFlip( SDL_RendererFlip flip )
   {
     _flipFlag = flip;
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Useful functions
+
+  RawTexture makeTextureFromText( TTF_Font* font, std::string textureString, SDL_Color color )
+  {
+    static SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
+    RawTexture theTexture;
+
+    SDL_Surface* textSurface = TTF_RenderText_Solid( font, textureString.c_str(), color );
+    if ( textSurface == nullptr )
+    {
+      std::cerr << "Could not create text surface. Error : " << TTF_GetError() << std::endl;
+    }
+    else
+    {
+      // Create the texture from the surface
+      theTexture.texture = SDL_CreateTextureFromSurface( renderer, textSurface );
+      if ( theTexture.texture == nullptr )
+      {
+        std::cerr << "Could not create texture from surface. Error : " << SDL_GetError() << std::endl;
+      }
+      else
+      {
+        theTexture.width = textSurface->w;
+        theTexture.height = textSurface->h;
+      }
+      // Remove the unneeded surface
+      SDL_FreeSurface( textSurface );
+    }
+
+    return theTexture;
   }
 
 }

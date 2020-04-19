@@ -2,7 +2,7 @@
 #ifndef __REGOLITH__SCENE_H__
 #define __REGOLITH__SCENE_H__
 
-#include "Texture.h"
+#include "Drawable.h"
 #include "TextureBuilder.h"
 #include "Window.h"
 #include "Camera.h"
@@ -16,7 +16,7 @@
 namespace Regolith
 {
 
-  typedef std::vector< Texture* > TextureList;
+  typedef std::vector< Drawable* > TextureList;
   typedef std::map< std::string, RawTexture > RawTextureMap;
 
 
@@ -28,11 +28,12 @@ namespace Regolith
 
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
+      TextureBuilder* _theBuilder;
+      std::string _sceneFile;
 
-      TextureBuilder _builder;
       TextureList _scene_elements;
       TextureList _hud_elements;
-      Texture* _background;
+      Drawable* _background;
 
       // Can be change to accelerator structures in the future
       // These do not own their memory. They are shortcut lists
@@ -43,18 +44,21 @@ namespace Regolith
       Camera _theHUD;
 
     protected:
-      void _addTextureFromFile( std::string, std::string );
-      void _addTextureFromText( std::string, std::string, TTF_Font*, SDL_Color );
-
-    public:
-      // No initialisation
-      Scene( Window*, SDL_Renderer* );
-
-      // Load immediately from file
-      Scene( Window*, SDL_Renderer*, std::string );
+      void _addTextureFromFile( Json::Value& );
+      void _addTextureFromText( Json::Value& );
 
       // Build the whole scene from a json file description
-      void buildFromJson( std::string );
+      void buildFromJson();
+
+    public:
+//      // No initialisation
+//      Scene( Window*, SDL_Renderer* );
+
+      // Set the necessary parameters
+      Scene( Window*, SDL_Renderer*, TextureBuilder*, std::string );
+
+      // Load the scene from the specified fiel
+      void load();
 
       // Update the time-dependent scene elements with the No. ticks
       void update( Uint32 );
@@ -68,6 +72,8 @@ namespace Regolith
       // Return the camera for the HUD
       Camera* getHUD() { return &_theHUD; }
 
+      // Return a pointer to a raw texture object
+      RawTexture findRawTexture( std::string ) const;
   };
 
 }

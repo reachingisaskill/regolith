@@ -6,6 +6,7 @@
 #include "Vector.h"
 #include "Definitions.h"
 #include "Exception.h"
+#include "Timer.h"
 
 #include "Texture.h"
 #include "SpriteSheet.h"

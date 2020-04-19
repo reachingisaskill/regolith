@@ -11,10 +11,23 @@
 
 namespace Regolith
 {
-  Scene::Scene( Window* window, SDL_Renderer* renderer ) :
+//  Scene::Scene( Window* window, SDL_Renderer* renderer ) :
+//    _theWindow( window ),
+//    _theRenderer( renderer ),
+//    _scene_elements(),
+//    _hud_elements(),
+//    _background( nullptr ),
+//    _theCamera(),
+//    _theHUD()
+//  {
+//  }
+
+
+  Scene::Scene( Window* window, SDL_Renderer* renderer, TextureBuilder* build, std::string json_file ) :
     _theWindow( window ),
     _theRenderer( renderer ),
-    _builder( renderer ),
+    _theBuilder( build ),
+    _sceneFile( json_file ),
     _scene_elements(),
     _hud_elements(),
     _background( nullptr ),
@@ -24,51 +37,44 @@ namespace Regolith
   }
 
 
-  Scene::Scene( Window* window, SDL_Renderer* renderer, std::string json_file ) :
-    _theWindow( window ),
-    _theRenderer( renderer ),
-    _builder( renderer ),
-    _scene_elements(),
-    _hud_elements(),
-    _background( nullptr ),
-    _theCamera(),
-    _theHUD()
+  void Scene::load()
   {
-    this->buildFromJson( json_file );
+    this->buildFromJson();
   }
 
 
-  void Scene::buildFromJson( std::string json_file )
+  void Scene::buildFromJson()
   {
-    Manager* man = Manager::getInstance();
+    // Tell the builder who's using it
+    _theBuilder->setScene( this );
 
     // Load the json data
     Json::Value json_data;
     try
     {
-      std::ifstream input( json_file );
+      std::ifstream input( _sceneFile );
       Json::CharReaderBuilder reader_builder;
       Json::CharReader* reader = reader_builder.newCharReader();
       std::string errors;
-      int result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
-      if ( result )
+      bool result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
+      if ( ! result )
       {
-        ERROR_LOG( "Scene::buildFromJson() : Found errors parsing json" );
-        ERROR_STREAM << errors;
+        ERROR_LOG( "Found errors parsing json" );
+        ERROR_STREAM << "\"" << errors << "\"";
       }
       delete reader;
     }
     catch ( std::ios_base::failure& f )
     {
       Exception ex( "Scene::buildFromJson()", "IFSteam failure", false );
-      ex.addDetail( "File name", json_file );
+      ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", f.what() );
       throw ex;
     }
     catch ( std::runtime_error& rt )
     {
       Exception ex( "Scene::buildFromJson()", "Json parsing failure" );
-      ex.addDetail( "File name", json_file );
+      ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
     }
@@ -80,57 +86,21 @@ namespace Regolith
       Json::ArrayIndex texture_files_size = texture_files.size();
       for ( Json::ArrayIndex i = 0; i != texture_files_size; ++i )
       {
-        std::string name = texture_files[i]["name"].asString();
-        std::string file_path = texture_files[i]["path"].asString();
-
-        _addTextureFromFile( name, file_path );
+        _addTextureFromFile( texture_files[i] );
       }
-
 
       // Load and cache the individual text textures
       Json::Value texture_strings = json_data["texture_strings"];
       Json::ArrayIndex texture_strings_size = texture_strings.size();
       for ( Json::ArrayIndex i = 0; i != texture_strings_size; ++i )
       {
-        std::string name = texture_strings[i]["name"].asString();
-        std::string text = texture_strings[i]["text"].asString();
-        INFO_STREAM << "Loading creating text texture. Name: " << name;
-
-        // Define the text colour
-        SDL_Color color;
-        if ( texture_strings[i].isMember( "colour" ) )
-        {
-          color.r = texture_strings[i]["colour"][0].asInt();
-          color.g = texture_strings[i]["colour"][1].asInt();
-          color.b = texture_strings[i]["colour"][2].asInt();
-          color.a = texture_strings[i]["colour"][3].asInt();
-        }
-        else
-        {
-          color = man->getDefaultColour();
-        }
-
-        // Find the specified font
-        TTF_Font* font = nullptr;
-        if ( texture_strings[i].isMember( "font" ) )
-        {
-          font = man->getFontPointer( texture_strings[i]["font"].asString() );
-          INFO_STREAM << "Creating text using font: " << texture_strings[i]["font"].asString();
-        }
-        else
-        {
-          font = man->getDefaultFont();
-          INFO_LOG( "Using default font" );
-        }
-
-        // Add to cache
-        _addTextureFromText( name, text, font, color );
+        _addTextureFromText( texture_strings[i] );
       }
     }
     catch ( std::runtime_error& rt )
     {
       Exception ex( "Scene::buildFromJson()", "Json reading failure - building cache" );
-      ex.addDetail( "File name", json_file );
+      ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
     }
@@ -140,16 +110,24 @@ namespace Regolith
     try
     {
       // Load the scene background
-      RawTexture raw_texture = _rawTextures[ json_data["background"]["texture_name"].asString() ];
-      _background = _builder.build( raw_texture, json_data["background"] );
+      _background = _theBuilder->build( json_data["background"] );
+      if ( _background->getProperties() & OBJECT_ANIMATED )
+      {
+        _animated_elements.push_back( _background );
+      }
 
       // Load all the individual scene elements
       Json::Value scene_data = json_data["scene_elements"];
       Json::ArrayIndex scene_size = scene_data.size();
       for ( Json::ArrayIndex i = 0; i != scene_size; ++i )
       {
-        RawTexture raw_texture = _rawTextures[ scene_data[i]["texture_name"].asString() ];
-        _scene_elements.push_back( _builder.build( raw_texture, scene_data[i] ) );
+        Drawable* newTexture =  _theBuilder->build( scene_data[i] );
+        _scene_elements.push_back( newTexture );
+        INFO_STREAM << "Object properties: " << newTexture->getProperties();
+        if ( newTexture->getProperties() & OBJECT_ANIMATED )
+        {
+          _animated_elements.push_back( newTexture );
+        }
       }
 
       // Load all the HUD elements
@@ -157,8 +135,13 @@ namespace Regolith
       Json::ArrayIndex hud_size = hud_data.size();
       for ( Json::ArrayIndex i = 0; i != hud_size; ++i )
       {
-        RawTexture raw_texture = _rawTextures[ hud_data[i]["texture_name"].asString() ];
-        _hud_elements.push_back( _builder.build( raw_texture, hud_data[i] ) );
+        Drawable* newTexture = _theBuilder->build( hud_data[i] );
+        _hud_elements.push_back( newTexture );
+        INFO_STREAM << "Object properties: " << newTexture->getProperties();
+        if ( newTexture->getProperties() & OBJECT_ANIMATED )
+        {
+          _animated_elements.push_back( newTexture );
+        }
       }
 
 
@@ -177,15 +160,19 @@ namespace Regolith
     catch ( std::runtime_error& rt )
     {
       Exception ex( "Scene::buildFromJson()", "Json reading failure" );
-      ex.addDetail( "File name", json_file );
+      ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
     }
   }
 
 
-  void Scene::_addTextureFromFile( std::string name, std::string path )
+  void Scene::_addTextureFromFile( Json::Value& json_data )
   {
+
+    std::string name = json_data["name"].asString();
+    std::string path = json_data["path"].asString();
+
     // Load the image into a surface
     SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
     if ( loadedSurface == nullptr )
@@ -194,6 +181,15 @@ namespace Regolith
       ex.addDetail( "Image path", path );
       ex.addDetail( "SDL_img error", IMG_GetError() );
       throw ex;
+    }
+
+    // If there is a colour key, apply it
+    if ( json_data.isMember("colour_key") )
+    {
+      int key_red = json_data["colour_key"][0].asInt();
+      int key_green = json_data["colour_key"][1].asInt();
+      int key_blue = json_data["colour_key"][2].asInt();
+      SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key_red, key_green, key_blue ) );
     }
 
     // Create SDL_Texture
@@ -214,13 +210,46 @@ namespace Regolith
   }
 
 
-  void Scene::_addTextureFromText( std::string name, std::string text_string, TTF_Font* font, SDL_Color color )
+  void Scene::_addTextureFromText( Json::Value& json_data )
   {
+    Manager* man = Manager::getInstance();
+
+    std::string name = json_data["name"].asString();
+    std::string text_string = json_data["text"].asString();
+    INFO_STREAM << "Creating and loaded text texture. Name: " << name;
+
+    // Define the text colour
+    SDL_Color color;
+    if ( json_data.isMember( "colour" ) )
+    {
+      color.r = json_data["colour"][0].asInt();
+      color.g = json_data["colour"][1].asInt();
+      color.b = json_data["colour"][2].asInt();
+      color.a = json_data["colour"][3].asInt();
+    }
+    else
+    {
+      color = man->getDefaultColour();
+    }
+
+    // Find the specified font
+    TTF_Font* font = nullptr;
+    if ( json_data.isMember( "font" ) )
+    {
+      font = man->getFontPointer( json_data["font"].asString() );
+      INFO_STREAM << "Creating text using font: " << json_data["font"].asString();
+    }
+    else
+    {
+      font = man->getDefaultFont();
+      INFO_LOG( "Using default font" );
+    }
+
     // Render the text as TTF
     SDL_Surface* textSurface = TTF_RenderText_Solid( font, text_string.c_str(), color );
     if ( textSurface == nullptr )
     {
-      Exception ex( "Texture::loadFromText()", "Could not render text", false );
+      Exception ex( "Scene::_addTextureFromText()", "Could not render text", true );
       ex.addDetail( "Text string", text_string );
       ex.addDetail( "SDL_ttf error", TTF_GetError() );
       throw ex;
@@ -233,7 +262,7 @@ namespace Regolith
       // Remove before we throw
       SDL_FreeSurface( textSurface );
       // Throw the exception
-      Exception ex( "Texture::loadFromText()", "Could not convert to texture", false );
+      Exception ex( "Scene::_addTextureFromText()", "Could not convert to texture", true );
       ex.addDetail( "Text string", text_string );
       ex.addDetail( "SDL_ttf error", TTF_GetError() );
       throw ex;
@@ -243,6 +272,16 @@ namespace Regolith
     _rawTextures[name] = theTexture;
 
     SDL_FreeSurface( textSurface );
+  }
+
+
+  void Scene::update( Uint32 time )
+  {
+    TextureList::iterator end = _animated_elements.end();
+    for ( TextureList::iterator it = _animated_elements.begin(); it != end; ++it )
+    {
+      (*it)->update( time );
+    }
   }
 
 
@@ -266,6 +305,21 @@ namespace Regolith
     {
       (*it)->render( &_theHUD );
     }
+  }
+
+
+  RawTexture Scene::findRawTexture( std::string name ) const
+  {
+    RawTextureMap::const_iterator found = _rawTextures.find( name );
+    if ( found == _rawTextures.end() )
+    {
+      ERROR_STREAM << "Failed to find raw texture with name: " << name;
+      Exception ex( "Scene::findRawTexture()", "Could not find raw texture", true );
+      ex.addDetail( "Texture name", name );
+      throw ex;
+    }
+
+    return found->second;
   }
 
 }

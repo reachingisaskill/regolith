@@ -3,6 +3,7 @@
 #define __REGOLITH__TEXTURE_H__
 
 #include "Definitions.h"
+#include "Drawable.h"
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -27,11 +28,15 @@ namespace Regolith
     int height;
   };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Useful functions
+
+  RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Texture class. The simplest for of renderable data.
+  // Texture class. The simplest object of renderable data.
 
-  class Texture
+  class Texture : public Drawable
   {
     Texture( const Texture& ) = delete; // Non-copy-constructable
     Texture& operator=( const Texture& ) = delete; // Non-copy-assignable
@@ -46,17 +51,12 @@ namespace Regolith
       SDL_Rect _clip;
       SDL_Rect _destination;
 
-      // Pointer to object owned by a manager class
-      SDL_Renderer* _theRenderer;
-
     protected:
-      virtual void _setClip( SDL_Rect );
-
-      // For use by texture builder
-      Texture( RawTexture );
 
     public:
       Texture();
+
+      Texture( RawTexture );
 
       Texture( Texture&& ); // Move constructor
 
@@ -64,18 +64,28 @@ namespace Regolith
 
       virtual ~Texture();
 
+      // Fullfill the Drawable class requirements
+
+      // Return the object properties
       virtual ObjectProperty getProperties() const { return OBJECT_SIMPLE; }
 
-      void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
+      // For derived classes to update every frame
+      virtual void update( Uint32 ) { }
+
+      // Render with the current renderer object
+      virtual void render( Camera* );
+
+      // Returns the collision object for the class;
+      virtual Collision* getCollision() { return nullptr; }
+
 
       // Accessors
       virtual int getWidth() const;
       virtual int getHeight() const;
       virtual float getAngle() const { return _angle; }
 
-
-      // Render with the current renderer object
-      virtual void render( Camera* );
+      // Set the clip around the texture
+      virtual void setClip( SDL_Rect );
 
       virtual void setPosition( int, int );
 
