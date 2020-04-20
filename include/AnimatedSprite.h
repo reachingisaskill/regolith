@@ -2,9 +2,9 @@
 #ifndef __REGOLITH__ANIMATED_SPRITE_H__
 #define __REGOLITH__ANIMATED_SPRITE_H__
 
-#include "SpriteSheet.h"
+#include "Definitions.h"
 
-#include <SDL2/SDL.h>
+#include "SpriteSheet.h"
 
 
 namespace Regolith

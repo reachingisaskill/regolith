@@ -308,6 +308,11 @@ namespace Regolith
   }
 
 
+  void Scene::handleEvent( SDL_Event* e )
+  {
+  }
+
+
   RawTexture Scene::findRawTexture( std::string name ) const
   {
     RawTextureMap::const_iterator found = _rawTextures.find( name );

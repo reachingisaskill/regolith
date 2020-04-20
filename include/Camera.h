@@ -18,6 +18,9 @@ namespace Regolith
       int _limitY;
       int _x;
       int _y;
+      // Parameters to rescale widths and heights if the window changes size
+      float _scaleX;
+      float _scaleY;
 
     protected:
 
@@ -28,13 +31,20 @@ namespace Regolith
       // Set the scene size and camera window size
       Camera( int, int, int, int );
 
+      // Configure the camera using scene width/height and view width/height
       void configure( int, int, int, int );
 
+      // Set the position of the camera
       void setPosition( int, int );
 
+      // Set the size of the viewing frame
       void setSize( int, int );
 
+      // Move the camera by a specified amount
       void move( int, int );
+
+      // Change the scale parameters based on the new window size
+      void updateScale( int, int );
 
       int getX() { return _x; }
       int getY() { return _y; }

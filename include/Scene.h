@@ -66,6 +66,9 @@ namespace Regolith
       // Render all the scene elements
       void render();
 
+      // Handle events
+      void handleEvent( SDL_Event* );
+
       // Return the camera for the scene
       Camera* getCamera() { return &_theCamera; }
 

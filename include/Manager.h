@@ -2,14 +2,12 @@
 #ifndef __REGOLITH__MANAGER_H__
 #define __REGOLITH__MANAGER_H__
 
+#include "Definitions.h"
+
 #include "Singleton.h"
 #include "Window.h"
 #include "Scene.h"
 #include "TextureBuilder.h"
-
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_image.h>
 
 #include <vector>
 #include <map>
@@ -22,6 +20,8 @@ namespace Regolith
   typedef std::vector< Scene* > SceneList;
   typedef std::map< std::string, TTF_Font* > FontMap;
 
+  class Engine;
+
 
   // Manager class
   // Global storage for all scenes, renderers and windows.
@@ -31,6 +31,7 @@ namespace Regolith
     friend class Singleton< Manager >; // Required to enable the singleton pattern
 
     private:
+      Engine* _theEngine;
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
       TextureBuilder* _theBuilder;
@@ -41,6 +42,9 @@ namespace Regolith
       TTF_Font* _defaultFont;
       SDL_Color _defaultColor;
 
+      Uint32 _eventStartIndex;
+      SDL_Event _gameEvents[REGOLITH_EVENT_TOTAL];
+
 
     protected:
       Manager();
@@ -50,6 +54,11 @@ namespace Regolith
 
       // Initialise the manager class from the configuration file
       void init( std::string );
+
+
+      // Load the first scene into the engine and give it control
+      void run();
+
 
       // Return a pointer to the texture builder
       TextureBuilder* getTextureBuilder() { return _theBuilder; }
@@ -74,6 +83,13 @@ namespace Regolith
 
       // Return the default colour
       SDL_Color getDefaultColour() { return _defaultColor; }
+
+      // Configure the list of user events for game events
+      void configureEvents();
+
+      // Push a user event into the SDL event queue
+      void raiseEvent( GameEvents );
+
   };
 
 }

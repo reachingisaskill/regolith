@@ -15,7 +15,9 @@ namespace Regolith
     _limitX( 0 ),
     _limitY( 0 ),
     _x( 0 ),
-    _y( 0 )
+    _y( 0 ),
+    _scaleX( 1.0 ),
+    _scaleY( 1.0 )
   {
   }
 
@@ -28,7 +30,9 @@ namespace Regolith
     _limitX( _sceneWidth - width ),
     _limitY( _sceneHeight - height ),
     _x( 0 ),
-    _y( 0 )
+    _y( 0 ),
+    _scaleX( 1.0 ),
+    _scaleY( 1.0 )
   {
   }
 
@@ -86,13 +90,20 @@ namespace Regolith
   }
 
 
+  void Camera::updateScale( int window_w, int window_h )
+  {
+    _scaleX = window_w / _width;
+    _scaleY = window_h / _height;
+  }
+
+
   SDL_Rect Camera::place( const SDL_Rect& rect )
   {
     SDL_Rect newRect;
     newRect.x = rect.x - _x;
     newRect.y = rect.y - _y;
-    newRect.w = rect.w;
-    newRect.h = rect.h;
+    newRect.w = rect.w * _scaleX;
+    newRect.h = rect.h * _scaleY;
     return newRect;
   }
 

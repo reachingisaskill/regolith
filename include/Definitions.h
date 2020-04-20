@@ -2,6 +2,12 @@
 #ifndef __REGOLITH__DEFINITIONS_H__
 #define __REGOLITH__DEFINITIONS_H__
 
+
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_ttf.h>
+
+
 #define REGOLITH_VERSION_NUMBER "0.1"
 
 
@@ -22,6 +28,14 @@ namespace Regolith
     OBJECT_HAS_COLLISION = 1 << 2,
     OBJECT_HAS_INPUT = 1 << 3
   };
+
+
+  enum GameEvents
+  {
+    REGOLITH_TOTAL_SCENE_END,
+    REGOLITH_EVENT_TOTAL
+  };
+
 
 }
 

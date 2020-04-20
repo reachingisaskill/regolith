@@ -2,6 +2,7 @@
 #include "Manager.h"
 
 #include "Exception.h"
+#include "Engine.h"
 
 #include "logtastic.h"
 
@@ -17,7 +18,8 @@ namespace Regolith
     _fonts(),
     _title(),
     _defaultFont( nullptr ),
-    _defaultColor( { 255, 255, 255, 255 } )
+    _defaultColor( { 255, 255, 255, 255 } ),
+    _gameEvents()
   {
     // Set up the provided factories
     _theBuilder->addFactory( new SimpleFactory() );
@@ -39,6 +41,11 @@ namespace Regolith
 
     // Destroy the builder
     delete _theBuilder;
+    _theBuilder = nullptr;
+
+    // Remove the engine
+    Engine::killInstance();
+    _theEngine = nullptr;
 
     // Remove each of scenes and clear the vector
     for ( size_t i = 0; i < _scenes.size(); ++i )
@@ -87,6 +94,9 @@ namespace Regolith
       ex.addDetail( "IMG Error", IMG_GetError() );
       throw ex;
     }
+
+    // Setup an engine object
+    _theEngine = Engine::createInstance();
 
 
     try
@@ -199,6 +209,21 @@ namespace Regolith
       throw ex;
     }
 
+    _theEngine->configure( _theRenderer, _theWindow );
+  }
+
+
+  void Manager::run()
+  {
+    if ( getNumberScenes() <= 0 )
+    {
+      FAILURE_LOG( "Scene list is empty - there are no scenes to render!" );
+      Exception ex( "Manager::run()", "No scenes to render", false );
+      throw ex;
+    }
+
+    _theEngine->loadScene( _scenes[0] );
+    _theEngine->run();
   }
 
 
@@ -226,5 +251,35 @@ namespace Regolith
     return _scenes[ scene_num ];
   }
 
+
+  void Manager::configureEvents()
+  {
+    // Load user events, etc
+    Uint32 start_num = SDL_RegisterEvents( REGOLITH_EVENT_TOTAL );
+
+    if ( start_num == (unsigned int)-1 )
+    {
+      std::string error = SDL_GetError();
+      FAILURE_STREAM << "Could not create required user events : " << error;
+      Exception ex( "Manager::configureEvents()", "Could not create user events", true );
+      ex.addDetail( "SDL Error", error );
+      throw ex;
+    }
+
+    for ( unsigned int i = 0; i < (unsigned int)REGOLITH_EVENT_TOTAL; ++i )
+    {
+      SDL_memset( &_gameEvents[ i ], 0, sizeof(_gameEvents[ i ]) );
+      _gameEvents[ i ].type = start_num + i;
+      _gameEvents[ i ].user.code = i;
+      _gameEvents[ i ].user.data1 = nullptr;
+      _gameEvents[ i ].user.data2 = nullptr;
+    }
+  }
+
+
+  void Manager::raiseEvent( GameEvents eventNum )
+  {
+    SDL_PushEvent( &_gameEvents[ eventNum ] );
+  }
 }
 
