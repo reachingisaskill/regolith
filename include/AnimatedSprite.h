@@ -13,11 +13,6 @@ namespace Regolith
 
   class AnimatedSprite : public SpriteSheet
   {
-    AnimatedSprite( const AnimatedSprite& ) = delete; // Non-copy-constructable
-    AnimatedSprite& operator=( const AnimatedSprite& ) = delete; // Non-copy-assignable
-
-    friend class TextureBuilder;
-
     private:
       Uint32 _updateRate;
       Uint32 _count;
@@ -37,7 +32,7 @@ namespace Regolith
 
       virtual ~AnimatedSprite();
 
-      virtual ObjectProperty getProperties() const { return OBJECT_ANIMATED; }
+      virtual int getProperties() const { return OBJECT_ANIMATED; }
 
       void setUpdateRate( Uint32 );
 

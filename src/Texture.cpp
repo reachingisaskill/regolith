@@ -40,32 +40,6 @@ namespace Regolith
   }
 
 
-  Texture::Texture( Texture&& other ) :
-    Drawable( std::move( other ) ),
-    _theTexture( std::exchange( other._theTexture, { nullptr, 0, 0 } ) ),
-    _angle( std::move( other._angle ) ),
-    _flipFlag( std::move( other._flipFlag ) ),
-    _clip( std::move( other._clip ) ),
-    _destination( std::move( other._destination) )
-  {
-  }
-
-
-  Texture& Texture::operator=( Texture&& other ) 
-  {
-    Drawable::operator=( std::move( other ) );
-
-    // Move the data memebers
-    _theTexture =  std::exchange( other._theTexture, { nullptr, 0, 0 } );
-    _angle = std::move( other._angle );
-    _flipFlag = std::move( other._flipFlag );
-    _clip = std::move( other._clip );
-    _destination = std::move( other._destination );
-
-    return *this;
-  }
-
-
   Texture::~Texture()
   {
   }

@@ -19,18 +19,18 @@ namespace Regolith
   }
 
 
-  Drawable::Drawable( const Drawable&& d ) :
-    _theRenderer( std::move( d._theRenderer ) )
-  {
-  }
+//  Drawable::Drawable( const Drawable&& d ) :
+//    _theRenderer( std::move( d._theRenderer ) )
+//  {
+//  }
 
 
-  Drawable& Drawable::operator=( const Drawable&& d )
-  {
-    _theRenderer = std::move( d._theRenderer );
-
-    return *this;
-  }
+//  Drawable& Drawable::operator=( const Drawable&& d )
+//  {
+//    _theRenderer = std::move( d._theRenderer );
+//
+//    return *this;
+//  }
 
 
   Drawable::~Drawable()

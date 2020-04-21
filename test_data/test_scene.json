@@ -27,7 +27,7 @@
   "background" :
   {
     "texture_name" : "background",
-    "texture_type" : "simple_texture"
+    "element_type" : "simple_texture"
   },
   "camera" :
   {
@@ -40,12 +40,12 @@
   [
     {
       "texture_name" : "the_dot",
-      "texture_type" : "simple_texture",
+      "element_type" : "simple_texture",
       "position" : [ 280, 150 ]
     },
     {
       "texture_name" : "the_spritesheet",
-      "texture_type" : "spritesheet",
+      "element_type" : "spritesheet",
       "number_rows" : 2,
       "number_columns" : 2,
       "number_used" : 4,
@@ -54,7 +54,7 @@
     },
     {
       "texture_name" : "the_spritesheet",
-      "texture_type" : "animated",
+      "element_type" : "animated",
       "update_rate" : 1000,
       "number_rows" : 2,
       "number_columns" : 2,
@@ -67,7 +67,7 @@
   [
     {
       "texture_name" : "fps_text",
-      "texture_type" : "fps_string",
+      "element_type" : "fps_string",
       "font" : "default",
       "frame_count" : 100,
       "position" : [ 20, 20 ]

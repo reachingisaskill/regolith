@@ -13,6 +13,8 @@ The user can extend the framework to include their own classes that do most thin
 ## Architecture Improvements
 - Implement a (doubly) linked list class to allow fast deletion and linear iteration for things like projectiles with timed lives.
 - Implement a "story" class. A state machine that organises the order in which scenes are loaded.
+- Need a new data structure to handle objects with timed life and objects that appear after the scene has already loaded. 
+I'm thinking a DrawableFactory class...
 
 ## Portability
 - Move all SDL include statements into the Defitions file and wrap them with #if-#else statements to select for operating system

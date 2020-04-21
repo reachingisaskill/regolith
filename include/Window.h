@@ -44,6 +44,7 @@ namespace Regolith
       bool hasMouseFocus() const { return _mouseFocus; }
       bool hasKeyboardFocus() const { return _keyboardFocus; }
       bool isMinimized() const { return _minimized; }
+      void toggleFullScreen();
 
 
       Window( const Window& ) = delete;

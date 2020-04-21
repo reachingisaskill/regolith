@@ -24,7 +24,11 @@ int main( int, char** )
     man->init( test_config );
 
     INFO_LOG( "Starting rendering loop" );
-    man->run();
+    Scene* the_scene = man->loadScene( 0 );
+
+    man->getEnginePointer()->setScene( the_scene );
+    man->getEnginePointer()->setCamera( the_scene->getCamera() );
+    man->getEnginePointer()->run();
 
   }
   catch ( Exception& ex )

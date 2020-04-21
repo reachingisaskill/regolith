@@ -33,16 +33,19 @@ namespace Regolith
       virtual ~FPSString();
 
       // Specify the properties of the object. (Moving, animated, collision, etc)
-      virtual ObjectProperty getProperties() const { return OBJECT_ANIMATED; }
+      virtual int getProperties() const { return OBJECT_ANIMATED; }
 
       // Perform the steps to call SDL_RenderCopy, etc
       virtual void render( Camera* );
+
+      // Handle Events
+      virtual void handleEvent( SDL_Event& ) {}
 
       // Update the objects behaviour based on the provided timestep
       virtual void update( Uint32 );
 
       // Returns the collision object for the class;
-      virtual Collision* getCollision() { return nullptr; }
+      virtual unsigned int getCollision( Collision*& ) { return 0; }
 
       // Size accessors
       virtual int getWidth() const { return _theTexture.width; }

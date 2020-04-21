@@ -68,14 +68,14 @@ namespace Regolith
 
   Drawable* TextureBuilder::build( Json::Value jsonObject )
   {
-    std::string object_type = jsonObject["texture_type"].asString();
+    std::string object_type = jsonObject["element_type"].asString();
     INFO_STREAM << "Building texture of type : " << object_type;
 
     FactoryMap::iterator found = _factories.find( object_type );
 
     if ( found == _factories.end() )
     {
-      ERROR_LOG( "Texture type not found in factory list" );
+      ERROR_STREAM << "Texture type not found in factory list: " << object_type;
       Exception ex( "TextureBuilder::build()", "Non-implemented build type", true );
       ex.addDetail( "TypeID", object_type );
       throw ex;

@@ -4,7 +4,6 @@
 
 #include "Definitions.h"
 
-#include <SDL2/SDL.h>
 
 namespace Regolith
 {
@@ -17,8 +16,6 @@ namespace Regolith
    */
   class Drawable
   {
-    Drawable( const Drawable& ) = delete; // Non-copy-constructable
-    Drawable& operator=( const Drawable& ) = delete; // Non-copy-assignable
 
     private:
       SDL_Renderer* _theRenderer;
@@ -28,14 +25,15 @@ namespace Regolith
 
       Drawable( SDL_Renderer* );
 
-      Drawable( const Drawable&& );
-
-      Drawable& operator=( const Drawable&& );
+      Drawable( const Drawable& ) = default;
+      Drawable( Drawable&& ) = default;
+      Drawable& operator=( const Drawable& ) = default;
+      Drawable& operator=( Drawable&& ) = default;
 
       virtual ~Drawable();
 
       // Specify the properties of the object. (Moving, animated, collision, etc)
-      virtual ObjectProperty getProperties() const = 0;
+      virtual int getProperties() const = 0;
 
       // Perform the steps to call SDL_RenderCopy, etc
       virtual void render( Camera* ) = 0;
@@ -43,8 +41,12 @@ namespace Regolith
       // Update the objects behaviour based on the provided timestep
       virtual void update( Uint32 ) = 0;
 
-      // Returns the collision object for the class;
-      virtual Collision* getCollision() = 0;
+      // Update the objects behaviour based on the provided timestep
+      virtual void handleEvent( SDL_Event& ) = 0;
+
+      // Returns the number of collision objects for the class.
+      // The argument is a pointer which will be updated to point at the first object
+      virtual unsigned int getCollision( Collision*& ) = 0;
 
 
       // Get and Set the Renderer object

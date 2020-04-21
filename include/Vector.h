@@ -66,7 +66,6 @@ namespace Regolith
       friend Vector operator* ( float, Vector ); // Pre-Mulitply by constant
       friend bool operator==( const Vector&, const Vector& ); // Equal to
       friend bool operator!=( const Vector& v1, const Vector& v2 ); // Not equal to
-      friend bool operator==( const Vector&, const Vector& ); // Equal to
       friend bool operator>( const Vector&, const Vector& ); // Greater than
       friend bool operator>=( const Vector&, const Vector& ); // Greater, equal to
       friend bool operator<( const Vector&, const Vector& ); // Less Than
@@ -79,8 +78,7 @@ namespace Regolith
   // Friend functions
   Vector operator* ( float, Vector ); // Pre-Mulitply by constant
   bool operator==( const Vector&, const Vector& ); // Equal to
-  bool operator!=( const Vector& v1, const Vector& v2 ) { return ! operator==( v1, v2 ); } // Not equal to
-  bool operator==( const Vector&, const Vector& ); // Equal to
+  bool operator!=( const Vector&, const Vector& ); // Not equal to
   bool operator>( const Vector&, const Vector& ); // Greater than
   bool operator>=( const Vector&, const Vector& ); // Greater, equal to
   bool operator<( const Vector&, const Vector& ); // Less Than

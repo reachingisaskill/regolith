@@ -194,6 +194,14 @@ namespace Regolith
   }
 
 
+  bool operator!=( const Vector& v1, const Vector& v2 ) // Equal to
+  {
+    if ( ( std::fabs(v1._x - v2._x) > epsilon ) && ( std::fabs(v1._y - v2._y) > epsilon ) )
+      return true;
+    return false;
+  }
+
+
   bool operator>( const Vector& v1, const Vector& v2 ) // Greater than
   {
     return v1.square() - v2.square() > epsilon; // Skip the square root. Slow!

@@ -73,80 +73,64 @@ namespace Regolith
 
   void Window::handleEvent( SDL_Event& e )
   {
-    if ( e.type == SDL_WINDOWEVENT )
+    bool updateCaption = false;
+
+    switch ( e.window.event )
     {
-      bool updateCaption = false;
+      case SDL_WINDOWEVENT_SIZE_CHANGED :
+        _width = e.window.data1;
+        _height = e.window.data2;
+        SDL_RenderPresent( _theRenderer );
+        break;
 
-      switch ( e.window.event )
-      {
-        case SDL_WINDOWEVENT_SIZE_CHANGED :
-          _width = e.window.data1;
-          _height = e.window.data2;
-          SDL_RenderPresent( _theRenderer );
-          break;
+      case SDL_WINDOWEVENT_EXPOSED :
+        SDL_RenderPresent( _theRenderer );
+        break;
 
-        case SDL_WINDOWEVENT_EXPOSED :
-          SDL_RenderPresent( _theRenderer );
-          break;
+      case SDL_WINDOWEVENT_ENTER :
+        _mouseFocus = true;
+        updateCaption = true;
+        break;
 
-        case SDL_WINDOWEVENT_ENTER :
-          _mouseFocus = true;
-          updateCaption = true;
-          break;
+      case SDL_WINDOWEVENT_LEAVE :
+        _mouseFocus = false;
+        updateCaption = true;
+        break;
 
-        case SDL_WINDOWEVENT_LEAVE :
-          _mouseFocus = false;
-          updateCaption = true;
-          break;
+      case SDL_WINDOWEVENT_FOCUS_GAINED :
+        _keyboardFocus = true;
+        updateCaption = true;
+        break;
 
-        case SDL_WINDOWEVENT_FOCUS_GAINED :
-          _keyboardFocus = true;
-          updateCaption = true;
-          break;
+      case SDL_WINDOWEVENT_FOCUS_LOST :
+        _keyboardFocus = false;
+        updateCaption = true;
+        break;
 
-        case SDL_WINDOWEVENT_FOCUS_LOST :
-          _keyboardFocus = false;
-          updateCaption = true;
-          break;
+      case SDL_WINDOWEVENT_MINIMIZED :
+        _minimized = true;
+        updateCaption = true;
+        break;
 
-        case SDL_WINDOWEVENT_MINIMIZED :
-          _minimized = true;
-          updateCaption = true;
-          break;
-
-        case SDL_WINDOWEVENT_MAXIMIZED :
-          _minimized = false;
-          updateCaption = true;
-          break;
-
-        case SDL_WINDOWEVENT_RESTORED :
-          _minimized = false;
-          updateCaption = true;
-          break;
-      }
-
-      if ( updateCaption )
-      {
-        std::stringstream text;
-        text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" );
-
-        SDL_SetWindowTitle( _theWindow, text.str().c_str() );
-      }
-    }
-    else if ( e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_RETURN )
-    {
-      if ( _fullscreen )
-      {
-        SDL_SetWindowFullscreen( _theWindow, SDL_FALSE );
-        _fullscreen = false;
-      }
-      else
-      {
-        SDL_SetWindowFullscreen( _theWindow, SDL_TRUE );
-        _fullscreen = true;
+      case SDL_WINDOWEVENT_MAXIMIZED :
         _minimized = false;
-      }
+        updateCaption = true;
+        break;
+
+      case SDL_WINDOWEVENT_RESTORED :
+        _minimized = false;
+        updateCaption = true;
+        break;
     }
+
+    if ( updateCaption )
+    {
+      std::stringstream text;
+      text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" );
+
+      SDL_SetWindowTitle( _theWindow, text.str().c_str() );
+    }
+
   }
 
 
@@ -154,6 +138,22 @@ namespace Regolith
   {
     SDL_DestroyWindow( _theWindow );
     _theWindow = nullptr;
+  }
+
+
+  void Window::toggleFullScreen()
+  {
+    if ( _fullscreen )
+    {
+      SDL_SetWindowFullscreen( _theWindow, SDL_FALSE );
+      _fullscreen = false;
+    }
+    else
+    {
+      SDL_SetWindowFullscreen( _theWindow, SDL_TRUE );
+      _fullscreen = true;
+      _minimized = false;
+    }
   }
 
 }

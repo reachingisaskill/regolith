@@ -39,6 +39,7 @@ namespace Regolith
       // These do not own their memory. They are shortcut lists
       TextureList _collision_elements;
       TextureList _animated_elements;
+      TextureList _input_elements;
 
       Camera _theCamera;
       Camera _theHUD;
@@ -67,7 +68,10 @@ namespace Regolith
       void render();
 
       // Handle events
-      void handleEvent( SDL_Event* );
+      void handleEvent( SDL_Event& );
+
+      // Resolve all the collision
+      void resolveCollisions();
 
       // Return the camera for the scene
       Camera* getCamera() { return &_theCamera; }

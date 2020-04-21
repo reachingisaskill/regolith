@@ -19,7 +19,8 @@ namespace Regolith
     _title(),
     _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
-    _gameEvents()
+    _gameEvents(),
+    _gravityConst( 1.0 )
   {
     // Set up the provided factories
     _theBuilder->addFactory( new SimpleFactory() );
@@ -209,6 +210,7 @@ namespace Regolith
       throw ex;
     }
 
+    this->configureEvents();
     _theEngine->configure( _theRenderer, _theWindow );
   }
 
@@ -221,9 +223,7 @@ namespace Regolith
       Exception ex( "Manager::run()", "No scenes to render", false );
       throw ex;
     }
-
-    _theEngine->loadScene( _scenes[0] );
-    _theEngine->run();
+    // This function should be used to start the "story" class running
   }
 
 
@@ -252,10 +252,25 @@ namespace Regolith
   }
 
 
+  Scene* Manager::loadScene( size_t scene_num )
+  {
+    if ( scene_num >= _scenes.size() )
+    {
+      FAILURE_STREAM << "Request scene out of bounds : " << scene_num;
+      Exception ex( "Manager::getScene()", "Scene number out of bounds", false );
+      ex.addDetail( "Scene number", scene_num );
+      throw ex;
+    }
+    _scenes[ scene_num ]->load();
+    return _scenes[ scene_num ];
+  }
+
+
   void Manager::configureEvents()
   {
     // Load user events, etc
     Uint32 start_num = SDL_RegisterEvents( REGOLITH_EVENT_TOTAL );
+    INFO_STREAM << "Registering " << REGOLITH_EVENT_TOTAL << " user events";
 
     if ( start_num == (unsigned int)-1 )
     {
@@ -269,7 +284,7 @@ namespace Regolith
     for ( unsigned int i = 0; i < (unsigned int)REGOLITH_EVENT_TOTAL; ++i )
     {
       SDL_memset( &_gameEvents[ i ], 0, sizeof(_gameEvents[ i ]) );
-      _gameEvents[ i ].type = start_num + i;
+      _gameEvents[ i ].type = start_num; // This should be the same number as SDL_USEREVENT
       _gameEvents[ i ].user.code = i;
       _gameEvents[ i ].user.data1 = nullptr;
       _gameEvents[ i ].user.data2 = nullptr;
@@ -277,7 +292,7 @@ namespace Regolith
   }
 
 
-  void Manager::raiseEvent( GameEvents eventNum )
+  void Manager::raiseEvent( GameEvent eventNum )
   {
     SDL_PushEvent( &_gameEvents[ eventNum ] );
   }

@@ -13,11 +13,6 @@ namespace Regolith
 
   class SpriteSheet : public Texture
   {
-    SpriteSheet( const SpriteSheet& ) = delete; // Non-copy-constructable
-    SpriteSheet& operator=( const SpriteSheet& ) = delete; // Non-copy-assignable
-
-    friend class TextureBuilder;
-
     private:
       int _currentSprite;
       int _rows;

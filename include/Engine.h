@@ -20,24 +20,28 @@ namespace Regolith
 
     private:
 
-    SDL_Renderer* _theRenderer;
-    Window* _currentWindow;
-    Scene* _currentScene;
-    Camera* _currentCamera;
+      SDL_Renderer* _theRenderer;
+      Window* _currentWindow;
+      Scene* _currentScene;
+      Camera* _currentCamera;
 
-    Timer _frameTimer;
-    SDL_Color _defaultColor;
+      Timer _frameTimer;
+      SDL_Color _defaultColor;
 
     public:
-    Engine();
+      Engine();
 
-    virtual ~Engine();
+      virtual ~Engine();
 
-    void configure( SDL_Renderer*, Window* );
+      void configure( SDL_Renderer*, Window* );
 
-    void run();
+      void run();
 
-    void loadScene( Scene* );
+      void setScene( Scene* );
+
+      void setCamera( Camera* );
+
+      void resolveUserEvent( GameEvent );
   };
   
 }

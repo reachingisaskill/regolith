@@ -10,10 +10,14 @@
 
 #include "Texture.h"
 #include "SpriteSheet.h"
+#include "AnimatedSprite.h"
+#include "FPSString.h"
+
 #include "Window.h"
 #include "TextureBuilder.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "Engine.h"
 
 #include "Manager.h"
 

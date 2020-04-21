@@ -38,11 +38,6 @@ namespace Regolith
 
   class Texture : public Drawable
   {
-    Texture( const Texture& ) = delete; // Non-copy-constructable
-    Texture& operator=( const Texture& ) = delete; // Non-copy-assignable
-
-    friend class TextureBuilder;
-
     private:
       // Class owns this memory
       RawTexture _theTexture;
@@ -58,16 +53,12 @@ namespace Regolith
 
       Texture( RawTexture );
 
-      Texture( Texture&& ); // Move constructor
-
-      Texture& operator=( Texture&& ); // Move assignment
-
       virtual ~Texture();
 
       // Fullfill the Drawable class requirements
 
       // Return the object properties
-      virtual ObjectProperty getProperties() const { return OBJECT_SIMPLE; }
+      virtual int getProperties() const { return OBJECT_SIMPLE; }
 
       // For derived classes to update every frame
       virtual void update( Uint32 ) { }
@@ -75,8 +66,11 @@ namespace Regolith
       // Render with the current renderer object
       virtual void render( Camera* );
 
+      // Handle events
+      virtual void handleEvent( SDL_Event& ) {}
+
       // Returns the collision object for the class;
-      virtual Collision* getCollision() { return nullptr; }
+      virtual unsigned int getCollision( Collision*& ) { return 0; }
 
 
       // Accessors

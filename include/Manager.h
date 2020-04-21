@@ -33,6 +33,9 @@ namespace Regolith
     private:
       Engine* _theEngine;
       Window* _theWindow;
+      Scene* _currentScene;
+      Camera* _currentCamera;
+
       SDL_Renderer* _theRenderer;
       TextureBuilder* _theBuilder;
       SceneList _scenes;
@@ -44,6 +47,8 @@ namespace Regolith
 
       Uint32 _eventStartIndex;
       SDL_Event _gameEvents[REGOLITH_EVENT_TOTAL];
+
+      float _gravityConst;
 
 
     protected:
@@ -69,11 +74,17 @@ namespace Regolith
       // Get the pointer to the window
       Window* getWindowPointer() { return _theWindow; }
 
+      // The engine being used
+      Engine* getEnginePointer() { return _theEngine; }
+
       // Return a pointer to the required font data
       TTF_Font* getFontPointer( std::string );
 
       // Return a pointer to the required scene
       Scene* getScene( size_t );
+
+      // Return a pointer to the required scene
+      Scene* loadScene( size_t );
 
       // Return the number of scenes
       size_t getNumberScenes() { return _scenes.size(); }
@@ -88,8 +99,10 @@ namespace Regolith
       void configureEvents();
 
       // Push a user event into the SDL event queue
-      void raiseEvent( GameEvents );
+      void raiseEvent( GameEvent );
 
+      // Return the constant g
+      inline float getGravity() { return _gravityConst; }
   };
 
 }

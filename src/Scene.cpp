@@ -121,12 +121,37 @@ namespace Regolith
       Json::ArrayIndex scene_size = scene_data.size();
       for ( Json::ArrayIndex i = 0; i != scene_size; ++i )
       {
-        Drawable* newTexture =  _theBuilder->build( scene_data[i] );
-        _scene_elements.push_back( newTexture );
-        INFO_STREAM << "Object properties: " << newTexture->getProperties();
-        if ( newTexture->getProperties() & OBJECT_ANIMATED )
+        try
         {
-          _animated_elements.push_back( newTexture );
+          Drawable* newTexture =  _theBuilder->build( scene_data[i] );
+          _scene_elements.push_back( newTexture );
+          INFO_STREAM << "Object properties: " << newTexture->getProperties();
+          if ( newTexture->getProperties() & OBJECT_ANIMATED )
+          {
+            _animated_elements.push_back( newTexture );
+          }
+          if ( newTexture->getProperties() & OBJECT_HAS_INPUT )
+          {
+            _input_elements.push_back( newTexture );
+          }
+          if ( newTexture->getProperties() & OBJECT_HAS_COLLISION )
+          {
+            _collision_elements.push_back( newTexture );
+          }
+        }
+        catch ( Exception& ex )
+        {
+          if ( ex.isRecoverable() )
+          {
+            ERROR_STREAM << "An error occured building scene elements: " << ex.what();
+            ERROR_LOG( "Skipping element" );
+          }
+          else
+          {
+            FAILURE_STREAM << "An error occured building scene elements: " << ex.what();
+            FAILURE_LOG( "Error is non-recoverable" );
+            throw ex;
+          }
         }
       }
 
@@ -142,6 +167,11 @@ namespace Regolith
         {
           _animated_elements.push_back( newTexture );
         }
+        if ( newTexture->getProperties() & OBJECT_HAS_INPUT )
+        {
+          _input_elements.push_back( newTexture );
+        }
+        // HUD Elements cannot have collision
       }
 
 
@@ -308,7 +338,17 @@ namespace Regolith
   }
 
 
-  void Scene::handleEvent( SDL_Event* e )
+  void Scene::handleEvent( SDL_Event& e )
+  {
+    TextureList::iterator end = _input_elements.end();
+    for ( TextureList::iterator it = _input_elements.begin(); it != end; ++it )
+    {
+      (*it)->handleEvent( e );
+    }
+  }
+
+
+  void Scene::resolveCollisions()
   {
   }
 
