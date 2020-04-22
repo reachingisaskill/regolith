@@ -74,6 +74,13 @@ namespace Regolith
   }
 
 
+  Drawable* Texture::clone() const
+  {
+    Texture* newTexture = new Texture( *this );
+    return (Drawable*) newTexture;
+  }
+
+
   void Texture::setClip( SDL_Rect clip )
   {
     _clip = clip;

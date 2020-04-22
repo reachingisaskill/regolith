@@ -1,76 +1,117 @@
 {
-  "texture_files" :
-  [
-    {
-      "name" : "background",
-      "path" : "test_data/test_background.png"
-    },
-    {
-      "name" : "the_dot",
-      "path" : "test_data/test_ball.png"
-    },
-    {
-      "name" : "the_spritesheet",
-      "path" : "test_data/test_spritesheet.png",
-      "colour_key" : [ 255, 255, 255 ]
-    }
-  ],
-  "texture_strings" :
-  [
-    {
-      "name" : "header_text",
-      "text" : "Press Return to toggle fullscreen",
-      "colour" : [ 0, 0, 0, 255 ],
-      "font" : "default"
-    }
-  ],
-  "background" :
+  "textures" :
   {
-    "texture_name" : "background",
-    "element_type" : "simple_texture"
+    "texture_files" :
+    [
+      {
+        "name" : "background_texture",
+        "path" : "test_data/test_background.png"
+      },
+      {
+        "name" : "dot_texture",
+        "path" : "test_data/test_ball.png"
+      },
+      {
+        "name" : "spritesheet_test",
+        "path" : "test_data/test_spritesheet.png",
+        "colour_key" : [ 255, 255, 255 ]
+      }
+    ],
+    "texture_strings" :
+    [
+      {
+        "name" : "header_text",
+        "text" : "Press Return to toggle fullscreen",
+        "colour" : [ 0, 0, 0, 255 ],
+        "font" : "default"
+      }
+    ]
   },
-  "camera" :
+
+  "resources" :
+  [
+    {
+      "resource_name" : "background",
+      "element_type" : "simple_texture",
+      "texture_name" : "background_texture"
+    },
+    {
+      "resource_name" : "the_dot",
+      "element_type" : "simple_texture",
+      "texture_name" : "dot_texture"
+    },
+    {
+      "resource_name" : "the_spritesheet",
+      "element_type" : "spritesheet_test",
+      "number_rows" : 2,
+      "number_columns" : 2,
+      "number_used" : 4,
+      "start_number" : 2
+    },
+    {
+      "resource_name" : "the_animated_spritesheet",
+      "element_type" : "animated",
+      "texture_name" : "spritesheet_test",
+      "update_rate" : 1000,
+      "number_rows" : 2,
+      "number_columns" : 2,
+      "number_used" : 4,
+      "start_number" : 1
+    },
+    {
+      "resource_name" : "fps_text",
+      "element_type" : "fps_string",
+      "font" : "default",
+      "frame_count" : 100
+    }
+  ],
+
+  "cameras" :
   {
     "type" : "flying",
     "width" : 1024,
     "height" : 768,
     "start_position" : [ 100, 100 ]
   },
-  "scene_elements" :
-  [
-    {
-      "texture_name" : "the_dot",
-      "element_type" : "simple_texture",
-      "position" : [ 280, 150 ]
-    },
-    {
-      "texture_name" : "the_spritesheet",
-      "element_type" : "spritesheet",
-      "number_rows" : 2,
-      "number_columns" : 2,
-      "number_used" : 4,
-      "start_number" : 2,
-      "position" : [ 150, 150 ]
-    },
-    {
-      "texture_name" : "the_spritesheet",
-      "element_type" : "animated",
-      "update_rate" : 1000,
-      "number_rows" : 2,
-      "number_columns" : 2,
-      "number_used" : 4,
-      "start_number" : 1,
-      "position" : [ 250, 200 ]
-    }
-  ],
-  "hud_elements" :
-  [
-    {
-      "texture_name" : "fps_text",
-      "element_type" : "fps_string",
-      "font" : "default",
-      "frame_count" : 100,
-      "position" : [ 20, 20 ]
-    }
-  ]
+
+  "elements" :
+  {
+    "background" : "background",
+
+    "scene_elements" :
+    [
+      {
+        "resource_name" : "the_dot",
+        "position" : [ 280, 150 ]
+      },
+      {
+        "resource_name" : "the_spritesheet",
+        "position" : [ 250, 150 ]
+      },
+      {
+        "resource_name" : "the_spritesheet",
+        "position" : [ 250, 550 ]
+      },
+      {
+        "resource_name" : "the_spritesheet",
+        "position" : [ 500, 500 ]
+      },
+      {
+        "resource_name" : "the_animated_spritesheet",
+        "position" : [ 250, 200 ]
+      },
+      {
+        "resource_name" : "the_animated_spritesheet",
+        "position" : [ 250, 300 ]
+      }
+    ],
+
+    "hud_elements" :
+    [
+      {
+        "resource_name" : "fps_text",
+        "position" : [ 20, 20 ]
+      }
+    ]
+  }
 }

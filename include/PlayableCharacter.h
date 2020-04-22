@@ -33,7 +33,10 @@ namespace Regolith
       virtual void handleEvent( SDL_Event& );
 
       // Returns the collision object for the class;
-      virtual Collision* getCollision();
+      virtual unsigned int getCollision( Collision*& );
+
+      // Return a new clone of the current object. Transfers ownership of the memory
+      Drawable* clone() const { return (Drawable*) new PlayableCharacter( *this ); }
 
   };
 

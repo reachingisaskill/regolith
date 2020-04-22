@@ -23,6 +23,9 @@ namespace Regolith
       Vector _position;
       float _rotation;
 
+    protected:
+      Drawable( SDL_Renderer*, Vector, float );
+
     public:
       Drawable();
 
@@ -50,6 +53,12 @@ namespace Regolith
       // Returns the number of collision objects for the class.
       // The argument is a pointer which will be updated to point at the first object
       virtual unsigned int getCollision( Collision*& ) = 0;
+
+
+      // Create a new copy and return the pointer to it. Transfers ownership of the memory
+      virtual Drawable* clone() const = 0;
+      // Same as above but specify the start position
+      virtual Drawable* cloneAt( Vector ) const;
 
 
       // Get and Set the Renderer object

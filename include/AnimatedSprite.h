@@ -24,11 +24,11 @@ namespace Regolith
 
       AnimatedSprite( RawTexture );
 
-      // Move-construct
-      AnimatedSprite( AnimatedSprite&& );
-
-      // Move-assign
-      AnimatedSprite& operator=( AnimatedSprite&& );
+//      // Move-construct
+//      AnimatedSprite( AnimatedSprite&& );
+//
+//      // Move-assign
+//      AnimatedSprite& operator=( AnimatedSprite&& );
 
       virtual ~AnimatedSprite();
 
@@ -42,6 +42,9 @@ namespace Regolith
       // Render with the current renderer object
       // Use the SpriteSheet variant
 //      virtual void render( Camera* );
+
+      // Return a clone of the current object. Transfers ownership of memory
+      Drawable* clone() const;
   };
 
 }

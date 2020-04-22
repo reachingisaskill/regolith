@@ -23,25 +23,25 @@ namespace Regolith
   }
 
 
-  // Move Constructor
-  AnimatedSprite::AnimatedSprite( AnimatedSprite&& ap ) :
-    SpriteSheet( std::move( ap ) ),
-    _updateRate( std::move( ap._updateRate ) ),
-    _count( std::move( ap._count ) )
-  {
-  }
-
-
-  // Move Assignement
-  AnimatedSprite& AnimatedSprite::operator=( AnimatedSprite&& ap )
-  {
-    SpriteSheet::operator=( std::move( ap ) );
-
-    _updateRate = std::move( ap._updateRate );
-    _count = std::move( ap._count );
-
-    return *this;
-  }
+//  // Move Constructor
+//  AnimatedSprite::AnimatedSprite( AnimatedSprite&& ap ) :
+//    SpriteSheet( std::move( ap ) ),
+//    _updateRate( std::move( ap._updateRate ) ),
+//    _count( std::move( ap._count ) )
+//  {
+//  }
+//
+//
+//  // Move Assignement
+//  AnimatedSprite& AnimatedSprite::operator=( AnimatedSprite&& ap )
+//  {
+//    SpriteSheet::operator=( std::move( ap ) );
+//
+//    _updateRate = std::move( ap._updateRate );
+//    _count = std::move( ap._count );
+//
+//    return *this;
+//  }
 
 
   AnimatedSprite::~AnimatedSprite()
@@ -65,6 +65,12 @@ namespace Regolith
     _count = _count % _updateRate;
 
     DEBUG_STREAM << "AnimatedSprite : _count : " << _count << ", frame No. : " << frame_number << ", update rate : " << _updateRate;
+  }
+
+
+  Drawable* AnimatedSprite::clone() const
+  {
+    return (Drawable*) new AnimatedSprite( *this );
   }
 
 }

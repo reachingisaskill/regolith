@@ -11,6 +11,7 @@ namespace Regolith
 {
 
   FPSString::FPSString() :
+    Drawable(),
     _theTexture( { nullptr, 0, 0 } ),
     _phrase( "Current FPS: " ),
     _frameCounter( 0 ),
@@ -20,6 +21,21 @@ namespace Regolith
     _theFont( nullptr ),
     _theColor( { 0, 0, 0, 0 } ),
     _destination( { 0, 0, 0, 0 } )
+  {
+  }
+
+
+  FPSString::FPSString( const FPSString& other ) :
+    Drawable( other ),
+    _theTexture( other._theTexture ),
+    _phrase( other._phrase ),
+    _frameCounter( other._frameCounter ),
+    _limit( other._limit ),
+    _tickCount( other._tickCount ),
+    _stringstream(),
+    _theFont( other._theFont ),
+    _theColor( other._theColor ),
+    _destination( other._destination )
   {
   }
 
@@ -60,6 +76,12 @@ namespace Regolith
       _frameCounter = 0;
       _tickCount = 0;
     }
+  }
+
+
+  Drawable* FPSString::clone() const
+  {
+    return (Drawable*) new FPSString( *this );
   }
 
 

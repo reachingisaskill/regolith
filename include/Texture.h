@@ -51,7 +51,7 @@ namespace Regolith
     public:
       Texture();
 
-      Texture( RawTexture );
+      explicit Texture( RawTexture );
 
       virtual ~Texture();
 
@@ -71,6 +71,9 @@ namespace Regolith
 
       // Returns the collision object for the class;
       virtual unsigned int getCollision( Collision*& ) { return 0; }
+
+      // Return a new clone of the current object. Transfers ownership of memory
+      virtual Drawable* clone() const;
 
 
       // Accessors

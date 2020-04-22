@@ -27,6 +27,8 @@ namespace Regolith
       void handleEvent( SDL_Event& ) {}
       
       unsigned int getCollision( Collision*& );
+
+      Drawable* clone() const;
   };
 
 }

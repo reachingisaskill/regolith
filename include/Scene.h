@@ -16,8 +16,11 @@
 namespace Regolith
 {
 
-  typedef std::vector< Drawable* > TextureList;
   typedef std::map< std::string, RawTexture > RawTextureMap;
+  typedef std::vector< Drawable* > ResourceList;
+  typedef std::map< std::string, unsigned int > ResourceNameMap;
+
+  typedef std::vector< Drawable* > ElementList;
 
 
   class Scene
@@ -25,36 +28,59 @@ namespace Regolith
     private:
       // Scene owns the memory for the texture data
       RawTextureMap _rawTextures;
+      ResourceList _resources;
+      ResourceNameMap _resourceNames;
 
+      // Key components for building elements and rendering
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
       TextureBuilder* _theBuilder;
       std::string _sceneFile;
 
-      TextureList _scene_elements;
-      TextureList _hud_elements;
+      // Containers storing drawable objects - the scene and the hud elements
+      // All memory is owned by the resource list above
       Drawable* _background;
+      ElementList _sceneElements;
+      ElementList _hudElements;
 
       // Can be change to accelerator structures in the future
       // These do not own their memory. They are shortcut lists
-      TextureList _collision_elements;
-      TextureList _animated_elements;
-      TextureList _input_elements;
+      ElementList _collisionElements;
+      ElementList _animatedElements;
+      ElementList _inputElements;
+      // Store the player elements separately - probably don't need to do global collision detection!
+      ElementList _playerElements;
 
+      // Cameras for rendering
       Camera _theCamera;
       Camera _theHUD;
 
     protected:
+      // Helper functions to build and store the raw texture files
       void _addTextureFromFile( Json::Value& );
       void _addTextureFromText( Json::Value& );
 
       // Build the whole scene from a json file description
       void buildFromJson();
 
-    public:
-//      // No initialisation
-//      Scene( Window*, SDL_Renderer* );
+      // Function to parse the json document
+      Json::Value _loadConfig();
 
+      // Function to load all the raw texture files
+      void _loadTextures( Json::Value& );
+
+      // Function to build all the resources
+      void _loadResources( Json::Value& );
+
+      void _loadCameras( Json::Value& );
+
+      // Function to build all the caches/acceleration structures
+      void _loadCaches( Json::Value& );
+
+      // Spawn an object with the supplied ID number at the supplied position in the HUD
+      // only the scene class can create HUD elements
+      void spawnHUD( unsigned int, int, int );
+    public:
       // Set the necessary parameters
       Scene( Window*, SDL_Renderer*, TextureBuilder*, std::string );
 
@@ -81,6 +107,12 @@ namespace Regolith
 
       // Return a pointer to a raw texture object
       RawTexture findRawTexture( std::string ) const;
+
+      // Spawn an object with the supplied ID number at the default position in the Scene
+      void spawn( unsigned int );
+
+      // Spawn an object with the supplied ID number at the supplied position in the scene
+      void spawnAt( unsigned int, Vector );
   };
 
 }

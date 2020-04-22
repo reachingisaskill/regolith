@@ -22,5 +22,11 @@ namespace Regolith
     return _collisionCount;
   }
 
+
+  Drawable* TestDrawable::clone() const
+  {
+    return (Drawable*) new TestDrawable( *this );
+  }
+
 }
 

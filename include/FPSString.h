@@ -30,6 +30,8 @@ namespace Regolith
 
       FPSString();
 
+      FPSString( const FPSString& );
+
       virtual ~FPSString();
 
       // Specify the properties of the object. (Moving, animated, collision, etc)
@@ -46,6 +48,9 @@ namespace Regolith
 
       // Returns the collision object for the class;
       virtual unsigned int getCollision( Collision*& ) { return 0; }
+
+      // Return a clone of the current object. Transfers ownership of memory
+      Drawable* clone() const;
 
       // Size accessors
       virtual int getWidth() const { return _theTexture.width; }

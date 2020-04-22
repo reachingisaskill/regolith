@@ -30,35 +30,35 @@ namespace Regolith
   }
 
 
-  // Move Constructor
-  SpriteSheet::SpriteSheet( SpriteSheet&& sp ) :
-    Texture( std::move( sp ) ),
-    _currentSprite( std::move( sp._currentSprite ) ),
-    _rows( std::move( sp._rows ) ),
-    _columns( std::move( sp._columns ) ),
-    _numSprites( std::move( sp._numSprites ) ),
-    _spriteWidth( std::move( sp._spriteWidth ) ),
-    _spriteHeight( std::move( sp._spriteHeight ) ),
-    _spriteRect( std::move( sp._spriteRect ) )
-  {
-  }
-
-
-  // Move Assignement
-  SpriteSheet& SpriteSheet::operator=( SpriteSheet&& sp )
-  {
-    Texture::operator=( std::move( sp ) );
-
-    _currentSprite = std::move( sp._currentSprite );
-    _rows = std::move( sp._rows );
-    _columns = std::move( sp._columns );
-    _numSprites = std::move( sp._numSprites );
-    _spriteWidth = std::move( sp._spriteWidth );
-    _spriteHeight = std::move( sp._spriteHeight );
-    _spriteRect = std::move( sp._spriteRect );
-
-    return *this;
-  }
+//  // Move Constructor
+//  SpriteSheet::SpriteSheet( SpriteSheet&& sp ) :
+//    Texture( std::move( sp ) ),
+//    _currentSprite( std::move( sp._currentSprite ) ),
+//    _rows( std::move( sp._rows ) ),
+//    _columns( std::move( sp._columns ) ),
+//    _numSprites( std::move( sp._numSprites ) ),
+//    _spriteWidth( std::move( sp._spriteWidth ) ),
+//    _spriteHeight( std::move( sp._spriteHeight ) ),
+//    _spriteRect( std::move( sp._spriteRect ) )
+//  {
+//  }
+//
+//
+//  // Move Assignement
+//  SpriteSheet& SpriteSheet::operator=( SpriteSheet&& sp )
+//  {
+//    Texture::operator=( std::move( sp ) );
+//
+//    _currentSprite = std::move( sp._currentSprite );
+//    _rows = std::move( sp._rows );
+//    _columns = std::move( sp._columns );
+//    _numSprites = std::move( sp._numSprites );
+//    _spriteWidth = std::move( sp._spriteWidth );
+//    _spriteHeight = std::move( sp._spriteHeight );
+//    _spriteRect = std::move( sp._spriteRect );
+//
+//    return *this;
+//  }
 
 
   SpriteSheet::~SpriteSheet()
@@ -78,6 +78,12 @@ namespace Regolith
 
     this->setClip( _spriteRect );
     Texture::render( camera );
+  }
+
+
+  Drawable* SpriteSheet::clone() const
+  {
+    return (Drawable*) new SpriteSheet( *this );
   }
 
 

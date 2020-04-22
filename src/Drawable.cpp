@@ -41,5 +41,13 @@ namespace Regolith
   {
   }
 
+
+  Drawable* Drawable::cloneAt( Vector pos ) const
+  {
+    Drawable* temp = this->clone();
+    temp->setPosition( pos );
+    return temp;
+  }
+
 }
 
