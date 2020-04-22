@@ -3,6 +3,7 @@
 #define __REGOLITH__DRAWABLE_H__
 
 #include "Definitions.h"
+#include "Vector.h"
 
 
 namespace Regolith
@@ -19,6 +20,8 @@ namespace Regolith
 
     private:
       SDL_Renderer* _theRenderer;
+      Vector _position;
+      float _rotation;
 
     public:
       Drawable();
@@ -52,6 +55,19 @@ namespace Regolith
       // Get and Set the Renderer object
       void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
       SDL_Renderer* getRenderer() const { return _theRenderer; }
+
+
+      // Access the basic position information
+      Vector getPosition() const { return _position; }
+      void setPosition( Vector v ) { _position = v; }
+      Vector& position() { return _position; }
+
+      float getRotation() const { return _rotation; }
+      void setRotation( float f ) { _rotation = f; }
+      float& rotation() { return _rotation; }
+
+      void move( Vector v ) { _position += v; }
+      void rotate( float f ) { _rotation += f; }
 
 
       // Have to define some width and height values

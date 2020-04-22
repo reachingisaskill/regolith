@@ -8,13 +8,17 @@ namespace Regolith
 {
 
   Drawable::Drawable() :
-    _theRenderer( nullptr )
+    _theRenderer( nullptr ),
+    _position(),
+    _rotation()
   {
   }
 
 
   Drawable::Drawable( SDL_Renderer* rend ) :
-    _theRenderer( rend )
+    _theRenderer( rend ),
+    _position(),
+    _rotation()
   {
   }
 

@@ -13,6 +13,8 @@
 #include "AnimatedSprite.h"
 #include "FPSString.h"
 
+#include "Collision.h"
+
 #include "Window.h"
 #include "TextureBuilder.h"
 #include "Camera.h"

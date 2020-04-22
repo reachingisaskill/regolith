@@ -10,6 +10,12 @@ namespace Regolith
 {
   /*
    * Collision is implemented only as axis aligned bounding boxes for the current version of Regolith.
+   * 
+   * Some assumptions are made. E.g. the side with the shortest overlap is the side at which the overlap
+   * happened. This is reasonably good assumption for when onve box is much larger than the other, or
+   * when the overlap distance is much smaller than the dimensions of the box.
+   * I will (eventually) switch to a model which uses incoming delta-velocity to determine the side of 
+   * the impact.
    */
 
   // Forward declarations
@@ -26,14 +32,21 @@ namespace Regolith
   {
     friend bool collides( Drawable*, Drawable*, Contact& );
     private:
+      // Position with respect to the owning drawable object
       Vector _position;
       float _width;
       float _height;
 
     public:
+      Collision();
+
       Collision( Vector, float, float );
 
       virtual ~Collision();
+
+      Vector& position() { return _position; }
+      float& width() { return _width; }
+      float& height() { return _height; }
 
   };
 
@@ -55,6 +68,10 @@ namespace Regolith
       void set( Drawable*, Drawable*, Vector, float );
 
       void applyContact();
+
+      Vector& normal() { return _normal; }
+
+      float& overlap() { return _overlap; }
 
   };
 
