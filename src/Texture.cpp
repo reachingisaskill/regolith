@@ -19,23 +19,19 @@ namespace Regolith
 {
 
   Texture::Texture() :
-    Drawable(),
     _theTexture( { nullptr, 0, 0 } ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
-    _clip( { 0, 0, 0, 0 } ),
-    _destination( { 0, 0, 0, 0 } )
+    _clip( { 0, 0, 0, 0 } )
   {
   }
 
 
   Texture::Texture( RawTexture tex) :
-    Drawable(),
     _theTexture( tex ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
-    _clip( { 0, 0, 0, 0 } ),
-    _destination( { 0, 0, 0, 0 } )
+    _clip( { 0, 0, 0, 0 } )
   {
   }
 
@@ -57,42 +53,11 @@ namespace Regolith
   }
 
 
-  void Texture::render( Camera* camera )
+  void Texture::draw( SDL_Rect* destination )
   {
-    if ( getRenderer() == nullptr )
-      ERROR_LOG( "No renderer present!" );
-
-    if ( _theTexture.texture == nullptr )
-      ERROR_LOG( "No texture present" );
-
-    DEBUG_LOG( "Placing destination rectangle" );
-    SDL_Rect newDestination = camera->place( _destination );
-    DEBUG_STREAM << "Destination : " << newDestination.x << ", " << newDestination.y << ", " << newDestination.w << ", " << newDestination.h;
-
+    static SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
     // Render it to the window
-    SDL_RenderCopyEx( getRenderer(), _theTexture.texture, &_clip, &newDestination, _angle, nullptr, _flipFlag );
-  }
-
-
-  Drawable* Texture::clone() const
-  {
-    Texture* newTexture = new Texture( *this );
-    return (Drawable*) newTexture;
-  }
-
-
-  void Texture::setClip( SDL_Rect clip )
-  {
-    _clip = clip;
-    _destination.w = _clip.w;
-    _destination.h = _clip.h;
-  }
-
-
-  void Texture::setPosition( int x, int y )
-  {
-    _destination.x = x;
-    _destination.y = y;
+    SDL_RenderCopyEx( renderer, _theTexture.texture, &_clip, destination, _angle, nullptr, _flipFlag );
   }
 
 
@@ -124,6 +89,7 @@ namespace Regolith
   {
     _flipFlag = flip;
   }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful functions

@@ -2,10 +2,10 @@
 #ifndef __REGOLITH__TEXTURE_BUILDER_H__
 #define __REGOLITH__TEXTURE_BUILDER_H__
 
-#include "Texture.h"
-#include "TextureFactory.h"
+#include "Definitions.h"
 
-#include <SDL2/SDL.h>
+#include "Drawable.h"
+#include "ObjectFactory.h"
 
 #include <string>
 #include <json/json.h>
@@ -19,11 +19,11 @@ namespace Regolith
 
 
   // Typedefs
-  typedef std::map< std::string, TextureFactory_base* > FactoryMap;
+  typedef std::map< std::string, ObjectFactory_base* > FactoryMap;
 
 
 
-  class TextureBuilder
+  class ObjectBuilder
   {
     private:
       FactoryMap _factories;
@@ -34,11 +34,11 @@ namespace Regolith
 
     public:
 
-      TextureBuilder();
+      ObjectBuilder();
 
-      explicit TextureBuilder( SDL_Renderer* );
+      explicit ObjectBuilder( SDL_Renderer* );
 
-      virtual ~TextureBuilder();
+      virtual ~ObjectBuilder();
 
       // Configure for the current scene being loaded
       void setRenderer( SDL_Renderer* );
@@ -49,7 +49,7 @@ namespace Regolith
       const Scene* getScene() const { return _theScene; }
 
       // Add a new factory to the build system - takes ownership of data
-      void addFactory( TextureFactory_base* );
+      void addFactory( ObjectFactory_base* );
 
       // Only needs a json object containing all the relevant info
       Drawable* build( Json::Value );

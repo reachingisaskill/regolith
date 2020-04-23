@@ -36,7 +36,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Texture class. The simplest object of renderable data.
 
-  class Texture : public Drawable
+  class Texture
   {
     private:
       // Class owns this memory
@@ -44,7 +44,6 @@ namespace Regolith
       float _angle;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
-      SDL_Rect _destination;
 
     protected:
 
@@ -57,23 +56,8 @@ namespace Regolith
 
       // Fullfill the Drawable class requirements
 
-      // Return the object properties
-      virtual int getProperties() const { return OBJECT_SIMPLE; }
-
-      // For derived classes to update every frame
-      virtual void update( Uint32 ) { }
-
       // Render with the current renderer object
-      virtual void render( Camera* );
-
-      // Handle events
-      virtual void handleEvent( SDL_Event& ) {}
-
-      // Returns the collision object for the class;
-      virtual unsigned int getCollision( Collision*& ) { return 0; }
-
-      // Return a new clone of the current object. Transfers ownership of memory
-      virtual Drawable* clone() const;
+      virtual void draw( SDL_Rect* );
 
 
       // Accessors
@@ -81,10 +65,11 @@ namespace Regolith
       virtual int getHeight() const;
       virtual float getAngle() const { return _angle; }
 
-      // Set the clip around the texture
-      virtual void setClip( SDL_Rect );
 
-      virtual void setPosition( int, int );
+      // Set the clip around the texture
+      virtual void setClip( SDL_Rect c ) { _clip = c; }
+      virtual SDL_Rect getClip() { return _clip; }
+
 
       // Colour Modulation
       void setColor( Uint8, Uint8, Uint8 );

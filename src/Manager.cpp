@@ -13,7 +13,7 @@ namespace Regolith
   Manager::Manager() :
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
-    _theBuilder( new TextureBuilder() ),
+    _theBuilder( new ObjectBuilder() ),
     _scenes(),
     _fonts(),
     _title(),
@@ -23,8 +23,8 @@ namespace Regolith
     _gravityConst( 1.0 )
   {
     // Set up the provided factories
-    _theBuilder->addFactory( new SimpleFactory() );
-    _theBuilder->addFactory( new SpriteSheetFactory() );
+//    _theBuilder->addFactory( new SimpleFactory() );
+    _theBuilder->addFactory( new SpriteFactory() );
     _theBuilder->addFactory( new AnimatedFactory() );
     _theBuilder->addFactory( new FPSStringFactory() );
   }

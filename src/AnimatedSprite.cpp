@@ -8,40 +8,19 @@ namespace Regolith
 {
 
   AnimatedSprite::AnimatedSprite() :
-    SpriteSheet(),
+    Sprite(),
     _updateRate( 0 ),
     _count( 0 )
   {
   }
 
 
-  AnimatedSprite::AnimatedSprite( RawTexture tex ) :
-    SpriteSheet( tex ),
-    _updateRate( 0 ),
+  AnimatedSprite::AnimatedSprite( SpriteSheet sheet, Uint32 rate ) :
+    Sprite( sheet ),
+    _updateRate( rate ),
     _count( 0 )
   {
   }
-
-
-//  // Move Constructor
-//  AnimatedSprite::AnimatedSprite( AnimatedSprite&& ap ) :
-//    SpriteSheet( std::move( ap ) ),
-//    _updateRate( std::move( ap._updateRate ) ),
-//    _count( std::move( ap._count ) )
-//  {
-//  }
-//
-//
-//  // Move Assignement
-//  AnimatedSprite& AnimatedSprite::operator=( AnimatedSprite&& ap )
-//  {
-//    SpriteSheet::operator=( std::move( ap ) );
-//
-//    _updateRate = std::move( ap._updateRate );
-//    _count = std::move( ap._count );
-//
-//    return *this;
-//  }
 
 
   AnimatedSprite::~AnimatedSprite()
@@ -58,10 +37,10 @@ namespace Regolith
   void AnimatedSprite::update( Uint32 timestep )
   {
     _count += timestep;
-    int frame_number = this->currentSpriteNumber();
+    int frame_number = this->spriteSheet().currentSpriteNumber();
     frame_number += _count / _updateRate;
-    frame_number = frame_number % this->getNumberSprites();
-    this->setSpriteNumber( frame_number );
+    frame_number = frame_number % this->spriteSheet().getNumberSprites();
+    this->spriteSheet().setSpriteNumber( frame_number );
     _count = _count % _updateRate;
 
     DEBUG_STREAM << "AnimatedSprite : _count : " << _count << ", frame No. : " << frame_number << ", update rate : " << _updateRate;

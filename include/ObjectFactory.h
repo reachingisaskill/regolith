@@ -11,27 +11,27 @@ namespace Regolith
 {
 
   // Forward declarations
-  class TextureBuilder;
+  class ObjectBuilder;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Base class definition
-  class TextureFactory_base
+  class ObjectFactory_base
   {
-    friend class TextureBuilder;
+    friend class ObjectBuilder;
 
     private:
-      TextureBuilder* _parentBuilder;
+      ObjectBuilder* _parentBuilder;
 
     protected :
       RawTexture findRawTexture( std::string ) const;
       SDL_Renderer* getRenderer() const;
 
     public:
-      TextureFactory_base();
+      ObjectFactory_base();
 
-      virtual ~TextureFactory_base();
+      virtual ~ObjectFactory_base();
 
-      virtual const char* getTextureName() const = 0;
+      virtual const char* getObjectName() const = 0;
 
       virtual Drawable* build( Json::Value& ) const = 0;
   };
@@ -39,40 +39,40 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Provided classes
 
-  // Standard Texture
-  class SimpleFactory : public TextureFactory_base
+//  // Standard Texture
+//  class SimpleFactory : public ObjectFactory_base
+//  {
+//    private:
+//
+//    public:
+//      SimpleFactory();
+//
+//      virtual ~SimpleFactory();
+//
+//      virtual const char* getObjectName() const { return "simple_texture"; }
+//
+//      virtual Drawable* build( Json::Value& ) const;
+//  };
+
+
+  // Sprites
+  class SpriteFactory : public ObjectFactory_base
   {
     private:
 
     public:
-      SimpleFactory();
+      SpriteFactory();
 
-      virtual ~SimpleFactory();
+      virtual ~SpriteFactory();
 
-      virtual const char* getTextureName() const { return "simple_texture"; }
+      virtual const char* getObjectName() const { return "sprite"; }
 
       virtual Drawable* build( Json::Value& ) const;
   };
 
 
-  // SpriteSheets
-  class SpriteSheetFactory : public TextureFactory_base
-  {
-    private:
-
-    public:
-      SpriteSheetFactory();
-
-      virtual ~SpriteSheetFactory();
-
-      virtual const char* getTextureName() const { return "spritesheet"; }
-
-      virtual Drawable* build( Json::Value& ) const;
-  };
-
-
-  // Animated SpriteSheets
-  class AnimatedFactory : public TextureFactory_base
+  // Animated Sprites
+  class AnimatedFactory : public ObjectFactory_base
   {
     private:
 
@@ -81,14 +81,14 @@ namespace Regolith
 
       virtual ~AnimatedFactory();
 
-      virtual const char* getTextureName() const { return "animated"; }
+      virtual const char* getObjectName() const { return "animated"; }
 
       virtual Drawable* build( Json::Value& ) const;
   };
 
 
   // Updating FPS string
-  class FPSStringFactory : public TextureFactory_base
+  class FPSStringFactory : public ObjectFactory_base
   {
     private:
 
@@ -97,7 +97,7 @@ namespace Regolith
 
       virtual ~FPSStringFactory();
 
-      virtual const char* getTextureName() const { return "fps_string"; }
+      virtual const char* getObjectName() const { return "fps_string"; }
 
       virtual Drawable* build( Json::Value& ) const;
   };

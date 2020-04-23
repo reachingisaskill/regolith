@@ -3,7 +3,7 @@
 #define __REGOLITH__SCENE_H__
 
 #include "Drawable.h"
-#include "TextureBuilder.h"
+#include "ObjectBuilder.h"
 #include "Window.h"
 #include "Camera.h"
 
@@ -19,8 +19,10 @@ namespace Regolith
   typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::vector< Drawable* > ResourceList;
   typedef std::map< std::string, unsigned int > ResourceNameMap;
+  typedef std::map< std::string, unsigned int > TeamNameMap;
 
   typedef std::vector< Drawable* > ElementList;
+  typedef std::vector< ElementList > TeamsList;
 
 
   class Scene
@@ -30,11 +32,12 @@ namespace Regolith
       RawTextureMap _rawTextures;
       ResourceList _resources;
       ResourceNameMap _resourceNames;
+      TeamNameMap _teamNames;
 
       // Key components for building elements and rendering
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
-      TextureBuilder* _theBuilder;
+      ObjectBuilder* _theBuilder;
       std::string _sceneFile;
 
       // Containers storing drawable objects - the scene and the hud elements
@@ -45,11 +48,9 @@ namespace Regolith
 
       // Can be change to accelerator structures in the future
       // These do not own their memory. They are shortcut lists
-      ElementList _collisionElements;
+      TeamsList _collisionElements;
       ElementList _animatedElements;
       ElementList _inputElements;
-      // Store the player elements separately - probably don't need to do global collision detection!
-      ElementList _playerElements;
 
       // Cameras for rendering
       Camera _theCamera;
@@ -79,10 +80,10 @@ namespace Regolith
 
       // Spawn an object with the supplied ID number at the supplied position in the HUD
       // only the scene class can create HUD elements
-      void spawnHUD( unsigned int, int, int );
+      void spawnHUD( unsigned int, Vector );
     public:
       // Set the necessary parameters
-      Scene( Window*, SDL_Renderer*, TextureBuilder*, std::string );
+      Scene( Window*, SDL_Renderer*, ObjectBuilder*, std::string );
 
       // Load the scene from the specified fiel
       void load();

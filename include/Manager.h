@@ -7,7 +7,7 @@
 #include "Singleton.h"
 #include "Window.h"
 #include "Scene.h"
-#include "TextureBuilder.h"
+#include "ObjectBuilder.h"
 
 #include <vector>
 #include <map>
@@ -37,7 +37,7 @@ namespace Regolith
       Camera* _currentCamera;
 
       SDL_Renderer* _theRenderer;
-      TextureBuilder* _theBuilder;
+      ObjectBuilder* _theBuilder;
       SceneList _scenes;
       FontMap _fonts;
 
@@ -66,7 +66,7 @@ namespace Regolith
 
 
       // Return a pointer to the texture builder
-      TextureBuilder* getTextureBuilder() { return _theBuilder; }
+      ObjectBuilder* getObjectBuilder() { return _theBuilder; }
 
       // Get the pointer to the window
       SDL_Renderer* getRendererPointer() { return _theRenderer; }

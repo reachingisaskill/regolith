@@ -1,9 +1,9 @@
 
-#include "TextureBuilder.h"
+#include "ObjectBuilder.h"
 
 #include "Exception.h"
-#include "Texture.h"
-#include "SpriteSheet.h"
+#include "Drawable.h"
+#include "Sprite.h"
 #include "AnimatedSprite.h"
 #include "Manager.h"
 
@@ -13,21 +13,21 @@
 namespace Regolith
 {
 
-  TextureBuilder::TextureBuilder() :
+  ObjectBuilder::ObjectBuilder() :
     _factories(),
     _theRenderer()
   {
   }
 
 
-  TextureBuilder::TextureBuilder( SDL_Renderer* rend ) :
+  ObjectBuilder::ObjectBuilder( SDL_Renderer* rend ) :
     _factories(),
     _theRenderer( rend )
   {
   }
 
 
-  TextureBuilder::~TextureBuilder()
+  ObjectBuilder::~ObjectBuilder()
   {
     // Delete the individual factories
     for ( FactoryMap::iterator it = _factories.begin(); it != _factories.end(); ++it )
@@ -38,21 +38,21 @@ namespace Regolith
   }
 
 
-  void TextureBuilder::setRenderer( SDL_Renderer* rend )
+  void ObjectBuilder::setRenderer( SDL_Renderer* rend )
   {
     _theRenderer = rend;
   }
 
 
-  void TextureBuilder::setScene( const Scene* scene )
+  void ObjectBuilder::setScene( const Scene* scene )
   {
     _theScene = scene;
   }
 
 
-  void TextureBuilder::addFactory( TextureFactory_base* factory )
+  void ObjectBuilder::addFactory( ObjectFactory_base* factory )
   {
-    std::string name( factory->getTextureName() );
+    std::string name( factory->getObjectName() );
 
     if ( _factories.find( name ) != _factories.end() )
     {
@@ -66,17 +66,17 @@ namespace Regolith
   }
 
 
-  Drawable* TextureBuilder::build( Json::Value jsonObject )
+  Drawable* ObjectBuilder::build( Json::Value jsonObject )
   {
-    std::string object_type = jsonObject["element_type"].asString();
+    std::string object_type = jsonObject["resource_type"].asString();
     INFO_STREAM << "Building texture of type : " << object_type;
 
     FactoryMap::iterator found = _factories.find( object_type );
 
     if ( found == _factories.end() )
     {
-      ERROR_STREAM << "Texture type not found in factory list: " << object_type;
-      Exception ex( "TextureBuilder::build()", "Non-implemented build type", true );
+      ERROR_STREAM << "Object type not found in factory list: " << object_type;
+      Exception ex( "ObjectBuilder::build()", "Non-implemented build type", true );
       ex.addDetail( "TypeID", object_type );
       throw ex;
     }
@@ -86,7 +86,7 @@ namespace Regolith
 
 
 
-//  Texture* TextureBuilder::buildTexture( Texture* newTexture, Json::Value& json_data )
+//  Texture* ObjectBuilder::buildTexture( Texture* newTexture, Json::Value& json_data )
 //  {
 //
 //    // TODO: Load some clipping info...
@@ -102,7 +102,7 @@ namespace Regolith
 //  }
 //
 //
-//  Texture* TextureBuilder::buildSpriteSheet( SpriteSheet* newTexture, Json::Value& json_data )
+//  Texture* ObjectBuilder::buildSpriteSheet( SpriteSheet* newTexture, Json::Value& json_data )
 //  {
 //    int pos_x = json_data["position"][0].asInt();
 //    int pos_y = json_data["position"][1].asInt();
@@ -130,7 +130,7 @@ namespace Regolith
 //  }
 //
 //
-//  Texture* TextureBuilder::buildAnimatedSprite( AnimatedSprite* newTexture, Json::Value& json_data )
+//  Texture* ObjectBuilder::buildAnimatedSprite( AnimatedSprite* newTexture, Json::Value& json_data )
 //  {
 //    int pos_x = json_data["position"][0].asInt();
 //    int pos_y = json_data["position"][1].asInt();

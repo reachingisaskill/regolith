@@ -45,13 +45,6 @@ namespace Regolith
   }
 
 
-  void FPSString::setPosition( int x, int y )
-  {
-    _destination.x = x;
-    _destination.y = y;
-  }
-
-
   void FPSString::render( Camera* camera )
   {
     SDL_Rect newDestination = camera->place( _destination );
@@ -96,5 +89,7 @@ namespace Regolith
 
     _destination.w = _theTexture.width;
     _destination.h = _theTexture.height;
+    setWidth( _theTexture.width );
+    setHeight( _theTexture.height );
   }
 }

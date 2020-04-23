@@ -11,8 +11,7 @@ namespace Regolith
     _columns( 0 ),
     _numSprites( 0 ),
     _spriteWidth( 0 ),
-    _spriteHeight( 0 ),
-    _spriteRect()
+    _spriteHeight( 0 )
   {
   }
 
@@ -24,41 +23,9 @@ namespace Regolith
     _columns( 0 ),
     _numSprites( 0 ),
     _spriteWidth( 0 ),
-    _spriteHeight( 0 ),
-    _spriteRect()
+    _spriteHeight( 0 )
   {
   }
-
-
-//  // Move Constructor
-//  SpriteSheet::SpriteSheet( SpriteSheet&& sp ) :
-//    Texture( std::move( sp ) ),
-//    _currentSprite( std::move( sp._currentSprite ) ),
-//    _rows( std::move( sp._rows ) ),
-//    _columns( std::move( sp._columns ) ),
-//    _numSprites( std::move( sp._numSprites ) ),
-//    _spriteWidth( std::move( sp._spriteWidth ) ),
-//    _spriteHeight( std::move( sp._spriteHeight ) ),
-//    _spriteRect( std::move( sp._spriteRect ) )
-//  {
-//  }
-//
-//
-//  // Move Assignement
-//  SpriteSheet& SpriteSheet::operator=( SpriteSheet&& sp )
-//  {
-//    Texture::operator=( std::move( sp ) );
-//
-//    _currentSprite = std::move( sp._currentSprite );
-//    _rows = std::move( sp._rows );
-//    _columns = std::move( sp._columns );
-//    _numSprites = std::move( sp._numSprites );
-//    _spriteWidth = std::move( sp._spriteWidth );
-//    _spriteHeight = std::move( sp._spriteHeight );
-//    _spriteRect = std::move( sp._spriteRect );
-//
-//    return *this;
-//  }
 
 
   SpriteSheet::~SpriteSheet()
@@ -66,30 +33,25 @@ namespace Regolith
   }
 
 
-  void SpriteSheet::render( Camera* camera )
-  {
-    int sprite_x = (_currentSprite % _columns) * _spriteWidth;
-    int sprite_y = (_currentSprite / _columns) * _spriteHeight;
-
-    _spriteRect.x = sprite_x;
-    _spriteRect.y = sprite_y;
-//    _spriteRect.w = _spriteWidth;
-//    _spriteRect.h = _spriteHeight;
-
-    this->setClip( _spriteRect );
-    Texture::render( camera );
-  }
-
-
-  Drawable* SpriteSheet::clone() const
-  {
-    return (Drawable*) new SpriteSheet( *this );
-  }
-
-
   int SpriteSheet::getNumberSprites() const
   {
     return _numSprites;
+  }
+
+
+  void SpriteSheet::setSpriteNumber( int num )
+  {
+    _currentSprite = num;
+    int sprite_x = (_currentSprite % _columns) * _spriteWidth;
+    int sprite_y = (_currentSprite / _columns) * _spriteHeight;
+
+    SDL_Rect clip;
+    clip.x = sprite_x;
+    clip.y = sprite_y;
+    clip.w = _spriteWidth;
+    clip.h = _spriteHeight;
+
+    this->setClip( clip );
   }
 
 
@@ -110,8 +72,7 @@ namespace Regolith
     _spriteWidth = Texture::getWidth() / _columns;
     _spriteHeight = Texture::getHeight() / _rows;
 
-    _spriteRect.w = _spriteWidth;
-    _spriteRect.h = _spriteHeight;
+    this->setSpriteNumber( 0 );
   }
 
 }

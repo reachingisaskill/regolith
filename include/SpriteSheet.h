@@ -20,22 +20,13 @@ namespace Regolith
       int _numSprites;
       int _spriteWidth;
       int _spriteHeight;
-      SDL_Rect _spriteRect;
 
     protected:
-
-      int& currentSpriteNumber() { return _currentSprite; }
 
     public:
       SpriteSheet();
 
       explicit SpriteSheet( RawTexture );
-
-//      // Move-construct
-//      SpriteSheet( SpriteSheet&& );
-//
-//      // Move-assign
-//      SpriteSheet& operator=( SpriteSheet&& );
 
       virtual ~SpriteSheet();
 
@@ -43,16 +34,11 @@ namespace Regolith
       void configure( int, int, int number = 0 );
 
 
-      // Render with the current renderer object
-      virtual void render( Camera* );
-
-      // Return a new clone of the current object. Transfers ownership of memory
-      virtual Drawable* clone() const;
-
-
       // Sprite details
       int getNumberSprites() const;
-      void setSpriteNumber( int s ) { _currentSprite = s; }
+      void setSpriteNumber( int );
+      const int& currentSpriteNumber() { return _currentSprite; }
+
 
       int getWidth() const { return _spriteWidth; }
       int getHeight() const { return _spriteHeight; }

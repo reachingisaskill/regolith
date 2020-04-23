@@ -57,8 +57,6 @@ namespace Regolith
       virtual int getHeight() const { return _theTexture.height; }
 
 
-      void setPosition( int, int );
-
       void setFrameCount( unsigned int n ) { _limit = n; }
 
       void setFont( TTF_Font* f ) { _theFont = f; }

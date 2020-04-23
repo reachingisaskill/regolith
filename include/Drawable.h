@@ -22,6 +22,9 @@ namespace Regolith
       SDL_Renderer* _theRenderer;
       Vector _position;
       float _rotation;
+      int _team;
+      int _width;
+      int _height;
 
     protected:
       Drawable( SDL_Renderer*, Vector, float );
@@ -29,7 +32,7 @@ namespace Regolith
     public:
       Drawable();
 
-      Drawable( SDL_Renderer* );
+      Drawable( int, int, float r = 0.0 );
 
       Drawable( const Drawable& ) = default;
       Drawable( Drawable&& ) = default;
@@ -78,10 +81,13 @@ namespace Regolith
       void move( Vector v ) { _position += v; }
       void rotate( float f ) { _rotation += f; }
 
+      void setTeam( int t ) { _team = t; }
+      int getTeam() const { return _team; }
 
-      // Have to define some width and height values
-      virtual int getWidth() const { return 0; }
-      virtual int getHeight() const { return 0; }
+      int getWidth() const { return _width; }
+      void setWidth( int w ) { _width = w; }
+      int getHeight() const { return _height; }
+      void setHeight( int h ) { _height = h; }
   };
 
 }

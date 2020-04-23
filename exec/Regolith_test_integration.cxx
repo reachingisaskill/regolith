@@ -1,4 +1,3 @@
-#define __DEBUG_OFF__
 
 #include "regolith.h"
 
@@ -35,13 +34,11 @@ int main( int, char** )
   {
     FAILURE_LOG( ex.what() );
     std::cerr << ex.elucidate();
-    return 0;
   }
   catch ( std::exception& ex )
   {
     FAILURE_LOG( "Unexpected exception occured:" );
     FAILURE_STREAM << ex.what();
-    return 0;
   }
 
   logtastic::stop();

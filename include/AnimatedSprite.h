@@ -4,14 +4,14 @@
 
 #include "Definitions.h"
 
-#include "SpriteSheet.h"
+#include "Sprite.h"
 
 
 namespace Regolith
 {
   class Camera;
 
-  class AnimatedSprite : public SpriteSheet
+  class AnimatedSprite : public Sprite
   {
     private:
       Uint32 _updateRate;
@@ -22,13 +22,8 @@ namespace Regolith
     public:
       AnimatedSprite();
 
-      AnimatedSprite( RawTexture );
-
-//      // Move-construct
-//      AnimatedSprite( AnimatedSprite&& );
-//
-//      // Move-assign
-//      AnimatedSprite& operator=( AnimatedSprite&& );
+      // Sprite sheet and update period
+      AnimatedSprite( SpriteSheet, Uint32 );
 
       virtual ~AnimatedSprite();
 
@@ -39,9 +34,6 @@ namespace Regolith
       // Update with time in ms
       virtual void update( Uint32 );
 
-      // Render with the current renderer object
-      // Use the SpriteSheet variant
-//      virtual void render( Camera* );
 
       // Return a clone of the current object. Transfers ownership of memory
       Drawable* clone() const;

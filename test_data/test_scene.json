@@ -32,17 +32,18 @@
   [
     {
       "resource_name" : "background",
-      "element_type" : "simple_texture",
+      "resource_type" : "sprite",
       "texture_name" : "background_texture"
     },
     {
       "resource_name" : "the_dot",
-      "element_type" : "simple_texture",
+      "resource_type" : "sprite",
       "texture_name" : "dot_texture"
     },
     {
       "resource_name" : "the_spritesheet",
-      "element_type" : "spritesheet_test",
+      "resource_type" : "sprite",
+      "texture_name" : "spritesheet_test",
       "number_rows" : 2,
       "number_columns" : 2,
       "number_used" : 4,
@@ -50,7 +51,7 @@
     },
     {
       "resource_name" : "the_animated_spritesheet",
-      "element_type" : "animated",
+      "resource_type" : "animated",
       "texture_name" : "spritesheet_test",
       "update_rate" : 1000,
       "number_rows" : 2,
@@ -60,7 +61,7 @@
     },
     {
       "resource_name" : "fps_text",
-      "element_type" : "fps_string",
+      "resource_type" : "fps_string",
       "font" : "default",
       "frame_count" : 100
     }
@@ -82,7 +83,7 @@
     [
       {
         "resource_name" : "the_dot",
-        "position" : [ 280, 150 ]
+        "position" : [ 380, 150 ]
       },
       {
         "resource_name" : "the_spritesheet",

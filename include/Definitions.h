@@ -30,6 +30,16 @@ namespace Regolith
   };
 
 
+  enum ObjectTeam
+  {
+    TEAM_ENVIRONMENT,
+    TEAM_PLAYER,
+    TEAM_NONPLAYER,
+    TEAM_ENEMY,
+    TEAM_TOTAL
+  };
+
+
   enum GameEvent
   {
     REGOLITH_SCENE_END,

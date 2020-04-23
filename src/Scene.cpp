@@ -2,6 +2,7 @@
 #include "Scene.h"
 
 #include "Exception.h"
+#include "Utilities.h"
 #include "Manager.h"
 
 #include "logtastic.h"
@@ -13,10 +14,11 @@ namespace Regolith
 {
 
 
-  Scene::Scene( Window* window, SDL_Renderer* renderer, TextureBuilder* build, std::string json_file ) :
+  Scene::Scene( Window* window, SDL_Renderer* renderer, ObjectBuilder* build, std::string json_file ) :
     _rawTextures(),
     _resources(),
     _resourceNames(),
+    _teamNames(),
     _theWindow( window ),
     _theRenderer( renderer ),
     _theBuilder( build ),
@@ -64,14 +66,14 @@ namespace Regolith
     }
     catch ( std::ios_base::failure& f )
     {
-      Exception ex( "Scene::buildFromJson()", "IFSteam failure", false );
+      Exception ex( "Scene::_loadConfig()", "IFSteam failure", false );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", f.what() );
       throw ex;
     }
     catch ( std::runtime_error& rt )
     {
-      Exception ex( "Scene::buildFromJson()", "Json parsing failure" );
+      Exception ex( "Scene::_loadConfig()", "Json parsing failure" );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
@@ -109,23 +111,55 @@ namespace Regolith
   }
 
 
-  void Scene::_loadResources( Json::Value& json_data )
+  void Scene::_loadResources( Json::Value& resources )
   {
-    // Setup out the Texture objects that use the SDL_Texture data
+    INFO_LOG( "Configuring default teams: \"environment\" & \"player_01\"" );
+    // Create the default teams - environment & player_01
+    _teamNames[ "environment" ] = 0u;
+    _collisionElements.push_back( ElementList() );
+    _teamNames[ "player_01" ] = 1u;
+    _collisionElements.push_back( ElementList() );
+
+    // Setup out the resources that use the SDL_Texture data
     try
     {
       // Load all the individual resource objects
-      Json::Value resources = json_data["resources"];
+      INFO_LOG( "Loading resource objects" );
       Json::ArrayIndex resources_size = resources.size();
       for ( Json::ArrayIndex i = 0; i != resources_size; ++i )
       {
         try
         {
-          Drawable* newResource =  _theBuilder->build( resources[i] );
+          Utilities::validateJson( resources[i], "resource_name", Utilities::JSON_TYPE_STRING );
+
           std::string resource_name = resources[i]["resource_name"].asString();
+          DEBUG_STREAM << "  Building resource: " << resource_name;
+          Drawable* newResource =  _theBuilder->build( resources[i] );
 
           _resources.push_back( newResource );
           _resourceNames[ resource_name ] = _resources.size() - 1; // Save the ID number
+
+          // Handle the team names
+          std::string team_name;
+          // If one is provided
+          if ( resources[i].isMember( "team_name" ) )
+            team_name = resources[i]["team_name"].asString();
+          else // Else assume environment
+            team_name = "environment";
+
+          DEBUG_STREAM << "  Resource Team Name : " << team_name;
+          // See if its already been used.
+          if ( _teamNames.find( team_name ) == _teamNames.end() )
+          {
+            // Create it otherwise
+            _collisionElements.push_back( ElementList() );
+            _teamNames[ team_name ] = _collisionElements.size() - 1;
+          }
+
+          // Set the resource team ID
+          DEBUG_LOG( "Setting team name" );
+          int team_id = _teamNames[ team_name ];
+          newResource->setTeam( team_id );
         }
         catch ( Exception& ex )
         {
@@ -145,7 +179,7 @@ namespace Regolith
     }
     catch ( std::runtime_error& rt )
     {
-      Exception ex( "Scene::buildFromJson()", "Json reading failure" );
+      Exception ex( "Scene::_loadResources()", "Json reading failure" );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
@@ -155,11 +189,15 @@ namespace Regolith
 
   void Scene::_loadCameras( Json::Value& json_data )
   {
+    Utilities::validateJson( json_data, "start_position", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_INTEGER );
+
     try
     {
       // Configure the camera objects
-      int camera_x = json_data["position"][0].asInt();
-      int camera_y = json_data["position"][1].asInt();
+      int camera_x = json_data["start_position"][0].asInt();
+      int camera_y = json_data["start_position"][1].asInt();
       int camera_width = json_data["width"].asInt();
       int camera_height = json_data["height"].asInt();
 
@@ -182,6 +220,9 @@ namespace Regolith
 
   void Scene::_loadCaches( Json::Value& json_data )
   {
+    Utilities::validateJson( json_data, "background", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "scene_elements", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "hud_elements", Utilities::JSON_TYPE_ARRAY );
     try
     {
       // Load the scene background
@@ -197,10 +238,14 @@ namespace Regolith
 
 
       // Load the Scene Elements
+      INFO_LOG( "Building the scene" );
       Json::Value scene_elements = json_data["scene_elements"];
       Json::ArrayIndex scene_elements_size = scene_elements.size();
       for ( Json::ArrayIndex i = 0; i != scene_elements_size; ++i )
       {
+        Utilities::validateJson( scene_elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( scene_elements[i], "position", Utilities::JSON_TYPE_ARRAY );
+
         // Load the necessary info
         std::string resource_name = scene_elements[i]["resource_name"].asString();
         int x = scene_elements[i]["position"][0].asInt();
@@ -221,14 +266,18 @@ namespace Regolith
       }
 
       // Load the HUD Elements
+      INFO_LOG( "Building the HUD" );
       Json::Value hud_elements = json_data["hud_elements"];
       Json::ArrayIndex hud_elements_size = hud_elements.size();
       for ( Json::ArrayIndex i = 0; i != hud_elements_size; ++i )
       {
+        Utilities::validateJson( hud_elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( hud_elements[i], "position", Utilities::JSON_TYPE_ARRAY );
+
         // Load the necessary info
         std::string resource_name = hud_elements[i]["resource_name"].asString();
-        int x = hud_elements[i]["position"][0].asInt();
-        int y = hud_elements[i]["position"][1].asInt();
+        float x = hud_elements[i]["position"][0].asFloat();
+        float y = hud_elements[i]["position"][1].asFloat();
 
         // Check that the resource exists
         if ( _resourceNames.find( resource_name ) == _resourceNames.end() )
@@ -240,7 +289,7 @@ namespace Regolith
 
         // Determine the ID number and spawn the element
         unsigned int id_number = _resourceNames[ resource_name ];
-        this->spawnHUD( id_number, x, y );
+        this->spawnHUD( id_number, Vector( x, y ) );
       }
     }
     catch ( Exception& ex )
@@ -258,7 +307,7 @@ namespace Regolith
     }
     catch ( std::runtime_error& rt )
     {
-      Exception ex( "Scene::buildFromJson()", "Json reading failure" );
+      Exception ex( "Scene::_loadCaches()", "Json reading failure" );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
@@ -272,17 +321,53 @@ namespace Regolith
   void Scene::buildFromJson()
   {
     // Tell the builder who's using it
+    INFO_STREAM <<  "Building Scene from json file: " << _sceneFile;
     _theBuilder->setScene( this );
+
+    INFO_LOG( "Builder Configured" );
+    INFO_LOG( "Loading configuration data" );
 
     Json::Value json_data = this->_loadConfig();
 
+    if ( ! json_data.isMember( "textures" ) )
+    {
+      FAILURE_LOG( "Could not find texture list in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No texture member found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Loading textures" );
     this->_loadTextures( json_data["textures"] );
 
+    if ( ! json_data.isMember( "resources" ) )
+    {
+      FAILURE_LOG( "Could not find resource list in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No resource member found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Loading resources" );
     this->_loadResources( json_data["resources"] );
 
-    this->_loadCameras( json_data["cameras"] );
-
+    if ( ! json_data.isMember( "elements" ) )
+    {
+      FAILURE_LOG( "Could not find elements data in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No elements member found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Building caches" );
     this->_loadCaches( json_data["elements"] );
+
+    if ( ! json_data.isMember( "cameras" ) )
+    {
+      FAILURE_LOG( "Could not find cameras data in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No cameras member found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Loading cameras" );
+    this->_loadCameras( json_data["cameras"] );
   }
 
 
@@ -468,61 +553,67 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Spawn functions to dynamically place elements in the scene and HUD
 
-  void Scene::spawnHUD( unsigned int, int, int )
+  void Scene::spawnHUD( unsigned int id, Vector vec )
   {
+    Drawable* newElement = _resources[id]->clone();
+    newElement->setPosition( vec );
+    _hudElements.push_back( newElement );
 
-//        INFO_STREAM << "Resource properties: " << newTexture->getProperties();
-//        if ( newElement->getProperties() & OBJECT_ANIMATED )
-//        {
-//          _animated_elements.push_back( newElement );
-//        }
-//        if ( newElement->getProperties() & OBJECT_HAS_INPUT )
-//        {
-//          _input_elements.push_back( newElement );
-//        }
-//
-//        // HUD Elements not allowed collision
+    INFO_STREAM << "Spawning HUD resource, properties: " << newElement->getProperties();
+
+    if ( newElement->getProperties() & OBJECT_ANIMATED )
+    {
+      _animatedElements.push_back( newElement );
+    }
+    if ( newElement->getProperties() & OBJECT_HAS_INPUT )
+    {
+      _inputElements.push_back( newElement );
+    }
+    // HUD Elements not allowed collision
   }
 
 
-  void Scene::spawn( unsigned int )
+  void Scene::spawn( unsigned int id )
   {
+    Drawable* newElement = _resources[id]->clone();
+    _sceneElements.push_back( newElement );
 
+    INFO_STREAM << "Spawning resource, properties: " << newElement->getProperties();
 
-//        INFO_STREAM << "Resource properties: " << newTexture->getProperties();
-//        if ( newElement->getProperties() & OBJECT_ANIMATED )
-//        {
-//          _animated_elements.push_back( newElement );
-//        }
-//        if ( newElement->getProperties() & OBJECT_HAS_INPUT )
-//        {
-//          _input_elements.push_back( newElement );
-//        }
-//        if ( newElement->getProperties() & OBJECT_HAS_COLLISION )
-//        {
-//          _collision_elements.push_back( newElement );
-//        }
+    if ( newElement->getProperties() & OBJECT_ANIMATED )
+    {
+      _animatedElements.push_back( newElement );
+    }
+    if ( newElement->getProperties() & OBJECT_HAS_INPUT )
+    {
+      _inputElements.push_back( newElement );
+    }
+    if ( newElement->getProperties() & OBJECT_HAS_COLLISION )
+    {
+      _collisionElements[ newElement->getTeam() ].push_back( newElement );
+    }
 
   }
 
 
-  void Scene::spawnAt( unsigned int, Vector )
+  void Scene::spawnAt( unsigned int id, Vector vec )
   {
+    Drawable* newElement = _resources[id]->cloneAt( vec );
+    _sceneElements.push_back( newElement );
 
-
-//        INFO_STREAM << "Resource properties: " << newTexture->getProperties();
-//        if ( newElement->getProperties() & OBJECT_ANIMATED )
-//        {
-//          _animated_elements.push_back( newElement );
-//        }
-//        if ( newElement->getProperties() & OBJECT_HAS_INPUT )
-//        {
-//          _input_elements.push_back( newElement );
-//        }
-//        if ( newElement->getProperties() & OBJECT_HAS_COLLISION )
-//        {
-//          _collision_elements.push_back( newElement );
-//        }
+    INFO_STREAM << "Spawning resource at " << vec << ", properties: " << newElement->getProperties();
+    if ( newElement->getProperties() & OBJECT_ANIMATED )
+    {
+      _animatedElements.push_back( newElement );
+    }
+    if ( newElement->getProperties() & OBJECT_HAS_INPUT )
+    {
+      _inputElements.push_back( newElement );
+    }
+    if ( newElement->getProperties() & OBJECT_HAS_COLLISION )
+    {
+      _collisionElements[ newElement->getTeam() ].push_back( newElement );
+    }
 
   }
 
