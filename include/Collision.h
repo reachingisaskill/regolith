@@ -48,6 +48,8 @@ namespace Regolith
       float& width() { return _width; }
       float& height() { return _height; }
 
+      virtual Collision* clone() const;
+
   };
 
 

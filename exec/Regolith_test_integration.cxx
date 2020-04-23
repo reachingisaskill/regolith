@@ -16,10 +16,11 @@ int main( int, char** )
   logtastic::addLogFile( "tests_integration.log" );
   logtastic::start( "Regolith - Integration Test", REGOLITH_VERSION_NUMBER );
 
+  INFO_LOG( "Initialising the manager" );
+  Manager* man = Manager::createInstance();
+
   try
   {
-    INFO_LOG( "Initialising the manager" );
-    Manager* man = Manager::createInstance();
     man->init( test_config );
 
     INFO_LOG( "Starting rendering loop" );
@@ -41,6 +42,7 @@ int main( int, char** )
     FAILURE_STREAM << ex.what();
   }
 
+  Manager::killInstance();
   logtastic::stop();
   return 0;
 }

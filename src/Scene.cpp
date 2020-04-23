@@ -35,6 +35,51 @@ namespace Regolith
   }
 
 
+  Scene::~Scene()
+  {
+    INFO_LOG( "Destroying Scene" );
+    INFO_LOG( "Clearing caches" );
+    _collisionElements.clear();
+    _animatedElements.clear();
+    _inputElements.clear();
+
+    INFO_LOG( "Deleting spawned objects" );
+    for ( ElementList::iterator it = _hudElements.begin(); it != _hudElements.end(); ++it )
+    {
+      delete (*it);
+    }
+    _hudElements.clear();
+
+    for ( ElementList::iterator it = _sceneElements.begin(); it != _sceneElements.end(); ++it )
+    {
+      delete (*it);
+    }
+    _sceneElements.clear();
+
+    delete _background;
+    _background = nullptr;
+
+    INFO_LOG( "Deleting resources" );
+    for ( ResourceList::iterator it = _resources.begin(); it != _resources.end(); ++it )
+    {
+      delete (*it);
+    }
+    _resources.clear();
+
+
+    _teamNames.clear();
+    _resourceNames.clear();
+
+
+    INFO_LOG( "Deleting raw texture data" );
+    for ( RawTextureMap::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
+    {
+      SDL_DestroyTexture( it->second.texture );
+    }
+    _rawTextures.clear();
+  }
+
+
   void Scene::load()
   {
     this->buildFromJson();
@@ -229,7 +274,7 @@ namespace Regolith
       INFO_LOG( "Building the background" );
       std::string background_resource = json_data["background"].asString();
       unsigned int id_number = _resourceNames[ background_resource ];
-      _background = _resources[ id_number ];
+      _background = _resources[ id_number ]->clone();
 
       if ( _background->getProperties() & OBJECT_ANIMATED )
       {

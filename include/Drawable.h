@@ -21,18 +21,25 @@ namespace Regolith
     private:
       SDL_Renderer* _theRenderer;
       Vector _position;
+      Vector _velocity;
+      Vector _force;
       float _rotation;
       int _team;
       int _width;
       int _height;
+      float _mass;
+      float _inverseMass;
 
     protected:
       Drawable( SDL_Renderer*, Vector, float );
 
+      // Performs the movement integration step
+      void step( float );
+
     public:
       Drawable();
 
-      Drawable( int, int, float r = 0.0 );
+      Drawable( int, int, float r = 0.0, float m = 0.0 );
 
       Drawable( const Drawable& ) = default;
       Drawable( Drawable&& ) = default;
@@ -74,6 +81,12 @@ namespace Regolith
       void setPosition( Vector v ) { _position = v; }
       Vector& position() { return _position; }
 
+      Vector getVelocity() const { return _velocity; }
+      void setVelocity( Vector v ) { _velocity = v; }
+      Vector& velocity() { return _velocity; }
+
+      void applyForce( Vector f ) { _force += f; }
+
       float getRotation() const { return _rotation; }
       void setRotation( float f ) { _rotation = f; }
       float& rotation() { return _rotation; }
@@ -88,6 +101,10 @@ namespace Regolith
       void setWidth( int w ) { _width = w; }
       int getHeight() const { return _height; }
       void setHeight( int h ) { _height = h; }
+
+      float getMass() const { return _mass; }
+      void setMass( float );
+      bool isMovable() const { return _inverseMass < epsilon; }
   };
 
 }

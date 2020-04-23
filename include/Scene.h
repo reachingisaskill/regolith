@@ -85,6 +85,9 @@ namespace Regolith
       // Set the necessary parameters
       Scene( Window*, SDL_Renderer*, ObjectBuilder*, std::string );
 
+      // Remove all the cached data and clean up
+      ~Scene();
+
       // Load the scene from the specified fiel
       void load();
 

@@ -4,7 +4,9 @@
 
 #include "Definitions.h"
 
+#include "Drawable.h"
 #include "SpriteSheet.h"
+#include "Collision.h"
 
 
 namespace Regolith
@@ -16,6 +18,7 @@ namespace Regolith
     private:
       SpriteSheet _spriteSheet;
       SDL_Rect _destination;
+      Collision* _collision;
 
     protected:
 
@@ -24,11 +27,13 @@ namespace Regolith
 
       explicit Sprite( SpriteSheet );
 
+      Sprite( const Sprite& );
+
       virtual ~Sprite();
 
 
       // Return the object properties
-      virtual int getProperties() const { return OBJECT_SIMPLE; }
+      virtual int getProperties() const;
 
       // For derived classes to update every frame
       virtual void update( Uint32 ) { }
@@ -40,11 +45,13 @@ namespace Regolith
       virtual void handleEvent( SDL_Event& ) {}
 
       // Returns the collision object for the class;
-      virtual unsigned int getCollision( Collision*& ) { return 0; }
+      virtual unsigned int getCollision( Collision*& );
 
       // Return a new clone of the current object. Transfers ownership of memory
       virtual Drawable* clone() const;
 
+
+      void setCollision( Collision* col ) { _collision = col; }
 
       // Sprite details
       SpriteSheet& spriteSheet() { return _spriteSheet; }

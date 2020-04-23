@@ -38,7 +38,9 @@
     {
       "resource_name" : "the_dot",
       "resource_type" : "sprite",
-      "texture_name" : "dot_texture"
+      "texture_name" : "dot_texture",
+      "collision" : "default",
+      "mass" : 0.0
     },
     {
       "resource_name" : "the_spritesheet",

@@ -90,6 +90,7 @@ namespace Regolith
 
       _currentScene->resolveCollisions();
 
+
       SDL_SetRenderDrawColor( _theRenderer, _defaultColor.r, _defaultColor.g, _defaultColor.b, _defaultColor.a );
       SDL_RenderClear( _theRenderer );
 

@@ -177,6 +177,12 @@ namespace Regolith
   }
 
 
+  Collision* Collision::clone() const
+  {
+    return new Collision( *this );
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Contact class member functions
 

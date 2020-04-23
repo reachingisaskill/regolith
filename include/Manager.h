@@ -48,7 +48,7 @@ namespace Regolith
       Uint32 _eventStartIndex;
       SDL_Event _gameEvents[REGOLITH_EVENT_TOTAL];
 
-      float _gravityConst;
+      Vector _gravityConst;
 
 
     protected:
@@ -102,7 +102,7 @@ namespace Regolith
       void raiseEvent( GameEvent );
 
       // Return the constant g
-      inline float getGravity() { return _gravityConst; }
+      inline Vector getGravity() { return _gravityConst; }
   };
 
 }

@@ -26,6 +26,11 @@ namespace Regolith
       RawTexture findRawTexture( std::string ) const;
       SDL_Renderer* getRenderer() const;
 
+      // Helper function to build the Drawable base class
+      void buildDrawable( Drawable*, Json::Value& ) const;
+
+      Collision* buildCollision( Json::Value& ) const;
+
     public:
       ObjectFactory_base();
 

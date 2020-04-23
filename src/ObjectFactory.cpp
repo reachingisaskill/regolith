@@ -39,6 +39,61 @@ namespace Regolith
   }
 
 
+  void ObjectFactory_base::buildDrawable( Drawable* object, Json::Value& json_data ) const
+  {
+
+    // Set the default position
+    Vector pos;
+    if ( json_data.isMember( "position" ) )
+    {
+      float pos_x = json_data["position"][0].asFloat();
+      float pos_y = json_data["position"][1].asFloat();
+      pos = Vector( pos_x, pos_y );
+    }
+    else
+      pos = Vector( 0.0, 0.0 );
+
+
+    // Does the object have mass?
+    float mass = 0.0;
+    if ( json_data.isMember( "mass" ) )
+    {
+      Utilities::validateJson( json_data, "mass", Utilities::JSON_TYPE_FLOAT );
+      mass = std::fabs( json_data["mass"].asFloat() );
+    }
+
+
+    // Is there a default velocity
+    Vector velocity( 0.0, 0.0 );
+    if ( json_data.isMember( "velocity" ) && json_data["velocity"].isArray() )
+    {
+      velocity.x() = json_data["velocity"][0].asFloat();
+      velocity.y() = json_data["velocity"][1].asFloat();
+    }
+
+
+    object->setPosition( pos );
+    object->setMass( mass );
+    object->setVelocity( velocity );
+    object->setRenderer( getRenderer() );
+  }
+
+
+  Collision* ObjectFactory_base::buildCollision( Json::Value& collision_data ) const
+  {
+    // Set the collision data
+    Utilities::validateJson( collision_data, "position", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( collision_data, "width", Utilities::JSON_TYPE_FLOAT );
+    Utilities::validateJson( collision_data, "height", Utilities::JSON_TYPE_FLOAT );
+
+    float col_x = collision_data["position"][0].asFloat();
+    float col_y = collision_data["position"][1].asFloat();
+
+    Collision* collision = new Collision( Vector( col_x, col_y ), collision_data["width"].asFloat(), collision_data["height"].asFloat() );
+    return collision;
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //  // Standard textures
 //  SimpleFactory::SimpleFactory()
@@ -61,7 +116,6 @@ namespace Regolith
 //
 //    newTexture->setClip( { 0, 0, newTexture->getWidth(), newTexture->getHeight() } );
 //    newTexture->setPosition( pos_x, pos_y );
-//    newTexture->setRenderer( getRenderer() );
 //
 //    return newTexture;
 //  }
@@ -82,6 +136,7 @@ namespace Regolith
 
   Drawable* SpriteFactory::build( Json::Value& json_data ) const
   {
+    DEBUG_LOG( "Building Sprite" );
     Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
 
     std::string texture_name = json_data["texture_name"].asString();
@@ -89,15 +144,6 @@ namespace Regolith
 
     SpriteSheet sheet( texture );
 
-    Vector pos;
-    if ( json_data.isMember( "position" ) )
-    {
-      float pos_x = json_data["position"][0].asFloat();
-      float pos_y = json_data["position"][1].asFloat();
-      pos = Vector( pos_x, pos_y );
-    }
-    else
-      pos = Vector( 0.0, 0.0 );
 
     if ( json_data.isMember( "number_rows" ) && json_data.isMember( "number_columns" ) )
     {
@@ -126,9 +172,25 @@ namespace Regolith
       sheet.setSpriteNumber( start_num );
     }
 
+    // Configure the default collision
+    Collision* collision = nullptr;
+    if ( json_data.isMember( "collision" ) )
+    {
+      if ( json_data["collision"].isString() && json_data["collision"].asString() == "default" )
+      {
+        DEBUG_LOG( "Configuring default collision for sprite" );
+        collision = new Collision( Vector( 0.0, 0.0 ), sheet.getWidth(), sheet.getHeight() );
+      }
+      else if ( json_data["collision"].isObject() )
+      {
+        collision = buildCollision( json_data["collision"] );
+      }
+    }
+
     Sprite* newSprite = new Sprite( sheet );
-    newSprite->setPosition( pos );
-    newSprite->setRenderer( getRenderer() );
+    newSprite->setCollision( collision );
+
+    buildDrawable( newSprite, json_data );
 
     return newSprite;
   }
@@ -158,17 +220,6 @@ namespace Regolith
 
     SpriteSheet sheet( texture );
 
-    Vector pos;
-    if ( json_data.isMember( "position" ) )
-    {
-      float pos_x = json_data["position"][0].asFloat();
-      float pos_y = json_data["position"][1].asFloat();
-      pos = Vector( pos_x, pos_y );
-    }
-    else
-      pos = Vector( 0.0, 0.0 );
-
-
     int num_rows = json_data["number_rows"].asInt();
     int num_cols = json_data["number_columns"].asInt();
     int num_used;
@@ -190,11 +241,29 @@ namespace Regolith
       sheet.setSpriteNumber( start_num );
     }
 
+    // Refresh timing
     int update_rate = json_data["update_rate"].asInt();
 
+    // Configure the default collision
+    Collision* collision = nullptr;
+    if ( json_data.isMember( "collision" ) )
+    {
+      if ( json_data["collision"].isString() && json_data["collision"].asString() == "default" )
+      {
+        DEBUG_LOG( "Configuring default collision for sprite" );
+        collision = new Collision( Vector( 0.0, 0.0 ), sheet.getWidth(), sheet.getHeight() );
+      }
+      else if ( json_data["collision"].isObject() )
+      {
+        collision = buildCollision( json_data["collision"] );
+      }
+    }
+
+
     AnimatedSprite* newSprite = new AnimatedSprite( sheet, update_rate );
-    newSprite->setPosition( pos );
-    newSprite->setRenderer( getRenderer() );
+    newSprite->setCollision( collision );
+
+    buildDrawable( newSprite, json_data );
 
     return newSprite;
   }
@@ -259,12 +328,11 @@ namespace Regolith
     FPSString* newSprite = new FPSString();
 
     newSprite->setFrameCount( frameCount );
-    newSprite->setPosition( pos );
     newSprite->setFont( font );
     newSprite->setColor( color );
-    newSprite->setRenderer( getRenderer() );
-
     newSprite->updateString();
+
+    buildDrawable( newSprite, json_data );
 
     return newSprite;
   }
