@@ -9,7 +9,12 @@
       },
       {
         "name" : "dot_texture",
-        "path" : "test_data/test_ball.png"
+        "path" : "test_data/test_ball.png",
+        "colour_key" : [ 0, 255, 255 ]
+      },
+      {
+        "name" : "ground_texture",
+        "path" : "test_data/test_ground.png"
       },
       {
         "name" : "spritesheet_test",
@@ -36,11 +41,19 @@
       "texture_name" : "background_texture"
     },
     {
+      "resource_name" : "platform",
+      "resource_type" : "sprite",
+      "texture_name" : "ground_texture",
+      "collision" : "default",
+      "mass" : 0.0
+    },
+    {
       "resource_name" : "the_dot",
       "resource_type" : "sprite",
       "texture_name" : "dot_texture",
       "collision" : "default",
-      "mass" : 0.0
+      "mass" : 1.0,
+      "team_name" : "npc"
     },
     {
       "resource_name" : "the_spritesheet",
@@ -106,6 +119,14 @@
       {
         "resource_name" : "the_animated_spritesheet",
         "position" : [ 250, 300 ]
+      },
+      {
+        "resource_name" : "platform",
+        "position" : [ -100, 1000 ]
+      },
+      {
+        "resource_name" : "platform",
+        "position" : [ 1100, 1000 ]
       }
     ],
 

@@ -35,7 +35,9 @@ namespace Regolith
       virtual ~FPSString();
 
       // Specify the properties of the object. (Moving, animated, collision, etc)
-      virtual int getProperties() const { return OBJECT_ANIMATED; }
+      virtual bool hasCollision() const { return false; }
+      virtual bool hasInput() const { return false; }
+      virtual bool hasAnimation() const { return true; }
 
       // Perform the steps to call SDL_RenderCopy, etc
       virtual void render( Camera* );

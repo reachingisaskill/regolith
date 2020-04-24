@@ -46,6 +46,11 @@ namespace Regolith
             break;
           case SDL_WINDOWEVENT :
             _currentWindow->handleEvent( e );
+
+            if ( e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED )
+            {
+              _currentCamera->updateScale( _currentWindow->getWidth(), _currentWindow->getHeight() );
+            }
             break;
           case SDL_KEYDOWN :
             if ( e.key.keysym.sym == SDLK_RETURN )

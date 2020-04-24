@@ -44,6 +44,8 @@ namespace Regolith
     _count = _count % _updateRate;
 
     DEBUG_STREAM << "AnimatedSprite : _count : " << _count << ", frame No. : " << frame_number << ", update rate : " << _updateRate;
+
+    this->step( timestep );
   }
 
 

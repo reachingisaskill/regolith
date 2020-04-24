@@ -49,13 +49,16 @@ namespace Regolith
       virtual ~Drawable();
 
       // Specify the properties of the object. (Moving, animated, collision, etc)
-      virtual int getProperties() const = 0;
+//      virtual int getProperties() const = 0;
+      virtual bool hasCollision() const = 0;
+      virtual bool hasInput() const = 0;
+      virtual bool hasAnimation() const = 0;
 
       // Perform the steps to call SDL_RenderCopy, etc
       virtual void render( Camera* ) = 0;
 
       // Update the objects behaviour based on the provided timestep
-      virtual void update( Uint32 ) = 0;
+      virtual void update( Uint32 t ) { this->step( t ); }
 
       // Update the objects behaviour based on the provided timestep
       virtual void handleEvent( SDL_Event& ) = 0;
@@ -76,35 +79,44 @@ namespace Regolith
       SDL_Renderer* getRenderer() const { return _theRenderer; }
 
 
-      // Access the basic position information
+      // Position
       Vector getPosition() const { return _position; }
       void setPosition( Vector v ) { _position = v; }
       Vector& position() { return _position; }
 
+      // Velocity
       Vector getVelocity() const { return _velocity; }
       void setVelocity( Vector v ) { _velocity = v; }
+      void addVelocity( Vector v ) { _velocity += v; }
       Vector& velocity() { return _velocity; }
 
+      // Force
       void applyForce( Vector f ) { _force += f; }
 
+      // Rotation
       float getRotation() const { return _rotation; }
       void setRotation( float f ) { _rotation = f; }
       float& rotation() { return _rotation; }
 
+      // Incremental movement
       void move( Vector v ) { _position += v; }
       void rotate( float f ) { _rotation += f; }
 
+      // Teams
       void setTeam( int t ) { _team = t; }
       int getTeam() const { return _team; }
 
+      // Dimensions
       int getWidth() const { return _width; }
       void setWidth( int w ) { _width = w; }
       int getHeight() const { return _height; }
       void setHeight( int h ) { _height = h; }
 
+      // Mass/inertia
       float getMass() const { return _mass; }
+      float getInverseMass() const { return _inverseMass; }
       void setMass( float );
-      bool isMovable() const { return _inverseMass < epsilon; }
+      bool isMovable() const { return _inverseMass >= epsilon; }
   };
 
 }

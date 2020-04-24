@@ -1,5 +1,8 @@
+#define __DEBUG_OFF__
 
 #include "Collision.h"
+
+#include "Manager.h"
 
 #include "logtastic.h"
 
@@ -206,6 +209,30 @@ namespace Regolith
 
   void Contact::applyContact()
   {
+    static Manager* man = Manager::getInstance();
+    float invM1 = _object1->getInverseMass();
+    float invM2 = _object2->getInverseMass();
+    float totalInvM = invM1 + invM2;
+
+    if ( totalInvM < epsilon ) return; // Both immovable objects!
+
+    // Move objects out of collision weighted by their inverse mass
+    Vector overlapVector = _normal*_overlap;
+    _object1->move( -overlapVector * (invM1 / totalInvM) );
+    _object2->move( overlapVector * (invM2 / totalInvM) );
+
+    // Nullify relevant forces
+    _object1->applyForce( man->getGravity()%_normal );
+    _object2->applyForce( -man->getGravity()%_normal );
+
+    // Remove velocity component
+    float perp_velocity = -_object1->getVelocity() * _normal;
+    _object1->addVelocity( perp_velocity * _normal );
+
+    perp_velocity = _object2->getVelocity() * _normal;
+    _object2->addVelocity( perp_velocity * _normal );
+
+    DEBUG_STREAM << "Ov:" << overlapVector << ", TotIM: " << totalInvM << ", kick:" << overlapVector * (invM1 / totalInvM) << ", Force: " << man->getGravity()%_normal << ", newVel: " << _object1->getVelocity();
   }
 
 }

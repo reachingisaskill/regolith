@@ -3,6 +3,8 @@
 
 #include "Manager.h"
 
+#include "logtastic.h"
+
 #include <utility>
 
 
@@ -74,8 +76,9 @@ namespace Regolith
 
     _position += _velocity * timestep;
 
+    DEBUG_STREAM << "Position : " << _position;
     // Update complete - reset forces
-    _force = man->getGravity();
+    _force = man->getGravity() - _velocity*man->getDrag();
   }
 
 

@@ -21,7 +21,9 @@ namespace Regolith
       PlayableCharacter();
 
       // Specify the properties of the object. (Moving, animated, collision, etc)
-      virtual int getProperties() const { return OBJECT_ANIMATED & OBJECT_HAS_COLLISION & OBJECT_HAS_INPUT; }
+      virtual bool hasCollision() const { return true; }
+      virtual bool hasInput() const { return true; }
+      virtual bool hasAnimation() const { return true; }
 
       // Perform the steps to call SDL_RenderCopy, etc
       virtual void render( Camera* );

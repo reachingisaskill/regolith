@@ -52,7 +52,7 @@ namespace Regolith
     }
     else
       pos = Vector( 0.0, 0.0 );
-
+    DEBUG_STREAM << "Position = " << pos;
 
     // Does the object have mass?
     float mass = 0.0;
@@ -61,6 +61,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "mass", Utilities::JSON_TYPE_FLOAT );
       mass = std::fabs( json_data["mass"].asFloat() );
     }
+    DEBUG_STREAM << "Mass = " << mass;
 
 
     // Is there a default velocity
@@ -70,6 +71,7 @@ namespace Regolith
       velocity.x() = json_data["velocity"][0].asFloat();
       velocity.y() = json_data["velocity"][1].asFloat();
     }
+    DEBUG_STREAM << "Initial Velocity = " << velocity;
 
 
     object->setPosition( pos );

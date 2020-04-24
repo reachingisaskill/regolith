@@ -80,6 +80,7 @@ namespace Regolith
       case SDL_WINDOWEVENT_SIZE_CHANGED :
         _width = e.window.data1;
         _height = e.window.data2;
+        updateCaption = true;
         SDL_RenderPresent( _theRenderer );
         break;
 
@@ -126,7 +127,7 @@ namespace Regolith
     if ( updateCaption )
     {
       std::stringstream text;
-      text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" );
+      text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" ) << " : " << _width << "x" << _height;
 
       SDL_SetWindowTitle( _theWindow, text.str().c_str() );
     }

@@ -92,16 +92,17 @@ namespace Regolith
 
   void Camera::updateScale( int window_w, int window_h )
   {
-    _scaleX = window_w / _width;
-    _scaleY = window_h / _height;
+    _scaleX = (float)window_w / (float)_width;
+    _scaleY = (float)window_h / (float)_height;
+    DEBUG_STREAM << "New camera scale = " << _scaleX << ", " << _scaleY << " (" << window_w << ", " << window_h << ")";
   }
 
 
   SDL_Rect Camera::place( const SDL_Rect& rect )
   {
     SDL_Rect newRect;
-    newRect.x = rect.x - _x;
-    newRect.y = rect.y - _y;
+    newRect.x = (rect.x - _x) * _scaleX;
+    newRect.y = (rect.y - _y) * _scaleY;
     newRect.w = rect.w * _scaleX;
     newRect.h = rect.h * _scaleY;
     return newRect;

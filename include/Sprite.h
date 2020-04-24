@@ -33,10 +33,12 @@ namespace Regolith
 
 
       // Return the object properties
-      virtual int getProperties() const;
+      virtual bool hasCollision() const { return _collision != nullptr; }
+      virtual bool hasInput() const { return false; }
+      virtual bool hasAnimation() const { return this->isMovable(); }
 
       // For derived classes to update every frame
-      virtual void update( Uint32 ) { }
+//      virtual void update( Uint32 );
 
       // Render with the current renderer object
       virtual void render( Camera* );

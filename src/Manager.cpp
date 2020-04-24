@@ -20,7 +20,8 @@ namespace Regolith
     _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
     _gameEvents(),
-    _gravityConst( 0.0, 1.0 )
+    _gravityConst( 0.0, 0.01 ),
+    _dragConst( 0.005 )
   {
     // Set up the provided factories
 //    _theBuilder->addFactory( new SimpleFactory() );

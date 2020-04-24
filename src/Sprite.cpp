@@ -3,6 +3,9 @@
 
 #include "Camera.h"
 
+#include "logtastic.h"
+
+
 namespace Regolith
 {
 
@@ -41,15 +44,6 @@ namespace Regolith
   }
 
 
-  int Sprite::getProperties() const
-  {
-    if ( _collision == nullptr )
-      return OBJECT_SIMPLE;
-    else
-      return OBJECT_SIMPLE & OBJECT_HAS_COLLISION;
-  }
-
-
   void Sprite::render( Camera* camera )
   {
     // Set the current sprite position
@@ -58,6 +52,7 @@ namespace Regolith
     
     // Move into the camera reference frame
     SDL_Rect destination = camera->place( _destination );
+    DEBUG_STREAM << "RENDER: Original: " << _destination.w << ", " << _destination.h << ", NEW: " << destination.w << ", " << destination.h;
 
     _spriteSheet.draw( &destination );
   }

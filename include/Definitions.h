@@ -24,9 +24,9 @@ namespace Regolith
   enum ObjectProperty
   {
     OBJECT_SIMPLE = 0,
-    OBJECT_ANIMATED = 1 << 1,
-    OBJECT_HAS_COLLISION = 1 << 2,
-    OBJECT_HAS_INPUT = 1 << 3
+    OBJECT_ANIMATED = 1 << 0,
+    OBJECT_HAS_COLLISION = 1 << 1,
+    OBJECT_HAS_INPUT = 1 << 2
   };
 
 

@@ -125,6 +125,12 @@ namespace Regolith
   }
 
 
+  Vector Vector::operator%( const Vector& other ) const // Directional Dot Product
+  {
+    return Vector( this->_x*other._x, this->_y*other._y );
+  }
+
+
   Vector Vector::operator+( const Vector& other ) const // Addition
   {
     return Vector( this->_x+other._x, this->_y+other._y );

@@ -52,6 +52,7 @@ namespace Regolith
       Vector operator*( float ) const; // Multiply by constant
       float operator*( const Vector& ) const; // Dot Product
       float operator^( const Vector& ) const; // Cross Product
+      Vector operator%( const Vector& ) const; // Directional Dot Product
       Vector operator+( const Vector& ) const; // Addition
       Vector operator-( const Vector& ) const; // Subtraction
       Vector operator-() const; // Unary minus

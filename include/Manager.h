@@ -49,6 +49,7 @@ namespace Regolith
       SDL_Event _gameEvents[REGOLITH_EVENT_TOTAL];
 
       Vector _gravityConst;
+      float _dragConst;
 
 
     protected:
@@ -103,6 +104,9 @@ namespace Regolith
 
       // Return the constant g
       inline Vector getGravity() { return _gravityConst; }
+
+      // Return the drag
+      inline float getDrag() { return _dragConst; }
   };
 
 }

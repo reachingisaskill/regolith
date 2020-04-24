@@ -27,7 +27,9 @@ namespace Regolith
 
       virtual ~AnimatedSprite();
 
-      virtual int getProperties() const { return OBJECT_ANIMATED; }
+//      virtual bool hasCollision() const; // Inherited
+//      virtual bool hasInput() const; // Inherited
+      virtual bool hasAnimation() const { return true; }
 
       void setUpdateRate( Uint32 );
 

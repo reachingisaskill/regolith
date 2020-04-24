@@ -4,6 +4,7 @@
 #include "Exception.h"
 #include "Utilities.h"
 #include "Manager.h"
+#include "Collision.h"
 
 #include "logtastic.h"
 
@@ -111,7 +112,7 @@ namespace Regolith
     }
     catch ( std::ios_base::failure& f )
     {
-      Exception ex( "Scene::_loadConfig()", "IFSteam failure", false );
+      Exception ex( "Scene::_loadConfig()", "IFStream failure", false );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", f.what() );
       throw ex;
@@ -158,11 +159,13 @@ namespace Regolith
 
   void Scene::_loadResources( Json::Value& resources )
   {
-    INFO_LOG( "Configuring default teams: \"environment\" & \"player_01\"" );
+    INFO_LOG( "Configuring default teams: \"environment\", \"npc\" & \"player_01\"" );
     // Create the default teams - environment & player_01
     _teamNames[ "environment" ] = 0u;
     _collisionElements.push_back( ElementList() );
-    _teamNames[ "player_01" ] = 1u;
+    _teamNames[ "npc" ] = 1u;
+    _collisionElements.push_back( ElementList() );
+    _teamNames[ "player_01" ] = 2u;
     _collisionElements.push_back( ElementList() );
 
     // Setup out the resources that use the SDL_Texture data
@@ -276,7 +279,7 @@ namespace Regolith
       unsigned int id_number = _resourceNames[ background_resource ];
       _background = _resources[ id_number ]->clone();
 
-      if ( _background->getProperties() & OBJECT_ANIMATED )
+      if ( _background->hasAnimation() )
       {
         _animatedElements.push_back( _background );
       }
@@ -531,6 +534,7 @@ namespace Regolith
 
   void Scene::update( Uint32 time )
   {
+    DEBUG_STREAM << "Updating " << _animatedElements.size() << " elements";
     ElementList::iterator end = _animatedElements.end();
     for ( ElementList::iterator it = _animatedElements.begin(); it != end; ++it )
     {
@@ -574,6 +578,32 @@ namespace Regolith
 
   void Scene::resolveCollisions()
   {
+    // First player vs environment
+    ElementList& environmentElements = _collisionElements[0];
+    size_t numberEnvironment = environmentElements.size();
+    size_t numberTeams = _collisionElements.size();
+
+    DEBUG_STREAM << "Resolving Collisions No. environment: " << numberEnvironment << ", number teams: " << numberTeams;
+
+    Contact contact; // Cache the contact info here
+
+    for ( size_t i = 1; i < numberTeams; ++i )
+    {
+      ElementList& team = _collisionElements[i];
+      size_t numberPlayers = team.size();
+      DEBUG_STREAM << "Team Size: " << numberPlayers;
+
+      for ( size_t j = 0; j < numberPlayers; ++j )
+      {
+        for ( size_t k = 0; k < numberEnvironment; ++k )
+        {
+          if ( collides( team[j], environmentElements[k], contact ) )
+          {
+            contact.applyContact();
+          }
+        }
+      }
+    }
   }
 
 
@@ -604,13 +634,13 @@ namespace Regolith
     newElement->setPosition( vec );
     _hudElements.push_back( newElement );
 
-    INFO_STREAM << "Spawning HUD resource, properties: " << newElement->getProperties();
+    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam();
 
-    if ( newElement->getProperties() & OBJECT_ANIMATED )
+    if ( newElement->hasAnimation() )
     {
       _animatedElements.push_back( newElement );
     }
-    if ( newElement->getProperties() & OBJECT_HAS_INPUT )
+    if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
     }
@@ -623,17 +653,17 @@ namespace Regolith
     Drawable* newElement = _resources[id]->clone();
     _sceneElements.push_back( newElement );
 
-    INFO_STREAM << "Spawning resource, properties: " << newElement->getProperties();
+    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam();
 
-    if ( newElement->getProperties() & OBJECT_ANIMATED )
+    if ( newElement->hasAnimation() )
     {
       _animatedElements.push_back( newElement );
     }
-    if ( newElement->getProperties() & OBJECT_HAS_INPUT )
+    if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
     }
-    if ( newElement->getProperties() & OBJECT_HAS_COLLISION )
+    if ( newElement->hasCollision() )
     {
       _collisionElements[ newElement->getTeam() ].push_back( newElement );
     }
@@ -646,16 +676,17 @@ namespace Regolith
     Drawable* newElement = _resources[id]->cloneAt( vec );
     _sceneElements.push_back( newElement );
 
-    INFO_STREAM << "Spawning resource at " << vec << ", properties: " << newElement->getProperties();
-    if ( newElement->getProperties() & OBJECT_ANIMATED )
+    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam() << ", at: " << vec;
+
+    if ( newElement->hasAnimation() )
     {
       _animatedElements.push_back( newElement );
     }
-    if ( newElement->getProperties() & OBJECT_HAS_INPUT )
+    if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
     }
-    if ( newElement->getProperties() & OBJECT_HAS_COLLISION )
+    if ( newElement->hasCollision() )
     {
       _collisionElements[ newElement->getTeam() ].push_back( newElement );
     }

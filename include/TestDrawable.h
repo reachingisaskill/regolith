@@ -18,7 +18,9 @@ namespace Regolith
     public:
       TestDrawable();
 
-      int getProperties() const { return OBJECT_SIMPLE; }
+      virtual bool hasCollision() const { return _collision != nullptr; }
+      virtual bool hasInput() const { return false; }
+      virtual bool hasAnimation() const { return this->isMovable(); }
 
       void render( Camera* ) {}
 
