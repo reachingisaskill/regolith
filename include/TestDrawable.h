@@ -26,7 +26,7 @@ namespace Regolith
 
       void update( Uint32 ) {}
 
-      void handleEvent( SDL_Event& ) {}
+      void registerEvents( InputHandler* );
       
       unsigned int getCollision( Collision*& );
 

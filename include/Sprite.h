@@ -44,7 +44,7 @@ namespace Regolith
       virtual void render( Camera* );
 
       // Handle events
-      virtual void handleEvent( SDL_Event& ) {}
+      virtual void registerEvents( InputHandler* ) {}
 
       // Returns the collision object for the class;
       virtual unsigned int getCollision( Collision*& );

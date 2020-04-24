@@ -566,14 +566,14 @@ namespace Regolith
   }
 
 
-  void Scene::handleEvent( SDL_Event& e )
-  {
-    ElementList::iterator end = _inputElements.end();
-    for ( ElementList::iterator it = _inputElements.begin(); it != end; ++it )
-    {
-      (*it)->handleEvent( e );
-    }
-  }
+//  void Scene::handleEvent( SDL_Event& e )
+//  {
+//    ElementList::iterator end = _inputElements.end();
+//    for ( ElementList::iterator it = _inputElements.begin(); it != end; ++it )
+//    {
+//      (*it)->handleEvent( e );
+//    }
+//  }
 
 
   void Scene::resolveCollisions()

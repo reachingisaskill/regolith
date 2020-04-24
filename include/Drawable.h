@@ -11,6 +11,7 @@ namespace Regolith
 
   class Camera;
   class Collision;
+  class InputHandler;
 
   /*
    * Defines the interface for all objects that can be drawn by the rendering functions.
@@ -61,7 +62,7 @@ namespace Regolith
       virtual void update( Uint32 t ) { this->step( t ); }
 
       // Update the objects behaviour based on the provided timestep
-      virtual void handleEvent( SDL_Event& ) = 0;
+      virtual void registerEvents( InputHandler* ) = 0;
 
       // Returns the number of collision objects for the class.
       // The argument is a pointer which will be updated to point at the first object
@@ -117,6 +118,12 @@ namespace Regolith
       float getInverseMass() const { return _inverseMass; }
       void setMass( float );
       bool isMovable() const { return _inverseMass >= epsilon; }
+
+
+      // Interfaces for input
+      void eventAction( const InputAction&, bool ) {}
+      void floatAction( const InputAction&, float ) {}
+      void vectorAction( const InputAction&, const Vector& ) {}
   };
 
 }

@@ -97,8 +97,8 @@ namespace Regolith
       // Render all the scene elements
       void render();
 
-      // Handle events
-      void handleEvent( SDL_Event& );
+//      // Handle events
+//      void handleEvent( SDL_Event& );
 
       // Resolve all the collision
       void resolveCollisions();

@@ -2,10 +2,10 @@
 #ifndef __REGOLITH__FPS_STRING_H__
 #define __REGOLITH__FPS_STRING_H__
 
+#include "Definitions.h"
+
 #include "Texture.h"
 #include "Camera.h"
-
-#include <SDL2/SDL.h>
 
 #include <sstream>
 
@@ -43,7 +43,7 @@ namespace Regolith
       virtual void render( Camera* );
 
       // Handle Events
-      virtual void handleEvent( SDL_Event& ) {}
+      virtual void registerEvents( InputHandler* ) {}
 
       // Update the objects behaviour based on the provided timestep
       virtual void update( Uint32 );

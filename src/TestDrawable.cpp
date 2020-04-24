@@ -1,6 +1,8 @@
 
 #include "TestDrawable.h"
 
+#include "InputHandler.h"
+
 #include "logtastic.h"
 
 
@@ -26,6 +28,14 @@ namespace Regolith
   Drawable* TestDrawable::clone() const
   {
     return (Drawable*) new TestDrawable( *this );
+  }
+
+
+  void TestDrawable::registerEvents( InputHandler* handler )
+  {
+    handler->registerInputRequest( this, INPUT_MOVE );
+    handler->registerInputRequest( this, INPUT_ATTACK );
+    handler->registerInputRequest( this, INPUT_DEFEND );
   }
 
 }

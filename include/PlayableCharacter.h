@@ -32,7 +32,7 @@ namespace Regolith
       virtual void update( Uint32 );
 
       // Update the objects behaviour based on the provided timestep
-      virtual void handleEvent( SDL_Event& );
+      virtual void registerEvents( InputHandler* );
 
       // Returns the collision object for the class;
       virtual unsigned int getCollision( Collision*& );

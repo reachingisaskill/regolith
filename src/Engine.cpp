@@ -73,7 +73,7 @@ namespace Regolith
             break;
         }
 
-        _currentScene->handleEvent( e );
+//        _currentScene->handleEvent( e );
       }
 
       const Uint8* keyStates = SDL_GetKeyboardState( nullptr );
