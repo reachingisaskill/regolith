@@ -17,16 +17,17 @@ namespace Regolith
 
   class InputHandler
   {
-    typedef std::set< Drawable* > DrawableSet;
-
     // Make this class non-copyable
     InputHandler( const InputHandler& ) = delete;
     InputHandler& operator=( const InputHandler& ) = delete;
 
+    public:
+      typedef std::set< Controllable* > DrawableSet;
+
     private:
       // Map the InputEventType to the InputMapping objects
       // This class owns this memory
-      InputMapping_base* _inputMaps[ INPUT_EVENT_TOTAL ];
+      InputMapping* _inputMaps[ INPUT_EVENT_TOTAL ];
 
       // Map the input actions to the list of drawable objects that request callbacks
       DrawableSet _actionMaps[ INPUT_ACTION_TOTAL ];
@@ -40,13 +41,25 @@ namespace Regolith
 
       virtual ~InputHandler();
 
+      // Iterate through all the SDL events and call the registered event handlers
       void handleEvents();
 
+      // Hande a specific SDL event object
       void handleEvent( SDL_Event& );
 
-      void addInputMap( InputEventType, InputMapping_base* );
+      // Set a new input map object
+      void addInputMap( InputEventType, InputMapping* );
 
-      void registerInputRequest( Drawable*, InputAction );
+      // Register the request from a drawable object to be called when a given action is raised
+      void registerInputRequest( Controllable*, InputAction );
+
+      // Return the set of objects that requested the input action
+      DrawableSet getRegisteredObjects( InputAction );
+
+      // Register an action to a specific input code on a specific input event type (hardware!)
+      void registerAction( InputEventType, unsigned int, InputAction );
+
+      InputAction getRegisteredAction( InputEventType, unsigned int );
   };
 }
 

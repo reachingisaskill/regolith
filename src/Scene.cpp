@@ -5,6 +5,7 @@
 #include "Utilities.h"
 #include "Manager.h"
 #include "Collision.h"
+#include "InputHandler.h"
 
 #include "logtastic.h"
 
@@ -30,8 +31,8 @@ namespace Regolith
     _collisionElements(),
     _animatedElements(),
     _inputElements(),
-    _theCamera(),
-    _theHUD()
+    _theCamera( nullptr ),
+    _theHUD( nullptr )
   {
   }
 
@@ -57,8 +58,20 @@ namespace Regolith
     }
     _sceneElements.clear();
 
+    INFO_LOG( "Deleting the background" );
     delete _background;
     _background = nullptr;
+
+    INFO_LOG( "Deleting the player" );
+    delete _player;
+    _player = nullptr;
+
+    INFO_LOG( "Deleting the cameras" );
+    delete _theCamera;
+    _theCamera = nullptr;
+
+    delete _theHUD;
+    _theHUD = nullptr;
 
     INFO_LOG( "Deleting resources" );
     for ( ResourceList::iterator it = _resources.begin(); it != _resources.end(); ++it )
@@ -68,8 +81,14 @@ namespace Regolith
     _resources.clear();
 
 
+    INFO_LOG( "Clearing name lookups" );
     _teamNames.clear();
     _resourceNames.clear();
+
+
+    INFO_LOG( "Deleting input handler" );
+    delete _theInput;
+    _theInput = nullptr;
 
 
     INFO_LOG( "Deleting raw texture data" );
@@ -127,6 +146,74 @@ namespace Regolith
   }
 
 
+  void Scene::_loadInput( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "keymapping", Utilities::JSON_TYPE_ARRAY );
+
+    _theInput = new InputHandler();
+
+    try
+    {
+      // Configure the input objects
+      Json::Value required = json_data["require"];
+      Json::Value keymaps = json_data["keymapping"];
+
+      Json::ArrayIndex required_size = required.size();
+      for ( Json::ArrayIndex i = 0; i != required_size; ++i )
+      {
+        if ( required[i].asString() == "controller" )
+        {
+          WARN_LOG( "Controllers are not yet supported!" );
+        }
+        else if ( required[i].asString() == "mouse" )
+        {
+          WARN_LOG( "Mouse interface is not yet supported!" );
+        }
+        else if ( required[i].asString() == "joystick" )
+        {
+          WARN_LOG( "Joystick is not yet supported!" );
+        }
+      }
+
+      Json::ArrayIndex keymaps_size = required.size();
+      for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
+      {
+        Json::Value keymap = keymaps[i];
+        Utilities::validateJson( keymap, "type", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( keymap, "mapping", Utilities::JSON_TYPE_OBJECT );
+
+        INFO_LOG( "Loading Keyboard Mapping." );
+        if ( keymap["type"].asString() == "keyboard" )
+        {
+          Json::Value keys = keymap["mapping"];
+          Json::Value::const_iterator keys_end = keys.end();
+          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
+          {
+            SDL_Scancode code = getScancodeID( it.key().asString() );
+            InputAction action = getActionID( it->asString() );
+            _theInput->registerAction( INPUT_EVENT_KEYBOARD, code, action );
+            INFO_STREAM << "Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+          }
+        }
+        else
+        {
+          WARN_LOG( "Key mapping specified for an unsupported interface." );
+          WARN_LOG( "Please try again with a future version." );
+        }
+      }
+
+    }
+    catch ( std::runtime_error& rt )
+    {
+      Exception ex( "Scene::_loadCameras()", "Json reading failure" );
+      ex.addDetail( "File name", _sceneFile );
+      ex.addDetail( "What", rt.what() );
+      throw ex;
+    }
+  }
+
+
   void Scene::_loadTextures( Json::Value& json_data )
   {
     try
@@ -159,13 +246,13 @@ namespace Regolith
 
   void Scene::_loadResources( Json::Value& resources )
   {
-    INFO_LOG( "Configuring default teams: \"environment\", \"npc\" & \"player_01\"" );
+    INFO_LOG( "Configuring default teams: \"environment\", \"npc\" & \"player\"" );
     // Create the default teams - environment & player_01
     _teamNames[ "environment" ] = 0u;
     _collisionElements.push_back( ElementList() );
-    _teamNames[ "npc" ] = 1u;
+    _teamNames[ "player" ] = 1u;
     _collisionElements.push_back( ElementList() );
-    _teamNames[ "player_01" ] = 2u;
+    _teamNames[ "npc" ] = 2u;
     _collisionElements.push_back( ElementList() );
 
     // Setup out the resources that use the SDL_Texture data
@@ -235,40 +322,10 @@ namespace Regolith
   }
 
 
-  void Scene::_loadCameras( Json::Value& json_data )
-  {
-    Utilities::validateJson( json_data, "start_position", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_INTEGER );
-
-    try
-    {
-      // Configure the camera objects
-      int camera_x = json_data["start_position"][0].asInt();
-      int camera_y = json_data["start_position"][1].asInt();
-      int camera_width = json_data["width"].asInt();
-      int camera_height = json_data["height"].asInt();
-
-      INFO_LOG( "Configuring scene camera" );
-      _theCamera.configure( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
-      _theCamera.setPosition( camera_x, camera_y );
-
-      INFO_LOG( "Configuring HUD camera" );
-      _theHUD.configure( camera_width, camera_height, camera_width, camera_height );
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Scene::_loadCameras()", "Json reading failure" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
-      throw ex;
-    }
-  }
-
-
   void Scene::_loadCaches( Json::Value& json_data )
   {
     Utilities::validateJson( json_data, "background", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "player", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "scene_elements", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "hud_elements", Utilities::JSON_TYPE_ARRAY );
     try
@@ -276,13 +333,43 @@ namespace Regolith
       // Load the scene background
       INFO_LOG( "Building the background" );
       std::string background_resource = json_data["background"].asString();
-      unsigned int id_number = _resourceNames[ background_resource ];
-      _background = _resources[ id_number ]->clone();
+      unsigned int bg_id_number = _resourceNames[ background_resource ];
+      _background = _resources[ bg_id_number ]->clone();
 
       if ( _background->hasAnimation() )
       {
         _animatedElements.push_back( _background );
       }
+
+
+      // Load the scene player character
+      INFO_LOG( "Building the player" );
+      Json::Value player = json_data["player"];
+      Utilities::validateJson( player, "position", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( player, "resource_name", Utilities::JSON_TYPE_STRING );
+
+      std::string player_resource = player["resource_name"].asString();
+      unsigned int player_id_number = _resourceNames[ player_resource ];
+      int player_x = player["position"][0].asInt();
+      int player_y = player["position"][1].asInt();
+      Vector pos( player_x, player_y );
+
+      _player = _resources[ player_id_number ]->clone();
+      _player->setPosition( pos );
+
+      if ( _player->hasAnimation() )
+      {
+        _animatedElements.push_back( _player );
+      }
+      if ( _player->hasInput() )
+      {
+        _inputElements.push_back( _player );
+      }
+      if ( _player->hasCollision() )
+      {
+        _collisionElements[ _player->getTeam() ].push_back( _player );
+      }
+
 
 
       // Load the Scene Elements
@@ -363,6 +450,63 @@ namespace Regolith
   }
 
 
+  void Scene::_loadCameras( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "start_position", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "type", Utilities::JSON_TYPE_STRING );
+
+    try
+    {
+      // Configure the camera objects
+      int camera_x = json_data["start_position"][0].asInt();
+      int camera_y = json_data["start_position"][1].asInt();
+      int camera_width = json_data["width"].asInt();
+      int camera_height = json_data["height"].asInt();
+
+      INFO_LOG( "Configuring scene camera" );
+      std::string camera_type = json_data["type"].asString();
+      if ( camera_type == "fixed" )
+      {
+        _theCamera = new Camera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
+        _theCamera->setPosition( camera_x, camera_y );
+      }
+      else if ( camera_type == "flying" )
+      {
+        FlyingCamera* camera = new FlyingCamera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
+        camera->setPosition( camera_x, camera_y );
+        camera->registerEvents( _theInput );
+        _theCamera = camera;
+      }
+      else if ( camera_type == "following" )
+      {
+        FollowingCamera* camera = new FollowingCamera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
+        camera->setPosition( camera_x, camera_y );
+        camera->followMe( _player );
+        _theCamera = camera;
+      }
+      else
+      {
+        FAILURE_STREAM << "Unknown camera type found : " << camera_type;
+        Exception ex( "Scene::_loadCameras()", "Unknown Camera Type" );
+        ex.addDetail( "Camera Type", camera_type );
+        throw ex;
+      }
+
+      INFO_LOG( "Configuring HUD camera" );
+      _theHUD = new Camera( camera_width, camera_height, camera_width, camera_height );
+    }
+    catch ( std::runtime_error& rt )
+    {
+      Exception ex( "Scene::_loadCameras()", "Json reading failure" );
+      ex.addDetail( "File name", _sceneFile );
+      ex.addDetail( "What", rt.what() );
+      throw ex;
+    }
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // The entry to the building algorithm
 
@@ -376,6 +520,16 @@ namespace Regolith
     INFO_LOG( "Loading configuration data" );
 
     Json::Value json_data = this->_loadConfig();
+
+    if ( ! json_data.isMember( "input" ) )
+    {
+      FAILURE_LOG( "Could not find input configuration in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No input configuration found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Loading Input Configuration" );
+    this->_loadInput( json_data["input"] );
 
     if ( ! json_data.isMember( "textures" ) )
     {
@@ -540,40 +694,43 @@ namespace Regolith
     {
       (*it)->update( time );
     }
+
+    _theCamera->update( time );
   }
 
 
   void Scene::render()
   {
     // Draw the background first
-    _background->render( &_theCamera );
+    _background->render( _theCamera );
 
 
     // Render all the elements with respect to the background
     ElementList::iterator end = _sceneElements.end();
     for ( ElementList::iterator it = _sceneElements.begin(); it != end; ++it )
     {
-      (*it)->render( &_theCamera );
+      (*it)->render( _theCamera );
     }
+
+
+    // Draw the player on top of the environment
+    _player->render( _theCamera );
+
 
 
     // Render all the elements with respect to the window
     end = _hudElements.end();
     for ( ElementList::iterator it = _hudElements.begin(); it != end; ++it )
     {
-      (*it)->render( &_theHUD );
+      (*it)->render( _theHUD );
     }
   }
 
 
-//  void Scene::handleEvent( SDL_Event& e )
-//  {
-//    ElementList::iterator end = _inputElements.end();
-//    for ( ElementList::iterator it = _inputElements.begin(); it != end; ++it )
-//    {
-//      (*it)->handleEvent( e );
-//    }
-//  }
+  void Scene::processEvents()
+  {
+    _theInput->handleEvents();
+  }
 
 
   void Scene::resolveCollisions()

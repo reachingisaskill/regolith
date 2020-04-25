@@ -15,6 +15,10 @@ namespace Regolith
       unsigned int _collisionCount;
       Collision _collision[2];
 
+      float _moveDistance;
+      bool _jump;
+      bool _attack;
+
     public:
       TestDrawable();
 
@@ -31,6 +35,14 @@ namespace Regolith
       unsigned int getCollision( Collision*& );
 
       Drawable* clone() const;
+
+      void booleanAction( const InputAction&, bool );
+      void floatAction( const InputAction&, float );
+      void vectorAction( const InputAction&, const Vector& );
+
+
+      bool getJump() { return _jump; }
+      bool getAttack() { return _attack; }
   };
 
 }

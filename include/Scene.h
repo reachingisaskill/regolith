@@ -39,10 +39,12 @@ namespace Regolith
       SDL_Renderer* _theRenderer;
       ObjectBuilder* _theBuilder;
       std::string _sceneFile;
+      InputHandler* _theInput;
 
       // Containers storing drawable objects - the scene and the hud elements
       // All memory is owned by the resource list above
       Drawable* _background;
+      Drawable* _player;
       ElementList _sceneElements;
       ElementList _hudElements;
 
@@ -53,8 +55,8 @@ namespace Regolith
       ElementList _inputElements;
 
       // Cameras for rendering
-      Camera _theCamera;
-      Camera _theHUD;
+      Camera* _theCamera;
+      Camera* _theHUD;
 
     protected:
       // Helper functions to build and store the raw texture files
@@ -67,20 +69,21 @@ namespace Regolith
       // Function to parse the json document
       Json::Value _loadConfig();
 
+      // Function to load the input configuration
+      void _loadInput( Json::Value& );
+
       // Function to load all the raw texture files
       void _loadTextures( Json::Value& );
 
       // Function to build all the resources
       void _loadResources( Json::Value& );
 
-      void _loadCameras( Json::Value& );
-
       // Function to build all the caches/acceleration structures
       void _loadCaches( Json::Value& );
 
-      // Spawn an object with the supplied ID number at the supplied position in the HUD
-      // only the scene class can create HUD elements
-      void spawnHUD( unsigned int, Vector );
+      // Function to build the camera objects
+      void _loadCameras( Json::Value& );
+
     public:
       // Set the necessary parameters
       Scene( Window*, SDL_Renderer*, ObjectBuilder*, std::string );
@@ -97,17 +100,17 @@ namespace Regolith
       // Render all the scene elements
       void render();
 
-//      // Handle events
-//      void handleEvent( SDL_Event& );
+      // Handle events
+      void processEvents();
 
       // Resolve all the collision
       void resolveCollisions();
 
       // Return the camera for the scene
-      Camera* getCamera() { return &_theCamera; }
+      Camera* getCamera() { return _theCamera; }
 
       // Return the camera for the HUD
-      Camera* getHUD() { return &_theHUD; }
+      Camera* getHUD() { return _theHUD; }
 
       // Return a pointer to a raw texture object
       RawTexture findRawTexture( std::string ) const;
@@ -117,6 +120,10 @@ namespace Regolith
 
       // Spawn an object with the supplied ID number at the supplied position in the scene
       void spawnAt( unsigned int, Vector );
+
+      // Spawn an object with the supplied ID number at the supplied position in the HUD
+      void spawnHUD( unsigned int, Vector );
+
   };
 
 }

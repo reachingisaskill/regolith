@@ -1,6 +1,9 @@
 
 #include "Camera.h"
 
+#include "Drawable.h"
+#include "InputHandler.h"
+
 #include "logtastic.h"
 
 
@@ -48,13 +51,10 @@ namespace Regolith
 
   void Camera::setPosition( int x, int y )
   {
-    if ( x > _limitX ) _x = _limitX;
-    else if ( x < 0 ) _x = 0;
-    else _x = x;
+    _x = x;
+    _y = y;
 
-    if ( y > _limitY ) _y = _limitY;
-    else if ( y < 0 ) _y = 0;
-    else _y = y;
+    checkPosition();
   }
 
 
@@ -71,20 +71,24 @@ namespace Regolith
     _limitY = _sceneHeight - _height;
 
     // Makesure the camera is still within the scene
-    if ( _x > _limitX ) _x = _limitX;
-    else if ( _x < 0 ) _x = 0;
-    if ( _y > _limitY ) _y = _limitY;
-    else if ( _y < 0 ) _y = 0;
+    checkPosition();
   }
 
 
   void Camera::move( int dx, int dy )
   {
     _x += dx;
+    _y += dy;
+
+    checkPosition();
+  }
+
+
+  void Camera::checkPosition()
+  {
     if ( _x > _limitX ) _x = _limitX;
     else if ( _x < 0 ) _x = 0;
 
-    _y += dy;
     if ( _y > _limitY ) _y = _limitY;
     else if ( _y < 0 ) _y = 0;
   }
@@ -106,6 +110,115 @@ namespace Regolith
     newRect.w = rect.w * _scaleX;
     newRect.h = rect.h * _scaleY;
     return newRect;
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Flying Camera type
+
+  FlyingCamera::FlyingCamera() :
+    Camera(),
+    _velocityX( 0 ),
+    _velocityY( 0 ),
+    _speed( 1 )
+  {
+  }
+
+
+  FlyingCamera::FlyingCamera( int scene_width, int scene_height, int width, int height ) :
+    Camera( scene_width, scene_height, width, height ),
+    _velocityX( 0 ),
+    _velocityY( 0 ),
+    _speed( 1 )
+  {
+  }
+
+
+  void FlyingCamera::registerEvents( InputHandler* handler )
+  {
+    handler->registerInputRequest( this, INPUT_ACTION_MOVE_UP );
+    handler->registerInputRequest( this, INPUT_ACTION_MOVE_DOWN );
+    handler->registerInputRequest( this, INPUT_ACTION_MOVE_LEFT );
+    handler->registerInputRequest( this, INPUT_ACTION_MOVE_RIGHT );
+  }
+
+
+  void FlyingCamera::booleanAction( const InputAction& action, bool value )
+  {
+    DEBUG_STREAM << " Camera : " << (int)action << " : " << value;
+    switch ( action )
+    {
+      case INPUT_ACTION_MOVE_UP :
+        if ( value ) _velocityY -= _speed;
+        else _velocityY += _speed;
+        break;
+
+      case INPUT_ACTION_MOVE_DOWN :
+        if ( value ) _velocityY += _speed;
+        else _velocityY -= _speed;
+        break;
+
+      case INPUT_ACTION_MOVE_LEFT :
+        if ( value ) _velocityX -= _speed;
+        else _velocityX += _speed;
+        break;
+
+      case INPUT_ACTION_MOVE_RIGHT :
+        if ( value ) _velocityX += _speed;
+        else _velocityX -= _speed;
+        break;
+
+      default :
+        break;
+    }
+  }
+
+
+  void FlyingCamera::update( Uint32 time )
+  {
+    this->x() += _velocityX * time;
+    this->y() += _velocityY * time;
+
+    this->checkPosition();
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Following Camera type
+
+
+  FollowingCamera::FollowingCamera() :
+    Camera(),
+    _theObject( nullptr ),
+    _offsetX( 0 ),
+    _offsetY( 0 )
+  {
+  }
+
+
+  FollowingCamera::FollowingCamera( int scene_width, int scene_height, int width, int height ) :
+    Camera( scene_width, scene_height, width, height ),
+    _theObject( nullptr ),
+    _offsetX( 0 ),
+    _offsetY( 0 )
+  {
+  }
+
+
+  void FollowingCamera::followMe( Drawable* object )
+  {
+    _theObject = object;
+    _offsetX = 0.5*object->getWidth();
+    _offsetY = 0.5*object->getHeight();
+  }
+
+
+  void FollowingCamera::update( Uint32 )
+  {
+    Vector pos = _theObject->getPosition();
+    this->setPosition( pos.x() - _offsetX, pos.y() + _offsetY );
+
+    this->checkPosition();
   }
 
 }

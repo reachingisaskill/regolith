@@ -53,6 +53,7 @@ namespace Regolith
 
         FAILURE_STREAM << "Json data failed validation. Could not resolve type ID: " << type;
         Exception ex( "validateJson()", "Wong data type", false );
+        ex.addDetail( "Name", name );
         ex.addDetail( "Type ID", type );
         throw ex;
 

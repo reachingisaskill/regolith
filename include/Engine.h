@@ -5,6 +5,7 @@
 #include "Definitions.h"
 
 #include "Singleton.h"
+#include "Controllable.h"
 #include "Scene.h"
 #include "Window.h"
 #include "Timer.h"
@@ -27,6 +28,7 @@ namespace Regolith
 
       Timer _frameTimer;
       SDL_Color _defaultColor;
+      bool _quit;
 
     public:
       Engine();
@@ -41,7 +43,8 @@ namespace Regolith
 
       void setCamera( Camera* );
 
-      void resolveUserEvent( GameEvent );
+      void quit() { _quit = true; }
+
   };
   
 }

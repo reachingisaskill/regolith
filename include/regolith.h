@@ -14,6 +14,7 @@
 #include "FPSString.h"
 
 #include "Collision.h"
+#include "InputHandler.h"
 
 #include "Window.h"
 #include "ObjectBuilder.h"

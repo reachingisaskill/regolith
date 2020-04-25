@@ -4,6 +4,7 @@
 
 #include "Definitions.h"
 #include "Vector.h"
+#include "Controllable.h"
 
 
 namespace Regolith
@@ -16,7 +17,7 @@ namespace Regolith
   /*
    * Defines the interface for all objects that can be drawn by the rendering functions.
    */
-  class Drawable
+  class Drawable : public Controllable
   {
 
     private:
@@ -60,9 +61,6 @@ namespace Regolith
 
       // Update the objects behaviour based on the provided timestep
       virtual void update( Uint32 t ) { this->step( t ); }
-
-      // Update the objects behaviour based on the provided timestep
-      virtual void registerEvents( InputHandler* ) = 0;
 
       // Returns the number of collision objects for the class.
       // The argument is a pointer which will be updated to point at the first object
@@ -119,11 +117,11 @@ namespace Regolith
       void setMass( float );
       bool isMovable() const { return _inverseMass >= epsilon; }
 
-
       // Interfaces for input
-      void eventAction( const InputAction&, bool ) {}
-      void floatAction( const InputAction&, float ) {}
-      void vectorAction( const InputAction&, const Vector& ) {}
+      virtual void eventAction( const InputAction& ) {}
+      virtual void booleanAction( const InputAction&, bool ) {}
+      virtual void floatAction( const InputAction&, float ) {}
+      virtual void vectorAction( const InputAction&, const Vector& ) {}
   };
 
 }
