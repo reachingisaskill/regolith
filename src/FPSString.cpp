@@ -72,6 +72,12 @@ namespace Regolith
   }
 
 
+  void FPSString::addCollision( Collision* )
+  {
+    ERROR_LOG( "FPSString objects do not support collision objects. No collision will be attributed." );
+  }
+
+
   Drawable* FPSString::clone() const
   {
     return (Drawable*) new FPSString( *this );

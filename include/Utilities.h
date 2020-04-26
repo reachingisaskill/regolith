@@ -24,6 +24,8 @@ namespace Regolith
 
     void validateJson( Json::Value&, const char*, JsonType type = JSON_TYPE_NULL );
 
+    void validateJsonArray( Json::Value&, unsigned int, JsonType type = JSON_TYPE_NULL );
+
   }
 }
 

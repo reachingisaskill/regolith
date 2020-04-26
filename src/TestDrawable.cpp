@@ -28,6 +28,12 @@ namespace Regolith
   }
 
 
+  void TestDrawable::addCollision( Collision* )
+  {
+    WARN_LOG( "Attempting to add collision to TestDrawable class. This is not supported" );
+  }
+
+
   Drawable* TestDrawable::clone() const
   {
     return (Drawable*) new TestDrawable( *this );

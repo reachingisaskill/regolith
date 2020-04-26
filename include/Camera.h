@@ -64,6 +64,9 @@ namespace Regolith
       int getX() { return _x; }
       int getY() { return _y; }
 
+      int getWidth() { return _width; }
+      int getHeight() { return _height; }
+
       // Places the object's rectang inside the window
       SDL_Rect place( const SDL_Rect& );
 

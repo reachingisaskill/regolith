@@ -3,6 +3,7 @@
 #define __REGOLITH__SCENE_H__
 
 #include "Drawable.h"
+#include "Trigger.h"
 #include "ObjectBuilder.h"
 #include "Window.h"
 #include "Camera.h"
@@ -10,6 +11,7 @@
 #include <SDL2/SDL.h>
 
 #include <vector>
+#include <queue>
 #include <map>
 
 
@@ -23,6 +25,8 @@ namespace Regolith
 
   typedef std::vector< Drawable* > ElementList;
   typedef std::vector< ElementList > TeamsList;
+  typedef std::vector< Trigger* > TriggerList;
+  typedef std::queue< Vector > SpawnPointList;
 
 
   class Scene
@@ -47,6 +51,11 @@ namespace Regolith
       Drawable* _player;
       ElementList _sceneElements;
       ElementList _hudElements;
+      TriggerList _triggers;
+      SpawnPointList _spawnPoints;
+
+      // Data for player health, death, spawning, etc.
+      Vector _currentPlayerSpawn;
 
       // Can be change to accelerator structures in the future
       // These do not own their memory. They are shortcut lists
@@ -83,6 +92,9 @@ namespace Regolith
 
       // Function to build the camera objects
       void _loadCameras( Json::Value& );
+
+      // Function to build the camera objects
+      void _loadSpawnPoints( Json::Value& );
 
     public:
       // Set the necessary parameters
@@ -124,6 +136,8 @@ namespace Regolith
       // Spawn an object with the supplied ID number at the supplied position in the HUD
       void spawnHUD( unsigned int, Vector );
 
+      // Respawn the player at the last spawn point
+      void playerRespawn();
   };
 
 }

@@ -16,12 +16,14 @@ namespace Regolith
     _position( 0.0 ),
     _velocity( 0.0 ),
     _force( 0.0 ),
+    _inputForce( 0.0 ),
     _rotation( 0.0 ),
     _team( 0 ),
     _width( 0 ),
     _height( 0 ),
     _mass( 0.0 ),
-    _inverseMass( 0.0 )
+    _inverseMass( 0.0 ),
+    _collisionActive( true )
   {
   }
 
@@ -31,12 +33,14 @@ namespace Regolith
     _position( 0.0 ),
     _velocity( 0.0 ),
     _force( 0.0 ),
+    _inputForce( 0.0 ),
     _rotation( rot ),
     _team( 0 ),
     _width( width ),
     _height( height ),
     _mass( mass ),
-    _inverseMass( (_mass < epsilon) ? 0.0 : (1.0/_mass) )
+    _inverseMass( (_mass < epsilon) ? 0.0 : (1.0/_mass) ),
+    _collisionActive( true )
   {
   }
 
@@ -70,7 +74,7 @@ namespace Regolith
     // Starting with Euler Step algorithm.
     // Might move to leap-frog/Runge-Kutta later
     
-    Vector accel = _inverseMass * _force;
+    Vector accel = _inverseMass * (_force + _inputForce);
 
     _velocity += accel * timestep;
 
@@ -78,7 +82,7 @@ namespace Regolith
 
     DEBUG_STREAM << "Position : " << _position;
     // Update complete - reset forces
-    _force = man->getGravity() - _velocity*man->getDrag();
+    _force = _inputForce + man->getGravity() - _velocity*man->getDrag();
   }
 
 

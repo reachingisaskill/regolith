@@ -10,9 +10,14 @@
 namespace Regolith
 {
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Collides functions
+
   bool collides( Drawable* object1, Drawable* object2, Contact& cont )
   {
     DEBUG_LOG( "Checking Collision" );
+    if ( ( ! object1->collisionActive()) || ( ! object2->collisionActive() ) ) return false;
+
     Collision* collisions1 = nullptr;
     Collision* collisions2 = nullptr;
     unsigned int number1 = object1->getCollision( collisions1 );
@@ -153,6 +158,53 @@ namespace Regolith
     }
 
     return false;
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Contains function
+
+  bool contains( Drawable* parent, Drawable* child )
+  {
+    DEBUG_LOG( "Checking Containment" );
+    if ( ( ! parent->collisionActive()) || ( ! child->collisionActive() ) ) return false;
+
+    Collision* parent_coll = nullptr;
+    Collision* child_coll = nullptr;
+    unsigned int p_number = parent->getCollision( parent_coll );
+    unsigned int c_number = child->getCollision( child_coll );
+    Vector parent_pos;
+    Vector child_pos;
+
+    Collision* p_iter = parent_coll;
+    Collision* c_iter;
+    for ( unsigned int i = 0; i < p_number; ++i, ++p_iter )
+    {
+      parent_pos = parent->position() + p_iter->position(); // Move into global coordinate system
+      DEBUG_STREAM << " Global Pos1, " << i << " : " << parent_pos << " W = " << p_iter->width() << " H = " << p_iter->height();
+
+      c_iter = child_coll;
+      for ( unsigned int j = 0; j < c_number; ++j, ++c_iter )
+      {
+        child_pos = child->position() + c_iter->position(); // Move into global coordinate system
+        DEBUG_STREAM << "   Global Pos2, " << j << " : " << child_pos << " W = " << c_iter->width() << " H = " << c_iter->height();
+
+        // X Axis
+        float diff_x = child_pos.x() - parent_pos.x();
+        if ( diff_x < 0.0 ) return false;
+
+        if ( diff_x > (p_iter->_width - c_iter->_width) ) return false;
+
+        // Y Axis
+        float diff_y = child_pos.y() - parent_pos.y();
+        if ( diff_y < 0.0 ) return false;
+
+        if ( diff_y > (p_iter->_height - c_iter->_height) ) return false;
+
+      }
+    }
+
+    return true;
   }
 
 

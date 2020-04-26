@@ -54,7 +54,7 @@ int main( int, char** )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  SECTION( "Axis-Aligned Bounding Boxes" );
+  SECTION( "Axis-Aligned Bounding Boxes - Collision" );
   {
     Drawable* object1 = (Drawable*) new TestDrawable();
     Drawable* object2 = (Drawable*) new TestDrawable();
@@ -123,6 +123,13 @@ int main( int, char** )
       ASSERT_APPROX_EQUAL( contact.overlap(), 0.2 );
     }
 
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  SECTION( "Axis-Aligned Bounding Boxes - Containment" );
+  {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

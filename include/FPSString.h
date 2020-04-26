@@ -51,6 +51,9 @@ namespace Regolith
       // Returns the collision object for the class;
       virtual unsigned int getCollision( Collision*& ) { return 0; }
 
+      // Add a collision object - reports and error for this data type
+      virtual void addCollision( Collision* );
+
       // Return a clone of the current object. Transfers ownership of memory
       Drawable* clone() const;
 

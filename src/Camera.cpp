@@ -208,8 +208,8 @@ namespace Regolith
   void FollowingCamera::followMe( Drawable* object )
   {
     _theObject = object;
-    _offsetX = 0.5*object->getWidth();
-    _offsetY = 0.5*object->getHeight();
+    _offsetX = 0.5*object->getWidth() + 0.5*getWidth();
+    _offsetY = 0.5*object->getHeight() + 0.5*getHeight();
   }
 
 

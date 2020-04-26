@@ -53,7 +53,7 @@ namespace Regolith
       virtual Drawable* clone() const;
 
 
-      void setCollision( Collision* col ) { _collision = col; }
+      void addCollision( Collision* col ) { _collision = col; }
 
       // Sprite details
       SpriteSheet& spriteSheet() { return _spriteSheet; }

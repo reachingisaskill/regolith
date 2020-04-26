@@ -28,6 +28,9 @@ namespace Regolith
     _background( nullptr ),
     _sceneElements(),
     _hudElements(),
+    _triggers(),
+    _spawnPoints(),
+    _currentPlayerSpawn( 0.0 ),
     _collisionElements(),
     _animatedElements(),
     _inputElements(),
@@ -336,6 +339,13 @@ namespace Regolith
       unsigned int bg_id_number = _resourceNames[ background_resource ];
       _background = _resources[ bg_id_number ]->clone();
 
+      if ( ! _background->hasCollision() )
+      {
+        FAILURE_LOG( "Backgroud sprite does not have any collision. Cannot define containment within scene" );
+        Exception ex( "Scene::_loadCaches()", "Background sprite does not have any associated collision." );
+        throw ex;
+      }
+
       if ( _background->hasAnimation() )
       {
         _animatedElements.push_back( _background );
@@ -356,6 +366,7 @@ namespace Regolith
 
       _player = _resources[ player_id_number ]->clone();
       _player->setPosition( pos );
+      _currentPlayerSpawn = pos;
 
       if ( _player->hasAnimation() )
       {
@@ -364,6 +375,7 @@ namespace Regolith
       if ( _player->hasInput() )
       {
         _inputElements.push_back( _player );
+        _player->registerEvents( _theInput );
       }
       if ( _player->hasCollision() )
       {
@@ -474,6 +486,7 @@ namespace Regolith
       }
       else if ( camera_type == "flying" )
       {
+        INFO_LOG( "Creating flying camera" );
         FlyingCamera* camera = new FlyingCamera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
         camera->setPosition( camera_x, camera_y );
         camera->registerEvents( _theInput );
@@ -481,6 +494,7 @@ namespace Regolith
       }
       else if ( camera_type == "following" )
       {
+        INFO_LOG( "Creating following camera. Tracing player" );
         FollowingCamera* camera = new FollowingCamera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
         camera->setPosition( camera_x, camera_y );
         camera->followMe( _player );
@@ -504,6 +518,31 @@ namespace Regolith
       ex.addDetail( "What", rt.what() );
       throw ex;
     }
+  }
+
+
+  void Scene::_loadSpawnPoints( Json::Value& spawnpoints )
+  {
+    INFO_LOG( "Loading spawn points into queue" );
+    if ( ! spawnpoints.isArray() )
+    {
+      FAILURE_LOG( "Spawn point list is not an array" );
+      Exception ex( "Scene::_loadSpawnPoints()", "Expected spawn point list to be an array" );
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+
+    Json::ArrayIndex spawnpoints_size = spawnpoints.size();
+    for ( Json::ArrayIndex i = 0; i != spawnpoints_size; ++i )
+    {
+      Utilities::validateJsonArray( spawnpoints[i], 2, Utilities::JSON_TYPE_FLOAT );
+
+      float x = spawnpoints[i][0].asFloat();
+      float y = spawnpoints[i][1].asFloat();
+
+      _spawnPoints.push( Vector( x, y ) );
+    }
+    INFO_STREAM << "Loaded " << spawnpoints_size << " spawn points into scene";
   }
 
 
@@ -570,6 +609,16 @@ namespace Regolith
     }
     INFO_LOG( "Loading cameras" );
     this->_loadCameras( json_data["cameras"] );
+
+    if ( ! json_data.isMember( "spawn_points" ) )
+    {
+      FAILURE_LOG( "Could not find spawn_points data in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No spawn_points member found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Loading spawn points" );
+    this->_loadSpawnPoints( json_data["spawn_points"] );
   }
 
 
@@ -735,6 +784,13 @@ namespace Regolith
 
   void Scene::resolveCollisions()
   {
+    // Make sure player is still within the scene
+    if ( ! contains( _background, _player ) )
+    {
+      DEBUG_LOG( "Player left scene - Respawning" );
+      this->playerRespawn();
+    }
+
     // First player vs environment
     ElementList& environmentElements = _collisionElements[0];
     size_t numberEnvironment = environmentElements.size();
@@ -761,6 +817,27 @@ namespace Regolith
         }
       }
     }
+
+    size_t numberTriggers = _triggers.size();
+    for ( size_t i = 0; i < numberTriggers; ++i )
+    {
+      if ( collides( _player, _triggers[i], contact ) )
+      {
+        DEBUG_STREAM << "Collided with trigger: " << i;
+        switch ( _triggers[i]->getTriggerType() )
+        {
+          default:
+            break;
+        }
+      }
+    }
+  }
+
+
+  void Scene::playerRespawn()
+  {
+
+    _player->setPosition( _currentPlayerSpawn );
   }
 
 

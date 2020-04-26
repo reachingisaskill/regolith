@@ -34,8 +34,8 @@ namespace Regolith
 
   void Engine::run()
   {
-//    Manager* man = Manager::getInstance();
     _frameTimer.lap();
+//    int count = 0;
 
     while ( ! _quit )
     {
@@ -53,6 +53,10 @@ namespace Regolith
       _currentScene->render();
 
       SDL_RenderPresent( _theRenderer );
+//      if ( count++ > 100 )
+//      {
+//        _quit = true;
+//      }
     }
   }
 

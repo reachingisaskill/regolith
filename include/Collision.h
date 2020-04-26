@@ -22,8 +22,11 @@ namespace Regolith
   class Contact;
   class Collision;
 
-  // Function that produces the interaction class
+  // Function that produces the contact class
   bool collides( Drawable*, Drawable*, Contact& );
+
+  // Function that returns true if the first object contains the second object
+  bool contains( Drawable*, Drawable* );
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -31,6 +34,7 @@ namespace Regolith
   class Collision
   {
     friend bool collides( Drawable*, Drawable*, Contact& );
+    friend bool contains( Drawable*, Drawable* );
     private:
       // Position with respect to the owning drawable object
       Vector _position;

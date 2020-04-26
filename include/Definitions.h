@@ -39,6 +39,16 @@ namespace Regolith
     REGOLITH_EVENT_TOTAL
   };
 
+  // In-scene triggers
+  enum TriggerEvent
+  {
+    TRIGGER_NULL,
+    TRIGGER_RESPAWN,
+    TRIGGER_DEATH,
+    TRIGGER_NEXT_EVENT,
+    TRIGGER_TOTAL
+  };
+
 //////////////////////////////////////////////////
   // Input possibilities
 

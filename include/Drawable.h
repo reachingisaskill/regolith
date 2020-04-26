@@ -25,12 +25,14 @@ namespace Regolith
       Vector _position;
       Vector _velocity;
       Vector _force;
+      Vector _inputForce;
       float _rotation;
       int _team;
       int _width;
       int _height;
       float _mass;
       float _inverseMass;
+      bool _collisionActive;
 
     protected:
       Drawable( SDL_Renderer*, Vector, float );
@@ -51,20 +53,30 @@ namespace Regolith
       virtual ~Drawable();
 
       // Specify the properties of the object. (Moving, animated, collision, etc)
-//      virtual int getProperties() const = 0;
       virtual bool hasCollision() const = 0;
       virtual bool hasInput() const = 0;
       virtual bool hasAnimation() const = 0;
+
+
+      // Returns the number of collision objects for the class.
+      // The argument is a pointer which will be updated to point at the first object
+      virtual unsigned int getCollision( Collision*& ) = 0;
+
+      // Returns true if the object currently has active collision
+      virtual bool collisionActive() const { return _collisionActive; }
+      // Set whether thte collision objects are active
+      virtual void setCollisionActive( bool active ) { _collisionActive = active; }
+
+      // Function to add a collision object to the class. 
+      // How the collision objects are stored is up to the derived class
+      virtual void addCollision( Collision* ) = 0;
+
 
       // Perform the steps to call SDL_RenderCopy, etc
       virtual void render( Camera* ) = 0;
 
       // Update the objects behaviour based on the provided timestep
       virtual void update( Uint32 t ) { this->step( t ); }
-
-      // Returns the number of collision objects for the class.
-      // The argument is a pointer which will be updated to point at the first object
-      virtual unsigned int getCollision( Collision*& ) = 0;
 
 
       // Create a new copy and return the pointer to it. Transfers ownership of the memory
@@ -91,6 +103,8 @@ namespace Regolith
 
       // Force
       void applyForce( Vector f ) { _force += f; }
+      void setInputForce( Vector f ) { _inputForce = f; }
+      Vector& inputForce() { return _inputForce; }
 
       // Rotation
       float getRotation() const { return _rotation; }
@@ -116,6 +130,10 @@ namespace Regolith
       float getInverseMass() const { return _inverseMass; }
       void setMass( float );
       bool isMovable() const { return _inverseMass >= epsilon; }
+
+
+      // Update the objects behaviour based on the provided timestep
+      virtual void registerEvents( InputHandler* ) = 0;
 
       // Interfaces for input
       virtual void eventAction( const InputAction& ) {}

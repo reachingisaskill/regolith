@@ -34,6 +34,8 @@ namespace Regolith
       
       unsigned int getCollision( Collision*& );
 
+      void addCollision( Collision* );
+
       Drawable* clone() const;
 
       void booleanAction( const InputAction&, bool );

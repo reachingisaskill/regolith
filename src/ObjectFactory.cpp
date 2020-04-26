@@ -190,7 +190,7 @@ namespace Regolith
     }
 
     Sprite* newSprite = new Sprite( sheet );
-    newSprite->setCollision( collision );
+    newSprite->addCollision( collision );
 
     buildDrawable( newSprite, json_data );
 
@@ -263,7 +263,7 @@ namespace Regolith
 
 
     AnimatedSprite* newSprite = new AnimatedSprite( sheet, update_rate );
-    newSprite->setCollision( collision );
+    newSprite->addCollision( collision );
 
     buildDrawable( newSprite, json_data );
 

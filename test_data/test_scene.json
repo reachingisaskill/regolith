@@ -58,7 +58,8 @@
     {
       "resource_name" : "background",
       "resource_type" : "sprite",
-      "texture_name" : "background_texture"
+      "texture_name" : "background_texture",
+      "collision" : "default"
     },
     {
       "resource_name" : "platform",
@@ -69,11 +70,13 @@
     },
     {
       "resource_name" : "the_dot",
-      "resource_type" : "sprite",
+      "resource_type" : "test_player",
       "texture_name" : "dot_texture",
       "collision" : "default",
       "mass" : 1.0,
-      "team_name" : "npc"
+      "team_name" : "player",
+      "jump_speed" : 3.0,
+      "movement_force" : 0.002
     },
     {
       "resource_name" : "the_spritesheet",
@@ -104,7 +107,7 @@
 
   "cameras" :
   {
-    "type" : "flying",
+    "type" : "following",
     "width" : 1024,
     "height" : 768,
     "start_position" : [ 100, 100 ]
@@ -159,5 +162,10 @@
         "position" : [ 20, 20 ]
       }
     ]
-  }
+  },
+
+  "spawn_points" :
+  [
+    [ 380, 150 ]
+  ]
 }
