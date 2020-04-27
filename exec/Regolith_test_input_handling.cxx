@@ -45,7 +45,7 @@ int main( int, char** )
     ASSERT_EQUAL( handler.getRegisteredAction( INPUT_EVENT_KEYBOARD, SDL_SCANCODE_A ), INPUT_ACTION_MOVE_LEFT );
     ASSERT_EQUAL( handler.getRegisteredAction( INPUT_EVENT_KEYBOARD, SDL_SCANCODE_D ), INPUT_ACTION_MOVE_RIGHT );
 
-    InputHandler::DrawableSet the_set = handler.getRegisteredObjects( INPUT_ACTION_JUMP );
+    InputHandler::ControllableSet the_set = handler.getRegisteredObjects( INPUT_ACTION_JUMP );
     ASSERT_EQUAL( the_set.size(), (size_t)1 );
     ASSERT_FALSE( the_set.find( testObject ) == the_set.end() );
 

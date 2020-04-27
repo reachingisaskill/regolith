@@ -2,13 +2,11 @@
 #ifndef __REGOLITH__SCENE_H__
 #define __REGOLITH__SCENE_H__
 
+#include "Definitions.h"
 #include "Drawable.h"
-#include "Trigger.h"
 #include "ObjectBuilder.h"
 #include "Window.h"
 #include "Camera.h"
-
-#include <SDL2/SDL.h>
 
 #include <vector>
 #include <queue>
@@ -25,8 +23,6 @@ namespace Regolith
 
   typedef std::vector< Drawable* > ElementList;
   typedef std::vector< ElementList > TeamsList;
-  typedef std::vector< Trigger* > TriggerList;
-  typedef std::queue< Vector > SpawnPointList;
 
 
   class Scene
@@ -48,14 +44,8 @@ namespace Regolith
       // Containers storing drawable objects - the scene and the hud elements
       // All memory is owned by the resource list above
       Drawable* _background;
-      Drawable* _player;
       ElementList _sceneElements;
       ElementList _hudElements;
-      TriggerList _triggers;
-      SpawnPointList _spawnPoints;
-
-      // Data for player health, death, spawning, etc.
-      Vector _currentPlayerSpawn;
 
       // Can be change to accelerator structures in the future
       // These do not own their memory. They are shortcut lists
@@ -93,18 +83,44 @@ namespace Regolith
       // Function to build the camera objects
       void _loadCameras( Json::Value& );
 
-      // Function to build the camera objects
-      void _loadSpawnPoints( Json::Value& );
+      // Function to build the dialog boxes
+      void _loadDialogs( Json::Value& );
+
+
+      // Override this function to allow the base class to build components specific to this scene type
+      virtual void _loadSceneSpecificComponents( Json::Value& ) = 0;
+
+
+      // Derived class rendering function
+      virtual void _render() = 0;
+
+      // Update the time-dependent scene elements with the No. ticks
+      virtual void _update( Uint32 ) = 0;
+
+      // Derived class collisions function
+      virtual void _resolveCollisions() = 0;
+
+
+      // Return the pointer to the background object
+      Drawable* getBackground() { return _background; }
 
     public:
       // Set the necessary parameters
-      Scene( Window*, SDL_Renderer*, ObjectBuilder*, std::string );
+      Scene( std::string );
 
       // Remove all the cached data and clean up
-      ~Scene();
+      virtual ~Scene();
 
-      // Load the scene from the specified fiel
+
+      // Configure the info required to build the scene
+      void configure( SDL_Renderer*, Window*, ObjectBuilder*, InputHandler*);
+
+      // Load the scene from the specified file
       void load();
+
+      // Return a copy of the scene file
+      std::string getSceneFile() { return _sceneFile; }
+
 
       // Update the time-dependent scene elements with the No. ticks
       void update( Uint32 );
@@ -118,14 +134,23 @@ namespace Regolith
       // Resolve all the collision
       void resolveCollisions();
 
+
       // Return the camera for the scene
-      Camera* getCamera() { return _theCamera; }
+      virtual Camera* getCamera() { return _theCamera; }
 
       // Return the camera for the HUD
-      Camera* getHUD() { return _theHUD; }
+      virtual Camera* getHUD() { return _theHUD; }
+
 
       // Return a pointer to a raw texture object
       RawTexture findRawTexture( std::string ) const;
+
+      // Look up the id number for a given resource
+      unsigned int findResourceID( std::string ) const;
+
+      // Return a pointer to a specific resource
+      Drawable* findResource( unsigned int n ) const { return _resources[ n ]; }
+
 
       // Spawn an object with the supplied ID number at the default position in the Scene
       void spawn( unsigned int );
@@ -136,8 +161,9 @@ namespace Regolith
       // Spawn an object with the supplied ID number at the supplied position in the HUD
       void spawnHUD( unsigned int, Vector );
 
-      // Respawn the player at the last spawn point
-      void playerRespawn();
+      // Spawn an object with the supplied ID number at the supplied position, and return the pointer
+      // THIS FUNCTION RETURNS OWNSHIP OF THIS MEMORY!
+      Drawable* spawnReturn( unsigned int, Vector );
   };
 
 }

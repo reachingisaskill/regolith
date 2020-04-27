@@ -6,8 +6,10 @@
 
 #include "Singleton.h"
 #include "Window.h"
+#include "InputHandler.h"
 #include "Scene.h"
 #include "ObjectBuilder.h"
+#include "SceneBuilder.h"
 
 #include <vector>
 #include <map>
@@ -33,11 +35,11 @@ namespace Regolith
     private:
       Engine* _theEngine;
       Window* _theWindow;
-      Scene* _currentScene;
-      Camera* _currentCamera;
-
       SDL_Renderer* _theRenderer;
+      InputHandler* _theInput;
+
       ObjectBuilder* _theBuilder;
+      SceneBuilder* _theSceneBuilder;
       SceneList _scenes;
       FontMap _fonts;
 
@@ -55,6 +57,10 @@ namespace Regolith
     protected:
       Manager();
 
+
+      // Load the input device configuration
+      void _loadInput( Json::Value& );
+
     public:
       virtual ~Manager();
 
@@ -69,6 +75,9 @@ namespace Regolith
       // Return a pointer to the texture builder
       ObjectBuilder* getObjectBuilder() { return _theBuilder; }
 
+      // Return a pointer to the texture builder
+      SceneBuilder* getSceneBuilder() { return _theSceneBuilder; }
+
       // Get the pointer to the window
       SDL_Renderer* getRendererPointer() { return _theRenderer; }
 
@@ -81,6 +90,8 @@ namespace Regolith
       // Return a pointer to the required font data
       TTF_Font* getFontPointer( std::string );
 
+
+
       // Return a pointer to the required scene
       Scene* getScene( size_t );
 
@@ -90,17 +101,23 @@ namespace Regolith
       // Return the number of scenes
       size_t getNumberScenes() { return _scenes.size(); }
 
+
+
       // Return the default font
       TTF_Font* getDefaultFont() { return _defaultFont; }
 
       // Return the default colour
       SDL_Color getDefaultColour() { return _defaultColor; }
 
+
+
       // Configure the list of user events for game events
       void configureEvents();
 
       // Push a user event into the SDL event queue
       void raiseEvent( GameEvent );
+
+
 
       // Return the constant g
       inline Vector getGravity() { return _gravityConst; }

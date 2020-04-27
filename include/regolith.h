@@ -19,7 +19,7 @@
 #include "Window.h"
 #include "ObjectBuilder.h"
 #include "Camera.h"
-#include "Scene.h"
+#include "ScenePlatformer.h"
 #include "Engine.h"
 
 #include "Manager.h"

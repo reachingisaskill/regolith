@@ -22,7 +22,7 @@ namespace Regolith
     InputHandler& operator=( const InputHandler& ) = delete;
 
     public:
-      typedef std::set< Controllable* > DrawableSet;
+      typedef std::set< Controllable* > ControllableSet;
 
     private:
       // Map the InputEventType to the InputMapping objects
@@ -30,7 +30,7 @@ namespace Regolith
       InputMapping* _inputMaps[ INPUT_EVENT_TOTAL ];
 
       // Map the input actions to the list of drawable objects that request callbacks
-      DrawableSet _actionMaps[ INPUT_ACTION_TOTAL ];
+      ControllableSet _actionMaps[ INPUT_ACTION_TOTAL ];
 
       // Cache the SDL event
       SDL_Event _theEvent;
@@ -54,7 +54,7 @@ namespace Regolith
       void registerInputRequest( Controllable*, InputAction );
 
       // Return the set of objects that requested the input action
-      DrawableSet getRegisteredObjects( InputAction );
+      ControllableSet getRegisteredObjects( InputAction );
 
       // Register an action to a specific input code on a specific input event type (hardware!)
       void registerAction( InputEventType, unsigned int, InputAction );

@@ -11,6 +11,7 @@ namespace Regolith
 {
 
   Camera::Camera() :
+    _currentMode( CAMERA_FIXED ),
     _sceneWidth( 0 ),
     _sceneHeight( 0 ),
     _width( 0 ),
@@ -20,7 +21,13 @@ namespace Regolith
     _x( 0 ),
     _y( 0 ),
     _scaleX( 1.0 ),
-    _scaleY( 1.0 )
+    _scaleY( 1.0 ),
+    _velocityX( 0 ),
+    _velocityY( 0 ),
+    _speed( 1 ),
+    _theObject( nullptr ),
+    _offsetX( 0 ),
+    _offsetY( 0 )
   {
   }
 
@@ -45,7 +52,7 @@ namespace Regolith
     _sceneWidth = scene_width;
     _sceneHeight = scene_height;
     this->setSize( width, height );
-    INFO_STREAM << "Camera::configure() : Scene Dims: " << _sceneWidth << ", " << _sceneHeight << ", Camera Dims: " << _width << ", " << _height << ", Limits: " << _limitX << ", " << _limitY << ", Pos: " << _x << ", " << _y;
+    INFO_STREAM << "Camera::configure() : ScenePlatformer Dims: " << _sceneWidth << ", " << _sceneHeight << ", Camera Dims: " << _width << ", " << _height << ", Limits: " << _limitX << ", " << _limitY << ", Pos: " << _x << ", " << _y;
   }
 
 
@@ -113,28 +120,7 @@ namespace Regolith
   }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Flying Camera type
-
-  FlyingCamera::FlyingCamera() :
-    Camera(),
-    _velocityX( 0 ),
-    _velocityY( 0 ),
-    _speed( 1 )
-  {
-  }
-
-
-  FlyingCamera::FlyingCamera( int scene_width, int scene_height, int width, int height ) :
-    Camera( scene_width, scene_height, width, height ),
-    _velocityX( 0 ),
-    _velocityY( 0 ),
-    _speed( 1 )
-  {
-  }
-
-
-  void FlyingCamera::registerEvents( InputHandler* handler )
+  void Camera::registerEvents( InputHandler* handler )
   {
     handler->registerInputRequest( this, INPUT_ACTION_MOVE_UP );
     handler->registerInputRequest( this, INPUT_ACTION_MOVE_DOWN );
@@ -143,82 +129,70 @@ namespace Regolith
   }
 
 
-  void FlyingCamera::booleanAction( const InputAction& action, bool value )
+  void Camera::booleanAction( const InputAction& action, bool value )
   {
-    DEBUG_STREAM << " Camera : " << (int)action << " : " << value;
-    switch ( action )
+    if ( _currentMode == CAMERA_FLYING )
     {
-      case INPUT_ACTION_MOVE_UP :
-        if ( value ) _velocityY -= _speed;
-        else _velocityY += _speed;
-        break;
+      DEBUG_STREAM << " Camera : " << (int)action << " : " << value;
+      switch ( action )
+      {
+        case INPUT_ACTION_MOVE_UP :
+          if ( value ) _velocityY -= _speed;
+          else _velocityY += _speed;
+          break;
 
-      case INPUT_ACTION_MOVE_DOWN :
-        if ( value ) _velocityY += _speed;
-        else _velocityY -= _speed;
-        break;
+        case INPUT_ACTION_MOVE_DOWN :
+          if ( value ) _velocityY += _speed;
+          else _velocityY -= _speed;
+          break;
 
-      case INPUT_ACTION_MOVE_LEFT :
-        if ( value ) _velocityX -= _speed;
-        else _velocityX += _speed;
-        break;
+        case INPUT_ACTION_MOVE_LEFT :
+          if ( value ) _velocityX -= _speed;
+          else _velocityX += _speed;
+          break;
 
-      case INPUT_ACTION_MOVE_RIGHT :
-        if ( value ) _velocityX += _speed;
-        else _velocityX -= _speed;
-        break;
+        case INPUT_ACTION_MOVE_RIGHT :
+          if ( value ) _velocityX += _speed;
+          else _velocityX -= _speed;
+          break;
 
-      default :
-        break;
+        default :
+          break;
+      }
     }
   }
 
 
-  void FlyingCamera::update( Uint32 time )
+  void Camera::update( Uint32 time )
   {
-    this->x() += _velocityX * time;
-    this->y() += _velocityY * time;
+    switch ( _currentMode )
+    {
+      case CAMERA_FIXED :
+        break;
+
+      case CAMERA_CONSTANT_VELOCITY :
+      case CAMERA_FLYING :
+        this->x() += _velocityX * time;
+        this->y() += _velocityY * time;
+        break;
+
+      case CAMERA_FOLLOWING :
+        if ( _theObject == nullptr ) return;
+        this->setPosition( _theObject->getPosition().x() - _offsetX, _theObject->getPosition().y() + _offsetY );
+
+      default:
+        break;
+    }
 
     this->checkPosition();
   }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Following Camera type
-
-
-  FollowingCamera::FollowingCamera() :
-    Camera(),
-    _theObject( nullptr ),
-    _offsetX( 0 ),
-    _offsetY( 0 )
-  {
-  }
-
-
-  FollowingCamera::FollowingCamera( int scene_width, int scene_height, int width, int height ) :
-    Camera( scene_width, scene_height, width, height ),
-    _theObject( nullptr ),
-    _offsetX( 0 ),
-    _offsetY( 0 )
-  {
-  }
-
-
-  void FollowingCamera::followMe( Drawable* object )
+  void Camera::followMe( Drawable* object )
   {
     _theObject = object;
     _offsetX = 0.5*object->getWidth() + 0.5*getWidth();
     _offsetY = 0.5*object->getHeight() + 0.5*getHeight();
-  }
-
-
-  void FollowingCamera::update( Uint32 )
-  {
-    Vector pos = _theObject->getPosition();
-    this->setPosition( pos.x() - _offsetX, pos.y() + _offsetY );
-
-    this->checkPosition();
   }
 
 }

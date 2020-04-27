@@ -16,27 +16,34 @@ namespace Regolith
 {
 
 
-  Scene::Scene( Window* window, SDL_Renderer* renderer, ObjectBuilder* build, std::string json_file ) :
+  Scene::Scene( std::string json_file ) :
     _rawTextures(),
     _resources(),
     _resourceNames(),
     _teamNames(),
-    _theWindow( window ),
-    _theRenderer( renderer ),
-    _theBuilder( build ),
+    _theWindow( nullptr ),
+    _theRenderer( nullptr ),
+    _theBuilder( nullptr ),
     _sceneFile( json_file ),
+    _theInput( nullptr ),
     _background( nullptr ),
     _sceneElements(),
     _hudElements(),
-    _triggers(),
-    _spawnPoints(),
-    _currentPlayerSpawn( 0.0 ),
     _collisionElements(),
     _animatedElements(),
     _inputElements(),
     _theCamera( nullptr ),
     _theHUD( nullptr )
   {
+  }
+
+
+  void Scene::configure( SDL_Renderer* renderer, Window* window, ObjectBuilder* build, InputHandler* input )
+  {
+    _theWindow = window;
+    _theRenderer = renderer;
+    _theBuilder = build;
+    _theInput = input;
   }
 
 
@@ -64,10 +71,6 @@ namespace Regolith
     INFO_LOG( "Deleting the background" );
     delete _background;
     _background = nullptr;
-
-    INFO_LOG( "Deleting the player" );
-    delete _player;
-    _player = nullptr;
 
     INFO_LOG( "Deleting the cameras" );
     delete _theCamera;
@@ -105,6 +108,12 @@ namespace Regolith
 
   void Scene::load()
   {
+    if ( this->_theRenderer == nullptr )
+    {
+      FAILURE_LOG( "Attempting to build a scene before it has been configured!" );
+      Exception ex( "Scene::load()", "Attemping to load a scene before it is configured" );
+      throw ex;
+    }
     this->buildFromJson();
   }
 
@@ -142,74 +151,6 @@ namespace Regolith
     catch ( std::runtime_error& rt )
     {
       Exception ex( "Scene::_loadConfig()", "Json parsing failure" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
-      throw ex;
-    }
-  }
-
-
-  void Scene::_loadInput( Json::Value& json_data )
-  {
-    Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "keymapping", Utilities::JSON_TYPE_ARRAY );
-
-    _theInput = new InputHandler();
-
-    try
-    {
-      // Configure the input objects
-      Json::Value required = json_data["require"];
-      Json::Value keymaps = json_data["keymapping"];
-
-      Json::ArrayIndex required_size = required.size();
-      for ( Json::ArrayIndex i = 0; i != required_size; ++i )
-      {
-        if ( required[i].asString() == "controller" )
-        {
-          WARN_LOG( "Controllers are not yet supported!" );
-        }
-        else if ( required[i].asString() == "mouse" )
-        {
-          WARN_LOG( "Mouse interface is not yet supported!" );
-        }
-        else if ( required[i].asString() == "joystick" )
-        {
-          WARN_LOG( "Joystick is not yet supported!" );
-        }
-      }
-
-      Json::ArrayIndex keymaps_size = required.size();
-      for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
-      {
-        Json::Value keymap = keymaps[i];
-        Utilities::validateJson( keymap, "type", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( keymap, "mapping", Utilities::JSON_TYPE_OBJECT );
-
-        INFO_LOG( "Loading Keyboard Mapping." );
-        if ( keymap["type"].asString() == "keyboard" )
-        {
-          Json::Value keys = keymap["mapping"];
-          Json::Value::const_iterator keys_end = keys.end();
-          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
-          {
-            SDL_Scancode code = getScancodeID( it.key().asString() );
-            InputAction action = getActionID( it->asString() );
-            _theInput->registerAction( INPUT_EVENT_KEYBOARD, code, action );
-            INFO_STREAM << "Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
-          }
-        }
-        else
-        {
-          WARN_LOG( "Key mapping specified for an unsupported interface." );
-          WARN_LOG( "Please try again with a future version." );
-        }
-      }
-
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Scene::_loadCameras()", "Json reading failure" );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
@@ -328,7 +269,6 @@ namespace Regolith
   void Scene::_loadCaches( Json::Value& json_data )
   {
     Utilities::validateJson( json_data, "background", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "player", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "scene_elements", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "hud_elements", Utilities::JSON_TYPE_ARRAY );
     try
@@ -350,38 +290,6 @@ namespace Regolith
       {
         _animatedElements.push_back( _background );
       }
-
-
-      // Load the scene player character
-      INFO_LOG( "Building the player" );
-      Json::Value player = json_data["player"];
-      Utilities::validateJson( player, "position", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( player, "resource_name", Utilities::JSON_TYPE_STRING );
-
-      std::string player_resource = player["resource_name"].asString();
-      unsigned int player_id_number = _resourceNames[ player_resource ];
-      int player_x = player["position"][0].asInt();
-      int player_y = player["position"][1].asInt();
-      Vector pos( player_x, player_y );
-
-      _player = _resources[ player_id_number ]->clone();
-      _player->setPosition( pos );
-      _currentPlayerSpawn = pos;
-
-      if ( _player->hasAnimation() )
-      {
-        _animatedElements.push_back( _player );
-      }
-      if ( _player->hasInput() )
-      {
-        _inputElements.push_back( _player );
-        _player->registerEvents( _theInput );
-      }
-      if ( _player->hasCollision() )
-      {
-        _collisionElements[ _player->getTeam() ].push_back( _player );
-      }
-
 
 
       // Load the Scene Elements
@@ -479,26 +387,24 @@ namespace Regolith
 
       INFO_LOG( "Configuring scene camera" );
       std::string camera_type = json_data["type"].asString();
-      if ( camera_type == "fixed" )
+      _theCamera = new Camera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
+      _theCamera->setPosition( camera_x, camera_y );
+      _theCamera->registerEvents( _theInput );
+
+      if ( camera_type == "flying" )
       {
-        _theCamera = new Camera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
-        _theCamera->setPosition( camera_x, camera_y );
-      }
-      else if ( camera_type == "flying" )
-      {
-        INFO_LOG( "Creating flying camera" );
-        FlyingCamera* camera = new FlyingCamera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
-        camera->setPosition( camera_x, camera_y );
-        camera->registerEvents( _theInput );
-        _theCamera = camera;
+        INFO_LOG( "Setting mode to flying camera" );
+        _theCamera->setMode( CAMERA_FLYING );
       }
       else if ( camera_type == "following" )
       {
-        INFO_LOG( "Creating following camera. Tracing player" );
-        FollowingCamera* camera = new FollowingCamera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
-        camera->setPosition( camera_x, camera_y );
-        camera->followMe( _player );
-        _theCamera = camera;
+        INFO_LOG( "Setting mode to flying camera" );
+        _theCamera->setMode( CAMERA_FOLLOWING );
+      }
+      else if ( camera_type == "constant_velocity" )
+      {
+        INFO_LOG( "Setting mode to flying camera" );
+        _theCamera->setMode( CAMERA_CONSTANT_VELOCITY );
       }
       else
       {
@@ -521,31 +427,6 @@ namespace Regolith
   }
 
 
-  void Scene::_loadSpawnPoints( Json::Value& spawnpoints )
-  {
-    INFO_LOG( "Loading spawn points into queue" );
-    if ( ! spawnpoints.isArray() )
-    {
-      FAILURE_LOG( "Spawn point list is not an array" );
-      Exception ex( "Scene::_loadSpawnPoints()", "Expected spawn point list to be an array" );
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-
-    Json::ArrayIndex spawnpoints_size = spawnpoints.size();
-    for ( Json::ArrayIndex i = 0; i != spawnpoints_size; ++i )
-    {
-      Utilities::validateJsonArray( spawnpoints[i], 2, Utilities::JSON_TYPE_FLOAT );
-
-      float x = spawnpoints[i][0].asFloat();
-      float y = spawnpoints[i][1].asFloat();
-
-      _spawnPoints.push( Vector( x, y ) );
-    }
-    INFO_STREAM << "Loaded " << spawnpoints_size << " spawn points into scene";
-  }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // The entry to the building algorithm
 
@@ -559,16 +440,6 @@ namespace Regolith
     INFO_LOG( "Loading configuration data" );
 
     Json::Value json_data = this->_loadConfig();
-
-    if ( ! json_data.isMember( "input" ) )
-    {
-      FAILURE_LOG( "Could not find input configuration in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No input configuration found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Loading Input Configuration" );
-    this->_loadInput( json_data["input"] );
 
     if ( ! json_data.isMember( "textures" ) )
     {
@@ -610,15 +481,10 @@ namespace Regolith
     INFO_LOG( "Loading cameras" );
     this->_loadCameras( json_data["cameras"] );
 
-    if ( ! json_data.isMember( "spawn_points" ) )
-    {
-      FAILURE_LOG( "Could not find spawn_points data in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No spawn_points member found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Loading spawn points" );
-    this->_loadSpawnPoints( json_data["spawn_points"] );
+    INFO_LOG( "Loading Scene-Specific Components" );
+    this->_loadSceneSpecificComponents( json_data );
+
+    INFO_LOG( "Scene Successfuly Built" );
   }
 
 
@@ -744,7 +610,11 @@ namespace Regolith
       (*it)->update( time );
     }
 
+    // Update the camera position
     _theCamera->update( time );
+
+    // Call the derived class udpated function
+    this->_update( time );
   }
 
 
@@ -761,13 +631,11 @@ namespace Regolith
       (*it)->render( _theCamera );
     }
 
-
-    // Draw the player on top of the environment
-    _player->render( _theCamera );
-
+    // Call the derived class render function
+    this->_render();
 
 
-    // Render all the elements with respect to the window
+    // Render all the HUD elements with respect to the window
     end = _hudElements.end();
     for ( ElementList::iterator it = _hudElements.begin(); it != end; ++it )
     {
@@ -784,14 +652,6 @@ namespace Regolith
 
   void Scene::resolveCollisions()
   {
-    // Make sure player is still within the scene
-    if ( ! contains( _background, _player ) )
-    {
-      DEBUG_LOG( "Player left scene - Respawning" );
-      this->playerRespawn();
-    }
-
-    // First player vs environment
     ElementList& environmentElements = _collisionElements[0];
     size_t numberEnvironment = environmentElements.size();
     size_t numberTeams = _collisionElements.size();
@@ -818,26 +678,8 @@ namespace Regolith
       }
     }
 
-    size_t numberTriggers = _triggers.size();
-    for ( size_t i = 0; i < numberTriggers; ++i )
-    {
-      if ( collides( _player, _triggers[i], contact ) )
-      {
-        DEBUG_STREAM << "Collided with trigger: " << i;
-        switch ( _triggers[i]->getTriggerType() )
-        {
-          default:
-            break;
-        }
-      }
-    }
-  }
-
-
-  void Scene::playerRespawn()
-  {
-
-    _player->setPosition( _currentPlayerSpawn );
+    // Resolve the derived class specific collisions
+    this->_resolveCollisions();
   }
 
 
@@ -859,6 +701,20 @@ namespace Regolith
   }
 
 
+  unsigned int Scene::findResourceID( std::string name ) const
+  {
+    ResourceNameMap::const_iterator found = _resourceNames.find( name );
+    if ( found == _resourceNames.end() )
+    {
+      ERROR_STREAM << "Failed to find resource with name: " << name;
+      Exception ex( "Scene::findResourceID()", "Could not find resource", true );
+      ex.addDetail( "Resource name", name );
+      throw ex;
+    }
+
+    return found->second;
+  }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Spawn functions to dynamically place elements in the scene and HUD
 
@@ -877,6 +733,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
+      newElement->registerEvents( _theInput );
     }
     // HUD Elements not allowed collision
   }
@@ -896,6 +753,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
+      newElement->registerEvents( _theInput );
     }
     if ( newElement->hasCollision() )
     {
@@ -919,6 +777,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
+      newElement->registerEvents( _theInput );
     }
     if ( newElement->hasCollision() )
     {
@@ -926,6 +785,30 @@ namespace Regolith
     }
 
   }
+
+
+  Drawable* Scene::spawnReturn( unsigned int id, Vector vec )
+  {
+    Drawable* newElement = _resources[id]->cloneAt( vec );
+    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam() << ", at: " << vec;
+
+    if ( newElement->hasAnimation() )
+    {
+      _animatedElements.push_back( newElement );
+    }
+    if ( newElement->hasInput() )
+    {
+      _inputElements.push_back( newElement );
+      newElement->registerEvents( _theInput );
+    }
+    if ( newElement->hasCollision() )
+    {
+      _collisionElements[ newElement->getTeam() ].push_back( newElement );
+    }
+
+    return newElement;
+  }
+
 
 }
 

@@ -4,10 +4,15 @@
   "default_colour" : [ 150, 150, 500, 255 ],
   "default_font" : "default",
   "title" : "Regolith Integration Test",
+
   "scenes" :
   [
-    "test_data/test_scene.json"
+    {
+      "file_name" : "test_data/test_scene.json",
+      "type" : "platformer"
+    }
   ],
+
   "fonts" :
   [
     {
@@ -15,6 +20,26 @@
       "path" : "test_data/test_font.ttf",
       "size" : 28
     }
-  ]
+  ],
+
+  "input" :
+  {
+    "require" : [ "keyboard" ],
+    "keymapping" :
+    [ 
+      {
+        "type" : "keyboard",
+        "mapping" :
+        {
+          "space"  : "jump",
+          "w"      : "move_up",
+          "s"      : "move_down",
+          "a"      : "move_left",
+          "d"      : "move_right",
+          "return" : "attack"
+        }
+      }
+    ]
+  }
 }
 

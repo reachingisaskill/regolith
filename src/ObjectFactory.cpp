@@ -4,7 +4,7 @@
 #include "Utilities.h"
 #include "Manager.h"
 #include "ObjectBuilder.h"
-#include "Scene.h"
+#include "ScenePlatformer.h"
 #include "Texture.h"
 #include "SpriteSheet.h"
 #include "AnimatedSprite.h"

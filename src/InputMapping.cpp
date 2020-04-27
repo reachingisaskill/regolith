@@ -32,6 +32,7 @@ namespace Regolith
 
   void KeyboardMapping::registerAction( unsigned int scan_code, InputAction action )
   {
+    DEBUG_STREAM << "Keyboard Mapping registered: " << action << " -> " << scan_code;
     _theMap[ scan_code ] = action;
   }
 

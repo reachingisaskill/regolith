@@ -12,9 +12,10 @@ namespace Regolith
   class InputHandler;
 
 
-  class Camera
+  class Camera : public Controllable
   {
     private:
+      CameraMode _currentMode;
       int _sceneWidth;
       int _sceneHeight;
       int _width;
@@ -26,6 +27,14 @@ namespace Regolith
       // Parameters to rescale widths and heights if the window changes size
       float _scaleX;
       float _scaleY;
+      // Details when flying
+      int _velocityX;
+      int _velocityY;
+      int _speed;
+      // Details when following
+      Drawable* _theObject;
+      int _offsetX;
+      int _offsetY;
 
     protected:
       int& x() { return _x; }
@@ -46,6 +55,9 @@ namespace Regolith
       // Configure the camera using scene width/height and view width/height
       void configure( int, int, int, int );
 
+      // Set the current camera mode
+      void setMode( CameraMode mode ) { _currentMode = mode; }
+
       // Set the position of the camera
       void setPosition( int, int );
 
@@ -55,8 +67,10 @@ namespace Regolith
       // Move the camera by a specified amount
       void move( int, int );
 
+      void setVelocity( int vx, int vy ) { _velocityX = vx; _velocityY = vy; }
+
       // Function to update the camera's behavious on every frame
-      virtual void update( Uint32 ) {}
+      virtual void update( Uint32 );
 
       // Change the scale parameters based on the new window size
       void updateScale( int, int );
@@ -70,30 +84,7 @@ namespace Regolith
       // Places the object's rectang inside the window
       SDL_Rect place( const SDL_Rect& );
 
-  };
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Flying Camera type
-
-  // Registers input actions with the input handler and is directly controllable by the move actions
-  class FlyingCamera : public Camera, public Controllable
-  {
-    private:
-      int _velocityX;
-      int _velocityY;
-      int _speed;
-
-    public:
-      // Create invalid instance
-      FlyingCamera();
-
-      // Set the scene size and camera window size
-      FlyingCamera( int, int, int, int );
-
-      // Applies the velocity to the current position
-      virtual void update( Uint32 );
-
+      // Functions for flying mode
       // Update the objects behaviour based on the provided timestep
       virtual void registerEvents( InputHandler* );
 
@@ -103,33 +94,10 @@ namespace Regolith
       virtual void floatAction( const InputAction&, float ) {}
       virtual void vectorAction( const InputAction&, const Vector& ) {}
 
-  };
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Following Camera type
-
-  // Follows the position of Drawable* object around the scene bounds
-  class FollowingCamera : public Camera
-  {
-    private:
-      Drawable* _theObject;
-      int _offsetX;
-      int _offsetY;
-
-    public:
-      // Create invalid instance
-      FollowingCamera();
-
-      // Set the scene size and camera window size
-      FollowingCamera( int, int, int, int );
-
-      // Updates the position to follow the object
-      virtual void update( Uint32 );
-
+      // Function to follow an element
       // Update the objects behaviour based on the provided timestep
       virtual void followMe( Drawable* );
-
   };
 
 }

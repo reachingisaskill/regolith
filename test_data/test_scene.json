@@ -1,24 +1,4 @@
 {
-  "input" :
-  {
-    "require" : [ "keyboard" ],
-    "keymapping" :
-    [ 
-      {
-        "type" : "keyboard",
-        "mapping" :
-        {
-          "space"  : "jump",
-          "w"      : "move_up",
-          "s"      : "move_down",
-          "a"      : "move_left",
-          "d"      : "move_right",
-          "return" : "attack"
-        }
-      }
-    ]
-  },
-
   "textures" :
   {
     "texture_files" :
@@ -117,12 +97,6 @@
   {
     "background" : "background",
     
-    "player" :
-    {
-      "resource_name" : "the_dot",
-      "position" : [ 380, 150 ]
-    },
-
     "scene_elements" :
     [
       {
@@ -162,6 +136,12 @@
         "position" : [ 20, 20 ]
       }
     ]
+  },
+
+  "player" :
+  {
+    "resource_name" : "the_dot",
+    "position" : [ 380, 150 ]
   },
 
   "spawn_points" :

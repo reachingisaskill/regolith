@@ -1,8 +1,10 @@
 
 #include "Manager.h"
 
+#include "Utilities.h"
 #include "Exception.h"
 #include "Engine.h"
+#include "ScenePlatformer.h"
 
 #include "logtastic.h"
 
@@ -11,23 +13,29 @@ namespace Regolith
 {
 
   Manager::Manager() :
+    _theEngine( nullptr ),
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
+    _theInput( nullptr ),
     _theBuilder( new ObjectBuilder() ),
+    _theSceneBuilder( new SceneBuilder() ),
     _scenes(),
     _fonts(),
     _title(),
     _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
+    _eventStartIndex(0),
     _gameEvents(),
     _gravityConst( 0.0, 0.01 ),
     _dragConst( 0.005 )
   {
     // Set up the provided factories
-//    _theBuilder->addFactory( new SimpleFactory() );
     _theBuilder->addFactory( new SpriteFactory() );
     _theBuilder->addFactory( new AnimatedFactory() );
     _theBuilder->addFactory( new FPSStringFactory() );
+
+    // Set up the scene factories
+    _theSceneBuilder->addFactory( new SceneFactory<ScenePlatformer>( "platformer" ) );
   }
 
 
@@ -44,6 +52,10 @@ namespace Regolith
     // Destroy the builder
     delete _theBuilder;
     _theBuilder = nullptr;
+
+    // Destroy the scene builder
+    delete _theSceneBuilder;
+    _theSceneBuilder = nullptr;
 
     // Remove the engine
     Engine::killInstance();
@@ -186,13 +198,20 @@ namespace Regolith
 
 
 
+      // Load the input device configuration
+      this->_loadInput( json_data["input"] );
+
+
       // Load all the scenes into memory
       Json::Value scene_data = json_data["scenes"];
       Json::ArrayIndex scenes_size = scene_data.size();
       for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
       {
-        _scenes.push_back( new Scene( _theWindow, _theRenderer, _theBuilder, scene_data[ i ].asString() ) );
+        Scene* new_scene = _theSceneBuilder->build( scene_data[i] );
+        new_scene->configure( _theRenderer, _theWindow, _theBuilder, _theInput );
+        _scenes.push_back( new_scene );
       }
+
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream
     {
@@ -213,6 +232,73 @@ namespace Regolith
 
     this->configureEvents();
     _theEngine->configure( _theRenderer, _theWindow );
+  }
+
+
+  void Manager::_loadInput( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "keymapping", Utilities::JSON_TYPE_ARRAY );
+
+    _theInput = new InputHandler();
+
+    try
+    {
+      // Configure the input objects
+      Json::Value required = json_data["require"];
+      Json::Value keymaps = json_data["keymapping"];
+
+      Json::ArrayIndex required_size = required.size();
+      for ( Json::ArrayIndex i = 0; i != required_size; ++i )
+      {
+        if ( required[i].asString() == "controller" )
+        {
+          WARN_LOG( "Controllers are not yet supported!" );
+        }
+        else if ( required[i].asString() == "mouse" )
+        {
+          WARN_LOG( "Mouse interface is not yet supported!" );
+        }
+        else if ( required[i].asString() == "joystick" )
+        {
+          WARN_LOG( "Joystick is not yet supported!" );
+        }
+      }
+
+      Json::ArrayIndex keymaps_size = required.size();
+      for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
+      {
+        Json::Value keymap = keymaps[i];
+        Utilities::validateJson( keymap, "type", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( keymap, "mapping", Utilities::JSON_TYPE_OBJECT );
+
+        INFO_LOG( "Loading Keyboard Mapping." );
+        if ( keymap["type"].asString() == "keyboard" )
+        {
+          Json::Value keys = keymap["mapping"];
+          Json::Value::const_iterator keys_end = keys.end();
+          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
+          {
+            SDL_Scancode code = getScancodeID( it.key().asString() );
+            InputAction action = getActionID( it->asString() );
+            _theInput->registerAction( INPUT_EVENT_KEYBOARD, code, action );
+            INFO_STREAM << "Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+          }
+        }
+        else
+        {
+          WARN_LOG( "Key mapping specified for an unsupported interface." );
+          WARN_LOG( "Please try again with a future version." );
+        }
+      }
+
+    }
+    catch ( std::runtime_error& rt )
+    {
+      Exception ex( "Manager::_loadInput()", "Json reading failure" );
+      ex.addDetail( "What", rt.what() );
+      throw ex;
+    }
   }
 
 

@@ -51,7 +51,7 @@ namespace Regolith
     InputMapping* mapper = nullptr;
     InputAction action = INPUT_ACTION_NULL;
 
-    DrawableSet::iterator end;
+    ControllableSet::iterator end;
 
     DEBUG_STREAM << "Handling event";
 
@@ -69,7 +69,7 @@ namespace Regolith
         if ( action == INPUT_ACTION_NULL ) break;
 
         end = _actionMaps[action].end();
-        for ( DrawableSet::iterator it = _actionMaps[action].begin(); it != end; ++it )
+        for ( ControllableSet::iterator it = _actionMaps[action].begin(); it != end; ++it )
         {
           DEBUG_STREAM << "  Propagating action : " << action;
           mapper->propagate( (*it) );
@@ -135,7 +135,7 @@ namespace Regolith
       case SDL_RENDER_TARGETS_RESET :
       case SDL_RENDER_DEVICE_RESET :
       default :
-        // Not logic for these event types yet.
+        // No logic for these event types yet.
         break;
     }
   }
@@ -155,12 +155,12 @@ namespace Regolith
 
   void InputHandler::registerInputRequest( Controllable* object, InputAction action )
   {
-    INFO_STREAM << "Registered input request for action: " << action;
+    INFO_STREAM << "Registered input request for action: " << action << " " << object;
     _actionMaps[action].insert( object );
   }
 
 
-  InputHandler::DrawableSet InputHandler::getRegisteredObjects( InputAction action )
+  InputHandler::ControllableSet InputHandler::getRegisteredObjects( InputAction action )
   {
     return _actionMaps[action];
   }

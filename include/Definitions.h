@@ -49,6 +49,14 @@ namespace Regolith
     TRIGGER_TOTAL
   };
 
+  enum CameraMode
+  {
+    CAMERA_FIXED,
+    CAMERA_FLYING,
+    CAMERA_FOLLOWING,
+    CAMERA_CONSTANT_VELOCITY
+  };
+
 //////////////////////////////////////////////////
   // Input possibilities
 
