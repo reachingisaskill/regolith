@@ -28,6 +28,9 @@ namespace Regolith
   // Function that returns true if the first object contains the second object
   bool contains( Drawable*, Drawable* );
 
+  // Function that returns true if the object contains point
+  bool contains( Drawable*, Vector& );
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Base class for all collision models

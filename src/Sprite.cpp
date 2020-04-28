@@ -40,7 +40,11 @@ namespace Regolith
 
   Sprite::~Sprite()
   {
-    delete _collision;
+    if ( _collision != nullptr )
+    {
+      delete _collision;
+      _collision = nullptr;
+    }
   }
 
 
@@ -79,6 +83,15 @@ namespace Regolith
   {
     col = _collision;
     return 1;
+  }
+
+
+  void Sprite::addCollision( Collision* col )
+  {
+    if ( _collision != nullptr )
+      delete _collision;
+
+    _collision = col;
   }
 
 }

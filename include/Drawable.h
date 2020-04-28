@@ -67,10 +67,6 @@ namespace Regolith
       // Set whether thte collision objects are active
       virtual void setCollisionActive( bool active ) { _collisionActive = active; }
 
-      // Function to add a collision object to the class. 
-      // How the collision objects are stored is up to the derived class
-      virtual void addCollision( Collision* ) = 0;
-
 
       // Perform the steps to call SDL_RenderCopy, etc
       virtual void render( Camera* ) = 0;

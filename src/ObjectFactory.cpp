@@ -3,11 +3,10 @@
 
 #include "Utilities.h"
 #include "Manager.h"
-#include "ObjectBuilder.h"
-#include "ScenePlatformer.h"
 #include "Texture.h"
 #include "Sprite.h"
 #include "FPSString.h"
+#include "Button.h"
 
 #include "logtastic.h"
 
@@ -35,6 +34,51 @@ namespace Regolith
   SDL_Renderer* ObjectFactory_base::getRenderer() const
   {
     return _parentBuilder->getRenderer();
+  }
+
+
+  Texture ObjectFactory_base::buildTexture( Json::Value& json_data ) const
+  {
+    Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
+
+    std::string texture_name = json_data["texture_name"].asString();
+    RawTexture raw_texture = findRawTexture( texture_name );
+
+    Texture texture( raw_texture );
+
+    if ( json_data.isMember( "number_rows" ) && json_data.isMember( "number_columns" ) )
+    {
+      int num_rows = json_data["number_rows"].asInt();
+      int num_cols = json_data["number_columns"].asInt();
+      int num_used;
+      int period = 0;
+      int start_num = 0;
+      if ( json_data.isMember( "number_used_cells" ) )
+      {
+        num_used = json_data["number_used_cells"].asInt();
+      }
+      else
+      {
+        num_used = 0;
+      }
+
+      if ( json_data.isMember( "update_period" ) )
+      {
+        period = json_data["update_period"].asInt();
+      }
+
+      INFO_STREAM << "Configuring sprite: " << num_rows << "x" << num_cols << " -> " << num_used << " T = " << period << " start: " << start_num;
+
+      texture.configure( num_rows, num_cols, num_used, period );
+
+      if ( json_data.isMember( "start_number" ) )
+      {
+        start_num = json_data["start_number"].asInt();
+      }
+      texture.setSpriteNumber( start_num );
+    }
+
+    return texture;
   }
 
 
@@ -111,45 +155,8 @@ namespace Regolith
   Drawable* SpriteFactory::build( Json::Value& json_data ) const
   {
     DEBUG_LOG( "Building Sprite" );
-    Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
 
-    std::string texture_name = json_data["texture_name"].asString();
-    RawTexture raw_texture = findRawTexture( texture_name );
-
-    Texture texture( raw_texture );
-
-
-    if ( json_data.isMember( "number_rows" ) && json_data.isMember( "number_columns" ) )
-    {
-      int num_rows = json_data["number_rows"].asInt();
-      int num_cols = json_data["number_columns"].asInt();
-      int num_used;
-      int period = 0;
-      int start_num = 0;
-      if ( json_data.isMember( "number_used_cells" ) )
-      {
-        num_used = json_data["number_used_cells"].asInt();
-      }
-      else
-      {
-        num_used = 0;
-      }
-
-      if ( json_data.isMember( "update_period" ) )
-      {
-        period = json_data["update_period"].asInt();
-      }
-
-      INFO_STREAM << "Configuring sprite: " << num_rows << "x" << num_cols << " -> " << num_used << " T = " << period << " start: " << start_num;
-
-      texture.configure( num_rows, num_cols, num_used, period );
-
-      if ( json_data.isMember( "start_number" ) )
-      {
-        start_num = json_data["start_number"].asInt();
-      }
-      texture.setSpriteNumber( start_num );
-    }
+    Texture texture = buildTexture( json_data );
 
     // Configure the default collision
     Collision* collision = nullptr;
@@ -243,5 +250,66 @@ namespace Regolith
     return newSprite;
   }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Sprites
+
+  ButtonFactory::ButtonFactory()
+  {
+  }
+
+
+  ButtonFactory::~ButtonFactory()
+  {
+  }
+
+
+  Drawable* ButtonFactory::build( Json::Value& json_data ) const
+  {
+    const char* state_names[Button::STATE_TOTAL] = { "state_normal", "state_focussed", "state_activated", "state_inactive" };
+    Texture state_textures[Button::STATE_TOTAL];
+
+    DEBUG_LOG( "Building Button" );
+    // Only require the normal state to be present
+    Utilities::validateJson( json_data, "state_normal", Utilities::JSON_TYPE_STRING );
+
+
+    // Load the normal texture first
+    Texture normal_texture = buildTexture( json_data[ state_names[0] ] );
+
+    // Configure the default collision
+    Collision* collision = nullptr;
+    if ( json_data.isMember( "collision" ) )
+    {
+      if ( json_data["collision"].isString() && json_data["collision"].asString() == "default" )
+      {
+        DEBUG_LOG( "Configuring default collision for sprite" );
+        collision = new Collision( Vector( 0.0, 0.0 ), normal_texture.getWidth(), normal_texture.getHeight() );
+      }
+      else if ( json_data["collision"].isObject() )
+      {
+        collision = buildCollision( json_data["collision"] );
+      }
+    }
+
+    
+    // Create the button object
+    Button* newButton = new Button( normal_texture, collision );
+
+    // Check and load the other textures
+    for ( unsigned int state_number = 1; state_number < Button::STATE_TOTAL; ++state_number )
+    {
+      if ( json_data.isMember( state_names[ state_number ] ) )
+      {
+        newButton->setTexture( buildTexture( json_data[ state_names[state_number] ] ), (Button::State)state_number );
+      }
+    }
+
+
+    // Set the rest of the drawable properties
+    buildDrawable( newButton, json_data );
+
+    return newButton;
+  }
 }
 

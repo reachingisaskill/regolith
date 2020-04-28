@@ -29,6 +29,9 @@ namespace Regolith
       // Helper function to build the Drawable base class
       void buildDrawable( Drawable*, Json::Value& ) const;
 
+      // Build a new texture object from the json data
+      Texture buildTexture( Json::Value& ) const;
+
       Collision* buildCollision( Json::Value& ) const;
 
     public:
@@ -71,6 +74,22 @@ namespace Regolith
       virtual ~FPSStringFactory();
 
       virtual const char* getObjectName() const { return "fps_string"; }
+
+      virtual Drawable* build( Json::Value& ) const;
+  };
+
+
+  // Buttons
+  class ButtonFactory : public ObjectFactory_base
+  {
+    private:
+
+    public:
+      ButtonFactory();
+
+      virtual ~ButtonFactory();
+
+      virtual const char* getObjectName() const { return "button"; }
 
       virtual Drawable* build( Json::Value& ) const;
   };
