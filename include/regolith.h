@@ -6,11 +6,12 @@
 #include "Vector.h"
 #include "Definitions.h"
 #include "Exception.h"
+#include "NamedVector.h"
 #include "Timer.h"
 
 #include "Texture.h"
-#include "SpriteSheet.h"
-#include "AnimatedSprite.h"
+#include "Drawable.h"
+#include "Sprite.h"
 #include "FPSString.h"
 
 #include "Collision.h"

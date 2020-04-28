@@ -39,13 +39,28 @@ namespace Regolith
   class Texture
   {
     private:
-      // Class owns this memory
+      // Pointer to the raw sdl texture
       RawTexture _theTexture;
       float _angle;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
 
+      // Dimensions after clipping, etc
+      int _spriteWidth;
+      int _spriteHeight;
+
+      // If its a spritesheet
+      int _currentSprite;
+      int _rows;
+      int _columns;
+      int _numSprites;
+
+      // If its animated
+      Uint32 _updatePeriod;
+      Uint32 _count;
+
     protected:
+      SDL_Rect& clip() { return _clip; }
 
     public:
       Texture();
@@ -54,20 +69,27 @@ namespace Regolith
 
       virtual ~Texture();
 
-      // Fullfill the Drawable class requirements
+
+      // Configures as a sprite sheet with optional animation. No. rows, No. Columns, and No. of used cells and update period
+      // This function is optinal. Without it this acts as a single flat texture
+      void configure( int, int, int number = 0, Uint32 period = 0 );
+
+      // Returns true if the spritesheeet is to be updated every frame
+      bool isAnimated() const { return _updatePeriod > 0u; }
+
 
       // Render with the current renderer object
       virtual void draw( SDL_Rect* );
 
 
       // Accessors
-      virtual int getWidth() const;
-      virtual int getHeight() const;
+      int getWidth() const { return _spriteWidth; }
+      int getHeight() const { return _spriteHeight; }
       virtual float getAngle() const { return _angle; }
 
 
-      // Set the clip around the texture
-      virtual void setClip( SDL_Rect c ) { _clip = c; }
+      // Manually set the clip around the texture (not compatible with spritesheet/animations)
+      virtual void setClip( SDL_Rect c );
       virtual SDL_Rect getClip() { return _clip; }
 
 
@@ -85,6 +107,19 @@ namespace Regolith
 
       // Flip the image
       void setFlip( SDL_RendererFlip );
+
+
+      // Animation update period
+      void setUpdatePeriod( Uint32 );
+
+      // Update with time in ms
+      virtual void update( Uint32 );
+
+
+      // Sprite details
+      int getNumberSprites() const { return _numSprites; }
+      void setSpriteNumber( int );
+      const int& currentSpriteNumber() { return _currentSprite; }
   };
 }
 

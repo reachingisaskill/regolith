@@ -31,7 +31,6 @@ namespace Regolith
   {
     // Set up the provided factories
     _theBuilder->addFactory( new SpriteFactory() );
-    _theBuilder->addFactory( new AnimatedFactory() );
     _theBuilder->addFactory( new FPSStringFactory() );
 
     // Set up the scene factories

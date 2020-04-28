@@ -33,6 +33,7 @@ namespace Regolith
 
 
   Camera::Camera( int scene_width, int scene_height, int width, int height ) :
+    _currentMode( CAMERA_FIXED ),
     _sceneWidth( scene_width ),
     _sceneHeight( scene_height ),
     _width( width ),
@@ -42,7 +43,13 @@ namespace Regolith
     _x( 0 ),
     _y( 0 ),
     _scaleX( 1.0 ),
-    _scaleY( 1.0 )
+    _scaleY( 1.0 ),
+    _velocityX( 0 ),
+    _velocityY( 0 ),
+    _speed( 1 ),
+    _theObject( nullptr ),
+    _offsetX( 0 ),
+    _offsetY( 0 )
   {
   }
 
@@ -179,6 +186,7 @@ namespace Regolith
       case CAMERA_FOLLOWING :
         if ( _theObject == nullptr ) return;
         this->setPosition( _theObject->getPosition().x() - _offsetX, _theObject->getPosition().y() + _offsetY );
+        break;
 
       default:
         break;

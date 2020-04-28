@@ -4,8 +4,8 @@
 
 #include "Definitions.h"
 
+#include "Texture.h"
 #include "Drawable.h"
-#include "SpriteSheet.h"
 #include "Collision.h"
 
 
@@ -16,7 +16,7 @@ namespace Regolith
   class Sprite : public Drawable
   {
     private:
-      SpriteSheet _spriteSheet;
+      Texture _texture;
       SDL_Rect _destination;
       Collision* _collision;
 
@@ -25,7 +25,7 @@ namespace Regolith
     public:
       Sprite();
 
-      explicit Sprite( SpriteSheet );
+      explicit Sprite( Texture );
 
       Sprite( const Sprite& );
 
@@ -35,10 +35,10 @@ namespace Regolith
       // Return the object properties
       virtual bool hasCollision() const { return _collision != nullptr; }
       virtual bool hasInput() const { return false; }
-      virtual bool hasAnimation() const { return this->isMovable(); }
+      virtual bool hasAnimation() const { return this->isMovable() || _texture.isAnimated(); }
 
       // For derived classes to update every frame
-//      virtual void update( Uint32 );
+      virtual void update( Uint32 );
 
       // Render with the current renderer object
       virtual void render( Camera* );
@@ -56,7 +56,7 @@ namespace Regolith
       void addCollision( Collision* col ) { _collision = col; }
 
       // Sprite details
-      SpriteSheet& spriteSheet() { return _spriteSheet; }
+      Texture& texture() { return _texture; }
   };
 
 }

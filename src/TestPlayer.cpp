@@ -18,7 +18,7 @@ namespace Regolith
   }
 
 
-  TestPlayer::TestPlayer( SpriteSheet sheet ) :
+  TestPlayer::TestPlayer( Texture sheet ) :
     Sprite( sheet ),
     _movementForce()
   {
@@ -125,7 +125,7 @@ namespace Regolith
     std::string texture_name = json_data["texture_name"].asString();
     RawTexture texture = this->findRawTexture( texture_name );
 
-    SpriteSheet sheet( texture );
+    Texture sheet( texture );
 
 
     if ( json_data.isMember( "number_rows" ) && json_data.isMember( "number_columns" ) )

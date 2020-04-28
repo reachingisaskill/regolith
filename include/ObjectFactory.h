@@ -44,22 +44,6 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Provided classes
 
-//  // Standard Texture
-//  class SimpleFactory : public ObjectFactory_base
-//  {
-//    private:
-//
-//    public:
-//      SimpleFactory();
-//
-//      virtual ~SimpleFactory();
-//
-//      virtual const char* getObjectName() const { return "simple_texture"; }
-//
-//      virtual Drawable* build( Json::Value& ) const;
-//  };
-
-
   // Sprites
   class SpriteFactory : public ObjectFactory_base
   {
@@ -71,22 +55,6 @@ namespace Regolith
       virtual ~SpriteFactory();
 
       virtual const char* getObjectName() const { return "sprite"; }
-
-      virtual Drawable* build( Json::Value& ) const;
-  };
-
-
-  // Animated Sprites
-  class AnimatedFactory : public ObjectFactory_base
-  {
-    private:
-
-    public:
-      AnimatedFactory();
-
-      virtual ~AnimatedFactory();
-
-      virtual const char* getObjectName() const { return "animated"; }
 
       virtual Drawable* build( Json::Value& ) const;
   };

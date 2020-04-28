@@ -22,7 +22,15 @@ namespace Regolith
     _theTexture( { nullptr, 0, 0 } ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
-    _clip( { 0, 0, 0, 0 } )
+    _clip( { 0, 0, 0, 0 } ),
+    _spriteWidth( 0 ),
+    _spriteHeight( 0 ),
+    _currentSprite( 0 ),
+    _rows( 0 ),
+    _columns( 0 ),
+    _numSprites( 0 ),
+    _updatePeriod( 0 ),
+    _count( 0 )
   {
   }
 
@@ -31,7 +39,15 @@ namespace Regolith
     _theTexture( tex ),
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
-    _clip( { 0, 0, 0, 0 } )
+    _clip( { 0, 0, tex.width, tex.height } ),
+    _spriteWidth( tex.width ),
+    _spriteHeight( tex.height ),
+    _currentSprite( 0 ),
+    _rows( 0 ),
+    _columns( 0 ),
+    _numSprites( 0 ),
+    _updatePeriod( 0 ),
+    _count( 0 )
   {
   }
 
@@ -41,15 +57,25 @@ namespace Regolith
   }
 
 
-  int Texture::getWidth() const
+  void Texture::configure( int rows, int cols, int number, Uint32 period )
   {
-    return _theTexture.width;
-  }
+    _rows = rows;
+    _columns = cols;
+    _updatePeriod = period;
 
+    if ( number == 0 )
+    {
+      _numSprites = _rows * _columns;
+    }
+    else
+    {
+      _numSprites = number;
+    }
 
-  int Texture::getHeight() const
-  {
-    return _theTexture.height;
+    _spriteWidth = Texture::getWidth() / _columns;
+    _spriteHeight = Texture::getHeight() / _rows;
+
+    this->setSpriteNumber( 0 );
   }
 
 
@@ -58,6 +84,14 @@ namespace Regolith
     static SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
     // Render it to the window
     SDL_RenderCopyEx( renderer, _theTexture.texture, &_clip, destination, _angle, nullptr, _flipFlag );
+  }
+
+
+  void Texture::setClip( SDL_Rect c )
+  {
+    _spriteWidth = c.w;
+    _spriteHeight = c.h;
+    _clip = c;
   }
 
 
@@ -88,6 +122,34 @@ namespace Regolith
   void Texture::setFlip( SDL_RendererFlip flip )
   {
     _flipFlag = flip;
+  }
+
+
+  void Texture::setSpriteNumber( int num )
+  {
+    _currentSprite = num;
+    int sprite_x = (_currentSprite % _columns) * _spriteWidth;
+    int sprite_y = (_currentSprite / _columns) * _spriteHeight;
+
+    _clip.x = sprite_x;
+    _clip.y = sprite_y;
+    _clip.w = _spriteWidth;
+    _clip.h = _spriteHeight;
+  }
+
+
+  void Texture::update( Uint32 timestep )
+  {
+    _count += timestep;
+
+    int frame_number = _currentSprite;
+
+    frame_number += _count / _updatePeriod;
+    frame_number = frame_number % _numSprites;
+    this->setSpriteNumber( frame_number );
+    _count = _count % _updatePeriod;
+
+    DEBUG_STREAM << "Sprite Animation : _count : " << _count << ", frame No. : " << frame_number << ", update rate : " << _updatePeriod;
   }
 
 

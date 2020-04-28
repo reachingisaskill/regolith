@@ -4,8 +4,8 @@
 
 #include "Definitions.h"
 
+#include "Texture.h"
 #include "Sprite.h"
-#include "SpriteSheet.h"
 #include "ObjectFactory.h"
 
 #include <json/json.h>
@@ -23,7 +23,7 @@ namespace Regolith
     public :
       TestPlayer();
 
-      explicit TestPlayer( SpriteSheet );
+      explicit TestPlayer( Texture );
 
       virtual ~TestPlayer();
 

@@ -6,8 +6,7 @@
 #include "ObjectBuilder.h"
 #include "ScenePlatformer.h"
 #include "Texture.h"
-#include "SpriteSheet.h"
-#include "AnimatedSprite.h"
+#include "Sprite.h"
 #include "FPSString.h"
 
 #include "logtastic.h"
@@ -97,35 +96,8 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//  // Standard textures
-//  SimpleFactory::SimpleFactory()
-//  {
-//  }
-//
-//
-//  SimpleFactory::~SimpleFactory()
-//  {
-//  }
-//
-//
-//  Drawable* SimpleFactory::build( Json::Value& json_data ) const
-//  {
-//    std::string texture_name = json_data["texture_name"].asString();
-//    Texture* newTexture = new Texture( findRawTexture( texture_name ) );
-//
-//    int pos_x = json_data["position"][0].asInt();
-//    int pos_y = json_data["position"][1].asInt();
-//
-//    newTexture->setClip( { 0, 0, newTexture->getWidth(), newTexture->getHeight() } );
-//    newTexture->setPosition( pos_x, pos_y );
-//
-//    return newTexture;
-//  }
+  // Sprites
 
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // SpriteSheets
   SpriteFactory::SpriteFactory()
   {
   }
@@ -142,9 +114,9 @@ namespace Regolith
     Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
 
     std::string texture_name = json_data["texture_name"].asString();
-    RawTexture texture = findRawTexture( texture_name );
+    RawTexture raw_texture = findRawTexture( texture_name );
 
-    SpriteSheet sheet( texture );
+    Texture texture( raw_texture );
 
 
     if ( json_data.isMember( "number_rows" ) && json_data.isMember( "number_columns" ) )
@@ -152,6 +124,8 @@ namespace Regolith
       int num_rows = json_data["number_rows"].asInt();
       int num_cols = json_data["number_columns"].asInt();
       int num_used;
+      int period = 0;
+      int start_num = 0;
       if ( json_data.isMember( "number_used_cells" ) )
       {
         num_used = json_data["number_used_cells"].asInt();
@@ -160,18 +134,21 @@ namespace Regolith
       {
         num_used = 0;
       }
-      sheet.configure( num_rows, num_cols, num_used );
-    }
-    else
-    {
-      // Only one sprite on the texture
-      sheet.configure( 1, 1, 1 );
-    }
 
-    if ( json_data.isMember( "start_number" ) )
-    {
-      int start_num = json_data["start_number"].asInt();
-      sheet.setSpriteNumber( start_num );
+      if ( json_data.isMember( "update_period" ) )
+      {
+        period = json_data["update_period"].asInt();
+      }
+
+      INFO_STREAM << "Configuring sprite: " << num_rows << "x" << num_cols << " -> " << num_used << " T = " << period << " start: " << start_num;
+
+      texture.configure( num_rows, num_cols, num_used, period );
+
+      if ( json_data.isMember( "start_number" ) )
+      {
+        start_num = json_data["start_number"].asInt();
+      }
+      texture.setSpriteNumber( start_num );
     }
 
     // Configure the default collision
@@ -181,7 +158,7 @@ namespace Regolith
       if ( json_data["collision"].isString() && json_data["collision"].asString() == "default" )
       {
         DEBUG_LOG( "Configuring default collision for sprite" );
-        collision = new Collision( Vector( 0.0, 0.0 ), sheet.getWidth(), sheet.getHeight() );
+        collision = new Collision( Vector( 0.0, 0.0 ), texture.getWidth(), texture.getHeight() );
       }
       else if ( json_data["collision"].isObject() )
       {
@@ -189,80 +166,7 @@ namespace Regolith
       }
     }
 
-    Sprite* newSprite = new Sprite( sheet );
-    newSprite->addCollision( collision );
-
-    buildDrawable( newSprite, json_data );
-
-    return newSprite;
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Animated SpriteSheets
-  AnimatedFactory::AnimatedFactory()
-  {
-  }
-
-
-  AnimatedFactory::~AnimatedFactory()
-  {
-  }
-
-
-  Drawable* AnimatedFactory::build( Json::Value& json_data ) const
-  {
-    Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "number_rows", Utilities::JSON_TYPE_FLOAT );
-    Utilities::validateJson( json_data, "number_columns", Utilities::JSON_TYPE_FLOAT );
-    Utilities::validateJson( json_data, "update_rate", Utilities::JSON_TYPE_FLOAT );
-
-    std::string texture_name = json_data["texture_name"].asString();
-    RawTexture texture = findRawTexture( texture_name );
-
-    SpriteSheet sheet( texture );
-
-    int num_rows = json_data["number_rows"].asInt();
-    int num_cols = json_data["number_columns"].asInt();
-    int num_used;
-    if ( json_data.isMember( "number_used_cells" ) )
-    {
-      num_used = json_data["number_used_cells"].asInt();
-    }
-    else
-    {
-      num_used = 0;
-    }
-
-    DEBUG_LOG( "Configuring sprite sheet" );
-    sheet.configure( num_rows, num_cols, num_used );
-
-    if ( json_data.isMember( "start_number" ) )
-    {
-      int start_num = json_data["start_number"].asInt();
-      sheet.setSpriteNumber( start_num );
-    }
-
-    // Refresh timing
-    int update_rate = json_data["update_rate"].asInt();
-
-    // Configure the default collision
-    Collision* collision = nullptr;
-    if ( json_data.isMember( "collision" ) )
-    {
-      if ( json_data["collision"].isString() && json_data["collision"].asString() == "default" )
-      {
-        DEBUG_LOG( "Configuring default collision for sprite" );
-        collision = new Collision( Vector( 0.0, 0.0 ), sheet.getWidth(), sheet.getHeight() );
-      }
-      else if ( json_data["collision"].isObject() )
-      {
-        collision = buildCollision( json_data["collision"] );
-      }
-    }
-
-
-    AnimatedSprite* newSprite = new AnimatedSprite( sheet, update_rate );
+    Sprite* newSprite = new Sprite( texture );
     newSprite->addCollision( collision );
 
     buildDrawable( newSprite, json_data );

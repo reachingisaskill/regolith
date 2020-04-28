@@ -11,17 +11,17 @@ namespace Regolith
 
   Sprite::Sprite() :
     Drawable(),
-    _spriteSheet(),
+    _texture(),
     _destination(),
     _collision( nullptr )
   {
   }
 
 
-  Sprite::Sprite( SpriteSheet sheet ) :
-    Drawable( sheet.getWidth(), sheet.getHeight() ),
-    _spriteSheet( sheet ),
-    _destination( { 0, 0, sheet.getWidth(), sheet.getHeight() } ),
+  Sprite::Sprite( Texture tex ) :
+    Drawable( tex.getWidth(), tex.getHeight() ),
+    _texture( tex ),
+    _destination( { 0, 0, tex.getWidth(), tex.getHeight() } ),
     _collision( nullptr )
   {
   }
@@ -29,7 +29,7 @@ namespace Regolith
 
   Sprite::Sprite( const Sprite& sp ) :
     Drawable( sp ),
-    _spriteSheet( sp._spriteSheet ),
+    _texture( sp._texture ),
     _destination( sp._destination ),
     _collision( nullptr )
   {
@@ -44,6 +44,17 @@ namespace Regolith
   }
 
 
+  void Sprite::update( Uint32 time )
+  {
+    if ( _texture.isAnimated() )
+    {
+      _texture.update( time );
+    }
+
+    this->step( time );
+  }
+
+
   void Sprite::render( Camera* camera )
   {
     // Set the current sprite position
@@ -54,7 +65,7 @@ namespace Regolith
     SDL_Rect destination = camera->place( _destination );
     DEBUG_STREAM << "RENDER: Original: " << _destination.w << ", " << _destination.h << ", NEW: " << destination.w << ", " << destination.h;
 
-    _spriteSheet.draw( &destination );
+    _texture.draw( &destination );
   }
 
 

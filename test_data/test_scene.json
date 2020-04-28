@@ -69,9 +69,9 @@
     },
     {
       "resource_name" : "the_animated_spritesheet",
-      "resource_type" : "animated",
+      "resource_type" : "sprite",
       "texture_name" : "spritesheet_test",
-      "update_rate" : 1000,
+      "update_period" : 1000,
       "number_rows" : 2,
       "number_columns" : 2,
       "number_used" : 4,

@@ -51,6 +51,9 @@ namespace Regolith
       case DECREMENT_3 :
         --counter3;
         break;
+
+      default:
+        break;
     };
   }
 
