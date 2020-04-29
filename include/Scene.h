@@ -3,6 +3,7 @@
 #define __REGOLITH__SCENE_H__
 
 #include "Definitions.h"
+#include "NamedVector.h"
 #include "Context.h"
 #include "Drawable.h"
 #include "ObjectBuilder.h"
@@ -31,8 +32,7 @@ namespace Regolith
     private:
       // Scene owns the memory for the texture data
       RawTextureMap _rawTextures;
-      ResourceList _resources;
-      ResourceNameMap _resourceNames;
+      NamedVector<Drawable> _resources;
       TeamNameMap _teamNames;
 
       // Key components for building elements and rendering
@@ -121,6 +121,9 @@ namespace Regolith
       // Return a copy of the scene file
       std::string getSceneFile() { return _sceneFile; }
 
+      // Return a pointer to the object builder
+      ObjectBuilder* getBuilder() { return _theBuilder; }
+
 
       // Update the time-dependent scene elements with the No. ticks
       void update( Uint32 );
@@ -143,10 +146,11 @@ namespace Regolith
       RawTexture findRawTexture( std::string ) const;
 
       // Look up the id number for a given resource
-      unsigned int findResourceID( std::string ) const;
+      unsigned int findResourceID( std::string name ) const { return _resources.getID( name ); }
 
       // Return a pointer to a specific resource
-      Drawable* findResource( unsigned int n ) const { return _resources[ n ]; }
+      Drawable* findResource( unsigned int n ) { return _resources[ n ]; }
+      Drawable* findResource( std::string name ) { return _resources.getByName( name ); }
 
 
       // Spawn an object with the supplied ID number at the default position in the Scene

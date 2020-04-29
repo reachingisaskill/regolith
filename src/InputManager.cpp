@@ -65,9 +65,7 @@ namespace Regolith
       case SDL_WINDOWEVENT :
         event_type = INPUT_TYPE_WINDOW;
         event = REGOLITH_EVENT_WINDOW;
-
         DEBUG_STREAM << "  Regolith Window Event";
-
         end = this->getRegisteredObjects( event ).end();
         for ( ControllableSet::iterator it = this->getRegisteredObjects( event ).begin(); it != end; ++it )
         {
@@ -78,22 +76,13 @@ namespace Regolith
 
       case SDL_KEYDOWN :
       case SDL_KEYUP :
-        if ( handler == nullptr )
-        {
-          DEBUG_LOG( "NULL Handler" );
-          break;
-        }
+        if ( handler == nullptr ) break;
 
         DEBUG_LOG( "  Keyboard key-press type event" );
         event_type = INPUT_TYPE_KEYBOARD;
         mapper = _inputMaps[ event_type ];
         action = (InputAction)mapper->getBehaviour( sdl_event );
-
-        if ( action == INPUT_ACTION_NULL )
-        {
-          DEBUG_LOG( "NULL or repeated action" );
-          break;
-        }
+        if ( action == INPUT_ACTION_NULL ) break;
 
         end = handler->getRegisteredObjects( action ).end();
         for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
@@ -124,15 +113,9 @@ namespace Regolith
       case SDL_USEREVENT :
         event_type = INPUT_TYPE_REGOLITH;
         event = (RegolithEvent)sdl_event.user.code;
-
         DEBUG_STREAM << "  Regolith User Event " << event;
 
-        if ( event == REGOLITH_EVENT_NULL )
-        {
-          DEBUG_LOG( "NULL Regolith event" );
-          break;
-        }
-
+        if ( event == REGOLITH_EVENT_NULL ) break;
         end = this->getRegisteredObjects( event ).end();
         for ( ControllableSet::iterator it = this->getRegisteredObjects( event ).begin(); it != end; ++it )
         {

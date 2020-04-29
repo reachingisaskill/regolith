@@ -55,6 +55,13 @@ namespace Regolith
   }
 
 
+  void ClickableSet::clear()
+  {
+    _buttons.clear();
+    _currentFocus = ButtonSet::iterator();
+  }
+
+
   void ClickableSet::registerActions( InputHandler* handler )
   {
     handler->registerInputRequest( this, INPUT_ACTION_NEXT );

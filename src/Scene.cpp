@@ -17,8 +17,7 @@ namespace Regolith
 
   Scene::Scene( std::string json_file ) :
     _rawTextures(),
-    _resources(),
-    _resourceNames(),
+    _resources("resources"),
     _teamNames(),
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
@@ -76,17 +75,11 @@ namespace Regolith
     delete _theHUD;
     _theHUD = nullptr;
 
-    INFO_LOG( "Deleting resources" );
-    for ( ResourceList::iterator it = _resources.begin(); it != _resources.end(); ++it )
-    {
-      delete (*it);
-    }
-    _resources.clear();
-
+    // Resources are deleted by the NamedVector class
+//    _resources.clear();
 
     INFO_LOG( "Clearing name lookups" );
     _teamNames.clear();
-    _resourceNames.clear();
 
 
     INFO_LOG( "Deleting raw texture data" );
@@ -207,8 +200,8 @@ namespace Regolith
           DEBUG_STREAM << "  Building resource: " << resource_name;
           Drawable* newResource =  _theBuilder->build( resources[i] );
 
-          _resources.push_back( newResource );
-          _resourceNames[ resource_name ] = _resources.size() - 1; // Save the ID number
+          _resources.addObject( newResource, resource_name );
+
 
           // Handle the team names
           std::string team_name;
@@ -268,8 +261,7 @@ namespace Regolith
       // Load the scene background
       INFO_LOG( "Building the background" );
       std::string background_resource = json_data["background"].asString();
-      unsigned int bg_id_number = _resourceNames[ background_resource ];
-      _background = _resources[ bg_id_number ]->clone();
+      _background = _resources.getByName( background_resource )->clone();
 
       if ( ! _background->hasCollision() )
       {
@@ -299,18 +291,11 @@ namespace Regolith
         int y = scene_elements[i]["position"][1].asInt();
         Vector pos( x, y );
 
-        // Check that the resource exists
-        if ( _resourceNames.find( resource_name ) == _resourceNames.end() )
-        {
-          ERROR_STREAM << "Could not locate a resource with the specified name; " << resource_name;
-          ERROR_LOG( "Ignoring current element and continuing." );
-          continue;
-        }
-
         // Determine the ID number and spawn the element
-        unsigned int id_number = _resourceNames[ resource_name ];
+        unsigned int id_number = _resources.getID( resource_name );
         this->spawnAt( id_number, pos );
       }
+
 
       // Load the HUD Elements
       INFO_LOG( "Building the HUD" );
@@ -326,16 +311,9 @@ namespace Regolith
         float x = hud_elements[i]["position"][0].asFloat();
         float y = hud_elements[i]["position"][1].asFloat();
 
-        // Check that the resource exists
-        if ( _resourceNames.find( resource_name ) == _resourceNames.end() )
-        {
-          ERROR_STREAM << "Could not locate a resource with the specified name; " << resource_name;
-          ERROR_LOG( "Ignoring current element and continuing." );
-          continue;
-        }
 
         // Determine the ID number and spawn the element
-        unsigned int id_number = _resourceNames[ resource_name ];
+        unsigned int id_number = _resources.getID( resource_name );
         this->spawnHUD( id_number, Vector( x, y ) );
       }
     }
@@ -686,20 +664,6 @@ namespace Regolith
     return found->second;
   }
 
-
-  unsigned int Scene::findResourceID( std::string name ) const
-  {
-    ResourceNameMap::const_iterator found = _resourceNames.find( name );
-    if ( found == _resourceNames.end() )
-    {
-      ERROR_STREAM << "Failed to find resource with name: " << name;
-      Exception ex( "Scene::findResourceID()", "Could not find resource", true );
-      ex.addDetail( "Resource name", name );
-      throw ex;
-    }
-
-    return found->second;
-  }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Spawn functions to dynamically place elements in the scene and HUD

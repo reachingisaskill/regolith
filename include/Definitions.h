@@ -519,11 +519,28 @@ namespace Regolith
   };
 
 
+  // Context Event strings
+  const char* const ContextEventStrings[] = 
+  {
+    "null",
+    "quit",
+    "respawn",
+    "death",
+    "next",
+    "prev",
+    "skip",
+    "end",
+    "finished",
+  };
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Enumeration lookup functions
   InputAction getActionID( std::string );
 
   SDL_Scancode getScancodeID( std::string );
+
+  ContextEvent getContextEventID( std::string );
 }
 
 #endif // __REGOLITH__DEFINITIONS_H__

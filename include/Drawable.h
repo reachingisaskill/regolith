@@ -56,6 +56,7 @@ namespace Regolith
       virtual bool hasCollision() const = 0;
       virtual bool hasInput() const = 0;
       virtual bool hasAnimation() const = 0;
+      virtual bool hasInteraction() const { return false; }
 
 
       // Returns the number of collision objects for the class.

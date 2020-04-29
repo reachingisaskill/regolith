@@ -56,6 +56,7 @@ namespace Regolith
       virtual bool hasCollision() const { return _collision != nullptr; }
       virtual bool hasInput() const { return false; }
       virtual bool hasAnimation() const;
+      virtual bool hasInteraction() const { return true; }
 
 
       // For derived classes to update every frame

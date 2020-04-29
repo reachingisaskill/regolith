@@ -32,7 +32,6 @@ namespace Regolith
   class DialogWindow : public Context
   {
     private:
-      std::string _filename;
       Scene* _scene;
       Camera* _camera;
 
@@ -45,10 +44,10 @@ namespace Regolith
 
     public:
       // Scene pointer, HUD camera, json file
-      DialogWindow( Scene*, Camera*, std::string );
+      DialogWindow( Scene*, Camera*, Json::Value& );
 
       // Load the Dialog data from the file
-      void loadFromJson();
+      void loadFromJson( Json::Value& );
 
       // Update all animations, sprite changes, etc
       void update( Uint32 );
@@ -68,24 +67,33 @@ namespace Regolith
   {
     typedef std::vector< Drawable* > ElementList;
 
+    Dialog( const Dialog& ) = delete;
+    Dialog& operator=( const Dialog& ) = delete;
+
     private:
       Scene* _owner;
       Camera* _HUDCamera;
       NamedVector<Dialog> _subDialogs;
 
       // List of the spawned elements
-      // Dialog owns this memory
+      // Dialog owns this memory - all elements in the dialog
       ElementList _elements;
 
       // Separate the background sprite
       Drawable* _background;
 
-      // All the elements that can be clicked on/have focus
+      // All the elements that can be clicked on/have focus - No memory ownership associated
       ClickableSet _buttons;
+
+      // All the elements that are animated - No memory ownership associated
+      ElementList _animated;
 
     public:
       // Scene pointer, camera pointer, json object containing this dialog
       Dialog( Scene*, Camera*, Json::Value& );
+
+      // Destruct all the owned memory
+      virtual ~Dialog();
 
       // Update all animations, sprite changes, etc
       void update( Uint32 );

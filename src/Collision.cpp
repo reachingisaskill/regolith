@@ -191,15 +191,15 @@ namespace Regolith
 
         // X Axis
         float diff_x = child_pos.x() - parent_pos.x();
-        if ( diff_x < 0.0 ) return false;
+        if ( diff_x < -c_iter->_width ) return false;
 
-        if ( diff_x > (p_iter->_width - c_iter->_width) ) return false;
+        if ( diff_x > p_iter->_width ) return false;
 
         // Y Axis
         float diff_y = child_pos.y() - parent_pos.y();
-        if ( diff_y < 0.0 ) return false;
+        if ( diff_y < -c_iter->_height ) return false;
 
-        if ( diff_y > (p_iter->_height - c_iter->_height) ) return false;
+        if ( diff_y > p_iter->_height ) return false;
 
       }
     }

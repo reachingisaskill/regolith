@@ -45,6 +45,9 @@ namespace Regolith
       void select();
 
 
+      void clear();
+
+
       // Don't allow derived classes to access game-wide events
       void registerEvents( InputManager* ) {}
 

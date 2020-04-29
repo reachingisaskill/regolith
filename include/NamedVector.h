@@ -40,7 +40,7 @@ namespace Regolith
 
       size_t addName( std::string );
 
-      size_t getID( std::string );
+      size_t getID( std::string ) const;
 
       DATA* getByName( std::string );
 
@@ -122,9 +122,9 @@ namespace Regolith
 
 
   template < class DATA >
-  size_t NamedVector<DATA>::getID( std::string objName )
+  size_t NamedVector<DATA>::getID( std::string objName ) const
   {
-    NameMap::iterator found = _names.find( objName );
+    NameMap::const_iterator found = _names.find( objName );
 
     if ( found == _names.end() )
     {
@@ -135,6 +135,14 @@ namespace Regolith
     }
 
     return found->second;
+  }
+
+
+  template < class DATA >
+  DATA* NamedVector<DATA>::getByName( std::string name )
+  {
+    size_t id = this->getID( name );
+    return _data[ id ];
   }
 
 
