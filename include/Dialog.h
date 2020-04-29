@@ -4,7 +4,7 @@
 
 #include "Definitions.h"
 
-#include "Controllable.h"
+#include "Context.h"
 #include "NamedVector.h"
 #include "ClickableSet.h"
 
@@ -29,7 +29,7 @@ namespace Regolith
    * no point in re-implementing the memory handling
    */
 
-  class DialogWindow
+  class DialogWindow : public Context
   {
     private:
       std::string _filename;
@@ -55,6 +55,9 @@ namespace Regolith
 
       // Render the dialog using the stored camera
       void render();
+
+      // Raise an event in the current context
+      void raiseContextEvent( ContextEvent );
   };
 
 
@@ -89,6 +92,10 @@ namespace Regolith
 
       // Render the dialog using the stored camera
       void render();
+
+
+      // Go to the corresponding sub dialog
+      Dialog* selectDialog( unsigned int );
 
   };
 

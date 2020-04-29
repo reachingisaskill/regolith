@@ -17,6 +17,7 @@ namespace Regolith
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
     _theInput( nullptr ),
+    _currentContext( nullptr ),
     _theBuilder( new ObjectBuilder() ),
     _theSceneBuilder( new SceneBuilder() ),
     _scenes(),
@@ -43,10 +44,6 @@ namespace Regolith
     // Remove the window
     delete _theWindow;
     _theWindow = nullptr;
-
-    // Remove the renderer object
-    SDL_DestroyRenderer( _theRenderer );
-    _theRenderer = nullptr;
 
     // Destroy the builder
     delete _theBuilder;
@@ -75,6 +72,12 @@ namespace Regolith
     _fonts.clear();
 
     _defaultFont = nullptr; // No longer valid
+
+
+    // Remove the renderer object
+    SDL_DestroyRenderer( _theRenderer );
+    _theRenderer = nullptr;
+
 
     // Close the SDL subsystems
     TTF_Quit();
@@ -131,6 +134,10 @@ namespace Regolith
 
       // Load the input device configuration first so objects can register game-wide behaviours
       this->_loadInput( json_data["input"] );
+
+
+      // Engine gets to register its events
+      _theEngine->registerEvents( _theInput );
 
 
 

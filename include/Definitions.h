@@ -29,24 +29,39 @@ namespace Regolith
   // Custom events added to SDL
   enum GameEvent
   {
+    REGOLITH_NULL,
     REGOLITH_QUIT,
     REGOLITH_SCENE_END,
     REGOLITH_SCENE_PAUSE,
+    REGOLITH_CONTEXT_END,
     REGOLITH_FULLSCREEN,
     REGOLITH_WIN_CONDITION,
     REGOLITH_LOSE_CONDITION,
     REGOLITH_GAMEOVER,
+
     REGOLITH_EVENT_TOTAL
   };
 
   // In-scene triggers
-  enum TriggerEvent
+  enum ContextEvent : unsigned int
   {
-    TRIGGER_NULL,
-    TRIGGER_RESPAWN,
-    TRIGGER_DEATH,
-    TRIGGER_NEXT_EVENT,
-    TRIGGER_TOTAL
+    CONTEXT_EVENT_NULL,
+
+    CONTEXT_EVENT_QUIT,
+
+    CONTEXT_EVENT_RESPAWN,
+    CONTEXT_EVENT_DEATH,
+
+    CONTEXT_EVENT_NEXT,
+    CONTEXT_EVENT_PREV,
+    CONTEXT_EVENT_SKIP,
+
+    CONTEXT_END, // Stops the current context
+    CONTEXT_FINISHED, // Tells a context that it's daughter has stopped
+
+    CONTEXT_EVENT_OPTIONS, // Eveything beyond this point can be considered a numerical value
+
+    CONTEXT_EVENT_TOTAL = (unsigned int) -1 // Set to the maximum unsinged int
   };
 
   enum CameraMode
@@ -60,9 +75,13 @@ namespace Regolith
 //////////////////////////////////////////////////
   // Input possibilities
 
-  enum InputAction
+  enum InputAction : unsigned int
   {
     INPUT_ACTION_NULL,
+    INPUT_ACTION_QUIT,
+
+    INPUT_ACTION_CLICK,
+
     INPUT_ACTION_MOVE,
     INPUT_ACTION_MOVE_UP,
     INPUT_ACTION_MOVE_UP_RIGHT,
@@ -74,6 +93,7 @@ namespace Regolith
     INPUT_ACTION_MOVE_RIGHT,
     INPUT_ACTION_MOVE_HORIZONTAL,
     INPUT_ACTION_MOVE_VERTICAL,
+
     INPUT_ACTION_AIM,
     INPUT_ACTION_AIM_UP,
     INPUT_ACTION_AIM_UP_RIGHT,
@@ -85,6 +105,7 @@ namespace Regolith
     INPUT_ACTION_AIM_RIGHT,
     INPUT_ACTION_AIM_HORIZONTAL,
     INPUT_ACTION_AIM_VERTICAL,
+
     INPUT_ACTION_LOOK,
     INPUT_ACTION_LOOK_UP,
     INPUT_ACTION_LOOK_UP_RIGHT,
@@ -96,6 +117,7 @@ namespace Regolith
     INPUT_ACTION_LOOK_RIGHT,
     INPUT_ACTION_LOOK_HORIZONTAL,
     INPUT_ACTION_LOOK_VERTICAL,
+
     INPUT_ACTION_JUMP,
     INPUT_ACTION_ATTACK,
     INPUT_ACTION_PRIMARY_ATTACK,
@@ -122,14 +144,30 @@ namespace Regolith
     INPUT_ACTION_DODGE,
     INPUT_ACTION_BLOCK,
     INPUT_ACTION_TAUNT,
-    INPUT_ACTION_CLICK,
+
+    INPUT_ACTION_NEXT,
+    INPUT_ACTION_PREV,
+    INPUT_ACTION_CONTINUE,
+    INPUT_ACTION_BACK,
+    INPUT_ACTION_RETURN,
+    INPUT_ACTION_SELECT,
+    INPUT_ACTION_CANCEL,
 
     INPUT_ACTION_TOTAL
   };
 
-  enum InputEvent
+  enum InputEvent : unsigned int
   {
     INPUT_EVENT_NULL,
+    INPUT_EVENT_QUIT,
+    INPUT_EVENT_SCENE_END,
+    INPUT_EVENT_SCENE_PAUSE,
+    INPUT_EVENT_CONTEXT_END,
+    INPUT_EVENT_FULLSCREEN,
+    INPUT_EVENT_WIN_CONDITION,
+    INPUT_EVENT_LOSE_CONDITION,
+    INPUT_EVENT_GAMEOVER,
+
     INPUT_EVENT_TOTAL
   };
 
@@ -140,6 +178,7 @@ namespace Regolith
   enum InputEventType
   {
     INPUT_TYPE_NULL,
+    INPUT_TYPE_REGOLITH,
     INPUT_TYPE_KEYBOARD,
     INPUT_TYPE_BUTTON,
     INPUT_TYPE_CONTROLLER_AXIS,
@@ -161,6 +200,10 @@ namespace Regolith
   const char* const InputActionStrings[] = 
   {
     "null",
+    "quit",
+
+    "click",
+
     "move",
     "move_up",
     "move_up_right",
@@ -172,6 +215,7 @@ namespace Regolith
     "move_right",
     "move_horizontal",
     "move_vertical",
+
     "aim",
     "aim_up",
     "aim_up_right",
@@ -183,6 +227,7 @@ namespace Regolith
     "aim_right",
     "aim_horizontal",
     "aim_vertical",
+
     "look",
     "look_up",
     "look_up_right",
@@ -194,6 +239,7 @@ namespace Regolith
     "look_right",
     "look_horizontal",
     "look_vertical",
+
     "jump",
     "attack",
     "primary_attack",
@@ -220,7 +266,14 @@ namespace Regolith
     "dodge",
     "block",
     "taunt",
-    "click"
+
+    "next",
+    "prev",
+    "continue",
+    "back",
+    "return",
+    "select",
+    "cancel",
   };
 
   const std::map< std::string, int > ScancodeStrings = 

@@ -28,12 +28,13 @@ namespace Regolith
 
       virtual void registerBehaviour( unsigned int, InputBehaviour ) = 0;
 
-      virtual InputBehaviour& getBehaviour( SDL_Event& ) = 0;
+      virtual InputBehaviour getBehaviour( SDL_Event& ) = 0;
 
       virtual InputBehaviour getRegisteredBehaviour( unsigned int ) const = 0;
 
       virtual void propagate( Controllable*  ) const = 0;
   };
+
 
 ////////////////////////////////////////////////////////////////////////////////
   // Keyboard/Button Mapping class
@@ -52,7 +53,31 @@ namespace Regolith
 
       void registerBehaviour( unsigned int, InputBehaviour );
 
-      InputBehaviour& getBehaviour( SDL_Event& event );
+      InputBehaviour getBehaviour( SDL_Event& event );
+
+      InputBehaviour getRegisteredBehaviour( unsigned int ) const;
+
+      void propagate( Controllable* ) const;
+  };
+
+
+////////////////////////////////////////////////////////////////////////////////
+  // Keyboard/Button Mapping class
+
+  class RegolithEventMapping : public InputMapping
+  {
+    private:
+      InputBehaviour _theMap[REGOLITH_EVENT_TOTAL];
+      InputBehaviour _lastBehaviour;
+
+    public:
+      RegolithEventMapping();
+
+      virtual ~RegolithEventMapping();
+
+      void registerBehaviour( unsigned int, InputBehaviour );
+
+      InputBehaviour getBehaviour( SDL_Event& event );
 
       InputBehaviour getRegisteredBehaviour( unsigned int ) const;
 
@@ -75,7 +100,7 @@ namespace Regolith
 //
 //      void registerBehaviour( unsigned int, InputBehaviour );
 //
-//      InputBehaviour& getBehaviour( SDL_Event& );
+//      InputBehaviour getBehaviour( SDL_Event& );
 //
 //      void propagate( Controllable* ) const;
 //  };
@@ -95,7 +120,7 @@ namespace Regolith
 //
 //      void registerBehaviour( unsigned int, InputBehaviour );
 //
-//      InputBehaviour& getBehaviour( SDL_Event& ) const { return INPUT_NULL; }
+//      InputBehaviour getBehaviour( SDL_Event& ) const { return INPUT_NULL; }
 //
 //      void propagate( Controllable* ) const { }
 //  };

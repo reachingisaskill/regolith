@@ -37,7 +37,7 @@ namespace Regolith
   }
 
 
-  InputBehaviour& KeyboardMapping::getBehaviour( SDL_Event& event )
+  InputBehaviour KeyboardMapping::getBehaviour( SDL_Event& event )
   {
     if ( event.key.repeat != 0 )
     {
@@ -54,13 +54,13 @@ namespace Regolith
       _lastValue = false;
     }
     _lastBehaviour = _theMap[event.key.keysym.scancode];
+
     return _lastBehaviour;
   }
 
 
   void KeyboardMapping::propagate( Controllable* object ) const
   {
-    DEBUG_LOG( "Calling booleanAction()" );
     object->booleanAction( (InputAction)_lastBehaviour, _lastValue );
   }
 
@@ -68,6 +68,54 @@ namespace Regolith
   InputBehaviour KeyboardMapping::getRegisteredBehaviour( unsigned int code ) const
   {
     return _theMap[code];
+  }
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+  // RegolithEvent/Button Mapping class
+
+  RegolithEventMapping::RegolithEventMapping() :
+    _theMap(),
+    _lastBehaviour( REGOLITH_NULL )
+  {
+    for ( unsigned int i = 0; i < REGOLITH_EVENT_TOTAL; ++i )
+    {
+      _theMap[ i ] = REGOLITH_NULL;
+    }
+  }
+
+
+  RegolithEventMapping::~RegolithEventMapping()
+  {
+  }
+
+
+
+  void RegolithEventMapping::registerBehaviour( unsigned int event_code, InputBehaviour action )
+  {
+    DEBUG_STREAM << "Regolith Event Mapping registered: " << action << " -> " << event_code;
+    _theMap[ event_code ] = action;
+  }
+
+
+  InputBehaviour RegolithEventMapping::getBehaviour( SDL_Event& event )
+  {
+//    _lastBehaviour = _theMap[event.user.code];
+    _lastBehaviour = event.user.code;
+    return _lastBehaviour;
+  }
+
+
+  void RegolithEventMapping::propagate( Controllable* object ) const
+  {
+    object->eventAction( (InputEvent)_lastBehaviour );
+  }
+
+
+  InputBehaviour RegolithEventMapping::getRegisteredBehaviour( unsigned int event_code ) const
+  {
+    return _theMap[event_code];
   }
 
 

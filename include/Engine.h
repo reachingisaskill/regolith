@@ -16,7 +16,7 @@ namespace Regolith
 {
 
 
-  class Engine : public Singleton< Engine >
+  class Engine : public Singleton< Engine >, public Controllable
   {
     friend class Singleton< Engine >;
 
@@ -26,7 +26,6 @@ namespace Regolith
       InputManager* _inputManager;
       Window* _currentWindow;
       Scene* _currentScene;
-      Camera* _currentCamera;
 
       Timer _frameTimer;
       SDL_Color _defaultColor;
@@ -43,9 +42,22 @@ namespace Regolith
 
       void setScene( Scene* );
 
-      void setCamera( Camera* );
-
       void quit() { _quit = true; }
+
+
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager* );
+
+
+      // Register context-wide actions with the handler
+      virtual void registerActions( InputHandler* ) {}
+
+
+      // Interfaces for input
+      virtual void eventAction( const InputEvent& );
+      virtual void booleanAction( const InputAction&, bool ) {}
+      virtual void floatAction( const InputAction&, float ) {}
+      virtual void vectorAction( const InputAction&, const Vector& ) {}
 
   };
   

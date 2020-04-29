@@ -292,6 +292,15 @@ namespace Regolith
       }
     }
 
+
+//    // Load the button's name
+//    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
+
+
+    // load the button's action
+    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
+    std::string action_name = json_data["action"].asString();
+
     
     // Create the button object
     Button* newButton = new Button( normal_texture, collision );
@@ -305,6 +314,8 @@ namespace Regolith
       }
     }
 
+    // Set the action name
+    newButton->setActionName( action_name );
 
     // Set the rest of the drawable properties
     buildDrawable( newButton, json_data );

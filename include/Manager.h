@@ -23,6 +23,7 @@ namespace Regolith
   typedef std::map< std::string, TTF_Font* > FontMap;
 
   class Engine;
+  class Context;
 
 
   // Manager class
@@ -37,6 +38,7 @@ namespace Regolith
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
       InputManager* _theInput;
+      Context* _currentContext;
 
       ObjectBuilder* _theBuilder;
       SceneBuilder* _theSceneBuilder;
@@ -116,6 +118,14 @@ namespace Regolith
 
       // Push a user event into the SDL event queue
       void raiseEvent( GameEvent );
+
+
+
+      // Set the current context pointer
+      void setContext( Context* c ) { _currentContext = c; }
+
+      // Get the current context
+      Context* currentContext() { return _currentContext; }
 
 
 

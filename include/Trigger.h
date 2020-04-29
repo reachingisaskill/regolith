@@ -22,12 +22,12 @@ namespace Regolith
   {
     private :
       Collision** _collision;
-      TriggerEvent _eventType;
+      ContextEvent _eventType;
       unsigned int _size;
       unsigned int _current;
 
     public :
-      Trigger( unsigned int, TriggerEvent );
+      Trigger( unsigned int, ContextEvent );
 
       Trigger( const Trigger& );
 
@@ -38,7 +38,7 @@ namespace Regolith
       virtual bool hasInput() const { return false; }
       virtual bool hasAnimation() const { return false; }
 
-      virtual TriggerEvent getTriggerType()  { return _eventType; }
+      virtual ContextEvent getTriggerType()  { return _eventType; }
 
 
       // Returns the number of collision objects for the class.

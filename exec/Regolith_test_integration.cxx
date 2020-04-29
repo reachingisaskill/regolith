@@ -31,7 +31,6 @@ int main( int, char** )
     Scene* the_scene = man->loadScene( 0 );
 
     man->getEnginePointer()->setScene( the_scene );
-    man->getEnginePointer()->setCamera( the_scene->getCamera() );
     man->getEnginePointer()->run();
 
   }

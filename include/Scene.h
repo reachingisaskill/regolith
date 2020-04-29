@@ -3,9 +3,9 @@
 #define __REGOLITH__SCENE_H__
 
 #include "Definitions.h"
+#include "Context.h"
 #include "Drawable.h"
 #include "ObjectBuilder.h"
-#include "InputManager.h"
 #include "Window.h"
 #include "Camera.h"
 
@@ -26,7 +26,7 @@ namespace Regolith
   typedef std::vector< ElementList > TeamsList;
 
 
-  class Scene
+  class Scene : public Context
   {
     private:
       // Scene owns the memory for the texture data
@@ -40,7 +40,6 @@ namespace Regolith
       SDL_Renderer* _theRenderer;
       ObjectBuilder* _theBuilder;
       std::string _sceneFile;
-      InputHandler _theInput;
 
       // Containers storing drawable objects - the scene and the hud elements
       // All memory is owned by the resource list above
@@ -121,9 +120,6 @@ namespace Regolith
 
       // Return a copy of the scene file
       std::string getSceneFile() { return _sceneFile; }
-
-      // Returns a pointer to the current input handler
-      InputHandler* inputHandler() { return &_theInput; }
 
 
       // Update the time-dependent scene elements with the No. ticks

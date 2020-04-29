@@ -56,6 +56,9 @@ namespace Regolith
 
       // Respawn the player at the last spawn point
       void playerRespawn();
+
+      // Raise an event in the current context
+      void raiseContextEvent( ContextEvent );
   };
 
 }

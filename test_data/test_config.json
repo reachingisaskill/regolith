@@ -31,6 +31,8 @@
         "type" : "keyboard",
         "mapping" :
         {
+          "escape" : "quit",
+          "p"      : "pause",
           "space"  : "jump",
           "w"      : "move_up",
           "s"      : "move_down",

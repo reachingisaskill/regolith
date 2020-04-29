@@ -5,7 +5,6 @@
 #include "Utilities.h"
 #include "Manager.h"
 #include "Collision.h"
-#include "InputManager.h"
 
 #include "logtastic.h"
 
@@ -160,6 +159,39 @@ namespace Regolith
             break;
         }
       }
+    }
+  }
+
+
+
+  void ScenePlatformer::raiseContextEvent( ContextEvent context_event )
+  {
+    static Manager* man = Manager::getInstance();
+
+    switch ( context_event )
+    {
+      case CONTEXT_EVENT_QUIT :
+        man->raiseEvent( REGOLITH_QUIT );
+        break;
+
+      case CONTEXT_EVENT_RESPAWN :
+        this->playerRespawn();
+        break;
+
+      case CONTEXT_EVENT_DEATH :
+        this->playerRespawn();
+        break;
+
+      case CONTEXT_END :
+        man->raiseEvent( REGOLITH_CONTEXT_END );
+        break;
+
+      case CONTEXT_EVENT_NEXT :
+      case CONTEXT_EVENT_PREV :
+      case CONTEXT_EVENT_SKIP :
+
+      default:
+        break;
     }
   }
 

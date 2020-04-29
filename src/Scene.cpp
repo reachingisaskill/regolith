@@ -5,7 +5,6 @@
 #include "Utilities.h"
 #include "Manager.h"
 #include "Collision.h"
-#include "InputManager.h"
 
 #include "logtastic.h"
 
@@ -25,7 +24,6 @@ namespace Regolith
     _theRenderer( nullptr ),
     _theBuilder( nullptr ),
     _sceneFile( json_file ),
-    _theInput(),
     _background( nullptr ),
     _sceneElements(),
     _hudElements(),
@@ -383,7 +381,7 @@ namespace Regolith
       std::string camera_type = json_data["type"].asString();
       _theCamera = new Camera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
       _theCamera->setPosition( camera_x, camera_y );
-      _theCamera->registerActions( &_theInput );
+      _theCamera->registerActions( inputHandler() );
 
       if ( camera_type == "flying" )
       {
@@ -721,7 +719,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
-      newElement->registerActions( &_theInput );
+      newElement->registerActions( inputHandler() );
     }
     // HUD Elements not allowed collision
   }
@@ -741,7 +739,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
-      newElement->registerActions( &_theInput );
+      newElement->registerActions( inputHandler() );
     }
     if ( newElement->hasCollision() )
     {
@@ -765,7 +763,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
-      newElement->registerActions( &_theInput );
+      newElement->registerActions( inputHandler() );
     }
     if ( newElement->hasCollision() )
     {
@@ -787,7 +785,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
-      newElement->registerActions( &_theInput );
+      newElement->registerActions( inputHandler() );
     }
     if ( newElement->hasCollision() )
     {

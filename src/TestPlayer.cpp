@@ -45,6 +45,8 @@ namespace Regolith
     handler->registerInputRequest( this, INPUT_ACTION_MOVE_LEFT );
     handler->registerInputRequest( this, INPUT_ACTION_MOVE_RIGHT );
     handler->registerInputRequest( this, INPUT_ACTION_JUMP );
+
+    handler->registerInputRequest( this, INPUT_ACTION_QUIT );
   }
 
 
@@ -94,6 +96,10 @@ namespace Regolith
         {
           this->velocity().y() -= _jumpSpeed;
         }
+        break;
+
+      case INPUT_ACTION_QUIT :
+        man->raiseEvent( REGOLITH_QUIT );
 
       default :
         break;

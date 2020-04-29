@@ -12,7 +12,6 @@ namespace Regolith
     _theRenderer( nullptr ),
     _currentWindow( nullptr ),
     _currentScene( nullptr ),
-    _currentCamera( nullptr ),
     _frameTimer(),
     _defaultColor( { 255, 255, 255, 255 } ),
     _quit( false )
@@ -66,12 +65,27 @@ namespace Regolith
   void Engine::setScene( Scene* scene )
   {
     _currentScene = scene;
+    _currentScene->giveFocus(); // This scene is now the current context for input and events
   }
 
 
-  void Engine::setCamera( Camera* camera )
+  void Engine::registerEvents( InputManager* manager )
   {
-    _currentCamera = camera;
+    manager->registerInputRequest( this, INPUT_EVENT_QUIT );
+  }
+
+
+  void Engine::eventAction( const InputEvent& event )
+  {
+    switch( event )
+    {
+      case INPUT_EVENT_QUIT :
+        _quit = true;
+        break;
+
+      default :
+        break;
+    }
   }
 
 }

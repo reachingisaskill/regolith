@@ -30,12 +30,19 @@ namespace Regolith
     private:
       ButtonSet _buttons;
 
-      Button* _currentFocus;
+      ButtonSet::iterator _currentFocus;
 
     public:
       ClickableSet();
 
       void addButton( Button* );
+
+
+      void focusNext();
+
+      void focusPrev();
+
+      void select();
 
 
       // Don't allow derived classes to access game-wide events

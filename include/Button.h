@@ -31,6 +31,9 @@ namespace Regolith
 
       State _state;
 
+      std::string _actionName;
+      ContextEvent _optionNumber;
+
 
     public :
       // Create in new button with the default texture
@@ -72,6 +75,20 @@ namespace Regolith
 
       // Return a new clone of the current object. Transfers ownership of memory
       virtual Drawable* clone() const;
+
+
+      // Set the action name
+      void setActionName( std::string name ) { _actionName = name; }
+
+      // Set the action name
+      std::string getActionName() { return _actionName; }
+
+
+      // Set the enumerated option number
+      void setOption( ContextEvent e ) { _optionNumber = e; }
+
+      // Get the enumerated option number
+      ContextEvent getOption() { return _optionNumber; }
       
 
       // Sets the current state to focussed if button is active

@@ -1,5 +1,6 @@
 
 #include "Dialog.h"
+#include "Manager.h"
 
 
 namespace Regolith
@@ -34,6 +35,42 @@ namespace Regolith
   }
 
 
+  void DialogWindow::raiseContextEvent( ContextEvent context_event )
+  {
+    static Manager* man = Manager::getInstance();
+
+    switch ( context_event )
+    {
+      case CONTEXT_EVENT_QUIT :
+        man->raiseEvent( REGOLITH_QUIT );
+        break;
+
+      case CONTEXT_EVENT_NEXT :
+
+        break;
+        
+      case CONTEXT_EVENT_PREV :
+
+        break;
+
+      case CONTEXT_END :
+        getParentContext()->raiseContextEvent( CONTEXT_FINISHED );
+        break;
+
+      case CONTEXT_EVENT_DEATH :
+      case CONTEXT_EVENT_RESPAWN :
+      case CONTEXT_EVENT_SKIP :
+
+      default:
+        if ( (unsigned)context_event > (unsigned)CONTEXT_EVENT_OPTIONS )
+        {
+          _currentDialog = _currentDialog->selectDialog( (unsigned)context_event - (unsigned)CONTEXT_EVENT_OPTIONS );
+        }
+        break;
+    }
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Dialog Class
 
@@ -55,6 +92,12 @@ namespace Regolith
 
   void Dialog::render()
   {
+  }
+
+
+  Dialog* Dialog::selectDialog( unsigned int n )
+  {
+    return _subDialogs[ n ];
   }
 
 }

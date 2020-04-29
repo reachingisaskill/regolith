@@ -9,7 +9,7 @@
 namespace Regolith
 {
 
-  Trigger::Trigger( unsigned int size, TriggerEvent event ) :
+  Trigger::Trigger( unsigned int size, ContextEvent event ) :
     Drawable(),
     _collision( new Collision*[size] ),
     _eventType( event ),
