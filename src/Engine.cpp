@@ -71,16 +71,21 @@ namespace Regolith
 
   void Engine::registerEvents( InputManager* manager )
   {
-    manager->registerInputRequest( this, INPUT_EVENT_QUIT );
+    manager->registerInputRequest( this, REGOLITH_EVENT_QUIT );
+    manager->registerInputRequest( this, REGOLITH_EVENT_CAMERA_RESIZE );
   }
 
 
-  void Engine::eventAction( const InputEvent& event )
+  void Engine::eventAction( const RegolithEvent& event, const SDL_Event& )
   {
     switch( event )
     {
-      case INPUT_EVENT_QUIT :
+      case REGOLITH_EVENT_QUIT :
         _quit = true;
+        break;
+
+      case REGOLITH_EVENT_CAMERA_RESIZE :
+        _currentScene->getCamera()->updateScale( _currentWindow->getWidth(), _currentWindow->getHeight() );
         break;
 
       default :

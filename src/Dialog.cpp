@@ -42,7 +42,7 @@ namespace Regolith
     switch ( context_event )
     {
       case CONTEXT_EVENT_QUIT :
-        man->raiseEvent( REGOLITH_QUIT );
+        man->raiseEvent( REGOLITH_EVENT_QUIT );
         break;
 
       case CONTEXT_EVENT_NEXT :

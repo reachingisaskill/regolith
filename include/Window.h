@@ -2,15 +2,23 @@
 #ifndef __REGOLITH__WINDOW_H__
 #define __REGOLITH__WINDOW_H__
 
-#include <SDL2/SDL.h>
+#include "Definitions.h"
+#include "Vector.h"
+#include "Controllable.h"
 
 #include <string>
 
+
 namespace Regolith
 {
+  class InputManager;
+  class InputHandler;
 
-  class Window
+  class Window : public Controllable
   {
+    Window( const Window& ) = delete;
+    Window& operator=( const Window& ) = delete;
+
     private:
       SDL_Window* _theWindow;
       std::string _title;
@@ -29,9 +37,9 @@ namespace Regolith
       Window( Window&& ); // Move construction
       Window& operator=( Window&& ); // Move assignment
 
-      SDL_Renderer* init( int, int );
+      virtual ~Window() { this->free(); }
 
-      void handleEvent( SDL_Event& );
+      SDL_Renderer* init( int, int );
 
       void free();
 
@@ -47,8 +55,22 @@ namespace Regolith
       void toggleFullScreen();
 
 
-      Window( const Window& ) = delete;
-      Window& operator=( const Window& ) = delete;
+
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager* );
+
+      // Register context-wide actions with the handler
+      virtual void registerActions( InputHandler* ) {}
+
+
+      // Interfaces for input
+      // Handled and mapped actions
+      virtual void booleanAction( const InputAction&, bool ) {}
+      virtual void floatAction( const InputAction&, float ) {}
+      virtual void vectorAction( const InputAction&, const Vector& ) {}
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& );
   };
 
 }

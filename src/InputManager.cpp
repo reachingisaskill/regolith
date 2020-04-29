@@ -1,5 +1,6 @@
 
 #include "InputManager.h"
+#include "Controllable.h"
 
 #include "logtastic.h"
 
@@ -18,7 +19,6 @@ namespace Regolith
     }
 
     _inputMaps[ INPUT_TYPE_KEYBOARD ] = new KeyboardMapping();
-    _inputMaps[ INPUT_TYPE_REGOLITH ] = new RegolithEventMapping();
   }
 
 
@@ -51,12 +51,10 @@ namespace Regolith
 
   void InputManager::handleEvent( SDL_Event& sdl_event, InputHandler* handler )
   {
-    // At this point we must assume ALL of the mapping objects are correctly configured!
-
-    InputEventType event_type = INPUT_TYPE_NULL;
+    InputEventType event_type;
     InputMapping* mapper = nullptr;
-    InputAction action = INPUT_ACTION_NULL;
-    InputEvent event = INPUT_EVENT_NULL;
+    InputAction action;
+    RegolithEvent event;
 
     ControllableSet::iterator end;
 
@@ -65,6 +63,17 @@ namespace Regolith
     switch ( sdl_event.type )
     {
       case SDL_WINDOWEVENT :
+        event_type = INPUT_TYPE_WINDOW;
+        event = REGOLITH_EVENT_WINDOW;
+
+        DEBUG_STREAM << "  Regolith Window Event";
+
+        end = this->getRegisteredObjects( event ).end();
+        for ( ControllableSet::iterator it = this->getRegisteredObjects( event ).begin(); it != end; ++it )
+        {
+          DEBUG_STREAM << "  Propagating event : " << event;
+          (*it)->eventAction( event, sdl_event );
+        }
         break;
 
       case SDL_KEYDOWN :
@@ -114,12 +123,11 @@ namespace Regolith
 
       case SDL_USEREVENT :
         event_type = INPUT_TYPE_REGOLITH;
-        mapper = _inputMaps[ event_type ];
-        event = (InputEvent)mapper->getBehaviour( sdl_event );
+        event = (RegolithEvent)sdl_event.user.code;
 
         DEBUG_STREAM << "  Regolith User Event " << event;
 
-        if ( event == INPUT_EVENT_NULL )
+        if ( event == REGOLITH_EVENT_NULL )
         {
           DEBUG_LOG( "NULL Regolith event" );
           break;
@@ -128,8 +136,8 @@ namespace Regolith
         end = this->getRegisteredObjects( event ).end();
         for ( ControllableSet::iterator it = this->getRegisteredObjects( event ).begin(); it != end; ++it )
         {
-          DEBUG_STREAM << "  Propagating action : " << action;
-          mapper->propagate( (*it) );
+          DEBUG_STREAM << "  Propagating event : " << event;
+          (*it)->eventAction( event, sdl_event );
         }
         break;
 
@@ -189,14 +197,14 @@ namespace Regolith
   }
 
 
-  void InputManager::registerInputRequest( Controllable* object, InputEvent event )
+  void InputManager::registerInputRequest( Controllable* object, RegolithEvent event )
   {
     INFO_STREAM << "Registered input request for event: " << event << " " << object;
     _eventMaps[event].insert( object );
   }
 
 
-  ControllableSet& InputManager::getRegisteredObjects( InputEvent event )
+  ControllableSet& InputManager::getRegisteredObjects( RegolithEvent event )
   {
     return _eventMaps[event];
   }

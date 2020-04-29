@@ -71,54 +71,6 @@ namespace Regolith
   }
 
 
-
-////////////////////////////////////////////////////////////////////////////////
-  // RegolithEvent/Button Mapping class
-
-  RegolithEventMapping::RegolithEventMapping() :
-    _theMap(),
-    _lastBehaviour( REGOLITH_NULL )
-  {
-    for ( unsigned int i = 0; i < REGOLITH_EVENT_TOTAL; ++i )
-    {
-      _theMap[ i ] = REGOLITH_NULL;
-    }
-  }
-
-
-  RegolithEventMapping::~RegolithEventMapping()
-  {
-  }
-
-
-
-  void RegolithEventMapping::registerBehaviour( unsigned int event_code, InputBehaviour action )
-  {
-    DEBUG_STREAM << "Regolith Event Mapping registered: " << action << " -> " << event_code;
-    _theMap[ event_code ] = action;
-  }
-
-
-  InputBehaviour RegolithEventMapping::getBehaviour( SDL_Event& event )
-  {
-//    _lastBehaviour = _theMap[event.user.code];
-    _lastBehaviour = event.user.code;
-    return _lastBehaviour;
-  }
-
-
-  void RegolithEventMapping::propagate( Controllable* object ) const
-  {
-    object->eventAction( (InputEvent)_lastBehaviour );
-  }
-
-
-  InputBehaviour RegolithEventMapping::getRegisteredBehaviour( unsigned int event_code ) const
-  {
-    return _theMap[event_code];
-  }
-
-
 ////////////////////////////////////////////////////////////////////////////////
   // Controller Axis Mapping class
 

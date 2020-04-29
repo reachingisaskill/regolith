@@ -62,30 +62,6 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
-  // Keyboard/Button Mapping class
-
-  class RegolithEventMapping : public InputMapping
-  {
-    private:
-      InputBehaviour _theMap[REGOLITH_EVENT_TOTAL];
-      InputBehaviour _lastBehaviour;
-
-    public:
-      RegolithEventMapping();
-
-      virtual ~RegolithEventMapping();
-
-      void registerBehaviour( unsigned int, InputBehaviour );
-
-      InputBehaviour getBehaviour( SDL_Event& event );
-
-      InputBehaviour getRegisteredBehaviour( unsigned int ) const;
-
-      void propagate( Controllable* ) const;
-  };
-
-
-////////////////////////////////////////////////////////////////////////////////
   // Controller Axis Mapping class
 
 //  class ControllerAxisMapping : public InputMapping

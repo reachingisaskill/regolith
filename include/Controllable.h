@@ -21,7 +21,8 @@ namespace Regolith
   class Controllable
   {
     public :
-
+      // Make the detructor virtual
+      virtual ~Controllable() {}
 
       // Register game-wide events with the manager
       virtual void registerEvents( InputManager* ) = 0;
@@ -31,10 +32,13 @@ namespace Regolith
 
 
       // Interfaces for input
-      virtual void eventAction( const InputEvent& ) = 0;
+      // Handled and mapped actions
       virtual void booleanAction( const InputAction&, bool ) = 0;
       virtual void floatAction( const InputAction&, float ) = 0;
       virtual void vectorAction( const InputAction&, const Vector& ) = 0;
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) = 0;
 
   };
 

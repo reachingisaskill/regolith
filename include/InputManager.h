@@ -36,7 +36,7 @@ namespace Regolith
       InputMapping* _inputMaps[ INPUT_TYPE_TOTAL ];
 
       // Map the input actions to the list of drawable objects that request callbacks
-      ControllableSet _eventMaps[ INPUT_EVENT_TOTAL ];
+      ControllableSet _eventMaps[ REGOLITH_EVENT_TOTAL ];
 
       // Cache the SDL event
       SDL_Event _theEvent;
@@ -57,10 +57,10 @@ namespace Regolith
       void addInputMap( InputEventType, InputMapping* );
 
       // Register the request from a drawable object to be called when a given event is raised
-      void registerInputRequest( Controllable*, InputEvent );
+      void registerInputRequest( Controllable*, RegolithEvent );
 
       // Return the set of objects that requested the input action
-      ControllableSet& getRegisteredObjects( InputEvent );
+      ControllableSet& getRegisteredObjects( RegolithEvent );
 
       // Register an action to a specific input code on a specific input event type (hardware!)
       void registerBehaviour( InputEventType, unsigned int, InputBehaviour );

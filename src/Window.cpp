@@ -1,6 +1,7 @@
 
 #include "Window.h"
-
+#include "Manager.h"
+#include "InputManager.h"
 #include "Exception.h"
 
 #include <iostream>
@@ -71,7 +72,38 @@ namespace Regolith
   }
 
 
-  void Window::handleEvent( SDL_Event& e )
+
+
+  void Window::free()
+  {
+    SDL_DestroyWindow( _theWindow );
+    _theWindow = nullptr;
+  }
+
+
+  void Window::toggleFullScreen()
+  {
+    if ( _fullscreen )
+    {
+      SDL_SetWindowFullscreen( _theWindow, SDL_FALSE );
+      _fullscreen = false;
+    }
+    else
+    {
+      SDL_SetWindowFullscreen( _theWindow, SDL_TRUE );
+      _fullscreen = true;
+      _minimized = false;
+    }
+  }
+
+
+  void Window::registerEvents( InputManager* manager )
+  {
+    manager->registerInputRequest( this, REGOLITH_EVENT_WINDOW );
+  }
+
+
+  void Window::eventAction( const RegolithEvent&, const SDL_Event& e  )
   {
     bool updateCaption = false;
 
@@ -130,30 +162,8 @@ namespace Regolith
       text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" ) << " : " << _width << "x" << _height;
 
       SDL_SetWindowTitle( _theWindow, text.str().c_str() );
-    }
 
-  }
-
-
-  void Window::free()
-  {
-    SDL_DestroyWindow( _theWindow );
-    _theWindow = nullptr;
-  }
-
-
-  void Window::toggleFullScreen()
-  {
-    if ( _fullscreen )
-    {
-      SDL_SetWindowFullscreen( _theWindow, SDL_FALSE );
-      _fullscreen = false;
-    }
-    else
-    {
-      SDL_SetWindowFullscreen( _theWindow, SDL_TRUE );
-      _fullscreen = true;
-      _minimized = false;
+      Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CAMERA_RESIZE );
     }
   }
 

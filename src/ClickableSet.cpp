@@ -65,7 +65,7 @@ namespace Regolith
   }
 
 
-//  void ClickableSet::eventAction( const InputEvent& event )
+//  void ClickableSet::eventAction( const RegolithEvent& event )
 //  {
 //  }
 

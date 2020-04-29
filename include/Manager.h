@@ -117,7 +117,7 @@ namespace Regolith
       void configureEvents();
 
       // Push a user event into the SDL event queue
-      void raiseEvent( GameEvent );
+      void raiseEvent( RegolithEvent );
 
 
 

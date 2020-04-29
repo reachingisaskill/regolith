@@ -26,21 +26,17 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful Enumerations
 
-  // Custom events added to SDL
-  enum GameEvent
+  enum CameraMode
   {
-    REGOLITH_NULL,
-    REGOLITH_QUIT,
-    REGOLITH_SCENE_END,
-    REGOLITH_SCENE_PAUSE,
-    REGOLITH_CONTEXT_END,
-    REGOLITH_FULLSCREEN,
-    REGOLITH_WIN_CONDITION,
-    REGOLITH_LOSE_CONDITION,
-    REGOLITH_GAMEOVER,
-
-    REGOLITH_EVENT_TOTAL
+    CAMERA_FIXED,
+    CAMERA_FLYING,
+    CAMERA_FOLLOWING,
+    CAMERA_CONSTANT_VELOCITY
   };
+
+
+//////////////////////////////////////////////////
+  // Event enumerations
 
   // In-scene triggers
   enum ContextEvent : unsigned int
@@ -64,16 +60,28 @@ namespace Regolith
     CONTEXT_EVENT_TOTAL = (unsigned int) -1 // Set to the maximum unsinged int
   };
 
-  enum CameraMode
+
+
+  enum RegolithEvent : unsigned int
   {
-    CAMERA_FIXED,
-    CAMERA_FLYING,
-    CAMERA_FOLLOWING,
-    CAMERA_CONSTANT_VELOCITY
+    REGOLITH_EVENT_NULL,
+    REGOLITH_EVENT_QUIT,
+    REGOLITH_EVENT_SCENE_END,
+    REGOLITH_EVENT_SCENE_PAUSE,
+    REGOLITH_EVENT_CONTEXT_END,
+    REGOLITH_EVENT_FULLSCREEN,
+    REGOLITH_EVENT_WIN_CONDITION,
+    REGOLITH_EVENT_LOSE_CONDITION,
+    REGOLITH_EVENT_GAMEOVER,
+
+    REGOLITH_EVENT_WINDOW,
+    REGOLITH_EVENT_DISPLAY,
+
+    REGOLITH_EVENT_CAMERA_RESIZE,
+
+    REGOLITH_EVENT_TOTAL
   };
 
-//////////////////////////////////////////////////
-  // Input possibilities
 
   enum InputAction : unsigned int
   {
@@ -154,21 +162,6 @@ namespace Regolith
     INPUT_ACTION_CANCEL,
 
     INPUT_ACTION_TOTAL
-  };
-
-  enum InputEvent : unsigned int
-  {
-    INPUT_EVENT_NULL,
-    INPUT_EVENT_QUIT,
-    INPUT_EVENT_SCENE_END,
-    INPUT_EVENT_SCENE_PAUSE,
-    INPUT_EVENT_CONTEXT_END,
-    INPUT_EVENT_FULLSCREEN,
-    INPUT_EVENT_WIN_CONDITION,
-    INPUT_EVENT_LOSE_CONDITION,
-    INPUT_EVENT_GAMEOVER,
-
-    INPUT_EVENT_TOTAL
   };
 
 

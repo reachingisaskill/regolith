@@ -41,10 +41,6 @@ namespace Regolith
 
   Manager::~Manager()
   {
-    // Remove the window
-    delete _theWindow;
-    _theWindow = nullptr;
-
     // Destroy the builder
     delete _theBuilder;
     _theBuilder = nullptr;
@@ -77,6 +73,12 @@ namespace Regolith
     // Remove the renderer object
     SDL_DestroyRenderer( _theRenderer );
     _theRenderer = nullptr;
+
+
+    // Remove the window
+    delete _theWindow;
+    _theWindow = nullptr;
+
 
 
     // Close the SDL subsystems
@@ -150,6 +152,7 @@ namespace Regolith
       _theWindow = new Window( _title );
       _theRenderer = _theWindow->init( screen_width, screen_height );
       _theBuilder->setRenderer( _theRenderer );
+      _theWindow->registerEvents( _theInput );
 
       // Set the default colour
       Json::Value color = json_data["default_color"];
@@ -382,10 +385,33 @@ namespace Regolith
       _gameEvents[ i ].user.data1 = nullptr;
       _gameEvents[ i ].user.data2 = nullptr;
     }
+    /*
+    // Load user events, etc
+    Uint32 start_num = SDL_RegisterEvents( REGOLITH_EVENT_TOTAL );
+    INFO_STREAM << "Registering " << REGOLITH_EVENT_TOTAL << " user events";
+
+    if ( start_num == (unsigned int)-1 )
+    {
+      std::string error = SDL_GetError();
+      FAILURE_STREAM << "Could not create required user events : " << error;
+      Exception ex( "Manager::configureEvents()", "Could not create user events", true );
+      ex.addDetail( "SDL Error", error );
+      throw ex;
+    }
+
+    for ( unsigned int i = 0; i < (unsigned int)REGOLITH_EVENT_TOTAL; ++i )
+    {
+      SDL_memset( &_gameEvents[ i ], 0, sizeof(_gameEvents[ i ]) );
+      _gameEvents[ i ].type = start_num; // This should be the same number as SDL_USEREVENT
+      _gameEvents[ i ].user.code = i;
+      _gameEvents[ i ].user.data1 = nullptr;
+      _gameEvents[ i ].user.data2 = nullptr;
+    }
+    */
   }
 
 
-  void Manager::raiseEvent( GameEvent eventNum )
+  void Manager::raiseEvent( RegolithEvent eventNum )
   {
     SDL_PushEvent( &_gameEvents[ eventNum ] );
   }

@@ -99,7 +99,7 @@ namespace Regolith
         break;
 
       case INPUT_ACTION_QUIT :
-        man->raiseEvent( REGOLITH_QUIT );
+        man->raiseEvent( REGOLITH_EVENT_QUIT );
 
       default :
         break;
