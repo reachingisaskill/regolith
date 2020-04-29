@@ -86,10 +86,13 @@ namespace Regolith
 
       // Functions for flying mode
       // Update the objects behaviour based on the provided timestep
-      virtual void registerEvents( InputHandler* );
+      virtual void registerEvents( InputManager* ) {}
+
+      // Update the objects behaviour based on the provided timestep
+      virtual void registerActions( InputHandler* );
 
       // Interfaces for input
-      virtual void eventAction( const InputAction& ) {}
+      virtual void eventAction( const InputEvent& ) {}
       virtual void booleanAction( const InputAction&, bool );
       virtual void floatAction( const InputAction&, float ) {}
       virtual void vectorAction( const InputAction&, const Vector& ) {}

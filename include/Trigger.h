@@ -61,10 +61,10 @@ namespace Regolith
       virtual Drawable* clone() const;
 
 
-      void registerEvents( InputHandler* ) {}
+      void registerActions( InputHandler* ) {}
 
       // Interfaces for input
-      virtual void eventAction( const InputAction& ) {}
+      virtual void eventAction( const InputEvent& ) {}
       virtual void booleanAction( const InputAction&, bool ) {}
       virtual void floatAction( const InputAction&, float ) {}
       virtual void vectorAction( const InputAction&, const Vector& ) {}

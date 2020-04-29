@@ -1,5 +1,5 @@
 
-#include "InputHandler.h"
+#include "InputManager.h"
 
 #include "logtastic.h"
 
@@ -7,23 +7,23 @@
 namespace Regolith
 {
 
-  InputHandler::InputHandler() :
+  InputManager::InputManager() :
     _inputMaps(),
-    _actionMaps(),
+    _eventMaps(),
     _theEvent()
   {
-    for ( size_t i = 0; i < INPUT_EVENT_TOTAL; ++i )
+    for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
     {
       _inputMaps[ i ] = nullptr; 
     }
 
-    _inputMaps[ INPUT_EVENT_KEYBOARD ] = new KeyboardMapping();
+    _inputMaps[ INPUT_TYPE_KEYBOARD ] = new KeyboardMapping();
   }
 
 
-  InputHandler::~InputHandler()
+  InputManager::~InputManager()
   {
-    for ( size_t i = 0; i < INPUT_EVENT_TOTAL; ++i )
+    for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
     {
       if ( _inputMaps[ i ] != nullptr )
       {
@@ -34,42 +34,51 @@ namespace Regolith
   }
 
 
-  void InputHandler::handleEvents()
+  void InputManager::handleEvents( InputHandler* handler )
   {
+    if ( handler == nullptr )
+    {
+      WARN_LOG( "No input handler provided in this context" );
+    }
+
     while ( SDL_PollEvent( &_theEvent ) != 0 )
     {
-      this->handleEvent( _theEvent );
+      this->handleEvent( _theEvent, handler );
     }
   }
 
 
-  void InputHandler::handleEvent( SDL_Event& event )
+  void InputManager::handleEvent( SDL_Event& sdl_event, InputHandler* handler )
   {
     // At this point we must assume ALL of the mapping objects are correctly configured!
 
-    InputEventType event_type = INPUT_EVENT_NULL;
+    InputEventType event_type = INPUT_TYPE_NULL;
     InputMapping* mapper = nullptr;
     InputAction action = INPUT_ACTION_NULL;
+    InputEvent event = INPUT_EVENT_NULL;
 
     ControllableSet::iterator end;
 
     DEBUG_STREAM << "Handling event";
 
-    switch ( event.type )
+    switch ( sdl_event.type )
     {
       case SDL_WINDOWEVENT :
         break;
 
       case SDL_KEYDOWN :
       case SDL_KEYUP :
+        if ( handler == nullptr ) break;
+
         DEBUG_LOG( "  Keyboard key-press type event" );
-        event_type = INPUT_EVENT_KEYBOARD;
+        event_type = INPUT_TYPE_KEYBOARD;
         mapper = _inputMaps[ event_type ];
-        action = mapper->getAction( event );
+        action = (InputAction&)mapper->getBehaviour( sdl_event );
+
         if ( action == INPUT_ACTION_NULL ) break;
 
-        end = _actionMaps[action].end();
-        for ( ControllableSet::iterator it = _actionMaps[action].begin(); it != end; ++it )
+        end = handler->getRegisteredObjects( action ).end();
+        for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
         {
           DEBUG_STREAM << "  Propagating action : " << action;
           mapper->propagate( (*it) );
@@ -141,7 +150,7 @@ namespace Regolith
   }
 
 
-  void InputHandler::addInputMap( InputEventType event_type, InputMapping* mapping )
+  void InputManager::addInputMap( InputEventType event_type, InputMapping* mapping )
   {
     if ( _inputMaps[ event_type ] != nullptr )
     {
@@ -153,29 +162,46 @@ namespace Regolith
   }
 
 
+  void InputManager::registerInputRequest( Controllable* object, InputEvent event )
+  {
+    INFO_STREAM << "Registered input request for event: " << event << " " << object;
+    _eventMaps[event].insert( object );
+  }
+
+
+  ControllableSet& InputManager::getRegisteredObjects( InputEvent event )
+  {
+    return _eventMaps[event];
+  }
+
+
+  void InputManager::registerBehaviour( InputEventType event_type, unsigned int code, InputBehaviour event )
+  {
+    _inputMaps[ event_type ]->registerBehaviour( code, event );
+  }
+
+
+  InputBehaviour InputManager::getRegisteredBehaviour( InputEventType event_type, unsigned int code )
+  {
+    return _inputMaps[ event_type ]->getRegisteredBehaviour( code );
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Input Handler
+
+  InputHandler::InputHandler() :
+    _actionMaps()
+  {
+  }
+
+
   void InputHandler::registerInputRequest( Controllable* object, InputAction action )
   {
     INFO_STREAM << "Registered input request for action: " << action << " " << object;
     _actionMaps[action].insert( object );
   }
 
-
-  InputHandler::ControllableSet InputHandler::getRegisteredObjects( InputAction action )
-  {
-    return _actionMaps[action];
-  }
-
-
-  void InputHandler::registerAction( InputEventType event, unsigned int code, InputAction action )
-  {
-    _inputMaps[ event ]->registerAction( code, action );
-  }
-
-
-  InputAction InputHandler::getRegisteredAction( InputEventType event_type, unsigned int code )
-  {
-    return _inputMaps[ event_type ]->getRegisteredAction( code );
-  }
 
 }
 

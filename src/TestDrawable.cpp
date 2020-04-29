@@ -1,7 +1,7 @@
 
 #include "TestDrawable.h"
 
-#include "InputHandler.h"
+#include "InputManager.h"
 
 #include "logtastic.h"
 
@@ -40,7 +40,7 @@ namespace Regolith
   }
 
 
-  void TestDrawable::registerEvents( InputHandler* handler )
+  void TestDrawable::registerActions( InputHandler* handler )
   {
     handler->registerInputRequest( this, INPUT_ACTION_JUMP );
     handler->registerInputRequest( this, INPUT_ACTION_MOVE );

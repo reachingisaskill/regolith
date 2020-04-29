@@ -5,7 +5,7 @@
 #include "Utilities.h"
 #include "Manager.h"
 #include "Collision.h"
-#include "InputHandler.h"
+#include "InputManager.h"
 
 #include "logtastic.h"
 
@@ -25,7 +25,7 @@ namespace Regolith
     _theRenderer( nullptr ),
     _theBuilder( nullptr ),
     _sceneFile( json_file ),
-    _theInput( nullptr ),
+    _theInput(),
     _background( nullptr ),
     _sceneElements(),
     _hudElements(),
@@ -38,12 +38,11 @@ namespace Regolith
   }
 
 
-  void Scene::configure( SDL_Renderer* renderer, Window* window, ObjectBuilder* build, InputHandler* input )
+  void Scene::configure( SDL_Renderer* renderer, Window* window, ObjectBuilder* build )
   {
     _theWindow = window;
     _theRenderer = renderer;
     _theBuilder = build;
-    _theInput = input;
   }
 
 
@@ -90,11 +89,6 @@ namespace Regolith
     INFO_LOG( "Clearing name lookups" );
     _teamNames.clear();
     _resourceNames.clear();
-
-
-    INFO_LOG( "Deleting input handler" );
-    delete _theInput;
-    _theInput = nullptr;
 
 
     INFO_LOG( "Deleting raw texture data" );
@@ -389,7 +383,7 @@ namespace Regolith
       std::string camera_type = json_data["type"].asString();
       _theCamera = new Camera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
       _theCamera->setPosition( camera_x, camera_y );
-      _theCamera->registerEvents( _theInput );
+      _theCamera->registerActions( &_theInput );
 
       if ( camera_type == "flying" )
       {
@@ -644,12 +638,6 @@ namespace Regolith
   }
 
 
-  void Scene::processEvents()
-  {
-    _theInput->handleEvents();
-  }
-
-
   void Scene::resolveCollisions()
   {
     ElementList& environmentElements = _collisionElements[0];
@@ -733,7 +721,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
-      newElement->registerEvents( _theInput );
+      newElement->registerActions( &_theInput );
     }
     // HUD Elements not allowed collision
   }
@@ -753,7 +741,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
-      newElement->registerEvents( _theInput );
+      newElement->registerActions( &_theInput );
     }
     if ( newElement->hasCollision() )
     {
@@ -777,7 +765,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
-      newElement->registerEvents( _theInput );
+      newElement->registerActions( &_theInput );
     }
     if ( newElement->hasCollision() )
     {
@@ -799,7 +787,7 @@ namespace Regolith
     if ( newElement->hasInput() )
     {
       _inputElements.push_back( newElement );
-      newElement->registerEvents( _theInput );
+      newElement->registerActions( &_theInput );
     }
     if ( newElement->hasCollision() )
     {

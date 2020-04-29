@@ -6,6 +6,7 @@
 
 #include "Singleton.h"
 #include "Controllable.h"
+#include "InputManager.h"
 #include "Scene.h"
 #include "Window.h"
 #include "Timer.h"
@@ -22,6 +23,7 @@ namespace Regolith
     private:
 
       SDL_Renderer* _theRenderer;
+      InputManager* _inputManager;
       Window* _currentWindow;
       Scene* _currentScene;
       Camera* _currentCamera;
@@ -35,7 +37,7 @@ namespace Regolith
 
       virtual ~Engine();
 
-      void configure( SDL_Renderer*, Window* );
+      void configure( SDL_Renderer*, Window*, InputManager* );
 
       void run();
 

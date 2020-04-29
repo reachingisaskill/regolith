@@ -14,7 +14,7 @@ namespace Regolith
 
   KeyboardMapping::KeyboardMapping() :
     _theMap(),
-    _lastAction( INPUT_ACTION_NULL ),
+    _lastBehaviour( INPUT_ACTION_NULL ),
     _lastValue( false )
   {
     for ( unsigned int i = 0; i < SDL_NUM_SCANCODES; ++i )
@@ -30,19 +30,19 @@ namespace Regolith
 
 
 
-  void KeyboardMapping::registerAction( unsigned int scan_code, InputAction action )
+  void KeyboardMapping::registerBehaviour( unsigned int scan_code, InputBehaviour action )
   {
     DEBUG_STREAM << "Keyboard Mapping registered: " << action << " -> " << scan_code;
     _theMap[ scan_code ] = action;
   }
 
 
-  InputAction& KeyboardMapping::getAction( SDL_Event& event )
+  InputBehaviour& KeyboardMapping::getBehaviour( SDL_Event& event )
   {
     if ( event.key.repeat != 0 )
     {
-      _lastAction = INPUT_ACTION_NULL;
-      return _lastAction;
+      _lastBehaviour = INPUT_ACTION_NULL;
+      return _lastBehaviour;
     }
 
     if ( event.type == SDL_KEYDOWN )
@@ -53,18 +53,19 @@ namespace Regolith
     {
       _lastValue = false;
     }
-    _lastAction = _theMap[event.key.keysym.scancode];
-    return _lastAction;
+    _lastBehaviour = _theMap[event.key.keysym.scancode];
+    return _lastBehaviour;
   }
 
 
   void KeyboardMapping::propagate( Controllable* object ) const
   {
-    object->booleanAction( _lastAction, _lastValue );
+    DEBUG_LOG( "Calling booleanAction()" );
+    object->booleanAction( (InputAction)_lastBehaviour, _lastValue );
   }
 
 
-  InputAction KeyboardMapping::getRegisteredAction( unsigned int code ) const
+  InputBehaviour KeyboardMapping::getRegisteredBehaviour( unsigned int code ) const
   {
     return _theMap[code];
   }
@@ -74,30 +75,30 @@ namespace Regolith
   // Controller Axis Mapping class
 
 //  ControllerAxisMapping::ControllerAxisMapping( unsigned int size ) :
-//    _theMap( new InputAction[size] ),
-//    _lastAction(),
+//    _theMap( new InputBehaviour[size] ),
+//    _lastBehaviour(),
 //    _lastPosition()
 //  {
 //  }
 //
 //
-//  void ControllerAxisMapping::registerAction( unsigned int controller, InputAction action )
+//  void ControllerAxisMapping::registerBehaviour( unsigned int controller, InputBehaviour action )
 //  {
 //    _theMap[ controller ] = action;
 //  }
 //
 //
-//  InputAction& ControllerAxisMapping::getAction( SDL_Event& event )
+//  InputBehaviour& ControllerAxisMapping::getBehaviour( SDL_Event& event )
 //  {
 //    _lastPosition = event.jaxis.value;
-//    _lastAction = _theMap[ event.jaxis.axis ];
-//    return _lastAction;
+//    _lastBehaviour = _theMap[ event.jaxis.axis ];
+//    return _lastBehaviour;
 //  }
 //
 //
 //  void ControllerAxisMapping::propagate( Controllable* object ) const
 //  {
-//    object->floatAction( _lastAction, _lastPosition );
+//    object->floatBehaviour( _lastBehaviour, _lastPosition );
 //  }
 
 

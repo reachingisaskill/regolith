@@ -2,7 +2,7 @@
 #include "TestPlayer.h"
 
 #include "Utilities.h"
-#include "InputHandler.h"
+#include "InputManager.h"
 #include "Manager.h"
 
 #include "logtastic.h"
@@ -37,7 +37,7 @@ namespace Regolith
   }
 
 
-  void TestPlayer::registerEvents( InputHandler* handler )
+  void TestPlayer::registerActions( InputHandler* handler )
   {
     DEBUG_LOG( "Registering player input requests" );
     handler->registerInputRequest( this, INPUT_ACTION_MOVE_UP );

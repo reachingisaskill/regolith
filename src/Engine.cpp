@@ -25,10 +25,11 @@ namespace Regolith
   }
 
 
-  void Engine::configure( SDL_Renderer* r, Window* w )
+  void Engine::configure( SDL_Renderer* r, Window* w, InputManager* m )
   {
     _theRenderer = r;
     _currentWindow = w;
+    _inputManager = m;
   }
 
 
@@ -39,7 +40,8 @@ namespace Regolith
 
     while ( ! _quit )
     {
-      _currentScene->processEvents();
+      // Handle events globally and context-specific actions using the scene's input handler
+      _inputManager->handleEvents( _currentScene->inputHandler() );
 
       SDL_SetRenderDrawColor( _theRenderer, _defaultColor.r, _defaultColor.g, _defaultColor.b, _defaultColor.a );
       SDL_RenderClear( _theRenderer );

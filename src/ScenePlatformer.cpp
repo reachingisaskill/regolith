@@ -5,7 +5,7 @@
 #include "Utilities.h"
 #include "Manager.h"
 #include "Collision.h"
-#include "InputHandler.h"
+#include "InputManager.h"
 
 #include "logtastic.h"
 

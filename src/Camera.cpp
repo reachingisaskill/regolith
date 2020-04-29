@@ -2,7 +2,7 @@
 #include "Camera.h"
 
 #include "Drawable.h"
-#include "InputHandler.h"
+#include "InputManager.h"
 
 #include "logtastic.h"
 
@@ -127,8 +127,9 @@ namespace Regolith
   }
 
 
-  void Camera::registerEvents( InputHandler* handler )
+  void Camera::registerActions( InputHandler* handler )
   {
+    INFO_LOG( "Registering camera actions with input handler" );
     handler->registerInputRequest( this, INPUT_ACTION_MOVE_UP );
     handler->registerInputRequest( this, INPUT_ACTION_MOVE_DOWN );
     handler->registerInputRequest( this, INPUT_ACTION_MOVE_LEFT );

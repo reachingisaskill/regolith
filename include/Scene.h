@@ -5,6 +5,7 @@
 #include "Definitions.h"
 #include "Drawable.h"
 #include "ObjectBuilder.h"
+#include "InputManager.h"
 #include "Window.h"
 #include "Camera.h"
 
@@ -39,7 +40,7 @@ namespace Regolith
       SDL_Renderer* _theRenderer;
       ObjectBuilder* _theBuilder;
       std::string _sceneFile;
-      InputHandler* _theInput;
+      InputHandler _theInput;
 
       // Containers storing drawable objects - the scene and the hud elements
       // All memory is owned by the resource list above
@@ -113,7 +114,7 @@ namespace Regolith
 
 
       // Configure the info required to build the scene
-      void configure( SDL_Renderer*, Window*, ObjectBuilder*, InputHandler*);
+      void configure( SDL_Renderer*, Window*, ObjectBuilder* );
 
       // Load the scene from the specified file
       void load();
@@ -121,15 +122,15 @@ namespace Regolith
       // Return a copy of the scene file
       std::string getSceneFile() { return _sceneFile; }
 
+      // Returns a pointer to the current input handler
+      InputHandler* inputHandler() { return &_theInput; }
+
 
       // Update the time-dependent scene elements with the No. ticks
       void update( Uint32 );
 
       // Render all the scene elements
       void render();
-
-      // Handle events
-      void processEvents();
 
       // Resolve all the collision
       void resolveCollisions();

@@ -9,6 +9,7 @@
 #include "ClickableSet.h"
 
 #include <string>
+#include <json/json.h>
 
 
 namespace Regolith
@@ -16,6 +17,7 @@ namespace Regolith
 
   class Scene;
   class Camera;
+  class Dialog;
 
   /*
    * Classes for defining dialog-style interaction boxes in a tree structure.
@@ -27,21 +29,26 @@ namespace Regolith
    * no point in re-implementing the memory handling
    */
 
-  class Dialog;
-
   class DialogWindow
   {
     private:
+      std::string _filename;
+      Scene* _scene;
+      Camera* _camera;
+
       // DialogWindow owns this memory
       Dialog* _dialogTree;
 
-      // This is just a pointer to the currently visible dialog- NOT unique and deletable memory.
+      // This is just a pointer to the currently visible dialog - NOT unique and deletable memory.
       Dialog* _currentDialog;
 
 
     public:
       // Scene pointer, HUD camera, json file
       DialogWindow( Scene*, Camera*, std::string );
+
+      // Load the Dialog data from the file
+      void loadFromJson();
 
       // Update all animations, sprite changes, etc
       void update( Uint32 );
@@ -51,6 +58,9 @@ namespace Regolith
   };
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
   class Dialog
   {
     typedef std::vector< Drawable* > ElementList;
@@ -58,7 +68,6 @@ namespace Regolith
     private:
       Scene* _owner;
       Camera* _HUDCamera;
-      std::string _dialogFile;
       NamedVector<Dialog> _subDialogs;
 
       // List of the spawned elements

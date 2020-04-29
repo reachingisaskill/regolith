@@ -128,11 +128,14 @@ namespace Regolith
       bool isMovable() const { return _inverseMass >= epsilon; }
 
 
-      // Update the objects behaviour based on the provided timestep
-      virtual void registerEvents( InputHandler* ) = 0;
+      // Prevent derived classes from using input manager. They do not persist outside the scene
+      void registerEvents( InputManager* ) {}
+
+      // Register actions with scenes input handler
+      virtual void registerActions( InputHandler* ) = 0;
 
       // Interfaces for input
-      virtual void eventAction( const InputAction& ) {}
+      virtual void eventAction( const InputEvent& ) {}
       virtual void booleanAction( const InputAction&, bool ) {}
       virtual void floatAction( const InputAction&, float ) {}
       virtual void vectorAction( const InputAction&, const Vector& ) {}

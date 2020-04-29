@@ -4,8 +4,10 @@
 
 #include "Definitions.h"
 
-#include "ButtonSprite.h"
+#include "Button.h"
 #include "Controllable.h"
+
+#include <set>
 
 
 namespace Regolith
@@ -36,14 +38,17 @@ namespace Regolith
       void addButton( Button* );
 
 
-      // Update the objects behaviour based on the provided timestep
-      virtual void registerEvents( InputHandler* ) = 0;
+      // Don't allow derived classes to access game-wide events
+      void registerEvents( InputManager* ) {}
+
+      // Register context-wide actions
+      virtual void registerActions( InputHandler* );
 
       // Interfaces for input
-      virtual void eventAction( const InputAction& ) = 0;
-      virtual void booleanAction( const InputAction&, bool ) = 0;
-      virtual void floatAction( const InputAction&, float ) = 0;
-      virtual void vectorAction( const InputAction&, const Vector& ) = 0;
+      virtual void eventAction( const InputEvent& ) {}
+      virtual void booleanAction( const InputAction&, bool );
+      virtual void floatAction( const InputAction&, float ) {}
+      virtual void vectorAction( const InputAction&, const Vector& );
   };
 
 }

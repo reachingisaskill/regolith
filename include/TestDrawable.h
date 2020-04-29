@@ -30,7 +30,7 @@ namespace Regolith
 
       void update( Uint32 ) {}
 
-      void registerEvents( InputHandler* );
+      void registerActions( InputHandler* );
       
       unsigned int getCollision( Collision*& );
 

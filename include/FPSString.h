@@ -43,7 +43,7 @@ namespace Regolith
       virtual void render( Camera* );
 
       // Handle Events
-      virtual void registerEvents( InputHandler* ) {}
+      virtual void registerActions( InputHandler* ) {}
 
       // Update the objects behaviour based on the provided timestep
       virtual void update( Uint32 );

@@ -19,16 +19,18 @@ namespace Regolith
    * SDL_CONTROLLER_BUTTON_MAX = max number of controller button inputs
    */
 
+  typedef unsigned int InputBehaviour;
+
   class InputMapping
   {
     public :
       virtual ~InputMapping() {}
 
-      virtual void registerAction( unsigned int, InputAction ) = 0;
+      virtual void registerBehaviour( unsigned int, InputBehaviour ) = 0;
 
-      virtual InputAction& getAction( SDL_Event& ) = 0;
+      virtual InputBehaviour& getBehaviour( SDL_Event& ) = 0;
 
-      virtual InputAction getRegisteredAction( unsigned int ) const = 0;
+      virtual InputBehaviour getRegisteredBehaviour( unsigned int ) const = 0;
 
       virtual void propagate( Controllable*  ) const = 0;
   };
@@ -39,8 +41,8 @@ namespace Regolith
   class KeyboardMapping : public InputMapping
   {
     private:
-      InputAction _theMap[SDL_NUM_SCANCODES];
-      InputAction _lastAction;
+      InputBehaviour _theMap[SDL_NUM_SCANCODES];
+      InputBehaviour _lastBehaviour;
       bool _lastValue;
 
     public:
@@ -48,11 +50,11 @@ namespace Regolith
 
       virtual ~KeyboardMapping();
 
-      void registerAction( unsigned int, InputAction );
+      void registerBehaviour( unsigned int, InputBehaviour );
 
-      InputAction& getAction( SDL_Event& event );
+      InputBehaviour& getBehaviour( SDL_Event& event );
 
-      InputAction getRegisteredAction( unsigned int ) const;
+      InputBehaviour getRegisteredBehaviour( unsigned int ) const;
 
       void propagate( Controllable* ) const;
   };
@@ -64,16 +66,16 @@ namespace Regolith
 //  class ControllerAxisMapping : public InputMapping
 //  {
 //    private:
-//      InputAction* _theMap; // Map for all controller joysticks!
-//      InputAction _lastAction;
+//      InputBehaviour* _theMap; // Map for all controller joysticks!
+//      InputBehaviour _lastBehaviour;
 //      float _lastPosition;
 //
 //    public:
 //      ControllerAxisMapping( unsigned int num = SDL_CONTROLLER_AXIS_MAX );
 //
-//      void registerAction( unsigned int, InputAction );
+//      void registerBehaviour( unsigned int, InputBehaviour );
 //
-//      InputAction& getAction( SDL_Event& );
+//      InputBehaviour& getBehaviour( SDL_Event& );
 //
 //      void propagate( Controllable* ) const;
 //  };
@@ -85,15 +87,15 @@ namespace Regolith
 //  class MouseMapping : public Mapping_base
 //  {
 //    private:
-//      InputAction _theAction; // Map for all joysticks!
+//      InputBehaviour _theBehaviour; // Map for all joysticks!
 //      Vector _lastPosition;
 //
 //    public:
 //      MouseMapping() {}
 //
-//      void registerAction( unsigned int, InputAction );
+//      void registerBehaviour( unsigned int, InputBehaviour );
 //
-//      InputAction& getAction( SDL_Event& ) const { return INPUT_NULL; }
+//      InputBehaviour& getBehaviour( SDL_Event& ) const { return INPUT_NULL; }
 //
 //      void propagate( Controllable* ) const { }
 //  };

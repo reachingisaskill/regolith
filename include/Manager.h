@@ -6,7 +6,7 @@
 
 #include "Singleton.h"
 #include "Window.h"
-#include "InputHandler.h"
+#include "InputManager.h"
 #include "Scene.h"
 #include "ObjectBuilder.h"
 #include "SceneBuilder.h"
@@ -36,7 +36,7 @@ namespace Regolith
       Engine* _theEngine;
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
-      InputHandler* _theInput;
+      InputManager* _theInput;
 
       ObjectBuilder* _theBuilder;
       SceneBuilder* _theSceneBuilder;

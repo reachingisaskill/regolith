@@ -129,6 +129,11 @@ namespace Regolith
       delete reader;
 
 
+      // Load the input device configuration first so objects can register game-wide behaviours
+      this->_loadInput( json_data["input"] );
+
+
+
       // Load the window configuration
       int screen_width = json_data["screen_width"].asInt();
       int screen_height = json_data["screen_height"].asInt();
@@ -196,18 +201,13 @@ namespace Regolith
       }
 
 
-
-      // Load the input device configuration
-      this->_loadInput( json_data["input"] );
-
-
       // Load all the scenes into memory
       Json::Value scene_data = json_data["scenes"];
       Json::ArrayIndex scenes_size = scene_data.size();
       for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
       {
         Scene* new_scene = _theSceneBuilder->build( scene_data[i] );
-        new_scene->configure( _theRenderer, _theWindow, _theBuilder, _theInput );
+        new_scene->configure( _theRenderer, _theWindow, _theBuilder );
         _scenes.push_back( new_scene );
       }
 
@@ -230,7 +230,7 @@ namespace Regolith
     }
 
     this->configureEvents();
-    _theEngine->configure( _theRenderer, _theWindow );
+    _theEngine->configure( _theRenderer, _theWindow, _theInput );
   }
 
 
@@ -239,7 +239,7 @@ namespace Regolith
     Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "keymapping", Utilities::JSON_TYPE_ARRAY );
 
-    _theInput = new InputHandler();
+    _theInput = new InputManager();
 
     try
     {
@@ -280,7 +280,7 @@ namespace Regolith
           {
             SDL_Scancode code = getScancodeID( it.key().asString() );
             InputAction action = getActionID( it->asString() );
-            _theInput->registerAction( INPUT_EVENT_KEYBOARD, code, action );
+            _theInput->registerBehaviour( INPUT_TYPE_KEYBOARD, code, (InputBehaviour)action );
             INFO_STREAM << "Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
         }

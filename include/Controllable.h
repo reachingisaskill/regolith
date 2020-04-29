@@ -8,6 +8,8 @@
 namespace Regolith
 {
 
+  // Forward declarations
+  class InputManager;
   class InputHandler;
 
 
@@ -21,12 +23,15 @@ namespace Regolith
     public :
 
 
-      // Update the objects behaviour based on the provided timestep
-      virtual void registerEvents( InputHandler* ) = 0;
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager* ) = 0;
+
+      // Register context-wide actions with the handler
+      virtual void registerActions( InputHandler* ) = 0;
 
 
       // Interfaces for input
-      virtual void eventAction( const InputAction& ) = 0;
+      virtual void eventAction( const InputEvent& ) = 0;
       virtual void booleanAction( const InputAction&, bool ) = 0;
       virtual void floatAction( const InputAction&, float ) = 0;
       virtual void vectorAction( const InputAction&, const Vector& ) = 0;

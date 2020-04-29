@@ -47,7 +47,7 @@ namespace Regolith
       virtual Drawable* clone() const;
 
       // Update the objects behaviour based on the provided timestep
-      virtual void registerEvents( InputHandler* );
+      virtual void registerActions( InputHandler* );
 
       // Interfaces for input
       virtual void eventAction( const InputAction& ) {}
