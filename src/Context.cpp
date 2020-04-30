@@ -6,9 +6,23 @@
 namespace Regolith
 {
 
+  Context::Context() :
+    _parent( nullptr ),
+    _theInput(),
+    _properties( CONTEXT_PROPERTIES_NONE )
+  {
+  }
+
+
   void Context::giveFocus()
   {
-    Manager::getInstance()->setContext( this );
+    Manager::getInstance()->pushContext( this );
+  }
+
+
+  void Context::takeFocus()
+  {
+    Manager::getInstance()->popContext();
   }
 
 }

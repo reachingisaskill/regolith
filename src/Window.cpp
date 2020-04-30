@@ -138,11 +138,14 @@ namespace Regolith
       case SDL_WINDOWEVENT_FOCUS_LOST :
         _keyboardFocus = false;
         updateCaption = true;
+        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_SCENE_PAUSE );
         break;
 
       case SDL_WINDOWEVENT_MINIMIZED :
         _minimized = true;
         updateCaption = true;
+        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_SCENE_PAUSE );
+        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_ENGINE_PAUSE );
         break;
 
       case SDL_WINDOWEVENT_MAXIMIZED :
@@ -153,6 +156,7 @@ namespace Regolith
       case SDL_WINDOWEVENT_RESTORED :
         _minimized = false;
         updateCaption = true;
+        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_ENGINE_RESUME );
         break;
     }
 

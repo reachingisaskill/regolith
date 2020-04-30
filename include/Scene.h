@@ -5,6 +5,7 @@
 #include "Definitions.h"
 #include "NamedVector.h"
 #include "Context.h"
+#include "Controllable.h"
 #include "Drawable.h"
 #include "ObjectBuilder.h"
 #include "Window.h"
@@ -27,13 +28,14 @@ namespace Regolith
   typedef std::vector< ElementList > TeamsList;
 
 
-  class Scene : public Context
+  class Scene : public Context, public Controllable
   {
     private:
       // Scene owns the memory for the texture data
       RawTextureMap _rawTextures;
       NamedVector<Drawable> _resources;
       TeamNameMap _teamNames;
+      bool _paused;
 
       // Key components for building elements and rendering
       Window* _theWindow;
@@ -58,6 +60,20 @@ namespace Regolith
       Camera* _theHUD;
 
     protected:
+
+      // Function for derived classes to implement when the pause signal is received
+      virtual void onPause() {}
+
+      // Function for derived classes to implement when the pause is over
+      virtual void onStart() {}
+
+      // Function for derived classes to implement when the pause is over
+      virtual void onResume() {}
+
+      // Function for derived classes to implement when the quit signal is received (auto saving?)
+      virtual void onQuit() {}
+
+
       // Helper functions to build and store the raw texture files
       void _addTextureFromFile( Json::Value& );
       void _addTextureFromText( Json::Value& );
@@ -125,6 +141,13 @@ namespace Regolith
       ObjectBuilder* getBuilder() { return _theBuilder; }
 
 
+      // Pause logic
+      void pause() { _paused = true; this->onPause(); }
+      void resume() { _paused = false; this->onResume(); }
+      bool isPaused() const { return _paused; }
+
+
+
       // Update the time-dependent scene elements with the No. ticks
       void update( Uint32 );
 
@@ -165,6 +188,27 @@ namespace Regolith
       // Spawn an object with the supplied ID number at the supplied position, and return the pointer
       // THIS FUNCTION RETURNS OWNSHIP OF THIS MEMORY!
       Drawable* spawnReturn( unsigned int, Vector );
+
+
+      //////////////////////////////////////////////////
+      // Code to enable controllable interface
+
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager* );
+
+      // Register context-wide actions with the handler
+      virtual void registerActions( InputHandler* );
+
+
+      // Interfaces for input
+      // Handled and mapped actions
+      virtual void booleanAction( const InputAction&, bool );
+      virtual void floatAction( const InputAction&, float ) {}
+      virtual void vectorAction( const InputAction&, const Vector& ) {}
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& );
+
   };
 
 }

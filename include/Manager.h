@@ -14,16 +14,19 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <deque>
 
 
 namespace Regolith
 {
+  // Forward declarations
+  class Engine;
+  class Context;
+
   // Useful typedefs
   typedef std::vector< Scene* > SceneList;
   typedef std::map< std::string, TTF_Font* > FontMap;
-
-  class Engine;
-  class Context;
+  typedef std::deque< Context* > ContextStack;
 
 
   // Manager class
@@ -38,7 +41,7 @@ namespace Regolith
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
       InputManager* _theInput;
-      Context* _currentContext;
+      ContextStack _contexts;
 
       ObjectBuilder* _theBuilder;
       SceneBuilder* _theSceneBuilder;
@@ -122,10 +125,16 @@ namespace Regolith
 
 
       // Set the current context pointer
-      void setContext( Context* c ) { _currentContext = c; }
+      void pushContext( Context* c ) { _contexts.push_front( c ); }
+
+      // Set the current context pointer
+      void popContext();
 
       // Get the current context
-      Context* currentContext() { return _currentContext; }
+      ContextStack& contextStack() { return _contexts; }
+
+      // Get the current context
+      Context* currentContext() { return _contexts.front(); }
 
 
 

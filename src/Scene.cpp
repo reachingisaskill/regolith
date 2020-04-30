@@ -19,6 +19,7 @@ namespace Regolith
     _rawTextures(),
     _resources("resources"),
     _teamNames(),
+    _paused( false ),
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
     _theBuilder( nullptr ),
@@ -454,6 +455,9 @@ namespace Regolith
     INFO_LOG( "Loading Scene-Specific Components" );
     this->_loadSceneSpecificComponents( json_data );
 
+    INFO_LOG( "Registering input actions" );
+    this->registerActions( inputHandler() );
+
     INFO_LOG( "Scene Successfuly Built" );
   }
 
@@ -585,6 +589,10 @@ namespace Regolith
 
     // Call the derived class udpated function
     this->_update( time );
+
+
+    // Now the update is finished resolve the collisions
+    this->resolveCollisions();
   }
 
 
@@ -759,6 +767,102 @@ namespace Regolith
     return newElement;
   }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Controllable interface
+
+  void Scene::registerEvents( InputManager* manager )
+  {
+    manager->registerInputRequest( this, REGOLITH_EVENT_QUIT );
+    manager->registerInputRequest( this, REGOLITH_EVENT_SCENE_END );
+    manager->registerInputRequest( this, REGOLITH_EVENT_SCENE_PAUSE );
+    manager->registerInputRequest( this, REGOLITH_EVENT_CONTEXT_END );
+    manager->registerInputRequest( this, REGOLITH_EVENT_WIN_CONDITION );
+    manager->registerInputRequest( this, REGOLITH_EVENT_LOSE_CONDITION );
+    manager->registerInputRequest( this, REGOLITH_EVENT_GAMEOVER );
+
+    manager->registerInputRequest( this, REGOLITH_EVENT_CAMERA_RESIZE );
+  }
+
+
+  void Scene::registerActions( InputHandler* handler )
+  {
+    handler->registerInputRequest( this, INPUT_ACTION_QUIT );
+    handler->registerInputRequest( this, INPUT_ACTION_PAUSE );
+  }
+
+
+  void Scene::eventAction( const RegolithEvent& regolith_event, const SDL_Event& sdl_event )
+  {
+    switch ( regolith_event )
+    {
+      case REGOLITH_EVENT_QUIT :
+      case REGOLITH_EVENT_SCENE_END :
+      case REGOLITH_EVENT_CONTEXT_END :
+        this->onQuit();
+        break;
+
+      case REGOLITH_EVENT_SCENE_PAUSE :
+        if ( ! this->isPaused() )
+          this->pause();
+        break;
+
+      case REGOLITH_EVENT_SCENE_RESUME :
+        if ( this->isPaused() )
+          this->resume();
+
+      case REGOLITH_EVENT_FULLSCREEN :
+        break;
+
+      case REGOLITH_EVENT_WIN_CONDITION :
+        break;
+
+      case REGOLITH_EVENT_LOSE_CONDITION :
+        break;
+
+      case REGOLITH_EVENT_GAMEOVER :
+        break;
+
+      case REGOLITH_EVENT_CAMERA_RESIZE :
+        Camera::updateScale( _theWindow->getWidth(), _theWindow->getHeight() );
+        break;
+
+      default:
+        break;
+    }
+  }
+
+
+  void Scene::booleanAction( const InputAction& action, bool value )
+  {
+    switch ( action )
+    {
+      case INPUT_ACTION_PAUSE :
+        if ( value )
+        {
+          if ( this->isPaused() )
+          {
+            this->resume();
+          }
+          else
+          {
+            this->pause();
+          }
+        }
+        break;
+
+      case INPUT_ACTION_QUIT :
+        if ( value )
+        {
+          this->pause();
+          Manager::getInstance()->raiseEvent( REGOLITH_EVENT_QUIT );
+        }
+        break;
+
+      default :
+        break;
+    }
+  }
 
 }
 

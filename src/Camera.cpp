@@ -10,18 +10,20 @@
 namespace Regolith
 {
 
+  float Camera::_scaleX = 1.0;
+  float Camera::_scaleY = 1.0;
+
+  int Camera::_windowWidth = 0;
+  int Camera::_windowHeight = 0;
+
   Camera::Camera() :
     _currentMode( CAMERA_FIXED ),
     _sceneWidth( 0 ),
     _sceneHeight( 0 ),
-    _width( 0 ),
-    _height( 0 ),
     _limitX( 0 ),
     _limitY( 0 ),
     _x( 0 ),
     _y( 0 ),
-    _scaleX( 1.0 ),
-    _scaleY( 1.0 ),
     _velocityX( 0 ),
     _velocityY( 0 ),
     _speed( 1 ),
@@ -36,14 +38,10 @@ namespace Regolith
     _currentMode( CAMERA_FIXED ),
     _sceneWidth( scene_width ),
     _sceneHeight( scene_height ),
-    _width( width ),
-    _height( height ),
     _limitX( _sceneWidth - width ),
     _limitY( _sceneHeight - height ),
     _x( 0 ),
     _y( 0 ),
-    _scaleX( 1.0 ),
-    _scaleY( 1.0 ),
     _velocityX( 0 ),
     _velocityY( 0 ),
     _speed( 1 ),
@@ -51,6 +49,8 @@ namespace Regolith
     _offsetX( 0 ),
     _offsetY( 0 )
   {
+    _windowWidth = width;
+    _windowHeight = height;
   }
 
 
@@ -59,7 +59,7 @@ namespace Regolith
     _sceneWidth = scene_width;
     _sceneHeight = scene_height;
     this->setSize( width, height );
-    INFO_STREAM << "Camera::configure() : ScenePlatformer Dims: " << _sceneWidth << ", " << _sceneHeight << ", Camera Dims: " << _width << ", " << _height << ", Limits: " << _limitX << ", " << _limitY << ", Pos: " << _x << ", " << _y;
+    INFO_STREAM << "Camera::configure() : ScenePlatformer Dims: " << _sceneWidth << ", " << _sceneHeight << ", Camera Dims: " << _windowWidth << ", " << _windowHeight << ", Limits: " << _limitX << ", " << _limitY << ", Pos: " << _x << ", " << _y;
   }
 
 
@@ -75,14 +75,14 @@ namespace Regolith
   void Camera::setSize( int x, int y )
   {
     // Set the new camera size ( must fit the scene )
-    _width = x;
-    if ( _width > _sceneWidth ) _width = _sceneWidth;
-    _height = y;
-    if ( _height > _sceneHeight ) _height = _sceneHeight;
+    _windowWidth = x;
+    if ( _windowWidth > _sceneWidth ) _windowWidth = _sceneWidth;
+    _windowHeight = y;
+    if ( _windowHeight > _sceneHeight ) _windowHeight = _sceneHeight;
 
     // Set the new corresponding limits
-    _limitX = _sceneWidth - _width;
-    _limitY = _sceneHeight - _height;
+    _limitX = _sceneWidth - _windowWidth;
+    _limitY = _sceneHeight - _windowHeight;
 
     // Makesure the camera is still within the scene
     checkPosition();
@@ -110,8 +110,8 @@ namespace Regolith
 
   void Camera::updateScale( int window_w, int window_h )
   {
-    _scaleX = (float)window_w / (float)_width;
-    _scaleY = (float)window_h / (float)_height;
+    _scaleX = (float)window_w / (float)_windowWidth;
+    _scaleY = (float)window_h / (float)_windowHeight;
     DEBUG_STREAM << "New camera scale = " << _scaleX << ", " << _scaleY << " (" << window_w << ", " << window_h << ")";
   }
 

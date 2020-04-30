@@ -18,15 +18,10 @@ namespace Regolith
       CameraMode _currentMode;
       int _sceneWidth;
       int _sceneHeight;
-      int _width;
-      int _height;
       int _limitX;
       int _limitY;
       int _x;
       int _y;
-      // Parameters to rescale widths and heights if the window changes size
-      float _scaleX;
-      float _scaleY;
       // Details when flying
       int _velocityX;
       int _velocityY;
@@ -35,6 +30,12 @@ namespace Regolith
       Drawable* _theObject;
       int _offsetX;
       int _offsetY;
+
+      // Parameters to rescale widths and heights if the window changes size
+      static float _scaleX;
+      static float _scaleY;
+      static int _windowWidth;
+      static int _windowHeight;
 
     protected:
       int& x() { return _x; }
@@ -72,14 +73,11 @@ namespace Regolith
       // Function to update the camera's behavious on every frame
       virtual void update( Uint32 );
 
-      // Change the scale parameters based on the new window size
-      void updateScale( int, int );
-
       int getX() { return _x; }
       int getY() { return _y; }
 
-      int getWidth() { return _width; }
-      int getHeight() { return _height; }
+      int getWidth() { return _windowWidth; }
+      int getHeight() { return _windowHeight; }
 
       // Places the object's rectang inside the window
       SDL_Rect place( const SDL_Rect& );
@@ -101,6 +99,10 @@ namespace Regolith
       // Function to follow an element
       // Update the objects behaviour based on the provided timestep
       virtual void followMe( Drawable* );
+
+
+      // Change the scale parameters based on the new window size
+      static void updateScale( int, int );
   };
 
 }

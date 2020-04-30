@@ -17,7 +17,7 @@ namespace Regolith
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
     _theInput( nullptr ),
-    _currentContext( nullptr ),
+    _contexts(),
     _theBuilder( new ObjectBuilder() ),
     _theSceneBuilder( new SceneBuilder() ),
     _scenes(),
@@ -36,6 +36,18 @@ namespace Regolith
 
     // Set up the scene factories
     _theSceneBuilder->addFactory( new SceneFactory<ScenePlatformer>( "platformer" ) );
+  }
+
+
+
+  void Manager::popContext()
+  {
+    // Remove the top element
+    _contexts.pop_front();
+
+    // If there's any left, tell them focus has returned
+    if ( ! _contexts.empty() )
+      _contexts.front()->returnFocus();
   }
 
 
@@ -218,6 +230,7 @@ namespace Regolith
       {
         Scene* new_scene = _theSceneBuilder->build( scene_data[i] );
         new_scene->configure( _theRenderer, _theWindow, _theBuilder );
+        new_scene->registerEvents( _theInput );
         _scenes.push_back( new_scene );
       }
 

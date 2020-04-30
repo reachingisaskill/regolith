@@ -57,6 +57,16 @@ namespace Regolith
       // Respawn the player at the last spawn point
       void playerRespawn();
 
+
+      // When paused stop animations
+      bool isAnimated() const { return ! isPaused(); }
+
+      // Scane is visible behind other context windows
+      bool isVisible() const { return true; }
+
+      // Tell the scene to un-pause
+      void returnFocus() { this->resume(); }
+
       // Raise an event in the current context
       void raiseContextEvent( ContextEvent );
   };

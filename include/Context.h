@@ -26,9 +26,28 @@ namespace Regolith
     private:
       Context* _parent;
       InputHandler _theInput;
+      ContextProperties _properties;
 
     public:
-      Context() : _parent( nullptr ), _theInput() {}
+      Context();
+
+      virtual ~Context() {}
+
+
+      // Flag to see it needs updating with the current time
+      virtual bool isAnimated() const = 0;
+
+      // Update the animations, etc
+      virtual void update( Uint32 ) = 0;
+
+
+      // Flag to tell the engine to render the context - it can be seen
+      virtual bool isVisible() const = 0;
+
+      // Render the current context
+      virtual void render() = 0;
+
+      
 
       // Set the parent context
       void setParentContext( Context* p ) { _parent = p; }
@@ -36,14 +55,27 @@ namespace Regolith
       // Get the parent context
       Context* getParentContext() { return _parent; }
 
+
+
       // Return the input handler for this context
       InputHandler* inputHandler() { return &_theInput; }
+
+
 
       // Raise an event in the current context
       virtual void raiseContextEvent( ContextEvent ) = 0;
 
-      // Class tells the manager that it is the current context
-      virtual void giveFocus();
+
+
+      // Called by the manager to tell the derived class that it now has focus again
+      virtual void returnFocus() = 0;
+
+
+      // Pushes current context onto the context stack - now has focus
+      void giveFocus();
+
+      // Pops the class from the context stack
+      void takeFocus();
   };
 
 }

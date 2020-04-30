@@ -37,10 +37,10 @@ namespace Regolith
 
   void InputManager::handleEvents( InputHandler* handler )
   {
-    if ( handler == nullptr )
-    {
-      WARN_LOG( "No input handler provided in this context" );
-    }
+//    if ( handler == nullptr )
+//    {
+//      WARN_LOG( "No input handler provided in this context" );
+//    }
 
     while ( SDL_PollEvent( &_theEvent ) != 0 )
     {

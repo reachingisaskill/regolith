@@ -30,6 +30,7 @@ namespace Regolith
       Timer _frameTimer;
       SDL_Color _defaultColor;
       bool _quit;
+      unsigned int _status;
 
     public:
       Engine();

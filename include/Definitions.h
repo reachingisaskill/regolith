@@ -39,6 +39,7 @@ namespace Regolith
   // Event enumerations
 
   // In-scene triggers
+  // Don't forget to update the string names!
   enum ContextEvent : unsigned int
   {
     CONTEXT_EVENT_NULL,
@@ -61,13 +62,23 @@ namespace Regolith
   };
 
 
+  enum ContextProperties
+  {
+    CONTEXT_PROPERTIES_NONE = 0,
+    CONTEXT_PROPERTIES_ANIMATED = 1<<0,
+    CONTEXT_PROPERTIES_VISIBLE = 1<<1
+  };
+
 
   enum RegolithEvent : unsigned int
   {
     REGOLITH_EVENT_NULL,
     REGOLITH_EVENT_QUIT,
+    REGOLITH_EVENT_ENGINE_PAUSE,
+    REGOLITH_EVENT_ENGINE_RESUME,
     REGOLITH_EVENT_SCENE_END,
     REGOLITH_EVENT_SCENE_PAUSE,
+    REGOLITH_EVENT_SCENE_RESUME,
     REGOLITH_EVENT_CONTEXT_END,
     REGOLITH_EVENT_FULLSCREEN,
     REGOLITH_EVENT_WIN_CONDITION,
@@ -83,10 +94,12 @@ namespace Regolith
   };
 
 
+  // Don't forget to update the string names!
   enum InputAction : unsigned int
   {
     INPUT_ACTION_NULL,
     INPUT_ACTION_QUIT,
+    INPUT_ACTION_PAUSE,
 
     INPUT_ACTION_CLICK,
 
@@ -194,6 +207,7 @@ namespace Regolith
   {
     "null",
     "quit",
+    "pause",
 
     "click",
 
