@@ -24,9 +24,11 @@ namespace Regolith
     _theRenderer( nullptr ),
     _theBuilder( nullptr ),
     _sceneFile( json_file ),
+    _pauseMenu( nullptr ),
     _background( nullptr ),
     _sceneElements(),
     _hudElements(),
+    _dialogWindows( "dialog_windows" ),
     _collisionElements(),
     _animatedElements(),
     _inputElements(),
@@ -317,23 +319,66 @@ namespace Regolith
         unsigned int id_number = _resources.getID( resource_name );
         this->spawnHUD( id_number, Vector( x, y ) );
       }
+
+
     }
     catch ( Exception& ex )
     {
       if ( ex.isRecoverable() )
       {
-        ERROR_STREAM << "An error occured building scene caches: " << ex.what();
+        ERROR_STREAM << "an error occured building scene caches: " << ex.what();
       }
       else
       {
-        FAILURE_STREAM << "An error occured building scene caches: " << ex.what();
-        FAILURE_LOG( "Error is non-recoverable" );
+        FAILURE_STREAM << "an error occured building scene caches: " << ex.what();
+        FAILURE_LOG( "error is non-recoverable" );
         throw ex;
       }
     }
     catch ( std::runtime_error& rt )
     {
       Exception ex( "Scene::_loadCaches()", "Json reading failure" );
+      ex.addDetail( "File name", _sceneFile );
+      ex.addDetail( "What", rt.what() );
+      throw ex;
+    }
+  }
+
+
+  void Scene::_loadDialogs( Json::Value& dialog_windows )
+  {
+    try
+    {
+      Json::ArrayIndex dialog_windows_size = dialog_windows.size();
+      for ( Json::ArrayIndex i = 0; i != dialog_windows_size; ++i )
+      {
+        Utilities::validateJson( dialog_windows[i], "name", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( dialog_windows[i], "dialog", Utilities::JSON_TYPE_OBJECT );
+
+        std::string name = dialog_windows[i]["name"].asString();
+
+        INFO_STREAM << "Building dialog window: " << name;
+        Dialog* newDialog = new Dialog( this, _theHUD, dialog_windows[i]["dialog"] );
+
+        _dialogWindows.addObject( newDialog, name );
+      }
+    }
+    catch ( Exception& ex )
+    {
+      if ( ex.isRecoverable() )
+      {
+        ERROR_STREAM << "an error occured building dialogs: " << ex.what();
+      }
+      else
+      {
+        FAILURE_STREAM << "an error occured building dialogs: " << ex.what();
+        FAILURE_LOG( "Error is non-recoverable" );
+        throw ex;
+      }
+    }
+    catch ( std::runtime_error& rt )
+    {
+      Exception ex( "Scene::_loadDialogs()", "json reading failure" );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
@@ -398,6 +443,16 @@ namespace Regolith
   }
 
 
+  void Scene::_loadOptions( Json::Value& options )
+  {
+    if ( Utilities::validateJson( options, "on_pause", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      std::string dialog_name = options["on_pause"].asString();
+      _pauseMenu = _dialogWindows.getByName( dialog_name );
+    }
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // The entry to the building algorithm
 
@@ -451,6 +506,26 @@ namespace Regolith
     }
     INFO_LOG( "Loading cameras" );
     this->_loadCameras( json_data["cameras"] );
+
+    if ( ! json_data.isMember( "dialog_windows" ) )
+    {
+      FAILURE_LOG( "Could not find dialog window in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No dialog_windows member found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Building Dialog Windows" );
+    this->_loadDialogs( json_data["dialog_windows"] );
+
+    if ( ! json_data.isMember( "options" ) )
+    {
+      FAILURE_LOG( "Could not find options in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No options member found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Configuring Scene options" );
+    this->_loadOptions( json_data["options"] );
 
     INFO_LOG( "Loading Scene-Specific Components" );
     this->_loadSceneSpecificComponents( json_data );
@@ -571,6 +646,7 @@ namespace Regolith
 
     SDL_FreeSurface( textSurface );
   }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Scene update and render functions
@@ -769,6 +845,19 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Miscellaneous scene events
+
+  void Scene::onPause()
+  {
+    DEBUG_LOG( "On pause called" );
+    if ( _pauseMenu != nullptr )
+    {
+      _pauseMenu->giveFocus();
+    }
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
   // Controllable interface
 
   void Scene::registerEvents( InputManager* manager )
@@ -792,7 +881,7 @@ namespace Regolith
   }
 
 
-  void Scene::eventAction( const RegolithEvent& regolith_event, const SDL_Event& sdl_event )
+  void Scene::eventAction( const RegolithEvent& regolith_event, const SDL_Event& )
   {
     switch ( regolith_event )
     {
@@ -840,12 +929,15 @@ namespace Regolith
       case INPUT_ACTION_PAUSE :
         if ( value )
         {
+          DEBUG_LOG( "Received pause signal" );
           if ( this->isPaused() )
           {
+            INFO_LOG( "Resuming Scene" );
             this->resume();
           }
           else
           {
+            INFO_LOG( "Pausing Scene" );
             this->pause();
           }
         }
@@ -854,6 +946,7 @@ namespace Regolith
       case INPUT_ACTION_QUIT :
         if ( value )
         {
+          INFO_LOG( "Quitting Program" );
           this->pause();
           Manager::getInstance()->raiseEvent( REGOLITH_EVENT_QUIT );
         }

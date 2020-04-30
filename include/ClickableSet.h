@@ -23,7 +23,7 @@ namespace Regolith
    * answer to the owning object.
    */
 
-  class ClickableSet : public Controllable
+  class ClickableSet
   {
     typedef std::set< Button* > ButtonSet;
 
@@ -44,21 +44,9 @@ namespace Regolith
 
       void select();
 
-
       void clear();
 
-
-      // Don't allow derived classes to access game-wide events
-      void registerEvents( InputManager* ) {}
-
-      // Register context-wide actions
-      virtual void registerActions( InputHandler* );
-
-      // Interfaces for input
-      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) {}
-      virtual void booleanAction( const InputAction&, bool );
-      virtual void floatAction( const InputAction&, float ) {}
-      virtual void vectorAction( const InputAction&, const Vector& );
+      void clickHere( Vector& );
   };
 
 }

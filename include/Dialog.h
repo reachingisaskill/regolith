@@ -29,41 +29,7 @@ namespace Regolith
    * no point in re-implementing the memory handling
    */
 
-  class DialogWindow : public Context
-  {
-    private:
-      Scene* _scene;
-      Camera* _camera;
-
-      // DialogWindow owns this memory
-      Dialog* _dialogTree;
-
-      // This is just a pointer to the currently visible dialog - NOT unique and deletable memory.
-      Dialog* _currentDialog;
-
-
-    public:
-      // Scene pointer, HUD camera, json file
-      DialogWindow( Scene*, Camera*, Json::Value& );
-
-      // Load the Dialog data from the file
-      void loadFromJson( Json::Value& );
-
-      // Update all animations, sprite changes, etc
-      void update( Uint32 );
-
-      // Render the dialog using the stored camera
-      void render();
-
-      // Raise an event in the current context
-      void raiseContextEvent( ContextEvent );
-  };
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-  class Dialog
+  class Dialog : public Context
   {
     typedef std::vector< Drawable* > ElementList;
 
@@ -73,7 +39,11 @@ namespace Regolith
     private:
       Scene* _owner;
       Camera* _HUDCamera;
+      std::string _name;
       NamedVector<Dialog> _subDialogs;
+
+      // Options
+      bool _canCancel;
 
       // List of the spawned elements
       // Dialog owns this memory - all elements in the dialog
@@ -95,16 +65,49 @@ namespace Regolith
       // Destruct all the owned memory
       virtual ~Dialog();
 
+      // Load the dialog
+      void loadFromJson( Json::Value& );
+
+
+      // Return the set of all clickable objects
+      ClickableSet& getSet() { return _buttons; }
+
+      // Go to the corresponding sub dialog
+      Dialog* selectDialog( unsigned int );
+
+
       // Update all animations, sprite changes, etc
       void update( Uint32 );
 
       // Render the dialog using the stored camera
       void render();
 
+      // Raise an event in the current context
+      void raiseContextEvent( ContextEvent );
 
-      // Go to the corresponding sub dialog
-      Dialog* selectDialog( unsigned int );
+      // Return true if animated
+      virtual bool isAnimated() const { return true; }
 
+      // Return true if visible
+      virtual bool isVisible() const { return true; }
+
+      // No child contexts - this function isn't needed
+      void returnFocus() {}
+
+
+
+      // Enable the controllable interface
+      // Don't allow derived classes to access game-wide events
+      void registerEvents( InputManager* ) {}
+
+      // Register context-wide actions
+      virtual void registerActions( InputHandler* );
+
+      // Interfaces for input
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) {}
+      virtual void booleanAction( const InputAction&, bool );
+      virtual void floatAction( const InputAction&, float ) {}
+      virtual void vectorAction( const InputAction&, const Vector& );
   };
 
 }

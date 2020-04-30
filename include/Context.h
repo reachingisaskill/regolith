@@ -3,6 +3,7 @@
 #define __REGOLITH__CONTEXT_H__
 
 #include "Definitions.h"
+#include "Controllable.h"
 #include "InputManager.h"
 
 
@@ -21,7 +22,7 @@ namespace Regolith
    * The standard rendering interface is still to use the current scene, and let the scene
    * call the rendering function for the current context.
    */
-  class Context
+  class Context : public Controllable
   {
     private:
       Context* _parent;

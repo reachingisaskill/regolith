@@ -70,6 +70,7 @@ namespace Regolith
           }
         }
 
+        DEBUG_LOG( "RENDER" );
         SDL_RenderPresent( _theRenderer );
   //      if ( count++ > 100 )
   //      {

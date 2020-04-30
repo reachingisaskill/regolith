@@ -53,6 +53,8 @@ namespace Regolith
     CONTEXT_EVENT_PREV,
     CONTEXT_EVENT_SKIP,
 
+    CONTEXT_EVENT_SELECT,
+
     CONTEXT_END, // Stops the current context
     CONTEXT_FINISHED, // Tells a context that it's daughter has stopped
 
@@ -174,7 +176,9 @@ namespace Regolith
     INPUT_ACTION_SELECT,
     INPUT_ACTION_CANCEL,
 
-    INPUT_ACTION_TOTAL
+    INPUT_ACTION_OPTIONS,
+
+    INPUT_ACTION_TOTAL = (unsigned int) -1
   };
 
 
@@ -543,6 +547,7 @@ namespace Regolith
     "next",
     "prev",
     "skip",
+    "select",
     "end",
     "finished",
   };

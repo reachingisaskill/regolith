@@ -9,7 +9,7 @@ namespace Regolith
 
   ClickableSet::ClickableSet() :
     _buttons(),
-    _currentFocus()
+    _currentFocus( _buttons.begin() )
   {
   }
 
@@ -47,10 +47,13 @@ namespace Regolith
   {
     Manager* man = Manager::getInstance();
 
-    if ( (*_currentFocus)->tryClick() )
+    if ( _currentFocus == _buttons.end() )
+
+    if ( (*_currentFocus != nullptr ) && (*_currentFocus)->tryClick() )
     {
-      ContextEvent event = (*_currentFocus)->getOption();
-      man->currentContext()->raiseContextEvent( event );
+      InputAction event = (*_currentFocus)->getOption();
+//      man->currentContext()->raiseContextEvent( event );
+      man->currentContext()->booleanAction( event, true );
     }
   }
 
@@ -62,52 +65,9 @@ namespace Regolith
   }
 
 
-  void ClickableSet::registerActions( InputHandler* handler )
+  void ClickableSet::clickHere( Vector& )
   {
-    handler->registerInputRequest( this, INPUT_ACTION_NEXT );
-    handler->registerInputRequest( this, INPUT_ACTION_PREV );
-    handler->registerInputRequest( this, INPUT_ACTION_SELECT );
-    handler->registerInputRequest( this, INPUT_ACTION_JUMP ); // Bind the jump key just in case!
-    handler->registerInputRequest( this, INPUT_ACTION_CLICK ); // Bind the mouse click
+    // Write the code to determine if the mouse clicked on anything interactable
   }
-
-
-//  void ClickableSet::eventAction( const RegolithEvent& event )
-//  {
-//  }
-
-
-  void ClickableSet::booleanAction( const InputAction& action, bool value )
-  {
-    switch ( action )
-    {
-      case INPUT_ACTION_NEXT :
-        if ( value ) this->focusNext();
-        break;
-
-      case INPUT_ACTION_PREV :
-        if ( value ) this->focusPrev();
-        break;
-
-      case INPUT_ACTION_SELECT :
-      case INPUT_ACTION_JUMP :
-        if ( value ) this->select();
-        break;
-
-      default :
-        break;
-    }
-  }
-
-
-//  void ClickableSet::floatAction( const InputAction& action, float )
-//  {
-//  }
-
-
-  void ClickableSet::vectorAction( const InputAction& action, const Vector& vector )
-  {
-  }
-
 }
 

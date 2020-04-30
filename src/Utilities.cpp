@@ -11,14 +11,21 @@ namespace Regolith
   namespace Utilities
   {
 
-    void validateJson( Json::Value& json_data, const char* name, JsonType type )
+    bool validateJson( Json::Value& json_data, const char* name, JsonType type, bool isRequired )
     {
       if ( ! json_data.isMember( name ) )
       {
-        FAILURE_STREAM << "Json data failed validation. Expected key: " << name;
-        Exception ex( "validateJson()", "Key not found", false );
-        ex.addDetail( "Key name", name );
-        throw ex;
+        if ( isRequired )
+        {
+          FAILURE_STREAM << "Json data failed validation. Expected key: " << name;
+          Exception ex( "validateJson()", "Key not found", false );
+          ex.addDetail( "Key name", name );
+          throw ex;
+        }
+        else
+        {
+          return false;
+        }
       }
 
       if ( type != JSON_TYPE_NULL )
@@ -28,26 +35,30 @@ namespace Regolith
         {
           case JSON_TYPE_OBJECT :
             if ( json_data[ name ].isObject() )
-              return;
+              return true;
             break;
           case JSON_TYPE_ARRAY :
             if ( json_data[ name ].isArray() )
-              return;
+              return true;
             break;
           case JSON_TYPE_STRING :
             if ( json_data[ name ].isString() )
-              return;
+              return true;
             break;
           case JSON_TYPE_FLOAT :
             if ( json_data[ name ].isNumeric() )
-              return;
+              return true;
             break;
           case JSON_TYPE_INTEGER :
             if ( json_data[ name ].isIntegral() )
-              return;
+              return true;
+            break;
+          case JSON_TYPE_BOOLEAN :
+            if ( json_data[ name ].isBool() )
+              return true;
             break;
           default :
-            return;
+            return true;
             break;
         }
 
@@ -56,8 +67,8 @@ namespace Regolith
         ex.addDetail( "Name", name );
         ex.addDetail( "Type ID", type );
         throw ex;
-
       }
+      return true;
     }
 
 

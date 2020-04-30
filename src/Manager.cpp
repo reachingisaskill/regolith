@@ -42,12 +42,16 @@ namespace Regolith
 
   void Manager::popContext()
   {
+    DEBUG_LOG( "Popping Context" );
     // Remove the top element
     _contexts.pop_front();
 
     // If there's any left, tell them focus has returned
     if ( ! _contexts.empty() )
+    {
+      DEBUG_LOG( "Returning focus" );
       _contexts.front()->returnFocus();
+    }
   }
 
 

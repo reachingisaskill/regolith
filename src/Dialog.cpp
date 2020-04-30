@@ -8,105 +8,56 @@
 namespace Regolith
 {
 
-  // Dialog Window
-
-  DialogWindow::DialogWindow( Scene* scene, Camera* camera, Json::Value& data ) :
-    _scene( scene ),
-    _camera( camera ),
-    _dialogTree( nullptr ),
-    _currentDialog( nullptr )
-  {
-    this->loadFromJson( data );
-  }
-
-
-  void DialogWindow::loadFromJson( Json::Value& json_data )
-  {
-  }
-
-
-  void DialogWindow::update( Uint32 time )
-  {
-    _currentDialog->update( time );
-  }
-
-
-  void DialogWindow::render()
-  {
-    _currentDialog->render();
-  }
-
-
-  void DialogWindow::raiseContextEvent( ContextEvent context_event )
-  {
-    static Manager* man = Manager::getInstance();
-
-    switch ( context_event )
-    {
-      case CONTEXT_EVENT_QUIT :
-        man->raiseEvent( REGOLITH_EVENT_QUIT );
-        break;
-
-      case CONTEXT_EVENT_NEXT :
-
-        break;
-        
-      case CONTEXT_EVENT_PREV :
-
-        break;
-
-      case CONTEXT_END :
-        getParentContext()->raiseContextEvent( CONTEXT_FINISHED );
-        break;
-
-      case CONTEXT_EVENT_DEATH :
-      case CONTEXT_EVENT_RESPAWN :
-      case CONTEXT_EVENT_SKIP :
-
-      default:
-        if ( (unsigned)context_event > (unsigned)CONTEXT_EVENT_OPTIONS )
-        {
-          _currentDialog = _currentDialog->selectDialog( (unsigned)context_event - (unsigned)CONTEXT_EVENT_OPTIONS );
-        }
-        break;
-    }
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Dialog Class
-
   Dialog::Dialog( Scene* scene, Camera* camera, Json::Value& json_data ) :
     _owner( scene ),
     _HUDCamera( camera ),
+    _name(),
     _subDialogs("sub_dialogs"),
     _elements(),
     _background(),
     _buttons()
   {
-    Utilities::validateJson( json_data, "background", Utilities::JSON_TYPE_STRING );
+    this->loadFromJson( json_data );
+  }
+
+
+  void Dialog::loadFromJson( Json::Value& json_data )
+  {
     Utilities::validateJson( json_data, "elements", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
 
     try
     {
+      _name = json_data["name"].asString();
+
+
+      INFO_LOG( "Checking for background sprite" );
       // Load the scene background
-      INFO_LOG( "Building the dialog background" );
-      Json::Value& background_data = json_data["background"];
-      Utilities::validateJson( background_data, "resource_name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( background_data, "position", Utilities::JSON_TYPE_ARRAY );
-
-      _background = _owner->findResource( background_data["resource_name"].asString() )->clone();
-
-      int x = background_data["position"][0].asInt();
-      int y = background_data["position"][1].asInt();
-      Vector pos( x, y );
-
-      if ( _background->hasAnimation() )
+      if ( Utilities::validateJson( json_data, "background", Utilities::JSON_TYPE_STRING, false ) )
       {
-        _animated.push_back( _background );
+        INFO_LOG( "Building the dialog background" );
+        Json::Value& background_data = json_data["background"];
+        Utilities::validateJson( background_data, "resource_name", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( background_data, "position", Utilities::JSON_TYPE_ARRAY );
+
+        _background = _owner->findResource( background_data["resource_name"].asString() )->clone();
+
+        int x = background_data["position"][0].asInt();
+        int y = background_data["position"][1].asInt();
+        Vector pos( x, y );
+
+        _background->setPosition( pos );
+
+        if ( _background->hasAnimation() )
+        {
+          INFO_LOG( "Dialog background is animated" );
+          _animated.push_back( _background );
+        }
       }
+      else _background = nullptr;
 
 
+      INFO_LOG( "Checking for child dialogs" );
       // Load the children first
       INFO_LOG( "Building the child dialogs" );
       if ( json_data.isMember( "dialogs" ) && json_data["dialogs"].isArray() )
@@ -120,6 +71,7 @@ namespace Regolith
 
           _subDialogs.addObject( new Dialog( _owner, _HUDCamera, dialogs[i] ), dialog_name );
         }
+        INFO_STREAM << "Loaded " << dialogs_size << " children";
       }
 
 
@@ -138,39 +90,59 @@ namespace Regolith
         int y = elements[i]["position"][1].asInt();
         Vector pos( x, y );
 
+        INFO_STREAM << "Loading resource : " << resource_name;
+
         // Determine the ID number and spawn the element
         Drawable* newElement = _owner->findResource( resource_name );
+        newElement->setPosition( pos );
         _elements.push_back( newElement );
+        INFO_LOG( "Resource loaded." );
   
         // If animated, add it to the animated cache
         if ( newElement->hasAnimation() )
         {
+          INFO_STREAM << "Resource is animated";
           _animated.push_back( newElement );
         }
 
         // If it has interaction, try to cast it to a Button*
         if ( newElement->hasInteraction() )
         {
+          INFO_LOG( "Resource is interactable." );
+
           Button* b_pointer = dynamic_cast< Button* >( newElement );
           if ( b_pointer != nullptr )
           {
+            INFO_LOG( "Caching resource as a button" );
+
             Utilities::validateJson( elements[i], "action", Utilities::JSON_TYPE_ARRAY );
             std::string action_name = elements[i]["action"].asString();
 
             // What is the base context id
-            ContextEvent event_id = getContextEventID( action_name );
-            if ( event_id == CONTEXT_EVENT_OPTIONS ) // Its not a standard context event => must be option specific
+            InputAction action_id = getActionID( action_name );
+            if ( action_id == INPUT_ACTION_OPTIONS ) // Its not a standard action => must be option specific
             {
               // Get the name of the corresponding sub dialog
-              event_id = (ContextEvent)( (unsigned int)event_id + (unsigned int)_subDialogs.getID( action_name ) );
+              action_id = (InputAction)( (unsigned int)action_id + (unsigned int)_subDialogs.getID( action_name ) );
             }
-            b_pointer->setOption( event_id );
+            b_pointer->setOption( action_id );
 
             _buttons.addButton( b_pointer );
           }
         }
       }
 
+
+      INFO_LOG( "Configuring Dialog Options" );
+      // Check for the known options
+      Json::Value options = json_data["options"];
+      if ( Utilities::validateJson( options, "can_cancel", Utilities::JSON_TYPE_BOOLEAN, false ) )
+      {
+        _canCancel = options["can_cancel"].asBool();
+      }
+
+      INFO_LOG( "Configuring action handler for dialog" );
+      this->registerActions( inputHandler() );
     }
     catch ( Exception& ex )
     {
@@ -221,8 +193,10 @@ namespace Regolith
 
   void Dialog::render()
   {
+    DEBUG_LOG( "Rendering Dialog" );
     // First draw the background
-    _background->render( _HUDCamera );
+    if ( _background != nullptr )
+      _background->render( _HUDCamera );
 
     // Render each element in the element list
     ElementList::iterator end = _elements.end();
@@ -237,6 +211,75 @@ namespace Regolith
   {
     return _subDialogs[ n ];
   }
+
+
+  void Dialog::raiseContextEvent( ContextEvent )
+  {
+  }
+
+
+  void Dialog::registerActions( InputHandler* handler )
+  {
+    handler->registerInputRequest( this, INPUT_ACTION_QUIT );
+    handler->registerInputRequest( this, INPUT_ACTION_NEXT );
+    handler->registerInputRequest( this, INPUT_ACTION_PREV );
+    handler->registerInputRequest( this, INPUT_ACTION_SELECT );
+    handler->registerInputRequest( this, INPUT_ACTION_PAUSE );
+    handler->registerInputRequest( this, INPUT_ACTION_BACK );
+    handler->registerInputRequest( this, INPUT_ACTION_CANCEL );
+    handler->registerInputRequest( this, INPUT_ACTION_JUMP ); // Bind the jump key just in case!
+    handler->registerInputRequest( this, INPUT_ACTION_CLICK ); // Bind the mouse click
+  }
+
+
+//  void Dialog::eventAction( const RegolithEvent& event )
+//  {
+//  }
+
+
+  void Dialog::booleanAction( const InputAction& action, bool value )
+  {
+    DEBUG_STREAM << "BOOLEAN ACTION : " << action;
+    switch ( action )
+    {
+      case INPUT_ACTION_QUIT :
+        if ( value ) Manager::getInstance()->raiseEvent( REGOLITH_EVENT_QUIT );
+        break;
+
+      case INPUT_ACTION_NEXT :
+        if ( value ) _buttons.focusNext();
+        break;
+
+      case INPUT_ACTION_PREV :
+        if ( value ) _buttons.focusPrev();
+        break;
+
+      case INPUT_ACTION_SELECT :
+      case INPUT_ACTION_JUMP :
+        if ( value ) _buttons.select();
+        break;
+
+      case INPUT_ACTION_PAUSE :
+      case INPUT_ACTION_BACK :
+      case INPUT_ACTION_CANCEL :
+        if ( _canCancel && value ) this->takeFocus();
+        break;
+
+      default :
+        break;
+    }
+  }
+
+
+//  void Dialog::floatAction( const InputAction& action, float )
+//  {
+//  }
+
+
+  void Dialog::vectorAction( const InputAction& action, const Vector& vector )
+  {
+  }
+
 
 }
 

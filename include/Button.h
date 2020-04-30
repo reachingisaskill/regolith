@@ -32,7 +32,7 @@ namespace Regolith
       State _state;
 
       std::string _actionName;
-      ContextEvent _optionNumber;
+      InputAction _optionNumber;
 
 
     public :
@@ -86,10 +86,10 @@ namespace Regolith
 
 
       // Set the enumerated option number
-      void setOption( ContextEvent e ) { _optionNumber = e; }
+      void setOption( InputAction e ) { _optionNumber = e; }
 
       // Get the enumerated option number
-      ContextEvent getOption() { return _optionNumber; }
+      InputAction getOption() { return _optionNumber; }
       
 
       // Sets the current state to focussed if button is active

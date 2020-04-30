@@ -8,6 +8,7 @@
 #include "Controllable.h"
 #include "Drawable.h"
 #include "ObjectBuilder.h"
+#include "Dialog.h"
 #include "Window.h"
 #include "Camera.h"
 
@@ -28,7 +29,7 @@ namespace Regolith
   typedef std::vector< ElementList > TeamsList;
 
 
-  class Scene : public Context, public Controllable
+  class Scene : public Context
   {
     private:
       // Scene owns the memory for the texture data
@@ -42,12 +43,14 @@ namespace Regolith
       SDL_Renderer* _theRenderer;
       ObjectBuilder* _theBuilder;
       std::string _sceneFile;
+      Dialog* _pauseMenu;
 
       // Containers storing drawable objects - the scene and the hud elements
       // All memory is owned by the resource list above
       Drawable* _background;
       ElementList _sceneElements;
       ElementList _hudElements;
+      NamedVector<Dialog> _dialogWindows;
 
       // Can be change to accelerator structures in the future
       // These do not own their memory. They are shortcut lists
@@ -62,7 +65,7 @@ namespace Regolith
     protected:
 
       // Function for derived classes to implement when the pause signal is received
-      virtual void onPause() {}
+      virtual void onPause();
 
       // Function for derived classes to implement when the pause is over
       virtual void onStart() {}
@@ -96,11 +99,14 @@ namespace Regolith
       // Function to build all the caches/acceleration structures
       void _loadCaches( Json::Value& );
 
+      // Function to build the dialog boxes
+      void _loadDialogs( Json::Value& );
+
       // Function to build the camera objects
       void _loadCameras( Json::Value& );
 
-      // Function to build the dialog boxes
-      void _loadDialogs( Json::Value& );
+      // Function to build the remaining configuration
+      void _loadOptions( Json::Value& );
 
 
       // Override this function to allow the base class to build components specific to this scene type
@@ -145,7 +151,6 @@ namespace Regolith
       void pause() { _paused = true; this->onPause(); }
       void resume() { _paused = false; this->onResume(); }
       bool isPaused() const { return _paused; }
-
 
 
       // Update the time-dependent scene elements with the No. ticks

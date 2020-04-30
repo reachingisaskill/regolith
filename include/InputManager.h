@@ -80,7 +80,7 @@ namespace Regolith
   class InputHandler
   {
     private:
-      ControllableSet _actionMaps[ INPUT_ACTION_TOTAL ];
+      ControllableSet _actionMaps[ INPUT_ACTION_OPTIONS ];
 
     public :
       InputHandler();

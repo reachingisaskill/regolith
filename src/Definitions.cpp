@@ -15,7 +15,7 @@ namespace Regolith
         return (InputAction) i;
     }
 
-    return INPUT_ACTION_NULL;
+    return INPUT_ACTION_OPTIONS;
   }
 
   SDL_Scancode getScancodeID( std::string name )

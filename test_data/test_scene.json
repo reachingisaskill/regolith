@@ -29,6 +29,12 @@
         "text" : "Press Return to toggle fullscreen",
         "colour" : [ 0, 0, 0, 255 ],
         "font" : "default"
+      },
+      {
+        "name" : "pause_text",
+        "text" : "Press \"p\" to unpause",
+        "colour" : [ 0, 0, 0, 255 ],
+        "font" : "default"
       }
     ]
   },
@@ -82,6 +88,11 @@
       "resource_type" : "fps_string",
       "font" : "default",
       "frame_count" : 100
+    },
+    {
+      "resource_name" : "pause_text",
+      "resource_type" : "sprite",
+      "texture_name" : "pause_text"
     }
   ],
 
@@ -91,6 +102,11 @@
     "width" : 1024,
     "height" : 768,
     "start_position" : [ 100, 100 ]
+  },
+
+  "options" :
+  {
+    "on_pause" : "pause_menu"
   },
 
   "elements" :
@@ -147,5 +163,27 @@
   "spawn_points" :
   [
     [ 380, 150 ]
+  ],
+
+  "dialog_windows" :
+  [
+    {
+      "name" : "pause_menu",
+      "dialog" :
+      {
+        "name" : "pause_menu_top",
+        "elements" :
+        [
+          {
+            "resource_name" : "pause_text",
+            "position" : [400, 400]
+          }
+        ],
+        "options" :
+        {
+          "can_cancel" : true
+        }
+      }
+    }
   ]
 }
