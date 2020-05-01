@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__FPS_STRING_H__
-#define __REGOLITH__FPS_STRING_H__
+#ifndef REGOLITH_FPS_STRING_H_
+#define REGOLITH_FPS_STRING_H_
 
 #include "Definitions.h"
 
@@ -74,5 +74,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__FPS_STRING_H__
+#endif // REGOLITH_FPS_STRING_H_
 

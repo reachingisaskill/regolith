@@ -39,6 +39,19 @@
     ]
   },
 
+  "sounds" :
+  {
+    "default_music" : "the_beat",
+
+    "sound_files" :
+    [
+      {
+        "name" : "thud",
+        "path" : "test_data/test_thud.wav"
+      }
+    ]
+  },
+
   "resources" :
   [
     {
@@ -149,7 +162,12 @@
     [
       {
         "resource_name" : "fps_text",
-        "position" : [ 20, 20 ]
+        "position" : [ 20, 20 ],
+        "alignment" : 
+        {
+          "horizontal" : "centre",
+          "vertical" : "bottom"
+        }
       }
     ]
   },
@@ -176,7 +194,12 @@
         [
           {
             "resource_name" : "pause_text",
-            "position" : [400, 400]
+            "position" : [0, 0],
+            "alignment" :
+            {
+              "horizontal" : "centre",
+              "vertical" : "centre"
+            }
           }
         ],
         "options" :

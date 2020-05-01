@@ -1,11 +1,12 @@
 
-#ifndef __REGOLITH__DEFINITIONS_H__
-#define __REGOLITH__DEFINITIONS_H__
+#ifndef REGOLITH_DEFINITIONS_H_
+#define REGOLITH_DEFINITIONS_H_
 
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 
 #include <map>
 
@@ -32,6 +33,22 @@ namespace Regolith
     CAMERA_FLYING,
     CAMERA_FOLLOWING,
     CAMERA_CONSTANT_VELOCITY
+  };
+
+
+  enum AlignmentMode
+  {
+    ALIGNMENT_LOW_EDGE,
+    ALIGNMENT_CENTRE,
+    ALIGNMENT_HIGH_EDGE
+  };
+
+
+  enum MusicState
+  {
+    MUSIC_STATE_STOPPED,
+    MUSIC_STATE_PLAYING,
+    MUSIC_STATE_PAUSED
   };
 
 
@@ -562,5 +579,5 @@ namespace Regolith
   ContextEvent getContextEventID( std::string );
 }
 
-#endif // __REGOLITH__DEFINITIONS_H__
+#endif // REGOLITH_DEFINITIONS_H_
 

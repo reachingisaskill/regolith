@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__DRAWABLE_H__
-#define __REGOLITH__DRAWABLE_H__
+#ifndef REGOLITH_DRAWABLE_H_
+#define REGOLITH_DRAWABLE_H_
 
 #include "Definitions.h"
 #include "Vector.h"
@@ -144,5 +144,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__DRAWABLE_H__
+#endif // REGOLITH_DRAWABLE_H_
 

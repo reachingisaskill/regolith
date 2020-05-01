@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__WINDOW_H__
-#define __REGOLITH__WINDOW_H__
+#ifndef REGOLITH_WINDOW_H_
+#define REGOLITH_WINDOW_H_
 
 #include "Definitions.h"
 #include "Vector.h"
@@ -75,5 +75,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__WINDOW_H__
+#endif // REGOLITH_WINDOW_H_
 

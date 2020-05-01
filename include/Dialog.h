@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__DIALOG_H__
-#define __REGOLITH__DIALOG_H__
+#ifndef REGOLITH_DIALOG_H_
+#define REGOLITH_DIALOG_H_
 
 #include "Definitions.h"
 
@@ -112,5 +112,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__DIALOG_H__
+#endif // REGOLITH_DIALOG_H_
 

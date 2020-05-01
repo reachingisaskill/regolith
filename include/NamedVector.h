@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH_NAMED_VECTOR_H__
-#define __REGOLITH_NAMED_VECTOR_H__
+#ifndef _REGOLITH_NAMED_VECTOR_H_
+#define _REGOLITH_NAMED_VECTOR_H_
 
 #include "Exception.h"
 
@@ -28,13 +28,19 @@ namespace Regolith
 
     private :
       std::string _storageType;
+      bool _ownsMemory;
       NameMap _names;
       DataVector _data;
 
     public :
-      NamedVector( const char* );
+      NamedVector( const char*, bool ownsMemory = true);
 
       ~NamedVector();
+
+
+      void deletePointers();
+
+      void clear();
 
       size_t addObject( DATA*, std::string );
 
@@ -50,13 +56,15 @@ namespace Regolith
 
       size_t mapSize() const { return _names.size(); }
       size_t vectorSize() const { return _data.size(); }
+      size_t size() const { return _data.size(); }
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   template < class DATA >
-  NamedVector<DATA>::NamedVector( const char* type ) :
+  NamedVector<DATA>::NamedVector( const char* type, bool ownsMemory ) :
     _storageType( type ),
+    _ownsMemory( ownsMemory ),
     _names(),
     _data()
   {
@@ -65,6 +73,28 @@ namespace Regolith
 
   template < class DATA >
   NamedVector<DATA>::~NamedVector()
+  {
+    if ( _ownsMemory )
+    {
+      deletePointers();
+    }
+    else
+    {
+      clear();
+    }
+  }
+
+
+  template < class DATA >
+  void NamedVector<DATA>::clear()
+  {
+    _names.clear();
+    _data.clear();
+  }
+
+
+  template < class DATA >
+  void NamedVector<DATA>::deletePointers()
   {
     INFO_STREAM << "Destroying Named Vector of: " << _storageType;
 
@@ -86,7 +116,7 @@ namespace Regolith
   {
     size_t position = this->addName( objName );
 
-    if ( _data[position] != nullptr )
+    if ( (_data[position] != nullptr) && _ownsMemory )
     {
       INFO_STREAM << "Named Vector: " << _storageType << ". Overwriting object with name : " << objName;
       delete _data[ position ];
@@ -164,5 +194,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH_NAMED_VECTOR_H__
+#endif // _REGOLITH_NAMED_VECTOR_H_
 

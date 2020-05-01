@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__SPRITE_H__
-#define __REGOLITH__SPRITE_H__
+#ifndef REGOLITH_SPRITE_H_
+#define REGOLITH_SPRITE_H_
 
 #include "Definitions.h"
 
@@ -62,5 +62,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__SPRITE_H__
+#endif // REGOLITH_SPRITE_H_
 

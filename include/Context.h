@@ -1,10 +1,11 @@
 
-#ifndef __REGOLITH__CONTEXT_H__
-#define __REGOLITH__CONTEXT_H__
+#ifndef REGOLITH_CONTEXT_H_
+#define REGOLITH_CONTEXT_H_
 
 #include "Definitions.h"
 #include "Controllable.h"
 #include "InputManager.h"
+#include "AudioManager.h"
 
 
 namespace Regolith
@@ -27,6 +28,7 @@ namespace Regolith
     private:
       Context* _parent;
       InputHandler _theInput;
+      AudioHandler _theAudio;
       ContextProperties _properties;
 
     public:
@@ -61,25 +63,29 @@ namespace Regolith
       // Return the input handler for this context
       InputHandler* inputHandler() { return &_theInput; }
 
-
-
-      // Raise an event in the current context
-      virtual void raiseContextEvent( ContextEvent ) = 0;
-
+      // Return the audio handler for this context
+      AudioHandler* audioHandler() { return &_theAudio; }
 
 
       // Called by the manager to tell the derived class that it now has focus again
-      virtual void returnFocus() = 0;
+      virtual void returnFocus();
 
+      // Takes the focus from the current context and passes it to the new context
+      void transferFocus( Context* newContext );
 
       // Pushes current context onto the context stack - now has focus
       void giveFocus();
 
       // Pops the class from the context stack
       void takeFocus();
+
+
+
+      // Raise an event in the current context
+      virtual void raiseContextEvent( ContextEvent ) = 0;
   };
 
 }
 
-#endif // __REGOLITH__CONTEXT_H__
+#endif // REGOLITH_CONTEXT_H_
 

@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__CONTROLLABLE_H__
-#define __REGOLITH__CONTROLLABLE_H__
+#ifndef REGOLITH_CONTROLLABLE_H_
+#define REGOLITH_CONTROLLABLE_H_
 
 #include "Vector.h"
 
@@ -44,5 +44,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__CONTROLLABLE_H__
+#endif // REGOLITH_CONTROLLABLE_H_
 

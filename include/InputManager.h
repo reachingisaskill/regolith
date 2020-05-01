@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__INPUT_HANDLER_H__
-#define __REGOLITH__INPUT_HANDLER_H__
+#ifndef REGOLITH_INPUT_HANDLER_H_
+#define REGOLITH_INPUT_HANDLER_H_
 
 #include "Definitions.h"
 
@@ -96,5 +96,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__INPUT_HANDLER_H__
+#endif // REGOLITH_INPUT_HANDLER_H_
 

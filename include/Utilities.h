@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__UTILITIES_H__
-#define __REGOLITH__UTILITIES_H__
+#ifndef REGOLITH_UTILITIES_H_
+#define REGOLITH_UTILITIES_H_
 
 #include "Definitions.h"
 
@@ -8,6 +8,9 @@
 
 namespace Regolith
 {
+
+  class Drawable;
+  class Camera;
 
   namespace Utilities
   {
@@ -27,8 +30,10 @@ namespace Regolith
 
     void validateJsonArray( Json::Value&, unsigned int, JsonType type = JSON_TYPE_NULL );
 
+    void jsonProcessPosition( Json::Value&, Drawable*, Camera* );
+
   }
 }
 
-#endif // __REGOLITH__UTILITIES_H__
+#endif // REGOLITH_UTILITIES_H_
 

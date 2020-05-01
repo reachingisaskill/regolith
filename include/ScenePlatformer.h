@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__SCENE_PLATFORMER_H__
-#define __REGOLITH__SCENE_PLATFORMER_H__
+#ifndef REGOLITH_SCENE_PLATFORMER_H_
+#define REGOLITH_SCENE_PLATFORMER_H_
 
 #include "Definitions.h"
 #include "Scene.h"
@@ -74,5 +74,5 @@ namespace Regolith
 }
 
 
-#endif // __REGOLITH__SCENE_PLATFORMER_H__
+#endif // REGOLITH_SCENE_PLATFORMER_H_
 

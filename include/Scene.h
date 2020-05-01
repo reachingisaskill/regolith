@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__SCENE_H__
-#define __REGOLITH__SCENE_H__
+#ifndef REGOLITH_SCENE_H_
+#define REGOLITH_SCENE_H_
 
 #include "Definitions.h"
 #include "NamedVector.h"
@@ -44,6 +44,7 @@ namespace Regolith
       ObjectBuilder* _theBuilder;
       std::string _sceneFile;
       Dialog* _pauseMenu;
+      int _defaultMusic;
 
       // Containers storing drawable objects - the scene and the hud elements
       // All memory is owned by the resource list above
@@ -67,8 +68,8 @@ namespace Regolith
       // Function for derived classes to implement when the pause signal is received
       virtual void onPause();
 
-      // Function for derived classes to implement when the pause is over
-      virtual void onStart() {}
+      // Function for derived classes to implement when the scene starts
+      virtual void onStart();
 
       // Function for derived classes to implement when the pause is over
       virtual void onResume() {}
@@ -93,17 +94,23 @@ namespace Regolith
       // Function to load all the raw texture files
       void _loadTextures( Json::Value& );
 
+      // Function to load all the sound files
+      void _loadSounds( Json::Value& );
+
       // Function to build all the resources
       void _loadResources( Json::Value& );
 
       // Function to build all the caches/acceleration structures
       void _loadCaches( Json::Value& );
 
-      // Function to build the dialog boxes
-      void _loadDialogs( Json::Value& );
-
       // Function to build the camera objects
       void _loadCameras( Json::Value& );
+
+      // Function to build all the HUD structures
+      void _loadHUD( Json::Value& );
+
+      // Function to build the dialog boxes
+      void _loadDialogs( Json::Value& );
 
       // Function to build the remaining configuration
       void _loadOptions( Json::Value& );
@@ -132,6 +139,10 @@ namespace Regolith
 
       // Remove all the cached data and clean up
       virtual ~Scene();
+
+
+      // Start the scene
+      void start() { this->onStart(); }
 
 
       // Configure the info required to build the scene
@@ -190,6 +201,9 @@ namespace Regolith
       // Spawn an object with the supplied ID number at the supplied position in the HUD
       void spawnHUD( unsigned int, Vector );
 
+      // Spawn an object with the supplied ID number at the supplied position in the HUD
+      void spawnHUD( unsigned int, Json::Value& );
+
       // Spawn an object with the supplied ID number at the supplied position, and return the pointer
       // THIS FUNCTION RETURNS OWNSHIP OF THIS MEMORY!
       Drawable* spawnReturn( unsigned int, Vector );
@@ -219,5 +233,5 @@ namespace Regolith
 }
 
 
-#endif // __REGOLITH__SCENE_H__
+#endif // REGOLITH_SCENE_H_
 

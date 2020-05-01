@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__CLICKABLE_SET_H__
-#define __REGOLITH__CLICKABLE_SET_H__
+#ifndef REGOLITH_CLICKABLE_SET_H_
+#define REGOLITH_CLICKABLE_SET_H_
 
 #include "Definitions.h"
 
@@ -51,5 +51,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__CLICKABLE_SET_H__
+#endif // REGOLITH_CLICKABLE_SET_H_
 

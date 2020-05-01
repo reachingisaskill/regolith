@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__COLLISION_H__
-#define __REGOLITH__COLLISION_H__
+#ifndef REGOLITH_COLLISION_H_
+#define REGOLITH_COLLISION_H_
 
 #include "Vector.h"
 #include "Drawable.h"
@@ -87,5 +87,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__COLLISION_H__
+#endif // REGOLITH_COLLISION_H_
 

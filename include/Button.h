@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__BUTTON_H__
-#define __REGOLITH__BUTTON_H__
+#ifndef REGOLITH_BUTTON_H_
+#define REGOLITH_BUTTON_H_
 
 #include "Definitions.h"
 
@@ -110,5 +110,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__BUTTON_H__
+#endif // REGOLITH_BUTTON_H_
 

@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__TEST_PLAYER_H__
-#define __REGOLITH__TEST_PLAYER_H__
+#ifndef REGOLITH_TEST_PLAYER_H_
+#define REGOLITH_TEST_PLAYER_H_
 
 #include "Definitions.h"
 
@@ -78,5 +78,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__TEST_PLAYER_H__
+#endif // REGOLITH_TEST_PLAYER_H_
 

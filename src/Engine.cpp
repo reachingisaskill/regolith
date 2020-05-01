@@ -88,6 +88,7 @@ namespace Regolith
   {
     _currentScene = scene;
     _currentScene->giveFocus(); // This scene is now the current context for input and events
+    _currentScene->start();
   }
 
 

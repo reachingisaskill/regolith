@@ -38,15 +38,9 @@ namespace Regolith
         INFO_LOG( "Building the dialog background" );
         Json::Value& background_data = json_data["background"];
         Utilities::validateJson( background_data, "resource_name", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( background_data, "position", Utilities::JSON_TYPE_ARRAY );
-
         _background = _owner->findResource( background_data["resource_name"].asString() )->clone();
 
-        int x = background_data["position"][0].asInt();
-        int y = background_data["position"][1].asInt();
-        Vector pos( x, y );
-
-        _background->setPosition( pos );
+        Utilities::jsonProcessPosition( background_data, _background, _HUDCamera );
 
         if ( _background->hasAnimation() )
         {
@@ -82,19 +76,14 @@ namespace Regolith
       for ( Json::ArrayIndex i = 0; i != elements_size; ++i )
       {
         Utilities::validateJson( elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( elements[i], "position", Utilities::JSON_TYPE_ARRAY );
 
         // Load the necessary info
         std::string resource_name = elements[i]["resource_name"].asString();
-        int x = elements[i]["position"][0].asInt();
-        int y = elements[i]["position"][1].asInt();
-        Vector pos( x, y );
-
         INFO_STREAM << "Loading resource : " << resource_name;
 
         // Determine the ID number and spawn the element
         Drawable* newElement = _owner->findResource( resource_name );
-        newElement->setPosition( pos );
+        Utilities::jsonProcessPosition( elements[i], newElement, _HUDCamera );
         _elements.push_back( newElement );
         INFO_LOG( "Resource loaded." );
   

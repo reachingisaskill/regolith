@@ -17,6 +17,7 @@ namespace Regolith
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
     _theInput( nullptr ),
+    _theAudio( nullptr ),
     _contexts(),
     _theBuilder( new ObjectBuilder() ),
     _theSceneBuilder( new SceneBuilder() ),
@@ -85,6 +86,13 @@ namespace Regolith
 
     _defaultFont = nullptr; // No longer valid
 
+    // Delete the input manager
+    delete _theInput;
+    _theInput = nullptr;
+
+    // Delete the Audio Manager
+    delete _theAudio;
+    _theAudio = nullptr;
 
     // Remove the renderer object
     SDL_DestroyRenderer( _theRenderer );
@@ -99,6 +107,7 @@ namespace Regolith
 
     // Close the SDL subsystems
     TTF_Quit();
+    Mix_Quit();
     IMG_Quit();
     SDL_Quit();
   }
@@ -107,7 +116,7 @@ namespace Regolith
   void Manager::init( std::string json_file )
   {
     // Initialise the SDL subsystems
-    if ( SDL_Init( SDL_INIT_VIDEO ) < 0 )
+    if ( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )
     {
       Exception ex( "Manager::init()", "Failed to initialise SDL" );
       ex.addDetail( "SDL Error", SDL_GetError() );
@@ -126,6 +135,14 @@ namespace Regolith
     {
       Exception ex( "Manager::init()", "Failed to initialise IMG" );
       ex.addDetail( "IMG Error", IMG_GetError() );
+      throw ex;
+    }
+
+    int mixFlags = MIX_INIT_OGG;
+    if ( ! ( Mix_Init( mixFlags ) & mixFlags ) )
+    {
+      Exception ex( "Manager::init()", "Failed to initialise Mixer" );
+      ex.addDetail( "MIX Error", Mix_GetError() );
       throw ex;
     }
 
@@ -149,9 +166,26 @@ namespace Regolith
       }
       delete reader;
 
+      // Validate the required keys
+      Utilities::validateJson( json_data, "screen_width", Utilities::JSON_TYPE_INTEGER );
+      Utilities::validateJson( json_data, "screen_height", Utilities::JSON_TYPE_INTEGER );
+      Utilities::validateJson( json_data, "default_colour", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "default_font", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( json_data, "title", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( json_data, "default_font", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( json_data, "scenes", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "fonts", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "input_device", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
+
+      Utilities::validateJsonArray( json_data["default_colour"], 4, Utilities::JSON_TYPE_INTEGER );
+
 
       // Load the input device configuration first so objects can register game-wide behaviours
-      this->_loadInput( json_data["input"] );
+      this->_loadInput( json_data["input_device"] );
+
+      // Load the audio device configuration
+      this->_loadAudio( json_data["audio_device"] );
 
 
       // Engine gets to register its events
@@ -258,6 +292,46 @@ namespace Regolith
 
     this->configureEvents();
     _theEngine->configure( _theRenderer, _theWindow, _theInput );
+  }
+
+
+  void Manager::_loadAudio( Json::Value& json_data )
+  {
+//    Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
+
+    try
+    {
+      INFO_LOG( "Configuring the audio manager" );
+      Utilities::validateJson( json_data, "music_files", Utilities::JSON_TYPE_ARRAY );
+
+      _theAudio = new AudioManager( 22050, 2, 1024 );
+
+      if ( Utilities::validateJson( json_data, "music_volume", Utilities::JSON_TYPE_FLOAT, false ) )
+      {
+        _theAudio->setVolumeMusic( json_data["music_volume"].asFloat() );
+      }
+
+      if ( Utilities::validateJson( json_data, "effect_volume", Utilities::JSON_TYPE_FLOAT, false ) )
+      {
+        _theAudio->setVolumeEffects( json_data["effect_volume"].asFloat() );
+      }
+
+      INFO_LOG( "Loading music files" );
+      Json::Value music_files = json_data["music_files"];
+      Json::ArrayIndex music_files_size = music_files.size();
+      for ( Json::ArrayIndex i = 0; i != music_files_size; ++i )
+      {
+        _theAudio->addMusic( music_files[i] );
+      }
+
+
+    }
+    catch ( std::runtime_error& rt )
+    {
+      Exception ex( "Manager::_loadAudio()", "Json reading failure" );
+      ex.addDetail( "What", rt.what() );
+      throw ex;
+    }
   }
 
 

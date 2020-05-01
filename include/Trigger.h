@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__TRIGGER_H__
-#define __REGOLITH__TRIGGER_H__
+#ifndef REGOLITH_TRIGGER_H_
+#define REGOLITH_TRIGGER_H_
 
 #include "Definitions.h"
 #include "Drawable.h"
@@ -72,5 +72,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__TRIGGER_H__
+#endif // REGOLITH_TRIGGER_H_
 

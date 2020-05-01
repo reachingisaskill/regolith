@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__STORY_BOARD_H__
-#define __REGOLITH__STORY_BOARD_H__
+#ifndef REGOLITH_STORY_BOARD_H_
+#define REGOLITH_STORY_BOARD_H_
 
 #include "Controllable.h"
 
@@ -14,5 +14,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__STORY_BOARD_H__
+#endif // REGOLITH_STORY_BOARD_H_
 

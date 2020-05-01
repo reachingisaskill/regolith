@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__MUTEXED_LIST_H__
-#define __REGOLITH__MUTEXED_LIST_H__
+#ifndef REGOLITH_MUTEXED_LIST_H_
+#define REGOLITH_MUTEXED_LIST_H_
 
 #include <mutex>
 
@@ -388,5 +388,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__MUTEXED_LIST_H__
+#endif // REGOLITH_MUTEXED_LIST_H_
 

@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__SINGLETON_H__
-#define __REGOLITH__SINGLETON_H__
+#ifndef REGOLITH_SINGLETON_H_
+#define REGOLITH_SINGLETON_H_
 
 
 template < class T >
@@ -31,4 +31,4 @@ template < class T >
 T* Singleton< T >::_theInstance = nullptr;
 
 
-#endif // __REGOLITH__SINGLETON_H__
+#endif // REGOLITH_SINGLETON_H_

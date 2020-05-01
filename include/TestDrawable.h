@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__TEST_DRAWABLE_H__
-#define __REGOLITH__TEST_DRAWABLE_H__
+#ifndef REGOLITH_TEST_DRAWABLE_H_
+#define REGOLITH_TEST_DRAWABLE_H_
 
 #include "Drawable.h"
 #include "Collision.h"
@@ -49,5 +49,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__TEST_DRAWABLE_H__
+#endif // REGOLITH_TEST_DRAWABLE_H_
 

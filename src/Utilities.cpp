@@ -1,6 +1,9 @@
 
 #include "Utilities.h"
 #include "Exception.h"
+#include "Vector.h"
+#include "Drawable.h"
+#include "Camera.h"
 
 #include "logtastic.h"
 
@@ -135,6 +138,59 @@ namespace Regolith
       }
     }
 
+
+    void jsonProcessPosition( Json::Value& json_data, Drawable* object, Camera* camera )
+    {
+      float x = 0.0;
+      float y = 0.0;
+
+      if ( validateJson( json_data, "position", JSON_TYPE_ARRAY, false ) )
+      {
+        validateJsonArray( json_data["position"], 2, JSON_TYPE_FLOAT );
+
+        x = json_data["position"][0].asFloat();
+        y = json_data["position"][1].asFloat();
+      }
+
+
+      if ( validateJson( json_data, "alignment", JSON_TYPE_OBJECT, false ) )
+      {
+        if ( validateJson( json_data["alignment"], "horizontal", JSON_TYPE_STRING, false ) )
+        {
+          if ( json_data["alignment"]["horizontal"].asString() == "centre" )
+          {
+            x += (float)camera->getWidth()/2 - (float)object->getWidth()/2;
+          }
+          else if ( json_data["alignment"]["horizontal"].asString() == "left" )
+          {
+            // Do nothing - this is the default
+          }
+          else if ( json_data["alignment"]["horizontal"].asString() == "right" )
+          {
+            x = ( (float)camera->getWidth() - (float)object->getWidth() ) - x;
+          }
+        }
+        if ( validateJson( json_data["alignment"], "vertical", JSON_TYPE_STRING, false ) )
+        {
+          if ( json_data["alignment"]["vertical"].asString() == "centre" )
+          {
+            y += (float)camera->getHeight()/2 - (float)object->getHeight()/2;
+          }
+          else if ( json_data["alignment"]["horizontal"].asString() == "top" )
+          {
+            // Do nothing - this is the default
+          }
+          else if ( json_data["alignment"]["horizontal"].asString() == "bottom" )
+          {
+            y = ( (float)camera->getHeight() - (float)object->getHeight() ) - y;
+          }
+        }
+      }
+
+      Vector vec( x, y );
+      INFO_STREAM << "Calculated object position to be: " << vec;
+      object->setPosition( vec );
+    }
   }
 }
 

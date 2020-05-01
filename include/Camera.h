@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__CAMERA_H__
-#define __REGOLITH__CAMERA_H__
+#ifndef REGOLITH_CAMERA_H_
+#define REGOLITH_CAMERA_H_
 
 #include "Definitions.h"
 #include "Vector.h"
@@ -107,5 +107,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__CAMERA_H__
+#endif // REGOLITH_CAMERA_H_
 

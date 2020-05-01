@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__TEXTURE_H__
-#define __REGOLITH__TEXTURE_H__
+#ifndef REGOLITH_TEXTURE_H_
+#define REGOLITH_TEXTURE_H_
 
 #include "Definitions.h"
 #include "Drawable.h"
@@ -123,5 +123,5 @@ namespace Regolith
   };
 }
 
-#endif // __REGOLITH__TEXTURE_H__
+#endif // REGOLITH_TEXTURE_H_
 

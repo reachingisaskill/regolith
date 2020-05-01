@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__TIMER_H__
-#define __REGOLITH__TIMER_H__
+#ifndef REGOLITH_TIMER_H_
+#define REGOLITH_TIMER_H_
 
 #include <SDL2/SDL.h>
 
@@ -61,5 +61,5 @@ namespace Regolith
 
 }
 
-#endif // __TIMER_H__
+#endif // _TIMER_H_
 

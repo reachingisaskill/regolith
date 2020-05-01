@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__TEXTURE_FACTORY_H__
-#define __REGOLITH__TEXTURE_FACTORY_H__
+#ifndef REGOLITH_TEXTURE_FACTORY_H_
+#define REGOLITH_TEXTURE_FACTORY_H_
 
 #include "Texture.h"
 
@@ -97,5 +97,5 @@ namespace Regolith
 }
 
 
-#endif // __REGOLITH__TEXTURE_FACTORY_H__
+#endif // REGOLITH_TEXTURE_FACTORY_H_
 

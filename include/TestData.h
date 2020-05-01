@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__TEST_DATA_H__
-#define __REGOLITH__TEST_DATA_H__
+#ifndef REGOLITH_TEST_DATA_H_
+#define REGOLITH_TEST_DATA_H_
 
 #include "GameData.h"
 
@@ -40,5 +40,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__TEST_DATA_H__
+#endif // REGOLITH_TEST_DATA_H_
 

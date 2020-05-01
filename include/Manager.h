@@ -1,12 +1,13 @@
 
-#ifndef __REGOLITH__MANAGER_H__
-#define __REGOLITH__MANAGER_H__
+#ifndef REGOLITH_MANAGER_H_
+#define REGOLITH_MANAGER_H_
 
 #include "Definitions.h"
 
 #include "Singleton.h"
 #include "Window.h"
 #include "InputManager.h"
+#include "AudioManager.h"
 #include "Scene.h"
 #include "ObjectBuilder.h"
 #include "SceneBuilder.h"
@@ -41,6 +42,7 @@ namespace Regolith
       Window* _theWindow;
       SDL_Renderer* _theRenderer;
       InputManager* _theInput;
+      AudioManager* _theAudio;
       ContextStack _contexts;
 
       ObjectBuilder* _theBuilder;
@@ -65,6 +67,9 @@ namespace Regolith
 
       // Load the input device configuration
       void _loadInput( Json::Value& );
+
+      // Load the input device configuration
+      void _loadAudio( Json::Value& );
 
     public:
       virtual ~Manager();
@@ -94,6 +99,12 @@ namespace Regolith
 
       // Return a pointer to the required font data
       TTF_Font* getFontPointer( std::string );
+
+      // Return a pointer to the input manager
+      InputManager* getInputManager() { return _theInput; }
+
+      // Return a pointer to the input manager
+      AudioManager* getAudioManager() { return _theAudio; }
 
 
 
@@ -147,5 +158,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__MANAGER_H__
+#endif // REGOLITH_MANAGER_H_
 

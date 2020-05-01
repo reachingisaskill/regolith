@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__EXCEPTION_H__
-#define __REGOLITH__EXCEPTION_H__
+#ifndef REGOLITH_EXCEPTION_H_
+#define REGOLITH_EXCEPTION_H_
 
 #include <vector>
 #include <string>
@@ -68,4 +68,4 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__EXCEPTION_H__
+#endif // REGOLITH_EXCEPTION_H_

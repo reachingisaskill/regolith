@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__ENGINE_H__
-#define __REGOLITH__ENGINE_H__
+#ifndef REGOLITH_ENGINE_H_
+#define REGOLITH_ENGINE_H_
 
 #include "Definitions.h"
 
@@ -64,5 +64,5 @@ namespace Regolith
   
 }
 
-#endif // __REGOLITH__ENGINE_H__
+#endif // REGOLITH_ENGINE_H_
 

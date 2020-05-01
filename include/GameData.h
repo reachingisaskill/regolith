@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__GAME_DATA_H__
-#define __REGOLITH__GAME_DATA_H__
+#ifndef REGOLITH_GAME_DATA_H_
+#define REGOLITH_GAME_DATA_H_
 
 #include "Definitions.h"
 
@@ -50,5 +50,5 @@ namespace Regolith
 
 }
 
-#endif // __REGOLITH__GAME_DATA_H__
+#endif // REGOLITH_GAME_DATA_H_
 

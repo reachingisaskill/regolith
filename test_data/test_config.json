@@ -22,7 +22,7 @@
     }
   ],
 
-  "input" :
+  "input_device" :
   {
     "require" : [ "keyboard" ],
     "keymapping" :
@@ -40,6 +40,23 @@
           "d"      : "move_right",
           "return" : "attack"
         }
+      }
+    ]
+  },
+
+  "audio_device" :
+  {
+    "sample_frequency" : 22050,
+    "channels" : 2,
+    "chunk_size" : 1024,
+    "music_volume" : 0.1,
+    "effect_volume" : 0.5,
+
+    "music_files" :
+    [
+      {
+        "name" : "the_beat",
+        "path" : "test_data/test_beat.wav"
       }
     ]
   }

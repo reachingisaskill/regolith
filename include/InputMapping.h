@@ -1,6 +1,6 @@
 
-#ifndef __REGOLITH__INPUT_MAPPING_H__
-#define __REGOLITH__INPUT_MAPPING_H__
+#ifndef REGOLITH_INPUT_MAPPING_H_
+#define REGOLITH_INPUT_MAPPING_H_
 
 #include "Definitions.h"
 
@@ -103,5 +103,5 @@ namespace Regolith
   
 }
 
-#endif // __REGOLITH__INPUT_MAPPING_H__
+#endif // REGOLITH_INPUT_MAPPING_H_
 

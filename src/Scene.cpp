@@ -25,6 +25,7 @@ namespace Regolith
     _theBuilder( nullptr ),
     _sceneFile( json_file ),
     _pauseMenu( nullptr ),
+    _defaultMusic( -1 ),
     _background( nullptr ),
     _sceneElements(),
     _hudElements(),
@@ -67,6 +68,9 @@ namespace Regolith
     }
     _sceneElements.clear();
 
+    INFO_LOG( "Deleting dialog windows" );
+    _dialogWindows.deletePointers();
+
     INFO_LOG( "Deleting the background" );
     delete _background;
     _background = nullptr;
@@ -78,8 +82,8 @@ namespace Regolith
     delete _theHUD;
     _theHUD = nullptr;
 
-    // Resources are deleted by the NamedVector class
-//    _resources.clear();
+    INFO_LOG( "Deleting the resources" );
+    _resources.deletePointers();
 
     INFO_LOG( "Clearing name lookups" );
     _teamNames.clear();
@@ -165,6 +169,42 @@ namespace Regolith
       {
         _addTextureFromText( texture_strings[i] );
       }
+    }
+    catch ( std::runtime_error& rt )
+    {
+      Exception ex( "Scene::_loadTextures()", "Json reading failure - building cache" );
+      ex.addDetail( "File name", _sceneFile );
+      ex.addDetail( "What", rt.what() );
+      throw ex;
+    }
+  }
+
+
+  void Scene::_loadSounds( Json::Value& json_data )
+  {
+    try
+    {
+      // Perform validation
+      Utilities::validateJson( json_data, "sound_files", Utilities::JSON_TYPE_ARRAY );
+
+      INFO_LOG( "Loading sound effect files" );
+      Json::Value effect_files = json_data["sound_files"];
+      Json::ArrayIndex effect_files_size = effect_files.size();
+      for ( Json::ArrayIndex i = 0; i != effect_files_size; ++i )
+      {
+        audioHandler()->addEffect( effect_files[i] );
+      }
+
+
+      if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
+      {
+        std::string name = json_data["default_music"].asString();
+        _defaultMusic = audioHandler()->getMusicID( name );
+      }
+
+
+      // Final configuration
+      audioHandler()->configure();
     }
     catch ( std::runtime_error& rt )
     {
@@ -313,11 +353,11 @@ namespace Regolith
         std::string resource_name = hud_elements[i]["resource_name"].asString();
         float x = hud_elements[i]["position"][0].asFloat();
         float y = hud_elements[i]["position"][1].asFloat();
-
+        Vector pos( x, y );
 
         // Determine the ID number and spawn the element
         unsigned int id_number = _resources.getID( resource_name );
-        this->spawnHUD( id_number, Vector( x, y ) );
+        this->spawnHUD( id_number, pos );
       }
 
 
@@ -476,6 +516,16 @@ namespace Regolith
     }
     INFO_LOG( "Loading textures" );
     this->_loadTextures( json_data["textures"] );
+
+    if ( ! json_data.isMember( "sounds" ) )
+    {
+      FAILURE_LOG( "Could not find sounds list in json data file" );
+      Exception ex( "Scene::_buildFromJson()", "No sounds member found in Json Data", false);
+      ex.addDetail( "File name", _sceneFile );
+      throw ex;
+    }
+    INFO_LOG( "Loading sounds" );
+    this->_loadSounds( json_data["sounds"] );
 
     if ( ! json_data.isMember( "resources" ) )
     {
@@ -773,6 +823,27 @@ namespace Regolith
   }
 
 
+  void Scene::spawnHUD( unsigned int id, Json::Value& json_data )
+  {
+    Drawable* newElement = _resources[id]->clone();
+    Utilities::jsonProcessPosition( json_data, newElement, _theHUD );
+    _hudElements.push_back( newElement );
+
+    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam();
+
+    if ( newElement->hasAnimation() )
+    {
+      _animatedElements.push_back( newElement );
+    }
+    if ( newElement->hasInput() )
+    {
+      _inputElements.push_back( newElement );
+      newElement->registerActions( inputHandler() );
+    }
+    // HUD Elements not allowed collision
+  }
+
+
   void Scene::spawn( unsigned int id )
   {
     Drawable* newElement = _resources[id]->clone();
@@ -852,7 +923,17 @@ namespace Regolith
     DEBUG_LOG( "On pause called" );
     if ( _pauseMenu != nullptr )
     {
-      _pauseMenu->giveFocus();
+      transferFocus( _pauseMenu );
+    }
+  }
+
+
+  void Scene::onStart()
+  {
+    DEBUG_LOG( "On start called" );
+    if ( _defaultMusic >= 0 )
+    {
+      audioHandler()->setSong( 0 );
     }
   }
 
