@@ -28,7 +28,6 @@ namespace Regolith
     private:
       FactoryMap _factories;
       SDL_Renderer* _theRenderer;
-      const Scene* _theScene;
 
     protected:
 
@@ -42,11 +41,8 @@ namespace Regolith
 
       // Configure for the current scene being loaded
       void setRenderer( SDL_Renderer* );
-      void setScene( const Scene* );
 
       SDL_Renderer* getRenderer() const { return this->_theRenderer; }
-
-      const Scene* getScene() const { return _theScene; }
 
       // Add a new factory to the build system - takes ownership of data
       void addFactory( ObjectFactory_base* );

@@ -107,6 +107,69 @@
     ]
   },
 
+  "resources" :
+  [
+    {
+      "resource_name" : "background",
+      "resource_type" : "sprite",
+      "texture_name" : "background_texture",
+      "team_name" : "environment",
+      "collision" : "default"
+    },
+    {
+      "resource_name" : "platform",
+      "resource_type" : "sprite",
+      "team_name" : "environment",
+      "texture_name" : "ground_texture",
+      "collision" : "default",
+      "mass" : 0.0
+    },
+    {
+      "resource_name" : "the_dot",
+      "resource_type" : "test_player",
+      "texture_name" : "dot_texture",
+      "collision" : "default",
+      "mass" : 1.0,
+      "team_name" : "player",
+      "jump_speed" : 3.0,
+      "movement_force" : 0.002
+    },
+    {
+      "resource_name" : "the_spritesheet",
+      "resource_type" : "sprite",
+      "team_name" : "environment",
+      "texture_name" : "spritesheet_test",
+      "number_rows" : 2,
+      "number_columns" : 2,
+      "number_used" : 4,
+      "start_number" : 2
+    },
+    {
+      "resource_name" : "the_animated_spritesheet",
+      "resource_type" : "sprite",
+      "team_name" : "environment",
+      "texture_name" : "spritesheet_test",
+      "update_period" : 1000,
+      "number_rows" : 2,
+      "number_columns" : 2,
+      "number_used" : 4,
+      "start_number" : 1
+    },
+    {
+      "resource_name" : "fps_text",
+      "resource_type" : "fps_string",
+      "team_name" : "hud",
+      "font" : "default",
+      "frame_count" : 100
+    },
+    {
+      "resource_name" : "pause_text",
+      "team_name" : "hud",
+      "resource_type" : "sprite",
+      "texture_name" : "pause_text"
+    }
+  ],
+
   "story" :
   {
     "scenes" :

@@ -23,6 +23,8 @@ namespace Regolith
     _theBuilder( new ObjectBuilder() ),
     _theSceneBuilder( new SceneBuilder() ),
     _rawTextures(),
+    _teamNames(),
+    _resources( "global_resource_list" ),
     _scenes(),
     _title(),
     _defaultFont( nullptr ),
@@ -38,6 +40,12 @@ namespace Regolith
 
     // Set up the scene factories
     _theSceneBuilder->addFactory( new SceneFactory<ScenePlatformer>( "platformer" ) );
+
+    // Create the default teams
+    _teamNames[ "hud" ] = DEFAULT_TEAM_HUD;
+    _teamNames[ "environment" ] = DEFAULT_TEAM_ENVIRONMENT;
+    _teamNames[ "npc" ] = DEFAULT_TEAM_NPC;
+    _teamNames[ "player" ] = DEFAULT_TEAM_PLAYER;
   }
 
 
@@ -59,17 +67,10 @@ namespace Regolith
 
   Manager::~Manager()
   {
-    // Destroy the builder
-    delete _theBuilder;
-    _theBuilder = nullptr;
 
-    // Destroy the scene builder
-    delete _theSceneBuilder;
-    _theSceneBuilder = nullptr;
+//    _defaultColor = nullptr;
+    _defaultFont = nullptr;
 
-    // Remove the engine
-    Engine::killInstance();
-    _theEngine = nullptr;
 
     // Remove each of scenes and clear the vector
     for ( size_t i = 0; i < _scenes.size(); ++i )
@@ -77,6 +78,13 @@ namespace Regolith
       delete _scenes[i];
     }
     _scenes.clear();
+
+
+    INFO_LOG( "Deleting Resources" );
+    _resources.clear();
+
+    INFO_LOG( "Clearing team list" );
+    _teamNames.clear();
 
 
     INFO_LOG( "Deleting raw texture data" );
@@ -87,6 +95,15 @@ namespace Regolith
     _rawTextures.clear();
 
 
+    // Destroy the builder
+    delete _theBuilder;
+    _theBuilder = nullptr;
+
+    // Destroy the scene builder
+    delete _theSceneBuilder;
+    _theSceneBuilder = nullptr;
+
+
     // Remove each of the fonts and clear the map
     for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )
     {
@@ -94,25 +111,28 @@ namespace Regolith
     }
     _fonts.clear();
 
-    _defaultFont = nullptr; // No longer valid
-
-    // Delete the input manager
-    delete _theInput;
-    _theInput = nullptr;
 
     // Delete the Audio Manager
     delete _theAudio;
     _theAudio = nullptr;
 
+    // Delete the input manager
+    delete _theInput;
+    _theInput = nullptr;
+
+
     // Remove the renderer object
     SDL_DestroyRenderer( _theRenderer );
     _theRenderer = nullptr;
-
 
     // Remove the window
     delete _theWindow;
     _theWindow = nullptr;
 
+
+    // Remove the engine
+    Engine::killInstance();
+    _theEngine = nullptr;
 
 
     // Close the SDL subsystems

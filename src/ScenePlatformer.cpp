@@ -17,7 +17,7 @@ namespace Regolith
 
   ScenePlatformer::ScenePlatformer( std::string json_file ) :
     Scene( json_file ),
-    _player(),
+    _player( nullptr ),
     _spawnPoints(),
     _currentPlayerSpawn( 0.0 )
   {
@@ -28,10 +28,6 @@ namespace Regolith
   {
     INFO_LOG( "Destroying Scene - Platformer" );
     INFO_LOG( "Clearing caches" );
-
-    INFO_LOG( "Deleting the player" );
-    delete _player;
-    _player = nullptr;
 
     INFO_LOG( "Clearing Spawn Points" );
     _spawnPoints.clear();
@@ -74,14 +70,16 @@ namespace Regolith
     Utilities::validateJson( player, "resource_name", Utilities::JSON_TYPE_STRING );
 
     std::string player_resource = player["resource_name"].asString();
-    unsigned int player_id_number = findResourceID( player_resource );
     int player_x = player["position"][0].asInt();
     int player_y = player["position"][1].asInt();
     Vector pos( player_x, player_y );
 
-    // Create spawn point
-    _player = spawnReturn( player_id_number, pos );
+    _player = Manager::getInstance()->getResource( player_resource );
+    _player->setPosition( pos );
     _currentPlayerSpawn = pos;
+
+    // Add object to collision caches, etc, and register actions
+    this->addSpawned( _player );
 
     // Tell the current camera object to follow the player
     this->getCamera()->followMe( _player );
@@ -130,7 +128,7 @@ namespace Regolith
   }
 
 
-  void ScenePlatformer::_update( Uint32 )
+  void ScenePlatformer::_update( Uint32 time )
   {
   }
 

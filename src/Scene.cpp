@@ -16,13 +16,8 @@ namespace Regolith
 
 
   Scene::Scene( std::string json_file ) :
-    _resources("resources"),
-    _teamNames(),
-    _paused( false ),
-    _theWindow( nullptr ),
-    _theRenderer( nullptr ),
-    _theBuilder( nullptr ),
     _sceneFile( json_file ),
+    _paused( false ),
     _pauseMenu( nullptr ),
     _defaultMusic( -1 ),
     _background( nullptr ),
@@ -31,18 +26,9 @@ namespace Regolith
     _dialogWindows( "dialog_windows" ),
     _collisionElements(),
     _animatedElements(),
-    _inputElements(),
     _theCamera( nullptr ),
     _theHUD( nullptr )
   {
-  }
-
-
-  void Scene::configure( SDL_Renderer* renderer, Window* window, ObjectBuilder* build )
-  {
-    _theWindow = window;
-    _theRenderer = renderer;
-    _theBuilder = build;
   }
 
 
@@ -52,7 +38,6 @@ namespace Regolith
     INFO_LOG( "Clearing caches" );
     _collisionElements.clear();
     _animatedElements.clear();
-    _inputElements.clear();
 
     INFO_LOG( "Deleting spawned objects" );
     for ( ElementList::iterator it = _hudElements.begin(); it != _hudElements.end(); ++it )
@@ -80,25 +65,82 @@ namespace Regolith
 
     delete _theHUD;
     _theHUD = nullptr;
-
-    INFO_LOG( "Deleting the resources" );
-    _resources.clear();
-
-    INFO_LOG( "Clearing name lookups" );
-    _teamNames.clear();
   }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // The entry to the building algorithm
 
   void Scene::load()
   {
-    if ( this->_theRenderer == nullptr )
+    INFO_STREAM <<  "Building Scene from json file: " << _sceneFile;
+
+    INFO_LOG( "Preparing collision data structure" );
+    _collisionElements.clear();
+    unsigned int numberTeams = Manager::getInstance()->getNumberTeams();
+    for ( unsigned int i = 0; i < numberTeams; ++i )
     {
-      FAILURE_LOG( "Attempting to build a scene before it has been configured!" );
-      Exception ex( "Scene::load()", "Attemping to load a scene before it is configured" );
+      _collisionElements.push_back( ElementList() );
+    }
+
+
+
+    INFO_LOG( "Loading Json Data" );
+    Json::Value json_data = this->_loadConfig();
+
+    try
+    {
+
+      Utilities::validateJson( json_data, "sounds", Utilities::JSON_TYPE_OBJECT, true );
+      Utilities::validateJson( json_data, "elements", Utilities::JSON_TYPE_OBJECT, true );
+      Utilities::validateJson( json_data, "cameras", Utilities::JSON_TYPE_OBJECT, true );
+      Utilities::validateJson( json_data, "dialog_windows", Utilities::JSON_TYPE_ARRAY, true );
+      Utilities::validateJson( json_data, "options", Utilities::JSON_TYPE_OBJECT, true );
+
+      INFO_LOG( "Loading sounds" );
+      this->_loadSounds( json_data["sounds"] );
+
+      INFO_LOG( "Building caches" );
+      this->_loadCaches( json_data["elements"] );
+
+      INFO_LOG( "Loading cameras" );
+      this->_loadCameras( json_data["cameras"] );
+
+      INFO_LOG( "Building Dialog Windows" );
+      this->_loadDialogs( json_data["dialog_windows"] );
+
+      INFO_LOG( "Configuring Scene options" );
+      this->_loadOptions( json_data["options"] );
+
+      INFO_LOG( "Loading Scene-Specific Components" );
+      this->_loadSceneSpecificComponents( json_data );
+
+      INFO_LOG( "Registering input actions" );
+      this->registerActions( inputHandler() );
+
+    }
+    catch ( Exception& ex )
+    {
+      FAILURE_LOG( "Scene Failed to Load" );
       throw ex;
     }
-    this->buildFromJson();
+    catch ( std::exception& e )
+    {
+      FAILURE_STREAM << "Scene Failed to Load with unexpected exception: " << e.what();
+      Exception ex( "Scene::load()", "Unexpected Exception" );
+      ex.addDetail( "What", e.what() );
+      throw ex;
+    }
+    catch ( ... )
+    {
+      FAILURE_LOG( "Scene Failed to Load with unknown exception" );
+      Exception ex( "Scene::load()", "Unknown Exception" );
+      throw ex;
+    }
+
+    INFO_LOG( "Scene Successfuly Built" );
   }
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -143,98 +185,10 @@ namespace Regolith
 
   void Scene::_loadSounds( Json::Value& json_data )
   {
-    try
+    if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
     {
-      if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
-      {
-        std::string name = json_data["default_music"].asString();
-        _defaultMusic = audioHandler()->getMusicID( name );
-      }
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Scene::_loadSounds()", "Json reading failure - loading sound configuration" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
-      throw ex;
-    }
-  }
-
-
-  void Scene::_loadResources( Json::Value& resources )
-  {
-    INFO_LOG( "Configuring default teams: \"environment\", \"npc\" & \"player\"" );
-    // Create the default teams - environment & player_01
-    _teamNames[ "environment" ] = 0u;
-    _collisionElements.push_back( ElementList() );
-    _teamNames[ "player" ] = 1u;
-    _collisionElements.push_back( ElementList() );
-    _teamNames[ "npc" ] = 2u;
-    _collisionElements.push_back( ElementList() );
-
-    // Setup out the resources that use the SDL_Texture data
-    try
-    {
-      // Load all the individual resource objects
-      INFO_LOG( "Loading resource objects" );
-      Json::ArrayIndex resources_size = resources.size();
-      for ( Json::ArrayIndex i = 0; i != resources_size; ++i )
-      {
-        try
-        {
-          Utilities::validateJson( resources[i], "resource_name", Utilities::JSON_TYPE_STRING );
-
-          std::string resource_name = resources[i]["resource_name"].asString();
-          DEBUG_STREAM << "  Building resource: " << resource_name;
-          Drawable* newResource =  _theBuilder->build( resources[i] );
-
-          _resources.addObject( newResource, resource_name );
-
-
-          // Handle the team names
-          std::string team_name;
-          // If one is provided
-          if ( resources[i].isMember( "team_name" ) )
-            team_name = resources[i]["team_name"].asString();
-          else // Else assume environment
-            team_name = "environment";
-
-          DEBUG_STREAM << "  Resource Team Name : " << team_name;
-          // See if its already been used.
-          if ( _teamNames.find( team_name ) == _teamNames.end() )
-          {
-            // Create it otherwise
-            _collisionElements.push_back( ElementList() );
-            _teamNames[ team_name ] = _collisionElements.size() - 1;
-          }
-
-          // Set the resource team ID
-          DEBUG_LOG( "Setting team name" );
-          int team_id = _teamNames[ team_name ];
-          newResource->setTeam( team_id );
-        }
-        catch ( Exception& ex )
-        {
-          if ( ex.isRecoverable() )
-          {
-            ERROR_STREAM << "An error occured building scene elements: " << ex.what();
-            ERROR_LOG( "Skipping element" );
-          }
-          else
-          {
-            FAILURE_STREAM << "An error occured building scene elements: " << ex.what();
-            FAILURE_LOG( "Error is non-recoverable" );
-            throw ex;
-          }
-        }
-      }
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Scene::_loadResources()", "Json reading failure" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
-      throw ex;
+      std::string name = json_data["default_music"].asString();
+      _defaultMusic = audioHandler()->getMusicID( name );
     }
   }
 
@@ -244,129 +198,78 @@ namespace Regolith
     Utilities::validateJson( json_data, "background", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "scene_elements", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "hud_elements", Utilities::JSON_TYPE_ARRAY );
-    try
+
+    // Load the scene background
+    INFO_LOG( "Building the background" );
+    std::string background_resource = json_data["background"].asString();
+    _background = Manager::getInstance()->spawn( background_resource );
+
+    if ( ! _background->hasCollision() )
     {
-      // Load the scene background
-      INFO_LOG( "Building the background" );
-      std::string background_resource = json_data["background"].asString();
-      _background = _resources.getByName( background_resource )->clone();
-
-      if ( ! _background->hasCollision() )
-      {
-        FAILURE_LOG( "Backgroud sprite does not have any collision. Cannot define containment within scene" );
-        Exception ex( "Scene::_loadCaches()", "Background sprite does not have any associated collision." );
-        throw ex;
-      }
-
-      if ( _background->hasAnimation() )
-      {
-        _animatedElements.push_back( _background );
-      }
-
-
-      // Load the Scene Elements
-      INFO_LOG( "Building the scene" );
-      Json::Value scene_elements = json_data["scene_elements"];
-      Json::ArrayIndex scene_elements_size = scene_elements.size();
-      for ( Json::ArrayIndex i = 0; i != scene_elements_size; ++i )
-      {
-        Utilities::validateJson( scene_elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( scene_elements[i], "position", Utilities::JSON_TYPE_ARRAY );
-
-        // Load the necessary info
-        std::string resource_name = scene_elements[i]["resource_name"].asString();
-        int x = scene_elements[i]["position"][0].asInt();
-        int y = scene_elements[i]["position"][1].asInt();
-        Vector pos( x, y );
-
-        // Determine the ID number and spawn the element
-        unsigned int id_number = _resources.getID( resource_name );
-        this->spawnAt( id_number, pos );
-      }
-
-
-      // Load the HUD Elements
-      INFO_LOG( "Building the HUD" );
-      Json::Value hud_elements = json_data["hud_elements"];
-      Json::ArrayIndex hud_elements_size = hud_elements.size();
-      for ( Json::ArrayIndex i = 0; i != hud_elements_size; ++i )
-      {
-        Utilities::validateJson( hud_elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( hud_elements[i], "position", Utilities::JSON_TYPE_ARRAY );
-
-        // Load the necessary info
-        std::string resource_name = hud_elements[i]["resource_name"].asString();
-        float x = hud_elements[i]["position"][0].asFloat();
-        float y = hud_elements[i]["position"][1].asFloat();
-        Vector pos( x, y );
-
-        // Determine the ID number and spawn the element
-        unsigned int id_number = _resources.getID( resource_name );
-        this->spawnHUD( id_number, pos );
-      }
-
-
-    }
-    catch ( Exception& ex )
-    {
-      if ( ex.isRecoverable() )
-      {
-        ERROR_STREAM << "an error occured building scene caches: " << ex.what();
-      }
-      else
-      {
-        FAILURE_STREAM << "an error occured building scene caches: " << ex.what();
-        FAILURE_LOG( "error is non-recoverable" );
-        throw ex;
-      }
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Scene::_loadCaches()", "Json reading failure" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
+      FAILURE_LOG( "Backgroud sprite does not have any collision. Cannot define containment within scene" );
+      Exception ex( "Scene::_loadCaches()", "Background sprite does not have any associated collision." );
       throw ex;
+    }
+
+    if ( _background->hasAnimation() )
+    {
+      _animatedElements.push_back( _background );
+    }
+
+
+    // Load the Scene Elements
+    INFO_LOG( "Building the scene" );
+    Json::Value scene_elements = json_data["scene_elements"];
+    Json::ArrayIndex scene_elements_size = scene_elements.size();
+    for ( Json::ArrayIndex i = 0; i != scene_elements_size; ++i )
+    {
+      Utilities::validateJson( scene_elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( scene_elements[i], "position", Utilities::JSON_TYPE_ARRAY );
+
+      // Load the necessary info
+      std::string resource_name = scene_elements[i]["resource_name"].asString();
+      int x = scene_elements[i]["position"][0].asInt();
+      int y = scene_elements[i]["position"][1].asInt();
+      Vector pos( x, y );
+
+      this->spawn( resource_name, pos );
+    }
+
+
+    // Load the HUD Elements
+    INFO_LOG( "Building the HUD" );
+    Json::Value hud_elements = json_data["hud_elements"];
+    Json::ArrayIndex hud_elements_size = hud_elements.size();
+    for ( Json::ArrayIndex i = 0; i != hud_elements_size; ++i )
+    {
+      Utilities::validateJson( hud_elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( hud_elements[i], "position", Utilities::JSON_TYPE_ARRAY );
+
+      // Load the necessary info
+      std::string resource_name = hud_elements[i]["resource_name"].asString();
+      float x = hud_elements[i]["position"][0].asFloat();
+      float y = hud_elements[i]["position"][1].asFloat();
+      Vector pos( x, y );
+
+      this->spawnHUD( resource_name, pos );
     }
   }
 
 
   void Scene::_loadDialogs( Json::Value& dialog_windows )
   {
-    try
+    Json::ArrayIndex dialog_windows_size = dialog_windows.size();
+    for ( Json::ArrayIndex i = 0; i != dialog_windows_size; ++i )
     {
-      Json::ArrayIndex dialog_windows_size = dialog_windows.size();
-      for ( Json::ArrayIndex i = 0; i != dialog_windows_size; ++i )
-      {
-        Utilities::validateJson( dialog_windows[i], "name", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( dialog_windows[i], "dialog", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( dialog_windows[i], "name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( dialog_windows[i], "dialog", Utilities::JSON_TYPE_OBJECT );
 
-        std::string name = dialog_windows[i]["name"].asString();
+      std::string name = dialog_windows[i]["name"].asString();
 
-        INFO_STREAM << "Building dialog window: " << name;
-        Dialog* newDialog = new Dialog( this, _theHUD, dialog_windows[i]["dialog"] );
+      INFO_STREAM << "Building dialog window: " << name;
+      Dialog* newDialog = new Dialog( _theHUD, dialog_windows[i]["dialog"] );
 
-        _dialogWindows.addObject( newDialog, name );
-      }
-    }
-    catch ( Exception& ex )
-    {
-      if ( ex.isRecoverable() )
-      {
-        ERROR_STREAM << "an error occured building dialogs: " << ex.what();
-      }
-      else
-      {
-        FAILURE_STREAM << "an error occured building dialogs: " << ex.what();
-        FAILURE_LOG( "Error is non-recoverable" );
-        throw ex;
-      }
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Scene::_loadDialogs()", "json reading failure" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
-      throw ex;
+      _dialogWindows.addObject( newDialog, name );
     }
   }
 
@@ -378,53 +281,43 @@ namespace Regolith
     Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_INTEGER );
     Utilities::validateJson( json_data, "type", Utilities::JSON_TYPE_STRING );
 
-    try
+    // Configure the camera objects
+    int camera_x = json_data["start_position"][0].asInt();
+    int camera_y = json_data["start_position"][1].asInt();
+    int camera_width = json_data["width"].asInt();
+    int camera_height = json_data["height"].asInt();
+
+    INFO_LOG( "Configuring scene camera" );
+    std::string camera_type = json_data["type"].asString();
+    _theCamera = new Camera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
+    _theCamera->setPosition( camera_x, camera_y );
+    _theCamera->registerActions( inputHandler() );
+
+    if ( camera_type == "flying" )
     {
-      // Configure the camera objects
-      int camera_x = json_data["start_position"][0].asInt();
-      int camera_y = json_data["start_position"][1].asInt();
-      int camera_width = json_data["width"].asInt();
-      int camera_height = json_data["height"].asInt();
-
-      INFO_LOG( "Configuring scene camera" );
-      std::string camera_type = json_data["type"].asString();
-      _theCamera = new Camera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
-      _theCamera->setPosition( camera_x, camera_y );
-      _theCamera->registerActions( inputHandler() );
-
-      if ( camera_type == "flying" )
-      {
-        INFO_LOG( "Setting mode to flying camera" );
-        _theCamera->setMode( CAMERA_FLYING );
-      }
-      else if ( camera_type == "following" )
-      {
-        INFO_LOG( "Setting mode to flying camera" );
-        _theCamera->setMode( CAMERA_FOLLOWING );
-      }
-      else if ( camera_type == "constant_velocity" )
-      {
-        INFO_LOG( "Setting mode to flying camera" );
-        _theCamera->setMode( CAMERA_CONSTANT_VELOCITY );
-      }
-      else
-      {
-        FAILURE_STREAM << "Unknown camera type found : " << camera_type;
-        Exception ex( "Scene::_loadCameras()", "Unknown Camera Type" );
-        ex.addDetail( "Camera Type", camera_type );
-        throw ex;
-      }
-
-      INFO_LOG( "Configuring HUD camera" );
-      _theHUD = new Camera( camera_width, camera_height, camera_width, camera_height );
+      INFO_LOG( "Setting mode to flying camera" );
+      _theCamera->setMode( CAMERA_FLYING );
     }
-    catch ( std::runtime_error& rt )
+    else if ( camera_type == "following" )
     {
-      Exception ex( "Scene::_loadCameras()", "Json reading failure" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
+      INFO_LOG( "Setting mode to flying camera" );
+      _theCamera->setMode( CAMERA_FOLLOWING );
+    }
+    else if ( camera_type == "constant_velocity" )
+    {
+      INFO_LOG( "Setting mode to flying camera" );
+      _theCamera->setMode( CAMERA_CONSTANT_VELOCITY );
+    }
+    else
+    {
+      FAILURE_STREAM << "Unknown camera type found : " << camera_type;
+      Exception ex( "Scene::_loadCameras()", "Unknown Camera Type" );
+      ex.addDetail( "Camera Type", camera_type );
       throw ex;
     }
+
+    INFO_LOG( "Configuring HUD camera" );
+    _theHUD = new Camera( camera_width, camera_height, camera_width, camera_height );
   }
 
 
@@ -435,90 +328,6 @@ namespace Regolith
       std::string dialog_name = options["on_pause"].asString();
       _pauseMenu = _dialogWindows.getByName( dialog_name );
     }
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // The entry to the building algorithm
-
-  void Scene::buildFromJson()
-  {
-    // Tell the builder who's using it
-    INFO_STREAM <<  "Building Scene from json file: " << _sceneFile;
-    _theBuilder->setScene( this );
-
-    INFO_LOG( "Builder Configured" );
-    INFO_LOG( "Loading configuration data" );
-
-    Json::Value json_data = this->_loadConfig();
-
-    if ( ! json_data.isMember( "sounds" ) )
-    {
-      FAILURE_LOG( "Could not find sounds list in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No sounds member found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Loading sounds" );
-    this->_loadSounds( json_data["sounds"] );
-
-    if ( ! json_data.isMember( "resources" ) )
-    {
-      FAILURE_LOG( "Could not find resource list in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No resource member found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Loading resources" );
-    this->_loadResources( json_data["resources"] );
-
-    if ( ! json_data.isMember( "elements" ) )
-    {
-      FAILURE_LOG( "Could not find elements data in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No elements member found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Building caches" );
-    this->_loadCaches( json_data["elements"] );
-
-    if ( ! json_data.isMember( "cameras" ) )
-    {
-      FAILURE_LOG( "Could not find cameras data in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No cameras member found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Loading cameras" );
-    this->_loadCameras( json_data["cameras"] );
-
-    if ( ! json_data.isMember( "dialog_windows" ) )
-    {
-      FAILURE_LOG( "Could not find dialog window in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No dialog_windows member found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Building Dialog Windows" );
-    this->_loadDialogs( json_data["dialog_windows"] );
-
-    if ( ! json_data.isMember( "options" ) )
-    {
-      FAILURE_LOG( "Could not find options in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No options member found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Configuring Scene options" );
-    this->_loadOptions( json_data["options"] );
-
-    INFO_LOG( "Loading Scene-Specific Components" );
-    this->_loadSceneSpecificComponents( json_data );
-
-    INFO_LOG( "Registering input actions" );
-    this->registerActions( inputHandler() );
-
-    INFO_LOG( "Scene Successfuly Built" );
   }
 
 
@@ -574,7 +383,9 @@ namespace Regolith
 
   void Scene::resolveCollisions()
   {
-    ElementList& environmentElements = _collisionElements[0];
+    ElementList& environmentElements = _collisionElements[DEFAULT_TEAM_ENVIRONMENT];
+    ElementList::iterator environment_end = environmentElements.end();
+
     size_t numberEnvironment = environmentElements.size();
     size_t numberTeams = _collisionElements.size();
 
@@ -582,17 +393,18 @@ namespace Regolith
 
     Contact contact; // Cache the contact info here
 
-    for ( size_t i = 1; i < numberTeams; ++i )
+    for ( size_t i = DEFAULT_TEAM_PLAYER; i < numberTeams; ++i )
     {
       ElementList& team = _collisionElements[i];
-      size_t numberPlayers = team.size();
-      DEBUG_STREAM << "Team Size: " << numberPlayers;
 
-      for ( size_t j = 0; j < numberPlayers; ++j )
+      DEBUG_STREAM << "Team Size: " << team.size();
+
+      ElementList::iterator team_end = team.end();
+      for ( ElementList::iterator it = team.begin(); it != team_end; ++it )
       {
-        for ( size_t k = 0; k < numberEnvironment; ++k )
+        for ( ElementList::iterator env_it = environmentElements.begin(); env_it != environment_end; ++env_it )
         {
-          if ( collides( team[j], environmentElements[k], contact ) )
+          if ( collides( (*it), (*env_it), contact ) )
           {
             contact.applyContact();
           }
@@ -608,13 +420,41 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Spawn functions to dynamically place elements in the scene and HUD
 
+  void Scene::spawnHUD( std::string name, Vector vec )
+  {
+    Manager* man = Manager::getInstance();
+
+    Drawable* newElement = man->spawn( name, vec );
+
+    _hudElements.push_back( newElement );
+
+    INFO_STREAM << "Spawning HUD resource, Team: " << newElement->getTeam();
+
+    if ( newElement->hasAnimation() )
+    {
+      _animatedElements.push_back( newElement );
+    }
+    if ( newElement->hasInput() )
+    {
+      newElement->registerActions( inputHandler() );
+    }
+    if ( newElement->hasSound() )
+    {
+      newElement->registerSounds( audioHandler() );
+    }
+    // HUD Elements not allowed collision
+  }
+
+
   void Scene::spawnHUD( unsigned int id, Vector vec )
   {
-    Drawable* newElement = _resources[id]->clone();
-    newElement->setPosition( vec );
+    static Manager* man = Manager::getInstance();
+
+    Drawable* newElement = man->spawn( id, vec );
+
     _hudElements.push_back( newElement );
 
-    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam();
+    INFO_STREAM << "Spawning HUD resource, Team: " << newElement->getTeam();
 
     if ( newElement->hasAnimation() )
     {
@@ -622,40 +462,24 @@ namespace Regolith
     }
     if ( newElement->hasInput() )
     {
-      _inputElements.push_back( newElement );
       newElement->registerActions( inputHandler() );
+    }
+    if ( newElement->hasSound() )
+    {
+      newElement->registerSounds( audioHandler() );
     }
     // HUD Elements not allowed collision
   }
 
 
-  void Scene::spawnHUD( unsigned int id, Json::Value& json_data )
+  void Scene::spawn( std::string name, Vector vec )
   {
-    Drawable* newElement = _resources[id]->clone();
-    Utilities::jsonProcessPosition( json_data, newElement, _theHUD );
-    _hudElements.push_back( newElement );
+    Manager* man = Manager::getInstance();
 
-    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam();
-
-    if ( newElement->hasAnimation() )
-    {
-      _animatedElements.push_back( newElement );
-    }
-    if ( newElement->hasInput() )
-    {
-      _inputElements.push_back( newElement );
-      newElement->registerActions( inputHandler() );
-    }
-    // HUD Elements not allowed collision
-  }
-
-
-  void Scene::spawn( unsigned int id )
-  {
-    Drawable* newElement = _resources[id]->clone();
+    Drawable* newElement = man->spawn( name, vec );
     _sceneElements.push_back( newElement );
 
-    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam();
+    INFO_STREAM << "Spawning scene resource, Team: " << newElement->getTeam() << ", at: " << vec;
 
     if ( newElement->hasAnimation() )
     {
@@ -663,23 +487,28 @@ namespace Regolith
     }
     if ( newElement->hasInput() )
     {
-      _inputElements.push_back( newElement );
       newElement->registerActions( inputHandler() );
     }
     if ( newElement->hasCollision() )
     {
       _collisionElements[ newElement->getTeam() ].push_back( newElement );
     }
+    if ( newElement->hasSound() )
+    {
+      newElement->registerSounds( audioHandler() );
+    }
 
   }
 
 
-  void Scene::spawnAt( unsigned int id, Vector vec )
+  void Scene::spawn( unsigned int id, Vector vec )
   {
-    Drawable* newElement = _resources[id]->cloneAt( vec );
+    Manager* man = Manager::getInstance();
+
+    Drawable* newElement = man->spawn( id, vec );
     _sceneElements.push_back( newElement );
 
-    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam() << ", at: " << vec;
+    INFO_STREAM << "Spawning scene resource, Team: " << newElement->getTeam() << ", at: " << vec;
 
     if ( newElement->hasAnimation() )
     {
@@ -687,39 +516,40 @@ namespace Regolith
     }
     if ( newElement->hasInput() )
     {
-      _inputElements.push_back( newElement );
       newElement->registerActions( inputHandler() );
     }
     if ( newElement->hasCollision() )
     {
       _collisionElements[ newElement->getTeam() ].push_back( newElement );
     }
-
+    if ( newElement->hasSound() )
+    {
+      newElement->registerSounds( audioHandler() );
+    }
   }
 
 
-  Drawable* Scene::spawnReturn( unsigned int id, Vector vec )
+  void Scene::addSpawned( Drawable* object )
   {
-    Drawable* newElement = _resources[id]->cloneAt( vec );
-    INFO_STREAM << "Spawning resource, Team: " << newElement->getTeam() << ", at: " << vec;
+    INFO_STREAM << "Adding existing object, Team: " << object->getTeam();
 
-    if ( newElement->hasAnimation() )
+    if ( object->hasAnimation() )
     {
-      _animatedElements.push_back( newElement );
+      _animatedElements.push_back( object );
     }
-    if ( newElement->hasInput() )
+    if ( object->hasInput() )
     {
-      _inputElements.push_back( newElement );
-      newElement->registerActions( inputHandler() );
+      object->registerActions( inputHandler() );
     }
-    if ( newElement->hasCollision() )
+    if ( object->hasCollision() )
     {
-      _collisionElements[ newElement->getTeam() ].push_back( newElement );
+      _collisionElements[ object->getTeam() ].push_back( object );
     }
-
-    return newElement;
+    if ( object->hasSound() )
+    {
+      object->registerSounds( audioHandler() );
+    }
   }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Miscellaneous scene events
@@ -770,6 +600,7 @@ namespace Regolith
 
   void Scene::eventAction( const RegolithEvent& regolith_event, const SDL_Event& )
   {
+    static Manager* man = Manager::getInstance();
     switch ( regolith_event )
     {
       case REGOLITH_EVENT_QUIT :
@@ -800,7 +631,7 @@ namespace Regolith
         break;
 
       case REGOLITH_EVENT_CAMERA_RESIZE :
-        Camera::updateScale( _theWindow->getWidth(), _theWindow->getHeight() );
+        Camera::updateScale( man->getWindowPointer()->getWidth(), man->getWindowPointer()->getHeight() );
         break;
 
       default:

@@ -8,8 +8,7 @@
 namespace Regolith
 {
 
-  Dialog::Dialog( Scene* scene, Camera* camera, Json::Value& json_data ) :
-    _owner( scene ),
+  Dialog::Dialog( Camera* camera, Json::Value& json_data ) :
     _cameraHUD( camera ),
     _name(),
     _subDialogs("sub_dialogs"),
@@ -23,6 +22,8 @@ namespace Regolith
 
   void Dialog::loadFromJson( Json::Value& json_data )
   {
+    Manager* man = Manager::getInstance();
+
     Utilities::validateJson( json_data, "elements", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
 
@@ -38,7 +39,7 @@ namespace Regolith
         INFO_LOG( "Building the dialog background" );
         Json::Value& background_data = json_data["background"];
         Utilities::validateJson( background_data, "resource_name", Utilities::JSON_TYPE_STRING );
-        _background = _owner->findResource( background_data["resource_name"].asString() )->clone();
+        _background = man->spawn( background_data["resource_name"].asString(), Vector( 0, 0 ) );
 
         Utilities::jsonProcessPosition( background_data, _background, _cameraHUD );
 
@@ -63,7 +64,7 @@ namespace Regolith
           Utilities::validateJson( dialogs[i], "name", Utilities::JSON_TYPE_STRING );
           std::string dialog_name = dialogs[i]["name"].asString();
 
-          _subDialogs.addObject( new Dialog( _owner, _cameraHUD, dialogs[i] ), dialog_name );
+          _subDialogs.addObject( new Dialog( _cameraHUD, dialogs[i] ), dialog_name );
         }
         INFO_STREAM << "Loaded " << dialogs_size << " children";
       }
@@ -82,7 +83,7 @@ namespace Regolith
         INFO_STREAM << "Loading resource : " << resource_name;
 
         // Determine the ID number and spawn the element
-        Drawable* newElement = _owner->findResource( resource_name );
+        Drawable* newElement = man->spawn( resource_name );
         Utilities::jsonProcessPosition( elements[i], newElement, _cameraHUD );
         _elements.push_back( newElement );
         INFO_LOG( "Resource loaded." );
@@ -268,7 +269,7 @@ namespace Regolith
 //  }
 
 
-  void Dialog::vectorAction( const InputAction& action, const Vector& vector )
+  void Dialog::vectorAction( const InputAction&, const Vector& )
   {
   }
 

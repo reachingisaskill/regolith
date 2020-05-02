@@ -52,6 +52,16 @@ namespace Regolith
   };
 
 
+  enum DefaultTeams : unsigned char
+  {
+    DEFAULT_TEAM_HUD = 0,
+    DEFAULT_TEAM_ENVIRONMENT = 1,
+    DEFAULT_TEAM_NPC = 2,
+    DEFAULT_TEAM_PLAYER = 3,
+    DEFAULT_TEAM_ENEMIES = 4,
+    DEFAULT_TEAM_MAX = 255
+  };
+
 //////////////////////////////////////////////////
   // Event enumerations
 

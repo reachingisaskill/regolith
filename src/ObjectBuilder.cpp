@@ -43,12 +43,6 @@ namespace Regolith
   }
 
 
-  void ObjectBuilder::setScene( const Scene* scene )
-  {
-    _theScene = scene;
-  }
-
-
   void ObjectBuilder::addFactory( ObjectFactory_base* factory )
   {
     std::string name( factory->getObjectName() );

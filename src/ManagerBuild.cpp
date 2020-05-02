@@ -92,6 +92,10 @@ namespace Regolith
 
 
       // Load all the texture files
+      this->_loadResources( json_data["resources"] );
+
+
+      // Load all the texture files
       this->_loadStory( json_data["story"] );
 
     }
@@ -342,6 +346,39 @@ namespace Regolith
   }
 
 
+  void Manager::_loadResources( Json::Value& resources )
+  {
+    INFO_LOG( "Loading resource objects" );
+    Json::ArrayIndex resources_size = resources.size();
+    for ( Json::ArrayIndex i = 0; i != resources_size; ++i )
+    {
+      Utilities::validateJson( resources[i], "resource_name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( resources[i], "resource_type", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( resources[i], "team_name", Utilities::JSON_TYPE_STRING );
+
+      std::string resource_name = resources[i]["resource_name"].asString();
+      std::string resource_type = resources[i]["resource_type"].asString();
+      std::string team_name = resources[i]["team_name"].asString();
+
+      DEBUG_STREAM << "  Building resource: " << resource_name << " as " << resource_type << " for team: " << team_name;
+
+      Drawable* newResource =  _theBuilder->build( resources[i] );
+      _resources.addObject( newResource, resource_name );
+
+      // See if its already been used.
+      if ( _teamNames.find( team_name ) == _teamNames.end() )
+      {
+        // Create it otherwise
+        _teamNames[ team_name ] = _teamNames.size();
+      }
+
+      DEBUG_LOG( "Setting team name" );
+      int team_id = _teamNames[ team_name ];
+      newResource->setTeam( team_id );
+    }
+  }
+
+
   void Manager::_loadStory( Json::Value& json_data )
   {
     Utilities::validateJson( json_data, "scenes", Utilities::JSON_TYPE_ARRAY );
@@ -352,7 +389,6 @@ namespace Regolith
     for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
     {
       Scene* new_scene = _theSceneBuilder->build( scene_data[i] );
-      new_scene->configure( _theRenderer, _theWindow, _theBuilder );
       new_scene->registerEvents( _theInput );
       _scenes.push_back( new_scene );
     }

@@ -22,10 +22,8 @@ int main( int, char** )
 
   try
   {
+    man->getObjectBuilder()->addFactory( new TestPlayerFactory() );
     man->init( test_config );
-
-    ObjectBuilder* builder = man->getObjectBuilder();
-    builder->addFactory( new TestPlayerFactory() );
 
     INFO_LOG( "Starting rendering loop" );
     Scene* the_scene = man->loadScene( 0 );

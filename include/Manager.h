@@ -25,9 +25,11 @@ namespace Regolith
   class Context;
 
   // Useful typedefs
+  typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::vector< Scene* > SceneList;
   typedef std::map< std::string, TTF_Font* > FontMap;
   typedef std::deque< Context* > ContextStack;
+  typedef std::map< std::string, unsigned int > TeamNameMap;
 
 
   // Manager class
@@ -50,6 +52,8 @@ namespace Regolith
       SceneBuilder* _theSceneBuilder;
 
       RawTextureMap _rawTextures;
+      TeamNameMap _teamNames;
+      NamedVector<Drawable, true> _resources;
 
       SceneList _scenes;
 
@@ -78,6 +82,8 @@ namespace Regolith
       void _loadWindow( Json::Value& );
       // Load all the texture files
       void _loadTextures( Json::Value& );
+      // Load all the resources
+      void _loadResources( Json::Value& );
       // Load the story
       void _loadStory( Json::Value& );
 
@@ -149,6 +155,24 @@ namespace Regolith
 
       // Return a raw texture container with the given name
       RawTexture findRawTexture( std::string ) const;
+
+      // Return the number of teams
+      size_t getNumberTeams() const { return _teamNames.size(); }
+
+      // Return the team ID for a given name
+      unsigned int getTeamID( std::string name ) { return _teamNames[name]; }
+
+      // Return a pointer to a given resource
+      Drawable* getResource( std::string name ) { return _resources.getByName( name ); }
+
+      // Return a pointer to a given resource
+      Drawable* getResource( unsigned int i ) { return _resources[i]; }
+
+      // Spawn a new instance of a resource and return the memory to the caller
+      Drawable* spawn( std::string name, Vector pos = Vector(0.0) ) { return _resources.getByName( name )->cloneAt( pos ); }
+
+      // Spawn a new instance of a resource and return the memory to the caller
+      Drawable* spawn( unsigned int i, Vector pos ) { return _resources[i]->cloneAt( pos ); }
 
 
       ////////////////////////////////////////////////////////////////////////////////

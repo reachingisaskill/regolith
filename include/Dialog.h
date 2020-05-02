@@ -37,7 +37,6 @@ namespace Regolith
     Dialog& operator=( const Dialog& ) = delete;
 
     private:
-      Scene* _owner;
       Camera* _cameraHUD;
       std::string _name;
       NamedVector<Dialog, true> _subDialogs;
@@ -60,7 +59,7 @@ namespace Regolith
 
     public:
       // Scene pointer, camera pointer, json object containing this dialog
-      Dialog( Scene*, Camera*, Json::Value& );
+      Dialog( Camera*, Json::Value& );
 
       // Destruct all the owned memory
       virtual ~Dialog();

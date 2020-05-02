@@ -20,43 +20,35 @@
 namespace Regolith
 {
 
-  typedef std::map< std::string, RawTexture > RawTextureMap;
-  typedef std::vector< Drawable* > ResourceList;
-  typedef std::map< std::string, unsigned int > ResourceNameMap;
-  typedef std::map< std::string, unsigned int > TeamNameMap;
 
-  typedef std::vector< Drawable* > ElementList;
+  // Useful Typedefs
+  typedef std::list< Drawable* > ElementList;
+  typedef std::vector< Drawable* > ElementVector;
   typedef std::vector< ElementList > TeamsList;
 
 
   class Scene : public Context
   {
     private:
-      // Scene owns the memory for the texture data
-      NamedVector<Drawable, true> _resources;
-      TeamNameMap _teamNames;
-      bool _paused;
-
-      // Key components for building elements and rendering
-      Window* _theWindow;
-      SDL_Renderer* _theRenderer;
-      ObjectBuilder* _theBuilder;
+      // Scene state information
       std::string _sceneFile;
+      bool _paused;
       Dialog* _pauseMenu;
       int _defaultMusic;
 
       // Containers storing drawable objects - the scene and the hud elements
-      // All memory is owned by the resource list above
+      // All memory is owned by Scene
       Drawable* _background;
       ElementList _sceneElements;
       ElementList _hudElements;
+
+      // Daughter contexts
       NamedVector<Dialog, true> _dialogWindows;
 
       // Can be change to accelerator structures in the future
       // These do not own their memory. They are shortcut lists
       TeamsList _collisionElements;
       ElementList _animatedElements;
-      ElementList _inputElements;
 
       // Cameras for rendering
       Camera* _theCamera;
@@ -77,9 +69,6 @@ namespace Regolith
       virtual void onQuit() {}
 
 
-      // Build the whole scene from a json file description
-      void buildFromJson();
-
       // Function to parse the json document
       Json::Value _loadConfig();
 
@@ -88,9 +77,6 @@ namespace Regolith
 
       // Function to load all the sound files
       void _loadSounds( Json::Value& );
-
-      // Function to build all the resources
-      void _loadResources( Json::Value& );
 
       // Function to build all the caches/acceleration structures
       void _loadCaches( Json::Value& );
@@ -137,17 +123,12 @@ namespace Regolith
       void start() { this->onStart(); }
 
 
-      // Configure the info required to build the scene
-      void configure( SDL_Renderer*, Window*, ObjectBuilder* );
-
       // Load the scene from the specified file
       void load();
 
+
       // Return a copy of the scene file
       std::string getSceneFile() { return _sceneFile; }
-
-      // Return a pointer to the object builder
-      ObjectBuilder* getBuilder() { return _theBuilder; }
 
 
       // Pause logic
@@ -173,29 +154,23 @@ namespace Regolith
       virtual Camera* getHUD() { return _theHUD; }
 
 
-      // Look up the id number for a given resource
-      unsigned int findResourceID( std::string name ) const { return _resources.getID( name ); }
-
-      // Return a pointer to a specific resource
-      Drawable* findResource( unsigned int n ) { return _resources[ n ]; }
-      Drawable* findResource( std::string name ) { return _resources.getByName( name ); }
-
-
-      // Spawn an object with the supplied ID number at the default position in the Scene
-      void spawn( unsigned int );
+      //////////////////////////////////////////////////
+      // Spawning functions to fill the environment/hud
 
       // Spawn an object with the supplied ID number at the supplied position in the scene
-      void spawnAt( unsigned int, Vector );
+      void spawn( std::string, Vector );
+
+      // Spawn an object with the supplied ID number at the supplied position in the scene
+      void spawn( unsigned int, Vector );
+
+      // Spawn an object with the supplied ID number at the supplied position in the HUD
+      void spawnHUD( std::string, Vector );
 
       // Spawn an object with the supplied ID number at the supplied position in the HUD
       void spawnHUD( unsigned int, Vector );
 
-      // Spawn an object with the supplied ID number at the supplied position in the HUD
-      void spawnHUD( unsigned int, Json::Value& );
-
-      // Spawn an object with the supplied ID number at the supplied position, and return the pointer
-      // THIS FUNCTION RETURNS OWNSHIP OF THIS MEMORY!
-      Drawable* spawnReturn( unsigned int, Vector );
+      // Add an object to the caches that is owned by another class.
+      void addSpawned( Drawable* );
 
 
       //////////////////////////////////////////////////
