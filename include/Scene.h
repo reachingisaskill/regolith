@@ -33,7 +33,6 @@ namespace Regolith
   {
     private:
       // Scene owns the memory for the texture data
-      RawTextureMap _rawTextures;
       NamedVector<Drawable, true> _resources;
       TeamNameMap _teamNames;
       bool _paused;
@@ -78,10 +77,6 @@ namespace Regolith
       virtual void onQuit() {}
 
 
-      // Helper functions to build and store the raw texture files
-      void _addTextureFromFile( Json::Value& );
-      void _addTextureFromText( Json::Value& );
-
       // Build the whole scene from a json file description
       void buildFromJson();
 
@@ -90,9 +85,6 @@ namespace Regolith
 
       // Function to load the input configuration
       void _loadInput( Json::Value& );
-
-      // Function to load all the raw texture files
-      void _loadTextures( Json::Value& );
 
       // Function to load all the sound files
       void _loadSounds( Json::Value& );
@@ -180,9 +172,6 @@ namespace Regolith
       // Return the camera for the HUD
       virtual Camera* getHUD() { return _theHUD; }
 
-
-      // Return a pointer to a raw texture object
-      RawTexture findRawTexture( std::string ) const;
 
       // Look up the id number for a given resource
       unsigned int findResourceID( std::string name ) const { return _resources.getID( name ); }

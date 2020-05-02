@@ -1,26 +1,24 @@
 {
-  "screen_width" : 1024,
-  "screen_height" : 768,
-  "default_colour" : [ 150, 150, 500, 255 ],
-  "default_font" : "default",
-  "title" : "Regolith Integration Test",
-
-  "scenes" :
-  [
-    {
-      "file_name" : "test_data/test_scene.json",
-      "type" : "platformer"
-    }
-  ],
+  "window" :
+  {
+    "screen_width" : 1024,
+    "screen_height" : 768,
+    "default_colour" : [ 150, 150, 500, 255 ],
+    "title" : "Regolith Integration Test"
+  },
 
   "fonts" :
-  [
-    {
-      "name" : "default",
-      "path" : "test_data/test_font.ttf",
-      "size" : 28
-    }
-  ],
+  {
+    "default_font" : "default",
+    "font_list" :
+    [
+      {
+        "name" : "default",
+        "path" : "test_data/test_font.ttf",
+        "size" : 28
+      }
+    ]
+  },
 
   "input_device" :
   {
@@ -67,6 +65,58 @@
         "path" : "test_data/test_thud.wav"
       }
     ]
+  },
+
+  "textures" :
+  {
+    "texture_files" :
+    [
+      {
+        "name" : "background_texture",
+        "path" : "test_data/test_background.png"
+      },
+      {
+        "name" : "dot_texture",
+        "path" : "test_data/test_ball.png",
+        "colour_key" : [ 0, 255, 255 ]
+      },
+      {
+        "name" : "ground_texture",
+        "path" : "test_data/test_ground.png"
+      },
+      {
+        "name" : "spritesheet_test",
+        "path" : "test_data/test_spritesheet.png",
+        "colour_key" : [ 255, 255, 255 ]
+      }
+    ],
+    "texture_strings" :
+    [
+      {
+        "name" : "header_text",
+        "text" : "Press Return to toggle fullscreen",
+        "colour" : [ 0, 0, 0, 255 ],
+        "font" : "default"
+      },
+      {
+        "name" : "pause_text",
+        "text" : "Press \"p\" to unpause",
+        "colour" : [ 0, 0, 0, 255 ],
+        "font" : "default"
+      }
+    ]
+  },
+
+  "story" :
+  {
+    "scenes" :
+    [
+      {
+        "file_name" : "test_data/test_scene.json",
+        "type" : "platformer"
+      }
+    ]
   }
+
 }
 

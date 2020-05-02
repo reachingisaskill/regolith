@@ -5,10 +5,7 @@
 #include "Definitions.h"
 #include "Drawable.h"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
-#include <SDL2/SDL_ttf.h>
-
+#include <json/json.h>
 #include <iostream>
 #include <string>
 
@@ -32,6 +29,8 @@ namespace Regolith
   // Useful functions
 
   RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );
+  RawTexture makeTextureFromText( Json::Value& );
+  RawTexture makeTextureFromFile( Json::Value& );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Texture class. The simplest object of renderable data.

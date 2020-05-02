@@ -44,11 +44,14 @@ namespace Regolith
       InputManager* _theInput;
       AudioManager* _theAudio;
       ContextStack _contexts;
+      FontMap _fonts;
 
       ObjectBuilder* _theBuilder;
       SceneBuilder* _theSceneBuilder;
+
+      RawTextureMap _rawTextures;
+
       SceneList _scenes;
-      FontMap _fonts;
 
       std::string _title;
       TTF_Font* _defaultFont;
@@ -67,12 +70,20 @@ namespace Regolith
 
       // Load the input device configuration
       void _loadInput( Json::Value& );
-
       // Load the input device configuration
       void _loadAudio( Json::Value& );
+      // Load the required fonts
+      void _loadFonts( Json::Value& );
+      // Configure the window
+      void _loadWindow( Json::Value& );
+      // Load all the texture files
+      void _loadTextures( Json::Value& );
+      // Load the story
+      void _loadStory( Json::Value& );
 
     public:
       virtual ~Manager();
+
 
       // Initialise the manager class from the configuration file
       void init( std::string );
@@ -81,6 +92,9 @@ namespace Regolith
       // Load the first scene into the engine and give it control
       void run();
 
+
+      ////////////////////////////////////////////////////////////////////////////////
+      // Get the pointers to various managers and builders
 
       // Return a pointer to the texture builder
       ObjectBuilder* getObjectBuilder() { return _theBuilder; }
@@ -107,6 +121,8 @@ namespace Regolith
       AudioManager* getAudioManager() { return _theAudio; }
 
 
+      ////////////////////////////////////////////////////////////////////////////////
+      // Scene Memory
 
       // Return a pointer to the required scene
       Scene* getScene( size_t );
@@ -118,6 +134,8 @@ namespace Regolith
       size_t getNumberScenes() { return _scenes.size(); }
 
 
+      ////////////////////////////////////////////////////////////////////////////////
+      // Access Fonts
 
       // Return the default font
       TTF_Font* getDefaultFont() { return _defaultFont; }
@@ -126,6 +144,15 @@ namespace Regolith
       SDL_Color getDefaultColour() { return _defaultColor; }
 
 
+      ////////////////////////////////////////////////////////////////////////////////
+      // Texture and resource access functionality
+
+      // Return a raw texture container with the given name
+      RawTexture findRawTexture( std::string ) const;
+
+
+      ////////////////////////////////////////////////////////////////////////////////
+      // User Event functions
 
       // Configure the list of user events for game events
       void configureEvents();
@@ -134,6 +161,8 @@ namespace Regolith
       void raiseEvent( RegolithEvent );
 
 
+      ////////////////////////////////////////////////////////////////////////////////
+      // Context stact manipulation
 
       // Set the current context pointer
       void pushContext( Context* c ) { _contexts.push_front( c ); }
@@ -148,6 +177,8 @@ namespace Regolith
       Context* currentContext() { return _contexts.front(); }
 
 
+      ////////////////////////////////////////////////////////////////////////////////
+      // Global Physics functions
 
       // Return the constant g
       inline Vector getGravity() { return _gravityConst; }

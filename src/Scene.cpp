@@ -16,7 +16,6 @@ namespace Regolith
 
 
   Scene::Scene( std::string json_file ) :
-    _rawTextures(),
     _resources("resources"),
     _teamNames(),
     _paused( false ),
@@ -87,14 +86,6 @@ namespace Regolith
 
     INFO_LOG( "Clearing name lookups" );
     _teamNames.clear();
-
-
-    INFO_LOG( "Deleting raw texture data" );
-    for ( RawTextureMap::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
-    {
-      SDL_DestroyTexture( it->second.texture );
-    }
-    _rawTextures.clear();
   }
 
 
@@ -143,36 +134,6 @@ namespace Regolith
     catch ( std::runtime_error& rt )
     {
       Exception ex( "Scene::_loadConfig()", "Json parsing failure" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
-      throw ex;
-    }
-  }
-
-
-  void Scene::_loadTextures( Json::Value& json_data )
-  {
-    try
-    {
-      // Load and cache the individual texture files
-      Json::Value texture_files = json_data["texture_files"];
-      Json::ArrayIndex texture_files_size = texture_files.size();
-      for ( Json::ArrayIndex i = 0; i != texture_files_size; ++i )
-      {
-        _addTextureFromFile( texture_files[i] );
-      }
-
-      // Load and cache the individual text textures
-      Json::Value texture_strings = json_data["texture_strings"];
-      Json::ArrayIndex texture_strings_size = texture_strings.size();
-      for ( Json::ArrayIndex i = 0; i != texture_strings_size; ++i )
-      {
-        _addTextureFromText( texture_strings[i] );
-      }
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Scene::_loadTextures()", "Json reading failure - loading textures" );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
@@ -491,16 +452,6 @@ namespace Regolith
 
     Json::Value json_data = this->_loadConfig();
 
-    if ( ! json_data.isMember( "textures" ) )
-    {
-      FAILURE_LOG( "Could not find texture list in json data file" );
-      Exception ex( "Scene::_buildFromJson()", "No texture member found in Json Data", false);
-      ex.addDetail( "File name", _sceneFile );
-      throw ex;
-    }
-    INFO_LOG( "Loading textures" );
-    this->_loadTextures( json_data["textures"] );
-
     if ( ! json_data.isMember( "sounds" ) )
     {
       FAILURE_LOG( "Could not find sounds list in json data file" );
@@ -568,117 +519,6 @@ namespace Regolith
     this->registerActions( inputHandler() );
 
     INFO_LOG( "Scene Successfuly Built" );
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Texture Creation helper functions
-
-  void Scene::_addTextureFromFile( Json::Value& json_data )
-  {
-
-    std::string name = json_data["name"].asString();
-    std::string path = json_data["path"].asString();
-
-    // Load the image into a surface
-    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
-    if ( loadedSurface == nullptr )
-    {
-      Exception ex( "Scene::addTextureFromFile()", "Could not load image data", false );
-      ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL_img error", IMG_GetError() );
-      throw ex;
-    }
-
-    // If there is a colour key, apply it
-    if ( json_data.isMember("colour_key") )
-    {
-      int key_red = json_data["colour_key"][0].asInt();
-      int key_green = json_data["colour_key"][1].asInt();
-      int key_blue = json_data["colour_key"][2].asInt();
-      SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key_red, key_green, key_blue ) );
-    }
-
-    // Create SDL_Texture
-    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( _theRenderer, loadedSurface );
-    if ( loadedTexture == nullptr )
-    {
-      SDL_FreeSurface( loadedSurface );
-      Exception ex( "Scene::addTextureFromFile()", "Could not convert to texture", false );
-      ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL error", SDL_GetError() );
-      throw ex;
-    }
-
-    RawTexture theTexture = { loadedTexture, loadedSurface->w, loadedSurface->h };
-    _rawTextures[name] = theTexture;
-
-    SDL_FreeSurface( loadedSurface );
-  }
-
-
-  void Scene::_addTextureFromText( Json::Value& json_data )
-  {
-    Manager* man = Manager::getInstance();
-
-    std::string name = json_data["name"].asString();
-    std::string text_string = json_data["text"].asString();
-    INFO_STREAM << "Creating and loaded text texture. Name: " << name;
-
-    // Define the text colour
-    SDL_Color color;
-    if ( json_data.isMember( "colour" ) )
-    {
-      color.r = json_data["colour"][0].asInt();
-      color.g = json_data["colour"][1].asInt();
-      color.b = json_data["colour"][2].asInt();
-      color.a = json_data["colour"][3].asInt();
-    }
-    else
-    {
-      color = man->getDefaultColour();
-    }
-
-    // Find the specified font
-    TTF_Font* font = nullptr;
-    if ( json_data.isMember( "font" ) )
-    {
-      font = man->getFontPointer( json_data["font"].asString() );
-      INFO_STREAM << "Creating text using font: " << json_data["font"].asString();
-    }
-    else
-    {
-      font = man->getDefaultFont();
-      INFO_LOG( "Using default font" );
-    }
-
-    // Render the text as TTF
-    SDL_Surface* textSurface = TTF_RenderText_Solid( font, text_string.c_str(), color );
-    if ( textSurface == nullptr )
-    {
-      Exception ex( "Scene::_addTextureFromText()", "Could not render text", true );
-      ex.addDetail( "Text string", text_string );
-      ex.addDetail( "SDL_ttf error", TTF_GetError() );
-      throw ex;
-    }
-
-    // Create the texture from the surface
-    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( _theRenderer, textSurface );
-    if ( loadedTexture == nullptr )
-    {
-      // Remove before we throw
-      SDL_FreeSurface( textSurface );
-      // Throw the exception
-      Exception ex( "Scene::_addTextureFromText()", "Could not convert to texture", true );
-      ex.addDetail( "Text string", text_string );
-      ex.addDetail( "SDL_ttf error", TTF_GetError() );
-      throw ex;
-    }
-
-    RawTexture theTexture = { loadedTexture, textSurface->w, textSurface->h };
-    _rawTextures[name] = theTexture;
-
-    SDL_FreeSurface( textSurface );
   }
 
 
@@ -762,24 +602,6 @@ namespace Regolith
 
     // Resolve the derived class specific collisions
     this->_resolveCollisions();
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Return existing texture pointer
-
-  RawTexture Scene::findRawTexture( std::string name ) const
-  {
-    RawTextureMap::const_iterator found = _rawTextures.find( name );
-    if ( found == _rawTextures.end() )
-    {
-      ERROR_STREAM << "Failed to find raw texture with name: " << name;
-      Exception ex( "Scene::findRawTexture()", "Could not find raw texture", true );
-      ex.addDetail( "Texture name", name );
-      throw ex;
-    }
-
-    return found->second;
   }
 
 

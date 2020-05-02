@@ -27,7 +27,7 @@ namespace Regolith
 
   RawTexture ObjectFactory_base::findRawTexture( std::string name ) const
   {
-    return _parentBuilder->getScene()->findRawTexture( name );
+    return Manager::getInstance()->findRawTexture( name );
   }
 
 

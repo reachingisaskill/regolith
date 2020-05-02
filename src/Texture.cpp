@@ -1,10 +1,10 @@
-#define LOGTASTIC_DEBUG_OFF
+//#define LOGTASTIC_DEBUG_OFF
 
 #include "Texture.h"
-
 #include "Exception.h"
 #include "Camera.h"
 #include "Manager.h"
+#include "Utilities.h"
 
 #include "logtastic.h"
 
@@ -164,24 +164,125 @@ namespace Regolith
     SDL_Surface* textSurface = TTF_RenderText_Solid( font, textureString.c_str(), color );
     if ( textSurface == nullptr )
     {
-      std::cerr << "Could not create text surface. Error : " << TTF_GetError() << std::endl;
+      Exception ex( "Scene::_addTextureFromText()", "Could not render text", true );
+      ex.addDetail( "Text string", textureString );
+      ex.addDetail( "SDL_ttf error", TTF_GetError() );
+      throw ex;
+    }
+
+    // Create the texture from the surface
+    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
+    if ( loadedTexture == nullptr )
+    {
+      // Remove before we throw
+      SDL_FreeSurface( textSurface );
+      // Throw the exception
+      Exception ex( "Scene::_addTextureFromText()", "Could not convert to texture", true );
+      ex.addDetail( "Text string", textureString );
+      ex.addDetail( "SDL_ttf error", TTF_GetError() );
+      throw ex;
+    }
+
+    // Fill the RawTexture object
+    theTexture.texture = SDL_CreateTextureFromSurface( renderer, textSurface );
+    theTexture.width = textSurface->w;
+    theTexture.height = textSurface->h;
+
+    // Remove the unneeded surface
+    SDL_FreeSurface( textSurface );
+
+    return theTexture;
+  }
+
+
+  RawTexture makeTextureFromText( Json::Value& json_data )
+  {
+    Manager* man = Manager::getInstance();
+
+    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "text", Utilities::JSON_TYPE_STRING );
+
+    std::string name = json_data["name"].asString();
+    std::string text_string = json_data["text"].asString();
+    INFO_STREAM << "Creating and loaded text texture. Name: " << name;
+
+    // Define the text colour
+    SDL_Color color;
+    if ( Utilities::validateJson( json_data, "colour", Utilities::JSON_TYPE_ARRAY, false ) )
+    {
+      Utilities::validateJsonArray( json_data["colour"], 4, Utilities::JSON_TYPE_INTEGER );
+
+      color.r = json_data["colour"][0].asInt();
+      color.g = json_data["colour"][1].asInt();
+      color.b = json_data["colour"][2].asInt();
+      color.a = json_data["colour"][3].asInt();
     }
     else
     {
-      // Create the texture from the surface
-      theTexture.texture = SDL_CreateTextureFromSurface( renderer, textSurface );
-      if ( theTexture.texture == nullptr )
-      {
-        std::cerr << "Could not create texture from surface. Error : " << SDL_GetError() << std::endl;
-      }
-      else
-      {
-        theTexture.width = textSurface->w;
-        theTexture.height = textSurface->h;
-      }
-      // Remove the unneeded surface
-      SDL_FreeSurface( textSurface );
+      color = man->getDefaultColour();
     }
+
+    // Find the specified font
+    TTF_Font* font = nullptr;
+    if ( Utilities::validateJson( json_data, "font", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      font = man->getFontPointer( json_data["font"].asString() );
+      INFO_STREAM << "Creating text using font: " << json_data["font"].asString();
+    }
+    else
+    {
+      font = man->getDefaultFont();
+      INFO_LOG( "Using default font" );
+    }
+
+    return makeTextureFromText( font, text_string, color );
+  }
+
+
+  RawTexture makeTextureFromFile( Json::Value& json_data )
+  {
+    Manager* man = Manager::getInstance();
+
+    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "path", Utilities::JSON_TYPE_STRING );
+
+    std::string name = json_data["name"].asString();
+    std::string path = json_data["path"].asString();
+
+    INFO_STREAM << "Creating and loading image texture. Name: " << name;
+
+    // Load the image into a surface
+    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
+    if ( loadedSurface == nullptr )
+    {
+      Exception ex( "Scene::addTextureFromFile()", "Could not load image data", false );
+      ex.addDetail( "Image path", path );
+      ex.addDetail( "SDL_img error", IMG_GetError() );
+      throw ex;
+    }
+
+    // If there is a colour key, apply it
+    if ( json_data.isMember("colour_key") )
+    {
+      int key_red = json_data["colour_key"][0].asInt();
+      int key_green = json_data["colour_key"][1].asInt();
+      int key_blue = json_data["colour_key"][2].asInt();
+      SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key_red, key_green, key_blue ) );
+    }
+
+    // Create SDL_Texture
+    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( man->getRendererPointer(), loadedSurface );
+    if ( loadedTexture == nullptr )
+    {
+      SDL_FreeSurface( loadedSurface );
+      Exception ex( "Scene::addTextureFromFile()", "Could not convert to texture", false );
+      ex.addDetail( "Image path", path );
+      ex.addDetail( "SDL error", SDL_GetError() );
+      throw ex;
+    }
+
+    RawTexture theTexture = { loadedTexture, loadedSurface->w, loadedSurface->h };
+    SDL_FreeSurface( loadedSurface );
 
     return theTexture;
   }
