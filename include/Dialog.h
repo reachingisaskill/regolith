@@ -38,9 +38,9 @@ namespace Regolith
 
     private:
       Scene* _owner;
-      Camera* _HUDCamera;
+      Camera* _cameraHUD;
       std::string _name;
-      NamedVector<Dialog> _subDialogs;
+      NamedVector<Dialog, true> _subDialogs;
 
       // Options
       bool _canCancel;

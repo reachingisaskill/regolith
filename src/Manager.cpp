@@ -302,29 +302,33 @@ namespace Regolith
     try
     {
       INFO_LOG( "Configuring the audio manager" );
+      Utilities::validateJson( json_data, "sample_frequency", Utilities::JSON_TYPE_INTEGER );
+      Utilities::validateJson( json_data, "audio_channels", Utilities::JSON_TYPE_INTEGER );
+      Utilities::validateJson( json_data, "chunk_size", Utilities::JSON_TYPE_INTEGER );
+      Utilities::validateJson( json_data, "music_volume", Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( json_data, "effect_volume", Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( json_data, "music_files", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "effect_files", Utilities::JSON_TYPE_ARRAY );
 
-      _theAudio = new AudioManager( 22050, 2, 1024 );
+      int sample_freq = json_data["sample_frequency"].asInt();
+      int audio_channels = json_data["audio_channels"].asInt();
+      int chunk_size = json_data["chunk_size"].asInt();
+      float music_volume = json_data["music_volume"].asFloat();
+      float effect_volume = json_data["effect_volume"].asFloat();
 
-      if ( Utilities::validateJson( json_data, "music_volume", Utilities::JSON_TYPE_FLOAT, false ) )
-      {
-        _theAudio->setVolumeMusic( json_data["music_volume"].asFloat() );
-      }
+      // Create the audio handler
+      _theAudio = new AudioManager( sample_freq, audio_channels, chunk_size );
 
-      if ( Utilities::validateJson( json_data, "effect_volume", Utilities::JSON_TYPE_FLOAT, false ) )
-      {
-        _theAudio->setVolumeEffects( json_data["effect_volume"].asFloat() );
-      }
+      // Set the volumes
+      _theAudio->setVolumeMusic( music_volume );
+      _theAudio->setVolumeEffects( effect_volume );
 
-      INFO_LOG( "Loading music files" );
+      // Load the music & effect files
+      INFO_LOG( "Loading sound files" );
       Json::Value music_files = json_data["music_files"];
-      Json::ArrayIndex music_files_size = music_files.size();
-      for ( Json::ArrayIndex i = 0; i != music_files_size; ++i )
-      {
-        _theAudio->addMusic( music_files[i] );
-      }
+      Json::Value effect_files = json_data["effect_files"];
 
-
+      _theAudio->configure( music_files, effect_files );
     }
     catch ( std::runtime_error& rt )
     {

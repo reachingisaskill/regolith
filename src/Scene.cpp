@@ -69,7 +69,7 @@ namespace Regolith
     _sceneElements.clear();
 
     INFO_LOG( "Deleting dialog windows" );
-    _dialogWindows.deletePointers();
+    _dialogWindows.clear();
 
     INFO_LOG( "Deleting the background" );
     delete _background;
@@ -83,7 +83,7 @@ namespace Regolith
     _theHUD = nullptr;
 
     INFO_LOG( "Deleting the resources" );
-    _resources.deletePointers();
+    _resources.clear();
 
     INFO_LOG( "Clearing name lookups" );
     _teamNames.clear();
@@ -172,7 +172,7 @@ namespace Regolith
     }
     catch ( std::runtime_error& rt )
     {
-      Exception ex( "Scene::_loadTextures()", "Json reading failure - building cache" );
+      Exception ex( "Scene::_loadTextures()", "Json reading failure - loading textures" );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;
@@ -184,31 +184,15 @@ namespace Regolith
   {
     try
     {
-      // Perform validation
-      Utilities::validateJson( json_data, "sound_files", Utilities::JSON_TYPE_ARRAY );
-
-      INFO_LOG( "Loading sound effect files" );
-      Json::Value effect_files = json_data["sound_files"];
-      Json::ArrayIndex effect_files_size = effect_files.size();
-      for ( Json::ArrayIndex i = 0; i != effect_files_size; ++i )
-      {
-        audioHandler()->addEffect( effect_files[i] );
-      }
-
-
       if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
       {
         std::string name = json_data["default_music"].asString();
         _defaultMusic = audioHandler()->getMusicID( name );
       }
-
-
-      // Final configuration
-      audioHandler()->configure();
     }
     catch ( std::runtime_error& rt )
     {
-      Exception ex( "Scene::_loadTextures()", "Json reading failure - building cache" );
+      Exception ex( "Scene::_loadSounds()", "Json reading failure - loading sound configuration" );
       ex.addDetail( "File name", _sceneFile );
       ex.addDetail( "What", rt.what() );
       throw ex;

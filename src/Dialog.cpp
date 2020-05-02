@@ -10,7 +10,7 @@ namespace Regolith
 
   Dialog::Dialog( Scene* scene, Camera* camera, Json::Value& json_data ) :
     _owner( scene ),
-    _HUDCamera( camera ),
+    _cameraHUD( camera ),
     _name(),
     _subDialogs("sub_dialogs"),
     _elements(),
@@ -40,7 +40,7 @@ namespace Regolith
         Utilities::validateJson( background_data, "resource_name", Utilities::JSON_TYPE_STRING );
         _background = _owner->findResource( background_data["resource_name"].asString() )->clone();
 
-        Utilities::jsonProcessPosition( background_data, _background, _HUDCamera );
+        Utilities::jsonProcessPosition( background_data, _background, _cameraHUD );
 
         if ( _background->hasAnimation() )
         {
@@ -63,7 +63,7 @@ namespace Regolith
           Utilities::validateJson( dialogs[i], "name", Utilities::JSON_TYPE_STRING );
           std::string dialog_name = dialogs[i]["name"].asString();
 
-          _subDialogs.addObject( new Dialog( _owner, _HUDCamera, dialogs[i] ), dialog_name );
+          _subDialogs.addObject( new Dialog( _owner, _cameraHUD, dialogs[i] ), dialog_name );
         }
         INFO_STREAM << "Loaded " << dialogs_size << " children";
       }
@@ -83,7 +83,7 @@ namespace Regolith
 
         // Determine the ID number and spawn the element
         Drawable* newElement = _owner->findResource( resource_name );
-        Utilities::jsonProcessPosition( elements[i], newElement, _HUDCamera );
+        Utilities::jsonProcessPosition( elements[i], newElement, _cameraHUD );
         _elements.push_back( newElement );
         INFO_LOG( "Resource loaded." );
   
@@ -151,6 +151,9 @@ namespace Regolith
 
   Dialog::~Dialog()
   {
+    // Delete the subDialogs
+    _subDialogs.clear();
+
     // Clear the caches
     _animated.clear();
     _buttons.clear();
@@ -185,13 +188,13 @@ namespace Regolith
     DEBUG_LOG( "Rendering Dialog" );
     // First draw the background
     if ( _background != nullptr )
-      _background->render( _HUDCamera );
+      _background->render( _cameraHUD );
 
     // Render each element in the element list
     ElementList::iterator end = _elements.end();
     for ( ElementList::iterator it = _elements.begin(); it != end; ++it )
     {
-      (*it)->render( _HUDCamera );
+      (*it)->render( _cameraHUD );
     }
   }
 

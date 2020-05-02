@@ -27,7 +27,8 @@ namespace Regolith
     _chunkSize( chun ),
     _fadeTime( 2000 ),
     _playbackChannelCounter( 0 ),
-    _musics( "music_files", false ),
+    _musics( "music_files" ),
+    _effects( "chunk_files" ),
     _volumeMusic( 1.0 ), // Defaults to full volume
     _volumeChunk( 1.0 ) // Defaults to full volume
   {
@@ -58,6 +59,15 @@ namespace Regolith
     {
       Mix_FreeMusic( _musics[i] );
     }
+    _musics.clear();
+
+    // free all the chunks
+    for ( unsigned int i = 0; i < _effects.size(); ++i )
+    {
+      Mix_FreeChunk( _effects[i] );
+    }
+    _effects.clear();
+
 
     Mix_CloseAudio();
   }
@@ -86,6 +96,65 @@ namespace Regolith
     }
 
     _musics.addObject( new_music, name );
+  }
+
+
+  void AudioManager::addEffect( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "path", Utilities::JSON_TYPE_STRING );
+
+    std::string name = json_data["name"].asString();
+    std::string path = json_data["path"].asString();
+
+    Mix_Chunk* new_chunk = Mix_LoadWAV( path.c_str() );
+
+    if ( new_chunk == nullptr )
+    {
+      std::string error = Mix_GetError();
+      FAILURE_STREAM << "Could load effect file: " << path;
+      FAILURE_STREAM << "Mix Error: " << error;
+      Exception ex( "AudioHandler::addEffect()", "Failed to load effect file" );
+      ex.addDetail( "Name", name );
+      ex.addDetail( "Path", path );
+      ex.addDetail( "Mix Error", error );
+      throw ex;
+    }
+
+    _effects.addObject( new_chunk, name );
+  }
+
+
+  void AudioManager::configure( Json::Value& music_files, Json::Value& effect_files )
+  {
+    INFO_LOG( "Audio Manager: Loading music files" );
+    Json::ArrayIndex music_size = music_files.size();
+    for ( Json::ArrayIndex i = 0; i < music_size; ++i )
+    {
+      this->addMusic( music_files[i] );
+    }
+
+    INFO_LOG( "Audio Manager: Loading sound effect files" );
+    Json::ArrayIndex effect_size = effect_files.size();
+    for ( Json::ArrayIndex i = 0; i < effect_size; ++i )
+    {
+      this->addEffect( effect_files[i] );
+    }
+
+    INFO_LOG( "Reserving Mixer Channels" );
+    size_t result = Mix_AllocateChannels( _effects.size() );
+
+    if ( result != _effects.size() )
+    {
+      std::string error = Mix_GetError();
+      FAILURE_STREAM << "Could allocate the requested number of channels: " << _effects.size() << ". Received : " << result;
+      FAILURE_STREAM << "SDL Mixer Error: " << error;
+      Exception ex( "AudioHandler::configure()", "Could not allocate requested channels" );
+      ex.addDetail( "Requested", _effects.size() );
+      ex.addDetail( "Received", result );
+      ex.addDetail( "Mix Error", error );
+      throw ex;
+    }
   }
 
 
@@ -142,23 +211,19 @@ namespace Regolith
   }
 
 
-  int AudioManager::reserveChannels( int n )
+  void AudioManager::playChunk( unsigned int i )
   {
-    int previous = _playbackChannelCounter;
-    int result = Mix_AllocateChannels( n );
-    if ( result == n )
+    Mix_Chunk* chunk = _effects[i];
+
+    if ( Mix_Playing( i ) ) // Sound already playing
     {
-      _playbackChannelCounter += n;
+      return;
     }
     else
     {
-      FAILURE_STREAM << "Could not reserve channel";
-      Exception ex( "AudioManager::reserveChannel()", "Failed to reserve a new channel" );
-      ex.addDetail( "No. Channels", _playbackChannelCounter );
-      throw ex;
+      // Play the chunk exactly once on its reserved channel
+      Mix_PlayChannel( i, chunk, 0 );
     }
-
-    return previous;
   }
 
 
@@ -167,9 +232,7 @@ namespace Regolith
 
   AudioHandler::AudioHandler( AudioManager* manager ) :
     _manager( manager ),
-    _effects( "audio_effects", false ),
     _channels(),
-    _channelGroup( 0 ),
     _state( MUSIC_STATE_STOPPED )
   {
   }
@@ -177,56 +240,42 @@ namespace Regolith
 
   AudioHandler::~AudioHandler()
   {
-    for ( unsigned int i = 0; i < _effects.vectorSize(); ++i )
-    {
-      Mix_FreeChunk( _effects[i] );
-    }
-    _effects.clear();
-
     _channels.clear();
   }
 
 
-  void AudioHandler::configure()
+  void AudioHandler::registerChunk( unsigned int num )
   {
-    _channels.clear();
-
-    _channelGroup = _manager->reserveChannels( _effects.size() );
-    for ( unsigned int i = 0; i < _effects.size(); ++i )
-    {
-      _channels.push_back( _channelGroup + i );
-    }
-
-//    Mix_GroupChannels( _channelGroup, _effects.size(), _channelGroup );
+    _channels.push_back( num );
   }
 
 
   void AudioHandler::_pauseAll()
   {
-    unsigned int num = _channelGroup + _effects.size();
-    for ( unsigned int i = _channelGroup; i < num; ++i )
+    unsigned int numChannels = _channels.size();
+    for ( unsigned int i = 0; i < numChannels; ++i )
     {
-      Mix_Pause( i );
+      Mix_Pause( _channels[i] );
     }
   }
 
 
   void AudioHandler::_resumeAll()
   {
-    unsigned int num = _channelGroup + _effects.size();
-    for ( unsigned int i = _channelGroup; i < num; ++i )
+    unsigned int numChannels = _channels.size();
+    for ( unsigned int i = 0; i < numChannels; ++i )
     {
-      Mix_Resume( i );
+      Mix_Resume( _channels[i] );
     }
   }
 
 
   void AudioHandler::_stopAll()
   {
-    unsigned int num = _channelGroup + _effects.size();
-    for ( unsigned int i = _channelGroup; i < num; ++i )
+    unsigned int numChannels = _channels.size();
+    for ( unsigned int i = 0; i < numChannels; ++i )
     {
-      Mix_HaltChannel( i );
+      Mix_HaltChannel( _channels[i] );
     }
   }
 
@@ -300,35 +349,7 @@ namespace Regolith
 
   void AudioHandler::triggerEffect( unsigned int num )
   {
-    // Play only if the sound effect is not already playing
-    if ( ! Mix_Playing( _channels[num] ) )
-      Mix_PlayChannel( _channels[num], _effects[num], 0 );
-  }
-
-
-  void AudioHandler::addEffect( Json::Value& json_data )
-  {
-    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "path", Utilities::JSON_TYPE_STRING );
-
-    std::string name = json_data["name"].asString();
-    std::string path = json_data["path"].asString();
-
-    Mix_Chunk* new_chunk = Mix_LoadWAV( path.c_str() );
-
-    if ( new_chunk == nullptr )
-    {
-      std::string error = Mix_GetError();
-      FAILURE_STREAM << "Could load effect file: " << path;
-      FAILURE_STREAM << "Mix Error: " << error;
-      Exception ex( "AudioHandler::addEffect()", "Failed to load effect file" );
-      ex.addDetail( "Name", name );
-      ex.addDetail( "Path", path );
-      ex.addDetail( "Mix Error", error );
-      throw ex;
-    }
-
-    _effects.addObject( new_chunk, name );
+    _manager->playChunk( num );
   }
 
 

@@ -41,15 +41,7 @@
 
   "sounds" :
   {
-    "default_music" : "the_beat",
-
-    "sound_files" :
-    [
-      {
-        "name" : "thud",
-        "path" : "test_data/test_thud.wav"
-      }
-    ]
+    "default_music" : "the_beat"
   },
 
   "resources" :

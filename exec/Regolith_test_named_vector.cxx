@@ -19,7 +19,7 @@ int main( int, char** )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    NamedVector<int> test_vector("test");
+    NamedVector<int, true> test_vector("test");
 
     ASSERT_EQUAL( test_vector.mapSize(),    0u );
     ASSERT_EQUAL( test_vector.vectorSize(), 0u );

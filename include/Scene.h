@@ -34,7 +34,7 @@ namespace Regolith
     private:
       // Scene owns the memory for the texture data
       RawTextureMap _rawTextures;
-      NamedVector<Drawable> _resources;
+      NamedVector<Drawable, true> _resources;
       TeamNameMap _teamNames;
       bool _paused;
 
@@ -51,7 +51,7 @@ namespace Regolith
       Drawable* _background;
       ElementList _sceneElements;
       ElementList _hudElements;
-      NamedVector<Dialog> _dialogWindows;
+      NamedVector<Dialog, true> _dialogWindows;
 
       // Can be change to accelerator structures in the future
       // These do not own their memory. They are shortcut lists

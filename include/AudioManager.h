@@ -17,6 +17,13 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Global Manager Class
+
+  /*
+   * The global audio manager.
+   * This class loads and handles all memory relating to music and sound effects.
+   * In the future I may look at a dynamic loading algorithm, however for now we just
+   * load every file straight into memory
+   */
   class AudioManager
   {
     friend void playNextTrack();
@@ -29,20 +36,40 @@ namespace Regolith
       int _fadeTime;
       int _playbackChannelCounter;
 
-      NamedVector<Mix_Music> _musics;
+      NamedVector<Mix_Music, false> _musics;
+      NamedVector<Mix_Chunk, false> _effects;
 
       float _volumeMusic;
       float _volumeChunk;
 
       static Mix_Music* nextTrack;
 
+
+     protected :
+      // Add music file using a json object
+      void addMusic( Json::Value& );
+
+      // Add an effect using a json object
+      void addEffect( Json::Value& );
+
     public :
+      // Contstructor
       AudioManager( unsigned int, int, int, Uint16 format = MIX_DEFAULT_FORMAT );
 
+      // Destructor
       ~AudioManager();
 
-      void addMusic( Json::Value& );
+
+      // Build the audio handler and load all the files
+      void configure( Json::Value&, Json::Value& );
+
+
+
+      // Return the ID number for the request track/sound effect
       unsigned int getMusicID( std::string name ) { return _musics.getID( name ); }
+      unsigned int getEffectID( std::string name ) { return _effects.getID( name ); }
+
+
 
       // Set the volumes
       void setVolumeMusic( float );
@@ -53,33 +80,38 @@ namespace Regolith
       float getVolumeEffects() { return _volumeChunk; }
 
 
+
       // Play a new music track
-      void playTrack( unsigned int n );
+      void playTrack( unsigned int );
       void playTrack( std::string n ) { playTrack( _musics.getID( n ) ); }
+
+      // Play a sound effect
+      void playChunk( unsigned int );
+      void playChunk( std::string n ) { playChunk( _effects.getID( n ) ); }
 
 
       // Get/Set the fade time for music
       int getFadeTime() const { return _fadeTime; }
       void setFadeTime( int t ) { _fadeTime = t; }
 
-
-      // Allocates n channels and returns the startiing number
-      int reserveChannels( int n );
   };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Handler for specific context
 
+  /*
+   * This class acts like the SDL Mix Group.
+   * It records all of the sound effects required by a specific context and organises the playing and 
+   * pausing of them as different contexts gain and lose focus
+   */
   class AudioHandler
   {
     typedef std::vector<int> ChannelLookup;
     private:
       AudioManager* _manager;
 
-      NamedVector<Mix_Chunk> _effects;
       ChannelLookup _channels;
-      int _channelGroup;
 
       MusicState _state;
 
@@ -96,24 +128,19 @@ namespace Regolith
       ~AudioHandler();
 
 
-      // Configure the handler and request channels from the manager
-      void configure();
+      // Tell the handler it has control of this effect
+      void registerChunk( unsigned int );
 
 
       // Return a pointer to the audio manager
       AudioManager* getManager() { return _manager; }
 
 
-
-      // Add an effect using a json object
-      void addEffect( Json::Value& );
-
-
       // Get the id for a track from the manager
       unsigned int getMusicID( std::string name ) { return _manager->getMusicID( name ); }
 
       // Get the id number for a sound effect from the handler
-      unsigned int getEffectID( std::string name ) { return _effects.getID( name ); }
+      unsigned int getEffectID( std::string name ) { return _manager->getEffectID( name ); }
 
 
       // Set the scene-music using the manager

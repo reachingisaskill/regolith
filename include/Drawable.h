@@ -5,6 +5,7 @@
 #include "Definitions.h"
 #include "Vector.h"
 #include "Controllable.h"
+#include "Noisy.h"
 
 
 namespace Regolith
@@ -17,7 +18,7 @@ namespace Regolith
   /*
    * Defines the interface for all objects that can be drawn by the rendering functions.
    */
-  class Drawable : public Controllable
+  class Drawable : public Controllable, public Noisy
   {
 
     private:
@@ -57,6 +58,7 @@ namespace Regolith
       virtual bool hasInput() const = 0;
       virtual bool hasAnimation() const = 0;
       virtual bool hasInteraction() const { return false; }
+      virtual bool hasSound() const { return false; }
 
 
       // Returns the number of collision objects for the class.
@@ -140,6 +142,11 @@ namespace Regolith
       virtual void booleanAction( const InputAction&, bool ) {}
       virtual void floatAction( const InputAction&, float ) {}
       virtual void vectorAction( const InputAction&, const Vector& ) {}
+
+
+
+      // Functions for the Noisy interface
+      virtual void registerSoundEffects( AudioHandler* ) {}
   };
 
 }
