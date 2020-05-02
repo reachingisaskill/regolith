@@ -18,8 +18,10 @@ namespace Regolith
   ScenePlatformer::ScenePlatformer( std::string json_file ) :
     Scene( json_file ),
     _player( nullptr ),
+    _pauseMenu( nullptr ),
     _spawnPoints(),
-    _currentPlayerSpawn( 0.0 )
+    _currentPlayerSpawn( 0.0 ),
+    _triggers()
   {
   }
 
@@ -111,6 +113,15 @@ namespace Regolith
   }
 
 
+  void ScenePlatformer::_loadOptions( Json::Value& options )
+  {
+    if ( Utilities::validateJson( options, "on_pause", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      std::string dialog_name = options["on_pause"].asString();
+      _pauseMenu = dialogWindows().getByName( dialog_name );
+    }
+  }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // ScenePlatformer update and render functions
 
@@ -128,7 +139,7 @@ namespace Regolith
   }
 
 
-  void ScenePlatformer::_update( Uint32 time )
+  void ScenePlatformer::_update( Uint32 )
   {
   }
 
@@ -190,6 +201,18 @@ namespace Regolith
 
       default:
         break;
+    }
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Hooks and callbacks
+
+  void ScenePlatformer::onPause()
+  {
+    DEBUG_LOG( "On pause called" );
+    if ( _pauseMenu != nullptr )
+    {
+      transferFocus( _pauseMenu );
     }
   }
 

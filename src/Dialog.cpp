@@ -84,6 +84,7 @@ namespace Regolith
 
         // Determine the ID number and spawn the element
         Drawable* newElement = man->spawn( resource_name );
+        DEBUG_STREAM << "ELEMENT = " << newElement;
         Utilities::jsonProcessPosition( elements[i], newElement, _cameraHUD );
         _elements.push_back( newElement );
         INFO_LOG( "Resource loaded." );
@@ -105,17 +106,20 @@ namespace Regolith
           {
             INFO_LOG( "Caching resource as a button" );
 
-            Utilities::validateJson( elements[i], "action", Utilities::JSON_TYPE_ARRAY );
+            Utilities::validateJson( elements[i], "action", Utilities::JSON_TYPE_STRING );
             std::string action_name = elements[i]["action"].asString();
 
-            // What is the base context id
-            InputAction action_id = getActionID( action_name );
-            if ( action_id == INPUT_ACTION_OPTIONS ) // Its not a standard action => must be option specific
+            if ( action_name != "" )
             {
-              // Get the name of the corresponding sub dialog
-              action_id = (InputAction)( (unsigned int)action_id + (unsigned int)_subDialogs.getID( action_name ) );
+              // What is the base context id
+              InputAction action_id = getActionID( action_name );
+              if ( action_id == INPUT_ACTION_OPTIONS ) // Its not a standard action => must be option specific
+              {
+                // Get the name of the corresponding sub dialog
+                action_id = (InputAction)( (unsigned int)action_id + (unsigned int)_subDialogs.getID( action_name ) );
+              }
+              b_pointer->setOption( action_id );
             }
-            b_pointer->setOption( action_id );
 
             _buttons.addButton( b_pointer );
           }

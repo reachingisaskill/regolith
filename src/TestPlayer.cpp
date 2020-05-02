@@ -93,6 +93,7 @@ namespace Regolith
         if ( value && ( std::fabs( this->velocity().y() ) < epsilon ) )
         {
           this->velocity().y() -= _jumpSpeed;
+          man->getAudioManager()->playChunk( _jumpSound );
         }
         break;
 
@@ -101,6 +102,30 @@ namespace Regolith
     }
 
     DEBUG_STREAM << " TestPlayer: " << this->velocity();
+  }
+
+
+  void TestPlayer::onCollision( unsigned int team, const Vector& overlap )
+  {
+    static Manager* man = Manager::getInstance();
+    DEBUG_STREAM << "On Collision Player :" << team << ", " << overlap;
+
+    switch ( team )
+    {
+      case DEFAULT_TEAM_ENVIRONMENT :
+        if ( overlap.y() < 0 )
+        {
+          Uint32 falltime = _fallTimer.lap();
+          if ( falltime > 500 || velocity().y() < -3.0 )
+          {
+            man->getAudioManager()->playChunk( _hardLandingSound );
+          }
+        }
+        break;
+
+      default :
+        break;
+    }
   }
 
 
@@ -122,6 +147,7 @@ namespace Regolith
     Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "jump_speed", Utilities::JSON_TYPE_FLOAT );
     Utilities::validateJson( json_data, "movement_force", Utilities::JSON_TYPE_FLOAT );
+    Utilities::validateJson( json_data, "jump_sound", Utilities::JSON_TYPE_STRING );
 
     std::string texture_name = json_data["texture_name"].asString();
     RawTexture texture = this->findRawTexture( texture_name );
@@ -174,10 +200,15 @@ namespace Regolith
     float jump_speed = json_data["jump_speed"].asFloat();
     float movement_force = json_data["movement_force"].asFloat();
 
+    std::string jump_sound = json_data["jump_sound"].asString();
+    std::string hard_sound = json_data["hard_landing_sound"].asString();
+
     TestPlayer* newPlayer = new TestPlayer( sheet );
     newPlayer->addCollision( collision );
     newPlayer->setJumpSpeed( jump_speed );
     newPlayer->setMovementForce( movement_force );
+    newPlayer->setJumpSound( Manager::getInstance()->getAudioManager()->getEffectID( jump_sound ) );
+    newPlayer->setHardSound( Manager::getInstance()->getAudioManager()->getEffectID( hard_sound ) );
 
     buildDrawable( newPlayer, json_data );
 

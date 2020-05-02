@@ -271,7 +271,7 @@ namespace Regolith
 
     DEBUG_LOG( "Building Button" );
     // Only require the normal state to be present
-    Utilities::validateJson( json_data, "state_normal", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "state_normal", Utilities::JSON_TYPE_OBJECT );
 
 
     // Load the normal texture first
@@ -297,11 +297,6 @@ namespace Regolith
 //    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
 
 
-    // load the button's action
-    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-    std::string action_name = json_data["action"].asString();
-
-    
     // Create the button object
     Button* newButton = new Button( normal_texture, collision );
 
@@ -313,9 +308,6 @@ namespace Regolith
         newButton->setTexture( buildTexture( json_data[ state_names[state_number] ] ), (Button::State)state_number );
       }
     }
-
-    // Set the action name
-    newButton->setActionName( action_name );
 
     // Set the rest of the drawable properties
     buildDrawable( newButton, json_data );

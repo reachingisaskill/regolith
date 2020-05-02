@@ -16,6 +16,11 @@
         "name" : "default",
         "path" : "test_data/test_font.ttf",
         "size" : 28
+      },
+      {
+        "name" : "default_big",
+        "path" : "test_data/test_font.ttf",
+        "size" : 42
       }
     ]
   },
@@ -63,6 +68,10 @@
       {
         "name" : "thud",
         "path" : "test_data/test_thud.wav"
+      },
+      {
+        "name" : "landing",
+        "path" : "test_data/test_landing.wav"
       }
     ]
   },
@@ -74,6 +83,10 @@
       {
         "name" : "background_texture",
         "path" : "test_data/test_background.png"
+      },
+      {
+        "name" : "title_background",
+        "path" : "test_data/test_wallpaper.jpg"
       },
       {
         "name" : "dot_texture",
@@ -103,12 +116,31 @@
         "text" : "Press \"p\" to unpause",
         "colour" : [ 0, 0, 0, 255 ],
         "font" : "default"
+      },
+      {
+        "name" : "welcome1",
+        "text" : "Welcome to the test title page",
+        "colour" : [ 255, 255, 255, 255 ],
+        "font" : "default_big"
+      },
+      {
+        "name" : "welcome_button_text1",
+        "text" : "Click here to play",
+        "colour" : [ 255, 255, 255, 255 ],
+        "font" : "default"
       }
     ]
   },
 
   "resources" :
   [
+    {
+      "resource_name" : "title_background",
+      "resource_type" : "sprite",
+      "texture_name" : "title_background",
+      "team_name" : "environment",
+      "collision" : "default"
+    },
     {
       "resource_name" : "background",
       "resource_type" : "sprite",
@@ -132,7 +164,9 @@
       "mass" : 1.0,
       "team_name" : "player",
       "jump_speed" : 3.0,
-      "movement_force" : 0.002
+      "movement_force" : 0.002,
+      "jump_sound" : "thud",
+      "hard_landing_sound" : "landing"
     },
     {
       "resource_name" : "the_spritesheet",
@@ -167,6 +201,21 @@
       "team_name" : "hud",
       "resource_type" : "sprite",
       "texture_name" : "pause_text"
+    },
+    {
+      "resource_name" : "welcome_text1",
+      "team_name" : "hud",
+      "resource_type" : "sprite",
+      "texture_name" : "welcome1"
+    },
+    {
+      "resource_name" : "welcome_play_button",
+      "team_name" : "hud",
+      "resource_type" : "button",
+      "state_normal" :
+      { 
+        "texture_name" : "welcome_button_text1"
+      }
     }
   ],
 
@@ -174,6 +223,10 @@
   {
     "scenes" :
     [
+      {
+        "file_name" : "test_data/test_title.json",
+        "type" : "title"
+      },
       {
         "file_name" : "test_data/test_scene.json",
         "type" : "platformer"

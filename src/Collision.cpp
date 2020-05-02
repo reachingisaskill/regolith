@@ -285,6 +285,9 @@ namespace Regolith
     _object2->addVelocity( perp_velocity * _normal );
 
     DEBUG_STREAM << "Ov:" << overlapVector << ", TotIM: " << totalInvM << ", kick:" << overlapVector * (invM1 / totalInvM) << ", Force: " << man->getGravity()%_normal << ", newVel: " << _object1->getVelocity();
+
+    _object1->onCollision( _object2->getTeam(), -overlapVector );
+    _object2->onCollision( _object1->getTeam(), overlapVector );
   }
 
 }

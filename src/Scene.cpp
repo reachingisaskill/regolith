@@ -18,7 +18,6 @@ namespace Regolith
   Scene::Scene( std::string json_file ) :
     _sceneFile( json_file ),
     _paused( false ),
-    _pauseMenu( nullptr ),
     _defaultMusic( -1 ),
     _background( nullptr ),
     _sceneElements(),
@@ -90,12 +89,10 @@ namespace Regolith
 
     try
     {
-
       Utilities::validateJson( json_data, "sounds", Utilities::JSON_TYPE_OBJECT, true );
       Utilities::validateJson( json_data, "elements", Utilities::JSON_TYPE_OBJECT, true );
       Utilities::validateJson( json_data, "cameras", Utilities::JSON_TYPE_OBJECT, true );
       Utilities::validateJson( json_data, "dialog_windows", Utilities::JSON_TYPE_ARRAY, true );
-      Utilities::validateJson( json_data, "options", Utilities::JSON_TYPE_OBJECT, true );
 
       INFO_LOG( "Loading sounds" );
       this->_loadSounds( json_data["sounds"] );
@@ -109,8 +106,11 @@ namespace Regolith
       INFO_LOG( "Building Dialog Windows" );
       this->_loadDialogs( json_data["dialog_windows"] );
 
-      INFO_LOG( "Configuring Scene options" );
-      this->_loadOptions( json_data["options"] );
+      if ( Utilities::validateJson( json_data, "options", Utilities::JSON_TYPE_OBJECT, false ) )
+      {
+        INFO_LOG( "Configuring Scene options" );
+        this->_loadOptions( json_data["options"] );
+      }
 
       INFO_LOG( "Loading Scene-Specific Components" );
       this->_loadSceneSpecificComponents( json_data );
@@ -293,7 +293,12 @@ namespace Regolith
     _theCamera->setPosition( camera_x, camera_y );
     _theCamera->registerActions( inputHandler() );
 
-    if ( camera_type == "flying" )
+    if ( camera_type == "fixed" )
+    {
+      INFO_LOG( "Setting mode to fixed camera" );
+      _theCamera->setMode( CAMERA_FIXED );
+    }
+    else if ( camera_type == "flying" )
     {
       INFO_LOG( "Setting mode to flying camera" );
       _theCamera->setMode( CAMERA_FLYING );
@@ -323,11 +328,6 @@ namespace Regolith
 
   void Scene::_loadOptions( Json::Value& options )
   {
-    if ( Utilities::validateJson( options, "on_pause", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      std::string dialog_name = options["on_pause"].asString();
-      _pauseMenu = _dialogWindows.getByName( dialog_name );
-    }
   }
 
 
@@ -554,22 +554,13 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Miscellaneous scene events
 
-  void Scene::onPause()
-  {
-    DEBUG_LOG( "On pause called" );
-    if ( _pauseMenu != nullptr )
-    {
-      transferFocus( _pauseMenu );
-    }
-  }
-
 
   void Scene::onStart()
   {
     DEBUG_LOG( "On start called" );
     if ( _defaultMusic >= 0 )
     {
-      audioHandler()->setSong( 0 );
+      audioHandler()->setSong( _defaultMusic );
     }
   }
 

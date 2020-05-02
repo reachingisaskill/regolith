@@ -1,0 +1,86 @@
+{
+  "sounds" :
+  {
+    "default_music" : "the_beat"
+  },
+
+  "cameras" :
+  {
+    "type" : "fixed",
+    "width" : 1024,
+    "height" : 768,
+    "start_position" : [ 0, 0 ]
+  },
+
+  "options" :
+  {
+    "starting_dialog" : "title_dialog"
+  },
+
+  "elements" :
+  {
+    "background" : "title_background",
+    
+    "scene_elements" :
+    [
+      {
+        "resource_name" : "the_animated_spritesheet",
+        "position" : [ 250, 200 ]
+      },
+      {
+        "resource_name" : "the_animated_spritesheet",
+        "position" : [ 800, 200 ]
+      }
+    ],
+
+    "hud_elements" :
+    [
+      {
+        "resource_name" : "fps_text",
+        "position" : [ 20, 20 ],
+        "alignment" : 
+        {
+          "horizontal" : "centre",
+          "vertical" : "bottom"
+        }
+      }
+    ]
+  },
+
+  "dialog_windows" :
+  [
+    {
+      "name" : "title_dialog",
+      "dialog" :
+      {
+        "name" : "title_menu",
+        "elements" :
+        [
+          {
+            "resource_name" : "welcome_text1",
+            "position" : [0, -200],
+            "alignment" :
+            {
+              "horizontal" : "centre",
+              "vertical" : "centre"
+            }
+          },
+          {
+            "resource_name" : "welcome_play_button",
+            "position" : [0, +200],
+            "alignment" :
+            {
+              "horizontal" : "centre",
+              "vertical" : "centre"
+            },
+            "action" : ""
+          }
+        ],
+        "options" :
+        {
+          "can_cancel" : true
+        }
+      }
+    }
+  ]
+}

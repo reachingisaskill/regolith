@@ -146,7 +146,7 @@ namespace Regolith
     if ( i >= _names.size() )
     {
       ERROR_STREAM << "Named Vector: " << _storageType << ". Could index, " << i << ", outside of map size, " << _names.size();
-      Exception ex( "NamedVector::getID()", "Index outside of map size", true );
+      Exception ex( "NamedVector::get()", "Index outside of map size", true );
       ex.addDetail( "Index", i );
       ex.addDetail( "Size", _names.size() );
       throw ex;

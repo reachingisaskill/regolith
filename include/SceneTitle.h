@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_SCENE_PLATFORMER_H_
-#define REGOLITH_SCENE_PLATFORMER_H_
+#ifndef REGOLITH_SCENE_TITLE_H_
+#define REGOLITH_SCENE_TITLE_H_
 
 #include "Definitions.h"
 #include "Scene.h"
@@ -13,38 +13,19 @@ namespace Regolith
   typedef std::vector< Trigger* > TriggerList;
   typedef std::vector< Vector > SpawnPointList;
 
-  class ScenePlatformer : public Scene
+  class SceneTitle : public Scene
   {
     private:
-      // All memory is owned by the base resource list
-      Drawable* _player;
-      Dialog* _pauseMenu;
-
-      // Data for player health, death, spawning, etc.
-      SpawnPointList _spawnPoints;
-      Vector _currentPlayerSpawn;
-
-      // Event triggers
-      TriggerList _triggers;
+      Dialog* _startingDialog;
 
     protected:
-      // Function for derived classes to implement when the pause signal is received
-      virtual void onPause();
-
-      // Loads the options
-      virtual void _loadOptions( Json::Value& );
-
-
-
-      // Function to build the camera objects
-      void _loadSpawnPoints( Json::Value& );
+      void onStart();
 
       // Override this function to allow the base class to build components specific to this scene type
       virtual void _loadSceneSpecificComponents( Json::Value& );
 
-      // Load the player model
-      void _loadPlayer( Json::Value& );
-
+      // Load the options section
+      void _loadOptions( Json::Value& );
 
       // Derived class render
       virtual void _render();
@@ -57,13 +38,10 @@ namespace Regolith
 
     public:
       // Set the necessary parameters
-      ScenePlatformer( std::string );
+      SceneTitle( std::string );
 
       // Remove all the cached data and clean up
-      ~ScenePlatformer();
-
-      // Respawn the player at the last spawn point
-      void playerRespawn();
+      ~SceneTitle();
 
 
       // When paused stop animations
@@ -73,7 +51,7 @@ namespace Regolith
       bool isVisible() const { return true; }
 
       // Tell the scene to un-pause
-      void returnFocus() { this->resume(); }
+      void returnFocus();
 
       // Raise an event in the current context
       void raiseContextEvent( ContextEvent );
@@ -82,5 +60,5 @@ namespace Regolith
 }
 
 
-#endif // REGOLITH_SCENE_PLATFORMER_H_
+#endif // REGOLITH_SCENE_TITLE_H_
 

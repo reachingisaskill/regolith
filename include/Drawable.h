@@ -70,12 +70,15 @@ namespace Regolith
       // Set whether thte collision objects are active
       virtual void setCollisionActive( bool active ) { _collisionActive = active; }
 
+      // Function is called when colliding with another object ( teamNo., overlap )
+      virtual void onCollision( unsigned int, const Vector& ) {}
 
       // Perform the steps to call SDL_RenderCopy, etc
       virtual void render( Camera* ) = 0;
 
       // Update the objects behaviour based on the provided timestep
       virtual void update( Uint32 t ) { this->step( t ); }
+
 
 
       // Create a new copy and return the pointer to it. Transfers ownership of the memory

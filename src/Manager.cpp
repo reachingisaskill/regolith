@@ -5,6 +5,7 @@
 #include "Exception.h"
 #include "Engine.h"
 #include "ScenePlatformer.h"
+#include "SceneTitle.h"
 
 #include "logtastic.h"
 
@@ -37,8 +38,10 @@ namespace Regolith
     // Set up the provided factories
     _theBuilder->addFactory( new SpriteFactory() );
     _theBuilder->addFactory( new FPSStringFactory() );
+    _theBuilder->addFactory( new ButtonFactory() );
 
     // Set up the scene factories
+    _theSceneBuilder->addFactory( new SceneFactory<SceneTitle>( "title" ) );
     _theSceneBuilder->addFactory( new SceneFactory<ScenePlatformer>( "platformer" ) );
 
     // Create the default teams

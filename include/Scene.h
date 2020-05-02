@@ -33,7 +33,6 @@ namespace Regolith
       // Scene state information
       std::string _sceneFile;
       bool _paused;
-      Dialog* _pauseMenu;
       int _defaultMusic;
 
       // Containers storing drawable objects - the scene and the hud elements
@@ -55,9 +54,11 @@ namespace Regolith
       Camera* _theHUD;
 
     protected:
+      // Returns the default music track
+      int defaultMusic() { return _defaultMusic; }
 
       // Function for derived classes to implement when the pause signal is received
-      virtual void onPause();
+      virtual void onPause() {}
 
       // Function for derived classes to implement when the scene starts
       virtual void onStart();
@@ -90,8 +91,8 @@ namespace Regolith
       // Function to build the dialog boxes
       void _loadDialogs( Json::Value& );
 
-      // Function to build the remaining configuration
-      void _loadOptions( Json::Value& );
+      // Function to build the remaining configuration - should be implemeted by the derived classes
+      virtual void _loadOptions( Json::Value& );
 
 
       // Override this function to allow the base class to build components specific to this scene type
@@ -106,6 +107,10 @@ namespace Regolith
 
       // Derived class collisions function
       virtual void _resolveCollisions() = 0;
+
+
+      // Return a reference to the dialog window container
+      NamedVector<Dialog, true>& dialogWindows() { return _dialogWindows; }
 
 
       // Return the pointer to the background object
@@ -152,6 +157,10 @@ namespace Regolith
 
       // Return the camera for the HUD
       virtual Camera* getHUD() { return _theHUD; }
+
+
+      // Return a pointer to a specific dialog window
+      Dialog* getDialog( unsigned int i ) { return _dialogWindows[i]; }
 
 
       //////////////////////////////////////////////////

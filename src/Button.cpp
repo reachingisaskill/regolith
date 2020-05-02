@@ -26,7 +26,7 @@ namespace Regolith
   Button::Button( const Button& but ) :
     Drawable( but ),
     _textures( but._textures ),
-    _collision( but._collision->clone() ),
+    _collision( (but._collision == nullptr) ? nullptr : but._collision->clone() ),
     _destination( but._destination ),
     _state( but._state )
   {

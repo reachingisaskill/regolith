@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "Sprite.h"
 #include "ObjectFactory.h"
+#include "Timer.h"
 
 #include <json/json.h>
 
@@ -19,6 +20,10 @@ namespace Regolith
     private :
       float _movementForce;
       float _jumpSpeed;
+      unsigned int _jumpSound;
+      unsigned int _hardLandingSound;
+
+      Timer _fallTimer;
 
     public :
       TestPlayer();
@@ -58,6 +63,12 @@ namespace Regolith
       void setMovementForce( float f ) { _movementForce = f; }
 
       void setJumpSpeed( float f ) { _jumpSpeed = f; }
+
+      void setJumpSound( unsigned int i ) { _jumpSound = i; }
+      void setHardSound( unsigned int i ) { _hardLandingSound = i; }
+
+
+      void onCollision( unsigned int, const Vector& );
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
