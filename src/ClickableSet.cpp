@@ -45,15 +45,17 @@ namespace Regolith
 
   void ClickableSet::select()
   {
-    Manager* man = Manager::getInstance();
+//    Manager* man = Manager::getInstance();
 
     if ( _currentFocus == _buttons.end() )
 
-    if ( (*_currentFocus != nullptr ) && (*_currentFocus)->tryClick() )
+    if ( (*_currentFocus != nullptr ) )
     {
-      InputAction event = (*_currentFocus)->getOption();
-//      man->currentContext()->raiseContextEvent( event );
-      man->currentContext()->booleanAction( event, true );
+      (*_currentFocus)->down();
+      (*_currentFocus)->up();
+//      InputAction event = (*_currentFocus)->getOption();
+////      man->currentContext()->raiseContextEvent( event );
+//      man->currentContext()->booleanAction( event, true );
     }
   }
 
@@ -65,9 +67,54 @@ namespace Regolith
   }
 
 
-  void ClickableSet::clickHere( Vector& )
+  void ClickableSet::mouseDown( const Vector& point )
   {
-    // Write the code to determine if the mouse clicked on anything interactable
+    ButtonSet::iterator end = _buttons.end();
+    for ( ButtonSet::iterator it = _buttons.begin(); it != end; ++it )
+    {
+      if ( contains( (*it), point ) )
+      {
+        (*it)->down();
+      }
+      else
+      {
+        (*it)->takeFocus();
+      }
+    }
+  }
+
+
+  void ClickableSet::mouseUp( const Vector& point )
+  {
+    ButtonSet::iterator end = _buttons.end();
+    for ( ButtonSet::iterator it = _buttons.begin(); it != end; ++it )
+    {
+      if ( contains( (*it), point ) )
+      {
+        (*it)->up();
+      }
+      else
+      {
+        (*it)->takeFocus();
+      }
+    }
+  }
+
+
+  void ClickableSet::mouseMove( const Vector& point )
+  {
+    ButtonSet::iterator end = _buttons.end();
+    for ( ButtonSet::iterator it = _buttons.begin(); it != end; ++it )
+    {
+      if ( contains( (*it), point ) )
+      {
+        (*it)->giveFocus();
+      }
+      else
+      {
+        (*it)->takeFocus();
+      }
+    }
   }
 }
 

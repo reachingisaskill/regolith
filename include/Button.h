@@ -18,7 +18,7 @@ namespace Regolith
       {
         STATE_NORMAL,
         STATE_FOCUSSED,
-        STATE_ACTIVATED,
+        STATE_DOWN,
         STATE_INACTIVE,
         STATE_TOTAL
       };
@@ -32,7 +32,7 @@ namespace Regolith
       State _state;
 
       std::string _actionName;
-      InputAction _optionNumber;
+      InputAction _actionNumber;
 
 
     public :
@@ -86,10 +86,10 @@ namespace Regolith
 
 
       // Set the enumerated option number
-      void setOption( InputAction e ) { _optionNumber = e; }
+      void setOption( InputAction e ) { _actionNumber = e; }
 
       // Get the enumerated option number
-      InputAction getOption() { return _optionNumber; }
+      InputAction getOption() { return _actionNumber; }
       
 
       // Sets the current state to focussed if button is active
@@ -99,7 +99,10 @@ namespace Regolith
       void takeFocus();
 
       // Returns false if the button is inactive
-      bool tryClick() const; 
+      void down(); 
+
+      // Returns false if the button is inactive
+      void up(); 
 
       // Allows the button to be clickable
       void activate();

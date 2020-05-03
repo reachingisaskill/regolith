@@ -120,6 +120,10 @@ namespace Regolith
               }
               b_pointer->setOption( action_id );
             }
+            else
+            {
+              WARN_LOG( "No action assigned to this button" );
+            }
 
             _buttons.addButton( b_pointer );
           }
@@ -224,6 +228,7 @@ namespace Regolith
     handler->registerInputRequest( this, INPUT_ACTION_PAUSE );
     handler->registerInputRequest( this, INPUT_ACTION_BACK );
     handler->registerInputRequest( this, INPUT_ACTION_CANCEL );
+    handler->registerInputRequest( this, INPUT_ACTION_MOUSE_MOVE );
     handler->registerInputRequest( this, INPUT_ACTION_JUMP ); // Bind the jump key just in case!
     handler->registerInputRequest( this, INPUT_ACTION_CLICK ); // Bind the mouse click
   }
@@ -273,8 +278,40 @@ namespace Regolith
 //  }
 
 
-  void Dialog::vectorAction( const InputAction&, const Vector& )
+  void Dialog::vectorAction( const InputAction& action, const Vector& vec )
   {
+    DEBUG_STREAM << "VECTOR ACTION : " << action;
+    switch ( action )
+    {
+      case INPUT_ACTION_MOUSE_MOVE :
+        _buttons.mouseMove( vec );
+        break;
+
+      default:
+        break;
+    }
+  }
+
+
+  void Dialog::mouseAction( const InputAction& action, bool click, const Vector& vec )
+  {
+    DEBUG_STREAM << "MOUSE ACTION : " << action;
+    switch ( action )
+    {
+      case INPUT_ACTION_CLICK :
+        if ( click )
+        {
+          _buttons.mouseDown( vec );
+        }
+        else
+        {
+          _buttons.mouseUp( vec );
+        }
+        break;
+
+      default:
+        break;
+    }
   }
 
 

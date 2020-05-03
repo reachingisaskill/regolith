@@ -72,6 +72,51 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
+  // Motion Mapping class
+
+  MotionMapping::MotionMapping() :
+    _theBehaviour( INPUT_ACTION_MOUSE_MOVE ),
+    _lastPosition( 0.0 )
+  {
+  }
+
+
+  MotionMapping::~MotionMapping()
+  {
+  }
+
+
+
+  void MotionMapping::registerBehaviour( unsigned int, InputBehaviour action )
+  {
+    DEBUG_STREAM << "Motion Mapping registered: " << action;
+    _theBehaviour = action;
+  }
+
+
+  InputBehaviour MotionMapping::getBehaviour( SDL_Event& event )
+  {
+    _lastPosition.x() = event.motion.x;
+    _lastPosition.y() = event.motion.y;
+
+    return _theBehaviour;
+  }
+
+
+  void MotionMapping::propagate( Controllable* object ) const
+  {
+    DEBUG_STREAM << "PROPAGATING MOUSE_MOVE " << object;
+    object->vectorAction( (InputAction)_theBehaviour, _lastPosition );
+  }
+
+
+  InputBehaviour MotionMapping::getRegisteredBehaviour( unsigned int ) const
+  {
+    return _theBehaviour;
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////
   // Controller Axis Mapping class
 
 //  ControllerAxisMapping::ControllerAxisMapping( unsigned int size ) :
@@ -104,6 +149,62 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////
   // Mouse Mapping class
+
+  MouseMapping::MouseMapping() :
+    _theMap(),
+    _lastBehaviour( 0 ),
+    _lastPosition( 0.0 ),
+    _lastValue( false )
+  {
+    for ( unsigned int i = 0; i < 14; ++i )
+    {
+      _theMap[ i ] = INPUT_ACTION_CLICK;
+    }
+  }
+
+
+  MouseMapping::~MouseMapping()
+  {
+  }
+
+
+
+  void MouseMapping::registerBehaviour( unsigned int button, InputBehaviour action )
+  {
+    DEBUG_STREAM << "Mouse Mapping registered: " << action << " -> " << button;
+    _theMap[ button ] = action;
+  }
+
+
+  InputBehaviour MouseMapping::getBehaviour( SDL_Event& event )
+  {
+    _lastPosition.x() = event.button.x;
+    _lastPosition.y() = event.button.y;
+
+    if ( event.type == SDL_MOUSEBUTTONDOWN )
+    {
+      _lastValue = true;
+    }
+    else
+    {
+      _lastValue = false;
+    }
+    _lastBehaviour = _theMap[event.button.button];
+
+    return _lastBehaviour;
+  }
+
+
+  void MouseMapping::propagate( Controllable* object ) const
+  {
+    object->mouseAction( (InputAction)_lastBehaviour, _lastValue, _lastPosition );
+  }
+
+
+  InputBehaviour MouseMapping::getRegisteredBehaviour( unsigned int code ) const
+  {
+    return _theMap[code];
+  }
 
 }
 

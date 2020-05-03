@@ -29,7 +29,7 @@ namespace Regolith
   bool contains( Drawable*, Drawable* );
 
   // Function that returns true if the object contains point
-  bool contains( Drawable*, Vector& );
+  bool contains( Drawable*, const Vector& );
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,6 +38,7 @@ namespace Regolith
   {
     friend bool collides( Drawable*, Drawable*, Contact& );
     friend bool contains( Drawable*, Drawable* );
+    friend bool contains( Drawable*, const Vector& );
     private:
       // Position with respect to the owning drawable object
       Vector _position;

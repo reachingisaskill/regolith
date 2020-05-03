@@ -19,6 +19,8 @@ namespace Regolith
     }
 
     _inputMaps[ INPUT_TYPE_KEYBOARD ] = new KeyboardMapping();
+    _inputMaps[ INPUT_TYPE_MOUSE_BUTTON ] = new MouseMapping();
+    _inputMaps[ INPUT_TYPE_MOUSE_MOVE ] = new MotionMapping();
   }
 
 
@@ -55,6 +57,7 @@ namespace Regolith
     InputMapping* mapper = nullptr;
     InputAction action;
     RegolithEvent event;
+    Vector vec;
 
     ControllableSet::iterator end;
 
@@ -93,6 +96,19 @@ namespace Regolith
         break;
 
       case SDL_MOUSEMOTION :
+        if ( handler == nullptr ) break;
+
+        event_type = INPUT_TYPE_MOUSE_MOVE;
+        mapper = _inputMaps[ event_type ];
+        action = (InputAction)mapper->getBehaviour( sdl_event );
+        DEBUG_STREAM << "  Regolith Mouse Motion Event";
+
+        end = handler->getRegisteredObjects( action ).end();
+        for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+        {
+          DEBUG_STREAM << "  Propagating action : " << action;
+          mapper->propagate( (*it) );
+        }
         break;
 
       case SDL_MOUSEWHEEL :
@@ -100,6 +116,20 @@ namespace Regolith
 
       case SDL_MOUSEBUTTONDOWN :
       case SDL_MOUSEBUTTONUP :
+        if ( handler == nullptr ) break;
+
+        DEBUG_LOG( "  Mouse button-press type event" );
+        event_type = INPUT_TYPE_MOUSE_BUTTON;
+        mapper = _inputMaps[ event_type ];
+        action = (InputAction)mapper->getBehaviour( sdl_event );
+        if ( action == INPUT_ACTION_NULL ) break;
+
+        end = handler->getRegisteredObjects( action ).end();
+        for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+        {
+          DEBUG_STREAM << "  Propagating action : " << action;
+          mapper->propagate( (*it) );
+        }
         break;
 
 

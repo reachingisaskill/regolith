@@ -141,10 +141,11 @@ namespace Regolith
       virtual void registerActions( InputHandler* ) = 0;
 
       // Interfaces for input
-      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) {}
-      virtual void booleanAction( const InputAction&, bool ) {}
-      virtual void floatAction( const InputAction&, float ) {}
+//      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) {}
+//      virtual void booleanAction( const InputAction&, bool ) {}
+//      virtual void floatAction( const InputAction&, float ) {}
       virtual void vectorAction( const InputAction&, const Vector& ) {}
+//      virtual void mouseAction( const InputAction&, bool, const Vector& ) {}
 
 
 

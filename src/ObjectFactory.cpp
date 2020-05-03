@@ -266,7 +266,7 @@ namespace Regolith
 
   Drawable* ButtonFactory::build( Json::Value& json_data ) const
   {
-    const char* state_names[Button::STATE_TOTAL] = { "state_normal", "state_focussed", "state_activated", "state_inactive" };
+    const char* state_names[Button::STATE_TOTAL] = { "state_normal", "state_focussed", "state_down", "state_inactive" };
     Texture state_textures[Button::STATE_TOTAL];
 
     DEBUG_LOG( "Building Button" );
@@ -305,6 +305,7 @@ namespace Regolith
     {
       if ( json_data.isMember( state_names[ state_number ] ) )
       {
+        INFO_STREAM << "Building Button state sprite: " << state_names[state_number];
         newButton->setTexture( buildTexture( json_data[ state_names[state_number] ] ), (Button::State)state_number );
       }
     }

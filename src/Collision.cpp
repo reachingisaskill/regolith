@@ -191,20 +191,50 @@ namespace Regolith
 
         // X Axis
         float diff_x = child_pos.x() - parent_pos.x();
-        if ( diff_x < -c_iter->_width ) return false;
-
-        if ( diff_x > p_iter->_width ) return false;
-
-        // Y Axis
-        float diff_y = child_pos.y() - parent_pos.y();
-        if ( diff_y < -c_iter->_height ) return false;
-
-        if ( diff_y > p_iter->_height ) return false;
-
+        if ( ( diff_x > -c_iter->_width ) && ( diff_x < p_iter->_width ) ) 
+        {
+          // Y Axis
+          float diff_y = child_pos.y() - parent_pos.y();
+          if ( ( diff_y > -c_iter->_height ) && ( diff_y < p_iter->_height ) )
+          {
+            return true;
+          }
+        }
       }
     }
 
-    return true;
+    return false;
+  }
+
+
+  bool contains( Drawable* object, const Vector& point )
+  {
+    DEBUG_LOG( "Checking Point Containment" );
+    if ( ( ! object->collisionActive()) ) return false;
+
+    Collision* collision = nullptr;
+    unsigned int number = object->getCollision( collision );
+    Vector pos;
+
+    Collision* iter = collision;
+    for ( unsigned int i = 0; i < number; ++i, ++iter )
+    {
+      pos = object->position() + iter->position(); // Move into global coordinate system
+      DEBUG_STREAM << " Global Pos1, " << i << " : " << pos << " W = " << iter->width() << " H = " << iter->height();
+
+      // X Axis
+      float diff_x = point.x() - pos.x();
+      if ( ( diff_x > 0.0 ) && ( diff_x < iter->_width ) )
+      {
+        float diff_y = point.y() - pos.y();
+        if ( ( diff_y > 0.0 ) && ( diff_y < iter->_height ) ) 
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
 

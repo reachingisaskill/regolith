@@ -3,9 +3,7 @@
 #define REGOLITH_CLICKABLE_SET_H_
 
 #include "Definitions.h"
-
 #include "Button.h"
-#include "Controllable.h"
 
 #include <set>
 
@@ -46,7 +44,11 @@ namespace Regolith
 
       void clear();
 
-      void clickHere( Vector& );
+      void mouseDown( const Vector& );
+
+      void mouseUp( const Vector& );
+
+      void mouseMove( const Vector& );
   };
 
 }

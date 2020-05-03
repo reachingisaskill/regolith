@@ -65,9 +65,10 @@ namespace Regolith
 
       // Interfaces for input
       // Handled and mapped actions
-      virtual void booleanAction( const InputAction&, bool ) {}
-      virtual void floatAction( const InputAction&, float ) {}
-      virtual void vectorAction( const InputAction&, const Vector& ) {}
+//      virtual void booleanAction( const InputAction&, bool ) {}
+//      virtual void floatAction( const InputAction&, float ) {}
+//      virtual void vectorAction( const InputAction&, const Vector& ) {}
+//      virtual void mouseAction( const InputAction&, bool, const Vector& ) {}
 
       // Regolith events
       virtual void eventAction( const RegolithEvent&, const SDL_Event& );

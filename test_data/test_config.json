@@ -126,7 +126,19 @@
       {
         "name" : "welcome_button_text1",
         "text" : "Click here to play",
+        "colour" : [ 150, 150, 150, 255 ],
+        "font" : "default"
+      },
+      {
+        "name" : "welcome_button_text_hover",
+        "text" : "Click here to play",
         "colour" : [ 255, 255, 255, 255 ],
+        "font" : "default"
+      },
+      {
+        "name" : "welcome_button_text_down",
+        "text" : "Click here to play",
+        "colour" : [ 255, 0, 0, 255 ],
         "font" : "default"
       }
     ]
@@ -212,9 +224,18 @@
       "resource_name" : "welcome_play_button",
       "team_name" : "hud",
       "resource_type" : "button",
+      "collision" : "default",
       "state_normal" :
       { 
         "texture_name" : "welcome_button_text1"
+      },
+      "state_focussed" :
+      { 
+        "texture_name" : "welcome_button_text_hover"
+      },
+      "state_down" :
+      { 
+        "texture_name" : "welcome_button_text_down"
       }
     }
   ],

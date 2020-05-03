@@ -131,6 +131,7 @@ namespace Regolith
     INPUT_ACTION_PAUSE,
 
     INPUT_ACTION_CLICK,
+    INPUT_ACTION_MOUSE_MOVE,
 
     INPUT_ACTION_MOVE,
     INPUT_ACTION_MOVE_UP,
@@ -241,6 +242,7 @@ namespace Regolith
     "pause",
 
     "click",
+    "mouse_move",
 
     "move",
     "move_up",

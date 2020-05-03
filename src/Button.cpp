@@ -1,6 +1,7 @@
 
 #include "Button.h"
 
+#include "Manager.h"
 #include "Camera.h"
 
 #include "logtastic.h"
@@ -14,7 +15,9 @@ namespace Regolith
     _textures( { tex, tex, tex, tex } ),
     _collision( col ),
     _destination( { 0, 0, tex.getWidth(), tex.getHeight() } ),
-    _state( STATE_NORMAL )
+    _state( STATE_NORMAL ),
+    _actionName(),
+    _actionNumber( INPUT_ACTION_NULL )
   {
     if ( _collision == nullptr )
     {
@@ -28,7 +31,9 @@ namespace Regolith
     _textures( but._textures ),
     _collision( (but._collision == nullptr) ? nullptr : but._collision->clone() ),
     _destination( but._destination ),
-    _state( but._state )
+    _state( but._state ),
+    _actionName( but._actionName),
+    _actionNumber( but._actionNumber )
   {
     if ( _collision == nullptr )
     {
@@ -59,7 +64,7 @@ namespace Regolith
       return true;
     if ( _textures[ STATE_FOCUSSED ].isAnimated() )
       return true;
-    if ( _textures[ STATE_ACTIVATED ].isAnimated() )
+    if ( _textures[ STATE_DOWN ].isAnimated() )
       return true;
     if ( _textures[ STATE_INACTIVE ].isAnimated() )
       return true;
@@ -113,11 +118,12 @@ namespace Regolith
         break;
 
       case STATE_FOCUSSED :
-      case STATE_ACTIVATED :
+      case STATE_DOWN :
       case STATE_INACTIVE :
       default :
         break;
     }
+    DEBUG_LOG ( "BUTTON FOCUSSED" );
   }
 
 
@@ -126,7 +132,7 @@ namespace Regolith
     switch ( _state )
     {
       case STATE_FOCUSSED :
-      case STATE_ACTIVATED :
+      case STATE_DOWN :
         _state = STATE_NORMAL;
         break;
 
@@ -135,24 +141,44 @@ namespace Regolith
       default :
         break;
     }
+    DEBUG_LOG ( "BUTTON DEFOCUSSED" );
   }
 
 
-  bool Button::tryClick() const
+  void Button::down()
   {
     switch ( _state )
     {
-      case STATE_NORMAL :
       case STATE_FOCUSSED :
-      case STATE_ACTIVATED :
-        return true;
+      case STATE_NORMAL :
+        _state = STATE_DOWN;
         break;
 
+      case STATE_DOWN :
       case STATE_INACTIVE :
       default :
-        return false;
         break;
     }
+    DEBUG_LOG ( "BUTTON DOWN" );
+  }
+
+
+  void Button::up()
+  {
+    switch ( _state )
+    {
+      case STATE_FOCUSSED :
+      case STATE_DOWN :
+        _state = STATE_NORMAL;
+        Manager::getInstance()->currentContext()->booleanAction( _actionNumber, true );
+        break;
+
+      case STATE_NORMAL :
+      case STATE_INACTIVE :
+      default :
+        break;
+    }
+    DEBUG_LOG ( "BUTTON UP" );
   }
 
 
@@ -162,7 +188,7 @@ namespace Regolith
     {
       case STATE_NORMAL :
       case STATE_FOCUSSED :
-      case STATE_ACTIVATED :
+      case STATE_DOWN :
         break;
 
       case STATE_INACTIVE :
@@ -181,7 +207,7 @@ namespace Regolith
     {
       case STATE_NORMAL :
       case STATE_FOCUSSED :
-      case STATE_ACTIVATED :
+      case STATE_DOWN :
         _state = STATE_INACTIVE;
         break;
 

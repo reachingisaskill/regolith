@@ -3,6 +3,7 @@
 #define REGOLITH_INPUT_MAPPING_H_
 
 #include "Definitions.h"
+#include "Vector.h"
 
 #include <map>
 
@@ -62,6 +63,30 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
+  // Keyboard/Button Mapping class
+
+  class MotionMapping : public InputMapping
+  {
+    private:
+      InputBehaviour _theBehaviour;
+      Vector _lastPosition;
+
+    public:
+      MotionMapping();
+
+      virtual ~MotionMapping();
+
+      void registerBehaviour( unsigned int, InputBehaviour );
+
+      InputBehaviour getBehaviour( SDL_Event& event );
+
+      InputBehaviour getRegisteredBehaviour( unsigned int ) const;
+
+      void propagate( Controllable* ) const;
+  };
+
+
+////////////////////////////////////////////////////////////////////////////////
   // Controller Axis Mapping class
 
 //  class ControllerAxisMapping : public InputMapping
@@ -85,21 +110,27 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
   // Mouse Mapping class
 
-//  class MouseMapping : public Mapping_base
-//  {
-//    private:
-//      InputBehaviour _theBehaviour; // Map for all joysticks!
-//      Vector _lastPosition;
-//
-//    public:
-//      MouseMapping() {}
-//
-//      void registerBehaviour( unsigned int, InputBehaviour );
-//
-//      InputBehaviour getBehaviour( SDL_Event& ) const { return INPUT_NULL; }
-//
-//      void propagate( Controllable* ) const { }
-//  };
+  class MouseMapping : public InputMapping
+  {
+    private:
+      InputBehaviour _theMap[14]; // Map for 7 mouse buttons, (up+down)
+      InputBehaviour _lastBehaviour;
+      Vector _lastPosition;
+      bool _lastValue;
+
+    public:
+      MouseMapping();
+
+      ~MouseMapping();
+
+      void registerBehaviour( unsigned int, InputBehaviour );
+
+      InputBehaviour getBehaviour( SDL_Event& );
+
+      InputBehaviour getRegisteredBehaviour( unsigned int ) const;
+
+      void propagate( Controllable* ) const;
+  };
   
 }
 
