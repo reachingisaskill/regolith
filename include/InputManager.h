@@ -69,6 +69,14 @@ namespace Regolith
 
       // Requests an input handler. If it exists, return the pointer, otherwise create it.
       InputHandler* requestHandler( std::string );
+
+
+      // Functions to manually push events to objects without the SDL event queue
+      void simulateInputAction( InputHandler*, InputAction );
+      void simulateBooleanAction( InputHandler*, InputAction, bool );
+      void simulateFloatAction( InputHandler*, InputAction, float );
+      void simulateVectorAction( InputHandler*, InputAction, const Vector& );
+      void simulateMouseAction( InputHandler*, InputAction, bool, const Vector& );
   };
 
 
@@ -108,7 +116,6 @@ namespace Regolith
 
       // Return the registered action for a given event type and mapping id
       InputAction getRegisteredInputAction( InputEventType, unsigned int );
-
   };
 
 }

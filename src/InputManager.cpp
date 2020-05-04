@@ -213,6 +213,76 @@ namespace Regolith
   }
 
 
+  void InputManager::simulateInputAction( InputHandler* handler, InputAction action )
+  {
+    DEBUG_LOG( "Simulating Input Action" );
+    if ( action == INPUT_ACTION_NULL ) return;
+
+    ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
+    for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+    {
+      DEBUG_STREAM << "  Propagating action : " << action;
+      (*it)->inputAction( action );
+    }
+  }
+
+
+  void InputManager::simulateBooleanAction( InputHandler* handler, InputAction action, bool val )
+  {
+    DEBUG_LOG( "Simulating Boolean Action" );
+    if ( action == INPUT_ACTION_NULL ) return;
+
+    ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
+    for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+    {
+      DEBUG_STREAM << "  Propagating action : " << action;
+      (*it)->booleanAction( action, val );
+    }
+  }
+
+
+  void InputManager::simulateFloatAction( InputHandler* handler, InputAction action, float val )
+  {
+    DEBUG_LOG( "Simulating Float Action" );
+    if ( action == INPUT_ACTION_NULL ) return;
+
+    ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
+    for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+    {
+      DEBUG_STREAM << "  Propagating action : " << action;
+      (*it)->floatAction( action, val );
+    }
+  }
+
+
+  void InputManager::simulateVectorAction( InputHandler* handler, InputAction action, const Vector& val )
+  {
+    DEBUG_LOG( "Simulating Vector Action" );
+    if ( action == INPUT_ACTION_NULL ) return;
+
+    ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
+    for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+    {
+      DEBUG_STREAM << "  Propagating action : " << action;
+      (*it)->vectorAction( action, val );
+    }
+  }
+
+
+  void InputManager::simulateMouseAction( InputHandler* handler, InputAction action, bool click, const Vector& vec )
+  {
+    DEBUG_LOG( "Simulating Mouse Action" );
+    if ( action == INPUT_ACTION_NULL ) return;
+
+    ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
+    for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+    {
+      DEBUG_STREAM << "  Propagating action : " << action;
+      (*it)->mouseAction( action, click, vec );
+    }
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Input Handler
 
@@ -261,7 +331,6 @@ namespace Regolith
   {
     return _inputMaps[ event_type ]->getRegisteredAction( code );
   }
-
 
 }
 

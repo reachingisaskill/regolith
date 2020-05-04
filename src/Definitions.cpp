@@ -31,6 +31,17 @@ namespace Regolith
     return (SDL_Scancode)value;
   }
 
+  RegolithEvent getRegolithEventID( std::string name )
+  {
+    for ( unsigned int i = 0; i < REGOLITH_EVENT_TOTAL; ++i )
+    {
+      if ( name == RegolithEventStrings[i] )
+        return (RegolithEvent) i;
+    }
+
+    return REGOLITH_EVENT_NULL;
+  }
+
 
   ContextEvent getContextEventID( std::string name )
   {

@@ -1,7 +1,6 @@
 
 #include "Manager.h"
 
-#include "Utilities.h"
 #include "Exception.h"
 #include "Engine.h"
 #include "ScenePlatformer.h"
@@ -248,5 +247,6 @@ namespace Regolith
   {
     SDL_PushEvent( &_gameEvents[ eventNum ] );
   }
+
 }
 

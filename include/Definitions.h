@@ -108,15 +108,7 @@ namespace Regolith
   };
 
 
-  enum ContextProperties
-  {
-    CONTEXT_PROPERTIES_NONE = 0,
-    CONTEXT_PROPERTIES_ANIMATED = 1<<0,
-    CONTEXT_PROPERTIES_VISIBLE = 1<<1
-  };
-
-
-  enum RegolithEvent : unsigned int
+  enum RegolithEvent
   {
     REGOLITH_EVENT_NULL,
     REGOLITH_EVENT_QUIT,
@@ -141,7 +133,7 @@ namespace Regolith
 
 
   // Don't forget to update the string names!
-  enum InputAction : unsigned int
+  enum InputAction
   {
     INPUT_ACTION_NULL,
     INPUT_ACTION_QUIT,
@@ -577,6 +569,25 @@ namespace Regolith
     { "audiofastforward", 286 }
   };
 
+  const char* const RegolithEventStrings[] =
+  {
+    "null",
+    "quit",
+    "engine_pause",
+    "engine_resume",
+    "scene_end",
+    "scene_pause",
+    "scene_resume",
+    "context_end",
+    "fullscreen",
+    "win_condition",
+    "lose_condition",
+    "gameover",
+    "window",
+    "display",
+    "camera_resize"
+  };
+
 
   // Context Event strings
   const char* const ContextEventStrings[] = 
@@ -611,6 +622,8 @@ namespace Regolith
   InputAction getActionID( std::string );
 
   SDL_Scancode getScancodeID( std::string );
+
+  RegolithEvent getRegolithEventID( std::string );
 
   ContextEvent getContextEventID( std::string );
 

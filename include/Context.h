@@ -30,6 +30,8 @@ namespace Regolith
       InputHandler* _theInput;
       AudioHandler _theAudio;
 
+      std::map< std::string, unsigned int > _contextEvents;
+
     public:
       explicit Context( InputHandler* h = nullptr );
 
@@ -74,6 +76,12 @@ namespace Regolith
       void takeFocus();
 
 
+      // Returns the context event for a given name
+      // This is how derived types allocate possible context events for buttons, etc to use
+      ContextEvent getContextEventID( std::string ) const;
+
+      // Return the ID number of registered (or default) context event
+      void registerContextEvent( std::string );
 
       // Raise an event in the current context
       virtual void raiseContextEvent( ContextEvent ) = 0;

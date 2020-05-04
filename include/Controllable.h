@@ -33,6 +33,7 @@ namespace Regolith
 
       // Interfaces for input
       // Handled and mapped actions
+      virtual void inputAction( const InputAction& ) {}
       virtual void booleanAction( const InputAction&, bool ) {}
       virtual void floatAction( const InputAction&, float ) {}
       virtual void vectorAction( const InputAction&, const Vector& ) {}
