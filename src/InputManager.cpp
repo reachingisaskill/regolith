@@ -9,31 +9,15 @@ namespace Regolith
 {
 
   InputManager::InputManager() :
-    _inputMaps(),
+    _inputHandlers( "input_handlers" ),
     _eventMaps(),
     _theEvent()
   {
-    for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
-    {
-      _inputMaps[ i ] = nullptr; 
-    }
-
-    _inputMaps[ INPUT_TYPE_KEYBOARD ] = new KeyboardMapping();
-    _inputMaps[ INPUT_TYPE_MOUSE_BUTTON ] = new MouseMapping();
-    _inputMaps[ INPUT_TYPE_MOUSE_MOVE ] = new MotionMapping();
   }
 
 
   InputManager::~InputManager()
   {
-    for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
-    {
-      if ( _inputMaps[ i ] != nullptr )
-      {
-        delete _inputMaps[ i ];
-        _inputMaps[ i ] = nullptr;
-      }
-    }
   }
 
 
@@ -65,26 +49,16 @@ namespace Regolith
 
     switch ( sdl_event.type )
     {
-      case SDL_WINDOWEVENT :
-        event_type = INPUT_TYPE_WINDOW;
-        event = REGOLITH_EVENT_WINDOW;
-        DEBUG_STREAM << "  Regolith Window Event";
-        end = this->getRegisteredObjects( event ).end();
-        for ( ControllableSet::iterator it = this->getRegisteredObjects( event ).begin(); it != end; ++it )
-        {
-          DEBUG_STREAM << "  Propagating event : " << event;
-          (*it)->eventAction( event, sdl_event );
-        }
-        break;
-
+      //////////////////////////////////////////////////
+      // Input-type events
       case SDL_KEYDOWN :
       case SDL_KEYUP :
         if ( handler == nullptr ) break;
 
         DEBUG_LOG( "  Keyboard key-press type event" );
         event_type = INPUT_TYPE_KEYBOARD;
-        mapper = _inputMaps[ event_type ];
-        action = (InputAction)mapper->getBehaviour( sdl_event );
+        mapper = handler->_inputMaps[ event_type ];
+        action = mapper->getAction( sdl_event );
         if ( action == INPUT_ACTION_NULL ) break;
 
         end = handler->getRegisteredObjects( action ).end();
@@ -99,8 +73,8 @@ namespace Regolith
         if ( handler == nullptr ) break;
 
         event_type = INPUT_TYPE_MOUSE_MOVE;
-        mapper = _inputMaps[ event_type ];
-        action = (InputAction)mapper->getBehaviour( sdl_event );
+        mapper = handler->_inputMaps[ event_type ];
+        action = mapper->getAction( sdl_event );
         DEBUG_STREAM << "  Regolith Mouse Motion Event";
 
         end = handler->getRegisteredObjects( action ).end();
@@ -120,8 +94,8 @@ namespace Regolith
 
         DEBUG_LOG( "  Mouse button-press type event" );
         event_type = INPUT_TYPE_MOUSE_BUTTON;
-        mapper = _inputMaps[ event_type ];
-        action = (InputAction)mapper->getBehaviour( sdl_event );
+        mapper = handler->_inputMaps[ event_type ];
+        action = mapper->getAction( sdl_event );
         if ( action == INPUT_ACTION_NULL ) break;
 
         end = handler->getRegisteredObjects( action ).end();
@@ -140,8 +114,31 @@ namespace Regolith
       case SDL_CONTROLLERBUTTONUP :
         break;
 
+      case SDL_JOYAXISMOTION :
+      case SDL_JOYBALLMOTION :
+      case SDL_JOYHATMOTION :
+        break;
+
+      case SDL_JOYBUTTONDOWN :
+      case SDL_JOYBUTTONUP :
+        break;
+
+      //////////////////////////////////////////////////
+      // Global-type events
+
+      case SDL_WINDOWEVENT :
+        event = REGOLITH_EVENT_WINDOW;
+        DEBUG_STREAM << "  Regolith Window Event";
+        end = this->getRegisteredObjects( event ).end();
+        for ( ControllableSet::iterator it = this->getRegisteredObjects( event ).begin(); it != end; ++it )
+        {
+          DEBUG_STREAM << "  Propagating event : " << event;
+          (*it)->eventAction( event, sdl_event );
+        }
+        break;
+
+
       case SDL_USEREVENT :
-        event_type = INPUT_TYPE_REGOLITH;
         event = (RegolithEvent)sdl_event.user.code;
         DEBUG_STREAM << "  Regolith User Event " << event;
 
@@ -161,12 +158,6 @@ namespace Regolith
       case SDL_CONTROLLERDEVICEADDED :
       case SDL_CONTROLLERDEVICEREMOVED :
       case SDL_CONTROLLERDEVICEREMAPPED :
-
-      case SDL_JOYAXISMOTION :
-      case SDL_JOYBALLMOTION :
-      case SDL_JOYHATMOTION :
-      case SDL_JOYBUTTONDOWN :
-      case SDL_JOYBUTTONUP :
 
       case SDL_JOYDEVICEADDED :
       case SDL_JOYDEVICEREMOVED :
@@ -198,19 +189,7 @@ namespace Regolith
   }
 
 
-  void InputManager::addInputMap( InputEventType event_type, InputMapping* mapping )
-  {
-    if ( _inputMaps[ event_type ] != nullptr )
-    {
-      delete _inputMaps[ event_type ];
-      _inputMaps[ event_type ] = nullptr;
-    }
-
-    _inputMaps[ event_type ] = mapping;
-  }
-
-
-  void InputManager::registerInputRequest( Controllable* object, RegolithEvent event )
+  void InputManager::registerEventRequest( Controllable* object, RegolithEvent event )
   {
     INFO_STREAM << "Registered input request for event: " << event << " " << object;
     _eventMaps[event].insert( object );
@@ -223,15 +202,14 @@ namespace Regolith
   }
 
 
-  void InputManager::registerBehaviour( InputEventType event_type, unsigned int code, InputBehaviour event )
+  InputHandler* InputManager::requestHandler( std::string name )
   {
-    _inputMaps[ event_type ]->registerBehaviour( code, event );
-  }
+    if ( ! _inputHandlers.exists( name ) ) 
+    {
+      _inputHandlers.addObject( new InputHandler(), name );
+    }
 
-
-  InputBehaviour InputManager::getRegisteredBehaviour( InputEventType event_type, unsigned int code )
-  {
-    return _inputMaps[ event_type ]->getRegisteredBehaviour( code );
+    return _inputHandlers.getByName( name );
   }
 
 
@@ -239,8 +217,30 @@ namespace Regolith
   // Input Handler
 
   InputHandler::InputHandler() :
+    _inputMaps(),
     _actionMaps()
   {
+    for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
+    {
+      _inputMaps[ i ] = nullptr; 
+    }
+
+    _inputMaps[ INPUT_TYPE_KEYBOARD ] = new KeyboardMapping();
+    _inputMaps[ INPUT_TYPE_MOUSE_BUTTON ] = new MouseMapping();
+    _inputMaps[ INPUT_TYPE_MOUSE_MOVE ] = new MotionMapping();
+  }
+
+
+  InputHandler::~InputHandler()
+  {
+    for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
+    {
+      if ( _inputMaps[ i ] != nullptr )
+      {
+        delete _inputMaps[ i ];
+        _inputMaps[ i ] = nullptr;
+      }
+    }
   }
 
 
@@ -248,6 +248,18 @@ namespace Regolith
   {
     INFO_STREAM << "Registered input request for action: " << action << " " << object;
     _actionMaps[action].insert( object );
+  }
+
+
+  void InputHandler::registerInputAction( InputEventType event_type, unsigned int code, InputAction event )
+  {
+    _inputMaps[ event_type ]->registerAction( code, event );
+  }
+
+
+  InputAction InputHandler::getRegisteredInputAction( InputEventType event_type, unsigned int code )
+  {
+    return _inputMaps[ event_type ]->getRegisteredAction( code );
   }
 
 

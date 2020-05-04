@@ -8,7 +8,8 @@
 namespace Regolith
 {
 
-  Dialog::Dialog( Camera* camera, Json::Value& json_data ) :
+  Dialog::Dialog( Camera* camera, Json::Value& json_data, InputHandler* h ) :
+    Context( h ),
     _cameraHUD( camera ),
     _name(),
     _subDialogs("sub_dialogs"),
@@ -64,7 +65,13 @@ namespace Regolith
           Utilities::validateJson( dialogs[i], "name", Utilities::JSON_TYPE_STRING );
           std::string dialog_name = dialogs[i]["name"].asString();
 
-          _subDialogs.addObject( new Dialog( _cameraHUD, dialogs[i] ), dialog_name );
+          InputHandler* dialogInHandler = this->inputHandler(); // Default is the same handler as the parent
+          if ( Utilities::validateJson( dialogs[i], "input_mapping", Utilities::JSON_TYPE_STRING, false ) )
+          {
+            dialogInHandler = Manager::getInstance()->getInputManager()->requestHandler( dialogs[i]["input_mapping"].asString() );
+          }
+
+          _subDialogs.addObject( new Dialog( _cameraHUD, dialogs[i], dialogInHandler ), dialog_name );
         }
         INFO_STREAM << "Loaded " << dialogs_size << " children";
       }
@@ -113,7 +120,7 @@ namespace Regolith
             {
               // What is the base context id
               InputAction action_id = getActionID( action_name );
-              if ( action_id == INPUT_ACTION_OPTIONS ) // Its not a standard action => must be option specific
+              if ( action_id == INPUT_ACTION_NULL ) // Its not a standard action => must be option specific
               {
                 // Get the name of the corresponding sub dialog
                 action_id = (InputAction)( (unsigned int)action_id + (unsigned int)_subDialogs.getID( action_name ) );

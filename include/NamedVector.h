@@ -51,6 +51,10 @@ namespace Regolith
 
       DATA* operator[]( size_t i ) { return _data[ i ]; }
 
+      bool exists( std::string ) const;
+
+      bool exists( size_t ) const;
+
       size_t mapSize() const { return _names.size(); }
       size_t vectorSize() const { return _data.size(); }
       size_t size() const { return _data.size(); }
@@ -155,6 +159,24 @@ namespace Regolith
     return _data[i];
   }
 
+
+  template < class DATA, bool OWNSMEMORY >
+  bool NamedVector<DATA, OWNSMEMORY>::exists( std::string objName ) const
+  {
+    NameMap::const_iterator found = _names.find( objName );
+    if ( found == _names.end() ) return false;
+    else return true;
+  }
+
+
+  template < class DATA, bool OWNSMEMORY >
+  bool NamedVector<DATA, OWNSMEMORY>::exists( size_t i ) const
+  {
+    if ( i >= _names.size() ) return false;
+    else return true;
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Partial Specialisation for Owned memory
 
@@ -188,6 +210,10 @@ namespace Regolith
       DATA* get( size_t );
 
       DATA* operator[]( size_t i ) { return _data[ i ]; }
+
+      bool exists( std::string ) const;
+
+      bool exists( size_t ) const;
 
       size_t mapSize() const { return _names.size(); }
       size_t vectorSize() const { return _data.size(); }
@@ -301,6 +327,23 @@ namespace Regolith
     }
 
     return _data[i];
+  }
+
+
+  template < class DATA >
+  bool NamedVector<DATA, true>::exists( std::string objName ) const
+  {
+    NameMap::const_iterator found = _names.find( objName );
+    if ( found == _names.end() ) return false;
+    else return true;
+  }
+
+
+  template < class DATA >
+  bool NamedVector<DATA, true>::exists( size_t i ) const
+  {
+    if ( i >= _names.size() ) return false;
+    else return true;
   }
 
 

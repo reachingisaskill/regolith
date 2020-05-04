@@ -94,9 +94,9 @@ namespace Regolith
 
   void Engine::registerEvents( InputManager* manager )
   {
-    manager->registerInputRequest( this, REGOLITH_EVENT_QUIT );
-    manager->registerInputRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
-    manager->registerInputRequest( this, REGOLITH_EVENT_ENGINE_RESUME );
+    manager->registerEventRequest( this, REGOLITH_EVENT_QUIT );
+    manager->registerEventRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
+    manager->registerEventRequest( this, REGOLITH_EVENT_ENGINE_RESUME );
   }
 
 

@@ -59,7 +59,7 @@ namespace Regolith
 
     public:
       // Scene pointer, camera pointer, json object containing this dialog
-      Dialog( Camera*, Json::Value& );
+      Dialog( Camera*, Json::Value&, InputHandler* h = nullptr );
 
       // Destruct all the owned memory
       virtual ~Dialog();

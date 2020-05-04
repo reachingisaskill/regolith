@@ -23,6 +23,8 @@ namespace Regolith
 
   const float epsilon = 1.0E-6;
 
+  const unsigned NUMBER_MOUSE_BUTTONS = 7;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful Enumerations
@@ -61,6 +63,21 @@ namespace Regolith
     DEFAULT_TEAM_ENEMIES = 4,
     DEFAULT_TEAM_MAX = 255
   };
+
+
+  enum MouseButton : unsigned char
+  {
+    MOUSE_BUTTON_NULL = 0,
+    MOUSE_BUTTON_LEFT = SDL_BUTTON_LMASK,
+    MOUSE_BUTTON_MIDDLE = SDL_BUTTON_MMASK,
+    MOUSE_BUTTON_RIGHT = SDL_BUTTON_RMASK,
+    MOUSE_BUTTON_X1 = SDL_BUTTON_X1MASK,
+    MOUSE_BUTTON_X2 = SDL_BUTTON_X2MASK,
+    MOUSE_BUTTON_Y1,
+    MOUSE_BUTTON_Y2,
+    MOUSE_BUTTON_TOTAL
+  };
+
 
 //////////////////////////////////////////////////
   // Event enumerations
@@ -204,9 +221,7 @@ namespace Regolith
     INPUT_ACTION_SELECT,
     INPUT_ACTION_CANCEL,
 
-    INPUT_ACTION_OPTIONS,
-
-    INPUT_ACTION_TOTAL = (unsigned int) -1
+    INPUT_ACTION_TOTAL
   };
 
 
@@ -216,7 +231,6 @@ namespace Regolith
   enum InputEventType
   {
     INPUT_TYPE_NULL,
-    INPUT_TYPE_REGOLITH,
     INPUT_TYPE_KEYBOARD,
     INPUT_TYPE_BUTTON,
     INPUT_TYPE_CONTROLLER_AXIS,
@@ -225,8 +239,6 @@ namespace Regolith
     INPUT_TYPE_MOUSE_WHEEL,
     INPUT_TYPE_JOYSTICK_MOVE,
     INPUT_TYPE_JOYHAT_MOVE,
-
-    INPUT_TYPE_WINDOW,
 
     INPUT_TYPE_TOTAL
   };
@@ -582,6 +594,18 @@ namespace Regolith
   };
 
 
+  const char* const MouseButtonStrings[] =
+  {
+    "null",
+    "left",
+    "middle",
+    "right",
+    "x1",
+    "x2",
+    "y1",
+    "y2"
+  };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Enumeration lookup functions
   InputAction getActionID( std::string );
@@ -589,6 +613,8 @@ namespace Regolith
   SDL_Scancode getScancodeID( std::string );
 
   ContextEvent getContextEventID( std::string );
+
+  MouseButton getMouseButtonID( std::string );
 }
 
 #endif // REGOLITH_DEFINITIONS_H_

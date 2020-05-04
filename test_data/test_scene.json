@@ -1,4 +1,6 @@
 {
+  "input_mapping" : "platformer",
+
   "sounds" :
   {
     "default_music" : "the_beat"

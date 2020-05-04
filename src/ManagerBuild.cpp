@@ -124,52 +124,90 @@ namespace Regolith
   void Manager::_loadInput( Json::Value& json_data )
   {
     Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "keymapping", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "keymappings", Utilities::JSON_TYPE_ARRAY );
 
     _theInput = new InputManager();
 
-    try
+    // Configure the input objects
+    Json::Value required = json_data["require"];
+    Json::Value keymaps = json_data["keymappings"];
+
+    // Quick vallidation - TODO: add a hardware check function to makesure hardware actually exists
+    Json::ArrayIndex required_size = required.size();
+    for ( Json::ArrayIndex i = 0; i != required_size; ++i )
     {
-      // Configure the input objects
-      Json::Value required = json_data["require"];
-      Json::Value keymaps = json_data["keymapping"];
-
-      Json::ArrayIndex required_size = required.size();
-      for ( Json::ArrayIndex i = 0; i != required_size; ++i )
+      if ( required[i].asString() == "controller" )
       {
-        if ( required[i].asString() == "controller" )
-        {
-          WARN_LOG( "Controllers are not yet supported!" );
-        }
-        else if ( required[i].asString() == "mouse" )
-        {
-          WARN_LOG( "Mouse interface is not yet supported!" );
-        }
-        else if ( required[i].asString() == "joystick" )
-        {
-          WARN_LOG( "Joystick is not yet supported!" );
-        }
+        WARN_LOG( "Controllers are not yet supported!" );
       }
-
-      Json::ArrayIndex keymaps_size = required.size();
-      for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
+      else if ( required[i].asString() == "joystick" )
       {
-        Json::Value keymap = keymaps[i];
-        Utilities::validateJson( keymap, "type", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( keymap, "mapping", Utilities::JSON_TYPE_OBJECT );
+        WARN_LOG( "Joystick is not yet supported!" );
+      }
+    }
 
-        INFO_LOG( "Loading Keyboard Mapping." );
-        if ( keymap["type"].asString() == "keyboard" )
+
+    Json::ArrayIndex keymaps_size = required.size();
+    for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
+    {
+      Utilities::validateJson( keymaps[i], "name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( keymaps[i], "keymapping", Utilities::JSON_TYPE_ARRAY );
+
+      std::string name = keymaps[i]["name"].asString();
+      Json::Value keymapping = keymaps[i]["keymapping"];
+
+      // Create an InputHandler with the required name and return a pointer
+      InputHandler* handler = _theInput->requestHandler( name );
+
+      // Loop over the key mapping hardware
+      Json::ArrayIndex keymapping_size = keymapping.size();
+      for ( Json::ArrayIndex j = 0; j != keymapping_size; ++j )
+      {
+        Utilities::validateJson( keymapping[j], "type", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( keymapping[j], "mapping", Utilities::JSON_TYPE_OBJECT );
+
+        std::string type = keymapping[j]["type"].asString();
+        Json::Value keys = keymapping[j]["mapping"];
+
+        if ( type == "keyboard" )
         {
-          Json::Value keys = keymap["mapping"];
+          INFO_LOG( "Loading Keyboard Mapping." );
+
           Json::Value::const_iterator keys_end = keys.end();
           for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
           {
             SDL_Scancode code = getScancodeID( it.key().asString() );
             InputAction action = getActionID( it->asString() );
-            _theInput->registerBehaviour( INPUT_TYPE_KEYBOARD, code, (InputBehaviour)action );
-            INFO_STREAM << "Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+            handler->registerInputAction( INPUT_TYPE_KEYBOARD, code, action );
+            INFO_STREAM << "Key Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
+        }
+
+        else if ( type == "mouse_buttons" )
+        {
+          INFO_LOG( "Loading Mouse Button Mapping." );
+
+          Json::Value::const_iterator keys_end = keys.end();
+          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
+          {
+            MouseButton code = getMouseButtonID( it.key().asString() );
+            InputAction action = getActionID( it->asString() );
+            handler->registerInputAction( INPUT_TYPE_MOUSE_BUTTON, code, action );
+            INFO_STREAM << "Mouse Button Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+          }
+        }
+
+        else if ( type == "mouse_movement" )
+        {
+          INFO_LOG( "Loading Mouse Movement." );
+
+          // Only require the movement input - it must be present if a mouse movement mapping is provided
+          Utilities::validateJson( keys, "movement", Utilities::JSON_TYPE_STRING );
+
+          unsigned code = 0; // Dummy variable - only one thing to map with mouse movement!
+          InputAction action = getActionID( keys["movement"].asString() );
+          handler->registerInputAction( INPUT_TYPE_MOUSE_MOVE, code, action );
+          INFO_STREAM << "Registered : mouse movement as action : " << keys["movement"].asString() << "(" << action << ")";
         }
         else
         {
@@ -177,13 +215,6 @@ namespace Regolith
           WARN_LOG( "Please try again with a future version." );
         }
       }
-
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Manager::_loadInput()", "Json reading failure" );
-      ex.addDetail( "What", rt.what() );
-      throw ex;
     }
   }
 

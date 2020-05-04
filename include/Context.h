@@ -26,15 +26,17 @@ namespace Regolith
   class Context : public Controllable
   {
     private:
-      Context* _parent;
-      InputHandler _theInput;
+      // Pointer to the Input manager owned input handler
+      InputHandler* _theInput;
       AudioHandler _theAudio;
-      ContextProperties _properties;
 
     public:
-      Context();
+      explicit Context( InputHandler* h = nullptr );
 
       virtual ~Context() {}
+
+      // This function MUST be called durng the configuration of the class if any user input is to be received.
+      void registerInputHandler( InputHandler* h ) { _theInput = h; }
 
 
       // Flag to see it needs updating with the current time
@@ -52,16 +54,8 @@ namespace Regolith
 
       
 
-      // Set the parent context
-      void setParentContext( Context* p ) { _parent = p; }
-
-      // Get the parent context
-      Context* getParentContext() { return _parent; }
-
-
-
       // Return the input handler for this context
-      InputHandler* inputHandler() { return &_theInput; }
+      InputHandler* inputHandler() { return _theInput; }
 
       // Return the audio handler for this context
       AudioHandler* audioHandler() { return &_theAudio; }

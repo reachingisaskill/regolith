@@ -82,10 +82,16 @@ namespace Regolith
       _collisionElements.push_back( ElementList() );
     }
 
-
-
     INFO_LOG( "Loading Json Data" );
     Json::Value json_data = this->_loadConfig();
+
+
+    // If a mapping object is indicated get a pointer to it from the manager
+    if ( Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      INFO_LOG( "Configuring Scene InputHandler" );
+      this->registerInputHandler( Manager::getInstance()->getInputManager()->requestHandler( json_data["input_mapping"].asString() ) );
+    }
 
     try
     {
@@ -264,10 +270,16 @@ namespace Regolith
       Utilities::validateJson( dialog_windows[i], "name", Utilities::JSON_TYPE_STRING );
       Utilities::validateJson( dialog_windows[i], "dialog", Utilities::JSON_TYPE_OBJECT );
 
+      InputHandler* dialogInHandler = this->inputHandler(); // Default is the same handler as the parent
+      if ( Utilities::validateJson( dialog_windows[i], "input_mapping", Utilities::JSON_TYPE_STRING, false ) )
+      {
+        dialogInHandler = Manager::getInstance()->getInputManager()->requestHandler( dialog_windows[i]["input_mapping"].asString() );
+      }
+
       std::string name = dialog_windows[i]["name"].asString();
 
       INFO_STREAM << "Building dialog window: " << name;
-      Dialog* newDialog = new Dialog( _theHUD, dialog_windows[i]["dialog"] );
+      Dialog* newDialog = new Dialog( _theHUD, dialog_windows[i]["dialog"], dialogInHandler );
 
       _dialogWindows.addObject( newDialog, name );
     }
@@ -326,7 +338,7 @@ namespace Regolith
   }
 
 
-  void Scene::_loadOptions( Json::Value& options )
+  void Scene::_loadOptions( Json::Value& )
   {
   }
 
@@ -570,15 +582,15 @@ namespace Regolith
 
   void Scene::registerEvents( InputManager* manager )
   {
-    manager->registerInputRequest( this, REGOLITH_EVENT_QUIT );
-    manager->registerInputRequest( this, REGOLITH_EVENT_SCENE_END );
-    manager->registerInputRequest( this, REGOLITH_EVENT_SCENE_PAUSE );
-    manager->registerInputRequest( this, REGOLITH_EVENT_CONTEXT_END );
-    manager->registerInputRequest( this, REGOLITH_EVENT_WIN_CONDITION );
-    manager->registerInputRequest( this, REGOLITH_EVENT_LOSE_CONDITION );
-    manager->registerInputRequest( this, REGOLITH_EVENT_GAMEOVER );
+    manager->registerEventRequest( this, REGOLITH_EVENT_QUIT );
+    manager->registerEventRequest( this, REGOLITH_EVENT_SCENE_END );
+    manager->registerEventRequest( this, REGOLITH_EVENT_SCENE_PAUSE );
+    manager->registerEventRequest( this, REGOLITH_EVENT_CONTEXT_END );
+    manager->registerEventRequest( this, REGOLITH_EVENT_WIN_CONDITION );
+    manager->registerEventRequest( this, REGOLITH_EVENT_LOSE_CONDITION );
+    manager->registerEventRequest( this, REGOLITH_EVENT_GAMEOVER );
 
-    manager->registerInputRequest( this, REGOLITH_EVENT_CAMERA_RESIZE );
+    manager->registerEventRequest( this, REGOLITH_EVENT_CAMERA_RESIZE );
   }
 
 

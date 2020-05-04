@@ -3,8 +3,8 @@
 #define REGOLITH_INPUT_HANDLER_H_
 
 #include "Definitions.h"
-
 #include "InputMapping.h"
+#include "NamedVector.h"
 
 #include <set>
 
@@ -31,9 +31,8 @@ namespace Regolith
     InputManager& operator=( const InputManager& ) = delete;
 
     private:
-      // Map the InputEventType to the InputMapping objects
-      // This class owns this memory
-      InputMapping* _inputMaps[ INPUT_TYPE_TOTAL ];
+      // Named vector of input handlers. Manager owns their memory
+      NamedVector<InputHandler, true> _inputHandlers;
 
       // Map the input actions to the list of drawable objects that request callbacks
       ControllableSet _eventMaps[ REGOLITH_EVENT_TOTAL ];
@@ -53,20 +52,23 @@ namespace Regolith
       // Hande a specific SDL event object
       void handleEvent( SDL_Event&, InputHandler* );
 
-      // Set a new input map object
-      void addInputMap( InputEventType, InputMapping* );
 
       // Register the request from a drawable object to be called when a given event is raised
-      void registerInputRequest( Controllable*, RegolithEvent );
+      void registerEventRequest( Controllable*, RegolithEvent );
 
       // Return the set of objects that requested the input action
       ControllableSet& getRegisteredObjects( RegolithEvent );
 
+
       // Register an action to a specific input code on a specific input event type (hardware!)
-      void registerBehaviour( InputEventType, unsigned int, InputBehaviour );
+      void registerEvent( InputEventType, unsigned int, RegolithEvent );
 
       // Return the event current registered to current event type
-      InputBehaviour getRegisteredBehaviour( InputEventType, unsigned int );
+      RegolithEvent getRegisteredEvent( InputEventType, unsigned int );
+
+
+      // Requests an input handler. If it exists, return the pointer, otherwise create it.
+      InputHandler* requestHandler( std::string );
   };
 
 
@@ -79,18 +81,33 @@ namespace Regolith
    */
   class InputHandler
   {
+    friend class InputManager;
     private:
-      ControllableSet _actionMaps[ INPUT_ACTION_OPTIONS ];
+      // Map the array of mapping object - one for each input event type
+      // This class owns this memory
+      InputMapping* _inputMaps[ INPUT_TYPE_TOTAL ];
+
+      // Array of sets of controllable objects - one for each input action
+      ControllableSet _actionMaps[ INPUT_ACTION_TOTAL ];
 
     public :
       InputHandler();
 
+      ~InputHandler();
 
       // Return the set of objects that requested the input action
       ControllableSet& getRegisteredObjects( InputAction action ) { return _actionMaps[ action ]; }
 
       // Register the request from a drawable object to be called when a given event is raised
       void registerInputRequest( Controllable*, InputAction );
+
+
+
+      // Register a user action (event+mapping id) to an input action
+      void registerInputAction( InputEventType, unsigned int, InputAction );
+
+      // Return the registered action for a given event type and mapping id
+      InputAction getRegisteredInputAction( InputEventType, unsigned int );
 
   };
 

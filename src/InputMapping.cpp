@@ -14,7 +14,7 @@ namespace Regolith
 
   KeyboardMapping::KeyboardMapping() :
     _theMap(),
-    _lastBehaviour( INPUT_ACTION_NULL ),
+    _lastAction( INPUT_ACTION_NULL ),
     _lastValue( false )
   {
     for ( unsigned int i = 0; i < SDL_NUM_SCANCODES; ++i )
@@ -30,19 +30,19 @@ namespace Regolith
 
 
 
-  void KeyboardMapping::registerBehaviour( unsigned int scan_code, InputBehaviour action )
+  void KeyboardMapping::registerAction( unsigned int scan_code, InputAction action )
   {
     DEBUG_STREAM << "Keyboard Mapping registered: " << action << " -> " << scan_code;
     _theMap[ scan_code ] = action;
   }
 
 
-  InputBehaviour KeyboardMapping::getBehaviour( SDL_Event& event )
+  InputAction KeyboardMapping::getAction( SDL_Event& event )
   {
     if ( event.key.repeat != 0 )
     {
-      _lastBehaviour = INPUT_ACTION_NULL;
-      return _lastBehaviour;
+      _lastAction = INPUT_ACTION_NULL;
+      return _lastAction;
     }
 
     if ( event.type == SDL_KEYDOWN )
@@ -53,19 +53,19 @@ namespace Regolith
     {
       _lastValue = false;
     }
-    _lastBehaviour = _theMap[event.key.keysym.scancode];
+    _lastAction = _theMap[event.key.keysym.scancode];
 
-    return _lastBehaviour;
+    return _lastAction;
   }
 
 
   void KeyboardMapping::propagate( Controllable* object ) const
   {
-    object->booleanAction( (InputAction)_lastBehaviour, _lastValue );
+    object->booleanAction( _lastAction, _lastValue );
   }
 
 
-  InputBehaviour KeyboardMapping::getRegisteredBehaviour( unsigned int code ) const
+  InputAction KeyboardMapping::getRegisteredAction( unsigned int code ) const
   {
     return _theMap[code];
   }
@@ -75,7 +75,7 @@ namespace Regolith
   // Motion Mapping class
 
   MotionMapping::MotionMapping() :
-    _theBehaviour( INPUT_ACTION_MOUSE_MOVE ),
+    _theAction( INPUT_ACTION_MOUSE_MOVE ),
     _lastPosition( 0.0 )
   {
   }
@@ -87,32 +87,32 @@ namespace Regolith
 
 
 
-  void MotionMapping::registerBehaviour( unsigned int, InputBehaviour action )
+  void MotionMapping::registerAction( unsigned int, InputAction action )
   {
     DEBUG_STREAM << "Motion Mapping registered: " << action;
-    _theBehaviour = action;
+    _theAction = action;
   }
 
 
-  InputBehaviour MotionMapping::getBehaviour( SDL_Event& event )
+  InputAction MotionMapping::getAction( SDL_Event& event )
   {
     _lastPosition.x() = event.motion.x;
     _lastPosition.y() = event.motion.y;
 
-    return _theBehaviour;
+    return _theAction;
   }
 
 
   void MotionMapping::propagate( Controllable* object ) const
   {
     DEBUG_STREAM << "PROPAGATING MOUSE_MOVE " << object;
-    object->vectorAction( (InputAction)_theBehaviour, _lastPosition );
+    object->vectorAction( (InputAction)_theAction, _lastPosition );
   }
 
 
-  InputBehaviour MotionMapping::getRegisteredBehaviour( unsigned int ) const
+  InputAction MotionMapping::getRegisteredAction( unsigned int ) const
   {
-    return _theBehaviour;
+    return _theAction;
   }
 
 
@@ -120,30 +120,30 @@ namespace Regolith
   // Controller Axis Mapping class
 
 //  ControllerAxisMapping::ControllerAxisMapping( unsigned int size ) :
-//    _theMap( new InputBehaviour[size] ),
-//    _lastBehaviour(),
+//    _theMap( new InputAction[size] ),
+//    _lastAction( INPUT_ACTION_NULL ),
 //    _lastPosition()
 //  {
 //  }
 //
 //
-//  void ControllerAxisMapping::registerBehaviour( unsigned int controller, InputBehaviour action )
+//  void ControllerAxisMapping::registerAction( unsigned int controller, InputAction action )
 //  {
 //    _theMap[ controller ] = action;
 //  }
 //
 //
-//  InputBehaviour& ControllerAxisMapping::getBehaviour( SDL_Event& event )
+//  InputAction& ControllerAxisMapping::getAction( SDL_Event& event )
 //  {
 //    _lastPosition = event.jaxis.value;
-//    _lastBehaviour = _theMap[ event.jaxis.axis ];
-//    return _lastBehaviour;
+//    _lastAction = _theMap[ event.jaxis.axis ];
+//    return _lastAction;
 //  }
 //
 //
 //  void ControllerAxisMapping::propagate( Controllable* object ) const
 //  {
-//    object->floatBehaviour( _lastBehaviour, _lastPosition );
+//    object->floatAction( _lastAction, _lastPosition );
 //  }
 
 
@@ -152,11 +152,11 @@ namespace Regolith
 
   MouseMapping::MouseMapping() :
     _theMap(),
-    _lastBehaviour( 0 ),
+    _lastAction( INPUT_ACTION_NULL ),
     _lastPosition( 0.0 ),
     _lastValue( false )
   {
-    for ( unsigned int i = 0; i < 14; ++i )
+    for ( unsigned int i = 0; i < NUMBER_MOUSE_BUTTONS; ++i )
     {
       _theMap[ i ] = INPUT_ACTION_CLICK;
     }
@@ -169,14 +169,14 @@ namespace Regolith
 
 
 
-  void MouseMapping::registerBehaviour( unsigned int button, InputBehaviour action )
+  void MouseMapping::registerAction( unsigned int button, InputAction action )
   {
     DEBUG_STREAM << "Mouse Mapping registered: " << action << " -> " << button;
     _theMap[ button ] = action;
   }
 
 
-  InputBehaviour MouseMapping::getBehaviour( SDL_Event& event )
+  InputAction MouseMapping::getAction( SDL_Event& event )
   {
     _lastPosition.x() = event.button.x;
     _lastPosition.y() = event.button.y;
@@ -189,19 +189,19 @@ namespace Regolith
     {
       _lastValue = false;
     }
-    _lastBehaviour = _theMap[event.button.button];
+    _lastAction = _theMap[event.button.button];
 
-    return _lastBehaviour;
+    return _lastAction;
   }
 
 
   void MouseMapping::propagate( Controllable* object ) const
   {
-    object->mouseAction( (InputAction)_lastBehaviour, _lastValue, _lastPosition );
+    object->mouseAction( _lastAction, _lastValue, _lastPosition );
   }
 
 
-  InputBehaviour MouseMapping::getRegisteredBehaviour( unsigned int code ) const
+  InputAction MouseMapping::getRegisteredAction( unsigned int code ) const
   {
     return _theMap[code];
   }

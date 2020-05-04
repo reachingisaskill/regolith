@@ -23,48 +23,47 @@ int main( int, char** )
   testass::control::get()->setVerbosity( testass::control::verb_short );
 
   InputManager manager;
+  InputHandler* handler = manager.requestHandler( "test" );
 
-  manager.registerBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_SPACE, INPUT_ACTION_JUMP );
+  handler->registerInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_SPACE, INPUT_ACTION_JUMP );
 
-  manager.registerBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_W, INPUT_ACTION_MOVE_UP );
-  manager.registerBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_S, INPUT_ACTION_MOVE_DOWN );
-  manager.registerBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_A, INPUT_ACTION_MOVE_LEFT );
-  manager.registerBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_D, INPUT_ACTION_MOVE_RIGHT );
-
-  InputHandler handler;
+  handler->registerInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_W, INPUT_ACTION_MOVE_UP );
+  handler->registerInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_S, INPUT_ACTION_MOVE_DOWN );
+  handler->registerInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_A, INPUT_ACTION_MOVE_LEFT );
+  handler->registerInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_D, INPUT_ACTION_MOVE_RIGHT );
 
   TestDrawable* testObject = new TestDrawable();
 
   testObject->registerEvents( &manager );
-  testObject->registerActions( &handler );
+  testObject->registerActions( handler );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   SECTION( "Action Registration" );
   {
-    ASSERT_EQUAL( manager.getRegisteredBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_SPACE ), INPUT_ACTION_JUMP );
-    ASSERT_EQUAL( manager.getRegisteredBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_W ), INPUT_ACTION_MOVE_UP );
-    ASSERT_EQUAL( manager.getRegisteredBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_S ), INPUT_ACTION_MOVE_DOWN );
-    ASSERT_EQUAL( manager.getRegisteredBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_A ), INPUT_ACTION_MOVE_LEFT );
-    ASSERT_EQUAL( manager.getRegisteredBehaviour( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_D ), INPUT_ACTION_MOVE_RIGHT );
+    ASSERT_EQUAL( handler->getRegisteredInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_SPACE ), INPUT_ACTION_JUMP );
+    ASSERT_EQUAL( handler->getRegisteredInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_W ), INPUT_ACTION_MOVE_UP );
+    ASSERT_EQUAL( handler->getRegisteredInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_S ), INPUT_ACTION_MOVE_DOWN );
+    ASSERT_EQUAL( handler->getRegisteredInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_A ), INPUT_ACTION_MOVE_LEFT );
+    ASSERT_EQUAL( handler->getRegisteredInputAction( INPUT_TYPE_KEYBOARD, SDL_SCANCODE_D ), INPUT_ACTION_MOVE_RIGHT );
 
-    ControllableSet the_set = handler.getRegisteredObjects( INPUT_ACTION_JUMP );
+    ControllableSet the_set = handler->getRegisteredObjects( INPUT_ACTION_JUMP );
     ASSERT_EQUAL( the_set.size(), (size_t)1 );
     ASSERT_FALSE( the_set.find( testObject ) == the_set.end() );
 
-    the_set = handler.getRegisteredObjects( INPUT_ACTION_MOVE_UP );
+    the_set = handler->getRegisteredObjects( INPUT_ACTION_MOVE_UP );
     ASSERT_EQUAL( the_set.size(), (size_t)1 );
     ASSERT_FALSE( the_set.find( testObject ) == the_set.end() );
 
-    the_set = handler.getRegisteredObjects( INPUT_ACTION_MOVE_DOWN );
+    the_set = handler->getRegisteredObjects( INPUT_ACTION_MOVE_DOWN );
     ASSERT_EQUAL( the_set.size(), (size_t)1 );
     ASSERT_FALSE( the_set.find( testObject ) == the_set.end() );
 
-    the_set = handler.getRegisteredObjects( INPUT_ACTION_MOVE_LEFT );
+    the_set = handler->getRegisteredObjects( INPUT_ACTION_MOVE_LEFT );
     ASSERT_EQUAL( the_set.size(), (size_t)1 );
     ASSERT_FALSE( the_set.find( testObject ) == the_set.end() );
 
-    the_set = handler.getRegisteredObjects( INPUT_ACTION_MOVE_RIGHT );
+    the_set = handler->getRegisteredObjects( INPUT_ACTION_MOVE_RIGHT );
     ASSERT_EQUAL( the_set.size(), (size_t)1 );
     ASSERT_FALSE( the_set.find( testObject ) == the_set.end() );
   }
@@ -89,13 +88,13 @@ int main( int, char** )
 
     event.type = SDL_KEYDOWN;
     event.key = key_down;
-    manager.handleEvent( event, &handler );
+    manager.handleEvent( event, handler );
 
     ASSERT_TRUE( testObject->getJump() );
 
     event.type = SDL_KEYUP;
     event.key = key_up;
-    manager.handleEvent( event, &handler );
+    manager.handleEvent( event, handler );
 
     ASSERT_FALSE( testObject->getJump() );
 
@@ -108,7 +107,7 @@ int main( int, char** )
 
     event.type = SDL_KEYDOWN;
     event.key = key_left;
-    manager.handleEvent( event, &handler );
+    manager.handleEvent( event, handler );
 
     ASSERT_APPROX_EQUAL( testObject->getVelocity().x(), -1.0 );
   }

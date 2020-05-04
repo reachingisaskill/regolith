@@ -6,11 +6,9 @@
 namespace Regolith
 {
 
-  Context::Context() :
-    _parent( nullptr ),
-    _theInput(),
-    _theAudio( Manager::getInstance()->getAudioManager() ),
-    _properties( CONTEXT_PROPERTIES_NONE )
+  Context::Context( InputHandler* h ) :
+    _theInput( h ),
+    _theAudio( Manager::getInstance()->getAudioManager() )
   {
   }
 

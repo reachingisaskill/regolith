@@ -1,4 +1,6 @@
 {
+  "input_mapping" : "title",
+
   "sounds" :
   {
     "default_music" : "the_beat"
@@ -50,6 +52,8 @@
   "dialog_windows" :
   [
     {
+      "input_mapping" : "title",
+
       "name" : "title_dialog",
       "dialog" :
       {

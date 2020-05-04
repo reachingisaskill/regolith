@@ -20,31 +20,29 @@ namespace Regolith
    * SDL_CONTROLLER_BUTTON_MAX = max number of controller button inputs
    */
 
-  typedef unsigned int InputBehaviour;
-
   class InputMapping
   {
     public :
       virtual ~InputMapping() {}
 
-      virtual void registerBehaviour( unsigned int, InputBehaviour ) = 0;
+      virtual void registerAction( unsigned int, InputAction ) = 0;
 
-      virtual InputBehaviour getBehaviour( SDL_Event& ) = 0;
+      virtual InputAction getAction( SDL_Event& ) = 0;
 
-      virtual InputBehaviour getRegisteredBehaviour( unsigned int ) const = 0;
+      virtual InputAction getRegisteredAction( unsigned int ) const = 0;
 
       virtual void propagate( Controllable*  ) const = 0;
   };
 
 
 ////////////////////////////////////////////////////////////////////////////////
-  // Keyboard/Button Mapping class
+  // Keyboard Mapping class
 
   class KeyboardMapping : public InputMapping
   {
     private:
-      InputBehaviour _theMap[SDL_NUM_SCANCODES];
-      InputBehaviour _lastBehaviour;
+      InputAction _theMap[SDL_NUM_SCANCODES];
+      InputAction _lastAction;
       bool _lastValue;
 
     public:
@@ -52,23 +50,23 @@ namespace Regolith
 
       virtual ~KeyboardMapping();
 
-      void registerBehaviour( unsigned int, InputBehaviour );
+      void registerAction( unsigned int, InputAction );
 
-      InputBehaviour getBehaviour( SDL_Event& event );
+      InputAction getAction( SDL_Event& event );
 
-      InputBehaviour getRegisteredBehaviour( unsigned int ) const;
+      InputAction getRegisteredAction( unsigned int ) const;
 
       void propagate( Controllable* ) const;
   };
 
 
 ////////////////////////////////////////////////////////////////////////////////
-  // Keyboard/Button Mapping class
+  // Mouse movement Mapping class
 
   class MotionMapping : public InputMapping
   {
     private:
-      InputBehaviour _theBehaviour;
+      InputAction _theAction;
       Vector _lastPosition;
 
     public:
@@ -76,11 +74,11 @@ namespace Regolith
 
       virtual ~MotionMapping();
 
-      void registerBehaviour( unsigned int, InputBehaviour );
+      void registerAction( unsigned int, InputAction );
 
-      InputBehaviour getBehaviour( SDL_Event& event );
+      InputAction getAction( SDL_Event& event );
 
-      InputBehaviour getRegisteredBehaviour( unsigned int ) const;
+      InputAction getRegisteredAction( unsigned int ) const;
 
       void propagate( Controllable* ) const;
   };
@@ -92,29 +90,29 @@ namespace Regolith
 //  class ControllerAxisMapping : public InputMapping
 //  {
 //    private:
-//      InputBehaviour* _theMap; // Map for all controller joysticks!
-//      InputBehaviour _lastBehaviour;
+//      InputAction* _theMap; // Map for all controller joysticks!
+//      InputAction _lastAction;
 //      float _lastPosition;
 //
 //    public:
 //      ControllerAxisMapping( unsigned int num = SDL_CONTROLLER_AXIS_MAX );
 //
-//      void registerBehaviour( unsigned int, InputBehaviour );
+//      void registerAction( unsigned int, InputAction );
 //
-//      InputBehaviour getBehaviour( SDL_Event& );
+//      InputAction getAction( SDL_Event& );
 //
 //      void propagate( Controllable* ) const;
 //  };
   
 
 ////////////////////////////////////////////////////////////////////////////////
-  // Mouse Mapping class
+  // Mouse button Mapping class
 
   class MouseMapping : public InputMapping
   {
     private:
-      InputBehaviour _theMap[14]; // Map for 7 mouse buttons, (up+down)
-      InputBehaviour _lastBehaviour;
+      InputAction _theMap[NUMBER_MOUSE_BUTTONS]; // Map for 7 mouse buttons
+      InputAction _lastAction;
       Vector _lastPosition;
       bool _lastValue;
 
@@ -123,11 +121,11 @@ namespace Regolith
 
       ~MouseMapping();
 
-      void registerBehaviour( unsigned int, InputBehaviour );
+      void registerAction( unsigned int, InputAction );
 
-      InputBehaviour getBehaviour( SDL_Event& );
+      InputAction getAction( SDL_Event& );
 
-      InputBehaviour getRegisteredBehaviour( unsigned int ) const;
+      InputAction getRegisteredAction( unsigned int ) const;
 
       void propagate( Controllable* ) const;
   };

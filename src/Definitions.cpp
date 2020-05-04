@@ -15,7 +15,7 @@ namespace Regolith
         return (InputAction) i;
     }
 
-    return INPUT_ACTION_OPTIONS;
+    return INPUT_ACTION_NULL;
   }
 
   SDL_Scancode getScancodeID( std::string name )
@@ -41,6 +41,18 @@ namespace Regolith
     }
 
     return CONTEXT_EVENT_OPTIONS;
+  }
+
+
+  MouseButton getMouseButtonID( std::string name )
+  {
+    for ( unsigned int i = 0; i < MOUSE_BUTTON_TOTAL; ++i )
+    {
+      if ( name == MouseButtonStrings[i] )
+        return (MouseButton) i;
+    }
+
+    return MOUSE_BUTTON_NULL;
   }
 }
 

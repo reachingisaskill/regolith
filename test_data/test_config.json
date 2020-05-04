@@ -27,22 +27,50 @@
 
   "input_device" :
   {
-    "require" : [ "keyboard" ],
-    "keymapping" :
-    [ 
+    "require" : [ "keyboard", "mouse" ],
+    "keymappings" :
+    [
       {
-        "type" : "keyboard",
-        "mapping" :
-        {
-          "escape" : "quit",
-          "p"      : "pause",
-          "space"  : "jump",
-          "w"      : "move_up",
-          "s"      : "move_down",
-          "a"      : "move_left",
-          "d"      : "move_right",
-          "return" : "attack"
-        }
+        "name" : "platformer",
+        "keymapping" :
+        [ 
+          {
+            "type" : "keyboard",
+            "mapping" :
+            {
+              "escape" : "quit",
+              "p"      : "pause",
+              "space"  : "jump",
+              "w"      : "move_up",
+              "s"      : "move_down",
+              "a"      : "move_left",
+              "d"      : "move_right",
+              "return" : "attack"
+            }
+          }
+        ]
+      },
+      {
+        "name" : "title",
+        "keymapping" :
+        [ 
+          {
+            "type" : "keyboard",
+            "mapping" :
+            {
+              "escape" : "quit",
+              "return" : "select",
+              "tab" : "focus_next"
+            }
+          },
+          {
+            "type" : "mouse_buttons",
+            "mapping" :
+            {
+              "left" : "click"
+            }
+          }
+        ]
       }
     ]
   },
