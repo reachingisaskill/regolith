@@ -11,6 +11,7 @@
 #include "Scene.h"
 #include "ObjectBuilder.h"
 #include "SceneBuilder.h"
+#include "DialogBuilder.h"
 
 #include <vector>
 #include <map>
@@ -50,12 +51,12 @@ namespace Regolith
 
       ObjectBuilder* _theBuilder;
       SceneBuilder* _theSceneBuilder;
+      DialogBuilder* _theDialogBuilder;
 
       RawTextureMap _rawTextures;
       TeamNameMap _teamNames;
       NamedVector<Drawable, true> _resources;
-
-      SceneList _scenes;
+      NamedVector<Scene, true> _scenes;
 
       std::string _title;
       TTF_Font* _defaultFont;
@@ -105,8 +106,11 @@ namespace Regolith
       // Return a pointer to the texture builder
       ObjectBuilder* getObjectBuilder() { return _theBuilder; }
 
-      // Return a pointer to the texture builder
+      // Return a pointer to the Scene builder
       SceneBuilder* getSceneBuilder() { return _theSceneBuilder; }
+
+      // Return a pointer to the dialog builder
+      DialogBuilder* getDialogBuilder() { return _theDialogBuilder; }
 
       // Get the pointer to the window
       SDL_Renderer* getRendererPointer() { return _theRenderer; }
@@ -134,10 +138,13 @@ namespace Regolith
       Scene* getScene( size_t );
 
       // Return a pointer to the required scene
-      Scene* loadScene( size_t );
+      void loadScene( size_t );
 
       // Return the number of scenes
       size_t getNumberScenes() { return _scenes.size(); }
+
+      // Return the ID number for a given scene
+      unsigned int getSceneID( std::string name ) const { return _scenes.getID( name ); }
 
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -163,13 +170,13 @@ namespace Regolith
       unsigned int getTeamID( std::string name ) { return _teamNames[name]; }
 
       // Return a pointer to a given resource
-      Drawable* getResource( std::string name ) { return _resources.getByName( name ); }
+      Drawable* getResource( std::string name ) { return _resources.get( name ); }
 
       // Return a pointer to a given resource
       Drawable* getResource( unsigned int i ) { return _resources[i]; }
 
       // Spawn a new instance of a resource and return the memory to the caller
-      Drawable* spawn( std::string name, Vector pos = Vector(0.0) ) { return _resources.getByName( name )->cloneAt( pos ); }
+      Drawable* spawn( std::string name, Vector pos = Vector(0.0) ) { return _resources.get( name )->cloneAt( pos ); }
 
       // Spawn a new instance of a resource and return the memory to the caller
       Drawable* spawn( unsigned int i, Vector pos ) { return _resources[i]->cloneAt( pos ); }
@@ -188,11 +195,14 @@ namespace Regolith
       ////////////////////////////////////////////////////////////////////////////////
       // Context stact manipulation
 
-      // Set the current context pointer
-      void pushContext( Context* c ) { _contexts.push_front( c ); }
+      // Open a new context on top of the stack
+      void openContext( Context* );
 
-      // Set the current context pointer
-      void popContext();
+      // Open a new context in place of the current one
+      void transferContext( Context* );
+
+      // Closes and then pops the context on the top of the stack
+      void closeContext();
 
       // Get the current context
       ContextStack& contextStack() { return _contexts; }

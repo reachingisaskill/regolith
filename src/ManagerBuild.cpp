@@ -153,11 +153,10 @@ namespace Regolith
       Utilities::validateJson( keymaps[i], "name", Utilities::JSON_TYPE_STRING );
       Utilities::validateJson( keymaps[i], "keymapping", Utilities::JSON_TYPE_ARRAY );
 
-      std::string name = keymaps[i]["name"].asString();
+      std::string mapping_name = keymaps[i]["name"].asString();
       Json::Value keymapping = keymaps[i]["keymapping"];
 
-      // Create an InputHandler with the required name and return a pointer
-      InputHandler* handler = _theInput->requestHandler( name );
+      _theInput->requestMapping( mapping_name );
 
       // Loop over the key mapping hardware
       Json::ArrayIndex keymapping_size = keymapping.size();
@@ -178,8 +177,8 @@ namespace Regolith
           {
             SDL_Scancode code = getScancodeID( it.key().asString() );
             InputAction action = getActionID( it->asString() );
-            handler->registerInputAction( INPUT_TYPE_KEYBOARD, code, action );
-            INFO_STREAM << "Key Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+            _theInput->registerInputAction( mapping_name, INPUT_TYPE_KEYBOARD, code, action );
+            INFO_STREAM << "Key Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
         }
 
@@ -192,8 +191,8 @@ namespace Regolith
           {
             MouseButton code = getMouseButtonID( it.key().asString() );
             InputAction action = getActionID( it->asString() );
-            handler->registerInputAction( INPUT_TYPE_MOUSE_BUTTON, code, action );
-            INFO_STREAM << "Mouse Button Registered : " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+            _theInput->registerInputAction( mapping_name, INPUT_TYPE_MOUSE_BUTTON, code, action );
+            INFO_STREAM << "Mouse Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
         }
 
@@ -206,8 +205,8 @@ namespace Regolith
 
           unsigned code = 0; // Dummy variable - only one thing to map with mouse movement!
           InputAction action = getActionID( keys["movement"].asString() );
-          handler->registerInputAction( INPUT_TYPE_MOUSE_MOVE, code, action );
-          INFO_STREAM << "Registered : mouse movement as action : " << keys["movement"].asString() << "(" << action << ")";
+          _theInput->registerInputAction( mapping_name, INPUT_TYPE_MOUSE_MOVE, code, action );
+          INFO_STREAM << "Registered : mouse movement as action to map: " << mapping_name << " -- " << keys["movement"].asString() << "(" << action << ")";
         }
         else
         {
@@ -419,11 +418,21 @@ namespace Regolith
     Json::ArrayIndex scenes_size = scene_data.size();
     for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
     {
-      Scene* new_scene = _theSceneBuilder->build( scene_data[i] );
-      new_scene->registerEvents( _theInput );
-      _scenes.push_back( new_scene );
+      Utilities::validateJson( scene_data[i], "name", Utilities::JSON_TYPE_STRING );
+      std::string name = scene_data[i]["name"].asString();
+
+      _scenes.addName( name );
     }
 
+    for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
+    {
+      Utilities::validateJson( scene_data[i], "name", Utilities::JSON_TYPE_STRING );
+      std::string name = scene_data[i]["name"].asString();
+
+      Scene* new_scene = _theSceneBuilder->build( scene_data[i] );
+      _scenes.set( name, new_scene );
+      INFO_STREAM << "Configured Scene: " << name;
+    }
   }
 
 }

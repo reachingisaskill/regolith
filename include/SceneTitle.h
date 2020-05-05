@@ -15,17 +15,13 @@ namespace Regolith
 
   class SceneTitle : public Scene
   {
+    friend class TitleSceneFactory;
+
     private:
       Dialog* _startingDialog;
 
     protected:
       void onStart();
-
-      // Override this function to allow the base class to build components specific to this scene type
-      virtual void _loadSceneSpecificComponents( Json::Value& );
-
-      // Load the options section
-      void _loadOptions( Json::Value& );
 
       // Derived class render
       virtual void _render();

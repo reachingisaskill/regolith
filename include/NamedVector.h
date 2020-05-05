@@ -45,9 +45,13 @@ namespace Regolith
 
       size_t getID( std::string ) const;
 
-      DATA* getByName( std::string );
+      DATA* get( std::string );
 
       DATA* get( size_t );
+
+      void set( size_t, DATA* );
+
+      void set( std::string, DATA* );
 
       DATA* operator[]( size_t i ) { return _data[ i ]; }
 
@@ -137,7 +141,7 @@ namespace Regolith
 
 
   template < class DATA, bool OWNSMEMORY >
-  DATA* NamedVector<DATA, OWNSMEMORY>::getByName( std::string name )
+  DATA* NamedVector<DATA, OWNSMEMORY>::get( std::string name )
   {
     size_t id = this->getID( name );
     return _data[ id ];
@@ -149,7 +153,7 @@ namespace Regolith
   {
     if ( i >= _names.size() )
     {
-      ERROR_STREAM << "Named Vector: " << _storageType << ". Could index, " << i << ", outside of map size, " << _names.size();
+      ERROR_STREAM << "Named Vector: " << _storageType << ". Could not find index, " << i << ", outside of map size, " << _names.size();
       Exception ex( "NamedVector::get()", "Index outside of map size", true );
       ex.addDetail( "Index", i );
       ex.addDetail( "Size", _names.size() );
@@ -157,6 +161,39 @@ namespace Regolith
     }
 
     return _data[i];
+  }
+
+
+  template < class DATA, bool OWNSMEMORY >
+  void NamedVector<DATA, OWNSMEMORY>::set( size_t i, DATA* data )
+  {
+    if ( i >= _names.size() )
+    {
+      ERROR_STREAM << "Named Vector: " << _storageType << ". Could not find index, " << i << ", outside of map size, " << _names.size();
+      Exception ex( "NamedVector::get()", "Index outside of map size", true );
+      ex.addDetail( "Index", i );
+      ex.addDetail( "Size", _names.size() );
+      throw ex;
+    }
+
+    _data[i] = data;
+  }
+
+
+  template < class DATA, bool OWNSMEMORY >
+  void NamedVector<DATA, OWNSMEMORY>::set( std::string name, DATA* data )
+  {
+    if ( ! exists( name ) )
+    {
+      ERROR_STREAM << "Named Vector: " << _storageType << ". Does not contain element with name: " << name;
+      Exception ex( "NamedVector::get()", "Index outside of map size", true );
+      ex.addDetail( "Name", name );
+      ex.addDetail( "Size", _names.size() );
+      throw ex;
+    }
+
+    size_t id = this->getID( name );
+    _data[id] = data;
   }
 
 
@@ -205,9 +242,13 @@ namespace Regolith
 
       size_t getID( std::string ) const;
 
-      DATA* getByName( std::string );
+      DATA* get( std::string );
 
       DATA* get( size_t );
+
+      void set( size_t, DATA* );
+
+      void set( std::string, DATA* );
 
       DATA* operator[]( size_t i ) { return _data[ i ]; }
 
@@ -307,7 +348,7 @@ namespace Regolith
 
 
   template < class DATA >
-  DATA* NamedVector<DATA, true>::getByName( std::string name )
+  DATA* NamedVector<DATA, true>::get( std::string name )
   {
     size_t id = this->getID( name );
     return _data[ id ];
@@ -319,7 +360,7 @@ namespace Regolith
   {
     if ( i >= _names.size() )
     {
-      ERROR_STREAM << "Named Vector: " << _storageType << ". Could index, " << i << ", outside of map size, " << _names.size();
+      ERROR_STREAM << "Named Vector: " << _storageType << ". Could not find index, " << i << ", outside of map size, " << _names.size();
       Exception ex( "NamedVector::getID()", "Index outside of map size", true );
       ex.addDetail( "Index", i );
       ex.addDetail( "Size", _names.size() );
@@ -327,6 +368,39 @@ namespace Regolith
     }
 
     return _data[i];
+  }
+
+
+  template < class DATA >
+  void NamedVector<DATA, true>::set( size_t i, DATA* data )
+  {
+    if ( i >= _names.size() )
+    {
+      ERROR_STREAM << "Named Vector: " << _storageType << ". Could not find index, " << i << ", outside of map size, " << _names.size();
+      Exception ex( "NamedVector::get()", "Index outside of map size", true );
+      ex.addDetail( "Index", i );
+      ex.addDetail( "Size", _names.size() );
+      throw ex;
+    }
+
+    _data[i] = data;
+  }
+
+
+  template < class DATA >
+  void NamedVector<DATA, true>::set( std::string name, DATA* data )
+  {
+    if ( ! exists( name ) )
+    {
+      ERROR_STREAM << "Named Vector: " << _storageType << ". Does not contain element with name: " << name;
+      Exception ex( "NamedVector::get()", "Index outside of map size", true );
+      ex.addDetail( "Name", name );
+      ex.addDetail( "Size", _names.size() );
+      throw ex;
+    }
+
+    size_t id = this->getID( name );
+    _data[id] = data;
   }
 
 

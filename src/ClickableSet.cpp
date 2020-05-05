@@ -51,11 +51,7 @@ namespace Regolith
 
     if ( (*_currentFocus != nullptr ) )
     {
-      (*_currentFocus)->down();
-      (*_currentFocus)->up();
-//      InputAction event = (*_currentFocus)->getOption();
-////      man->currentContext()->raiseContextEvent( event );
-//      man->currentContext()->booleanAction( event, true );
+      (*_currentFocus)->click();
     }
   }
 

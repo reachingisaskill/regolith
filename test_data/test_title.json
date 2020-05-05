@@ -16,7 +16,7 @@
 
   "options" :
   {
-    "starting_dialog" : "title_dialog"
+    "starting_dialog" : "title_menu"
   },
 
   "elements" :
@@ -53,37 +53,40 @@
   [
     {
       "input_mapping" : "title",
+      "name" : "title_menu",
+      "dialog_type" : "menu",
 
-      "name" : "title_dialog",
-      "dialog" :
-      {
-        "name" : "title_menu",
-        "elements" :
-        [
-          {
-            "resource_name" : "welcome_text1",
-            "position" : [0, -200],
-            "alignment" :
-            {
-              "horizontal" : "centre",
-              "vertical" : "centre"
-            }
-          },
-          {
-            "resource_name" : "welcome_play_button",
-            "position" : [0, +200],
-            "alignment" :
-            {
-              "horizontal" : "centre",
-              "vertical" : "centre"
-            },
-            "action" : ""
-          }
-        ],
-        "options" :
+      "elements" :
+      [
         {
-          "can_cancel" : true
+          "resource_name" : "welcome_text1",
+          "position" : [0, -200],
+          "alignment" :
+          {
+            "horizontal" : "centre",
+            "vertical" : "centre"
+          }
+        },
+        {
+          "resource_name" : "welcome_play_button",
+          "position" : [0, +200],
+          "alignment" :
+          {
+            "horizontal" : "centre",
+            "vertical" : "centre"
+          },
+          "actions" :
+          [
+            {
+              "type" : "scene_change",
+              "scene_name" : "test_scene"
+            }
+          ]
         }
+      ],
+      "options" :
+      {
+        "can_cancel" : true
       }
     }
   ]

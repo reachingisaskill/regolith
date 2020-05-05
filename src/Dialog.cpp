@@ -3,176 +3,29 @@
 #include "Manager.h"
 #include "ObjectBuilder.h"
 #include "Utilities.h"
+#include "Signal.h"
 
 
 namespace Regolith
 {
 
-  Dialog::Dialog( Camera* camera, Json::Value& json_data, InputHandler* h ) :
+  Dialog::Dialog( Camera* camera, std::string h ) :
     Context( h ),
     _cameraHUD( camera ),
-    _name(),
-    _subDialogs("sub_dialogs"),
     _elements(),
     _background(),
     _buttons()
   {
-    this->loadFromJson( json_data );
-  }
-
-
-  void Dialog::loadFromJson( Json::Value& json_data )
-  {
-    Manager* man = Manager::getInstance();
-
-    Utilities::validateJson( json_data, "elements", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
-
-    try
-    {
-      _name = json_data["name"].asString();
-
-
-      INFO_LOG( "Checking for background sprite" );
-      // Load the scene background
-      if ( Utilities::validateJson( json_data, "background", Utilities::JSON_TYPE_STRING, false ) )
-      {
-        INFO_LOG( "Building the dialog background" );
-        Json::Value& background_data = json_data["background"];
-        Utilities::validateJson( background_data, "resource_name", Utilities::JSON_TYPE_STRING );
-        _background = man->spawn( background_data["resource_name"].asString(), Vector( 0, 0 ) );
-
-        Utilities::jsonProcessPosition( background_data, _background, _cameraHUD );
-
-        if ( _background->hasAnimation() )
-        {
-          INFO_LOG( "Dialog background is animated" );
-          _animated.push_back( _background );
-        }
-      }
-      else _background = nullptr;
-
-
-      INFO_LOG( "Checking for child dialogs" );
-      // Load the children first
-      INFO_LOG( "Building the child dialogs" );
-      if ( json_data.isMember( "dialogs" ) && json_data["dialogs"].isArray() )
-      {
-        Json::Value& dialogs = json_data["dialogs"];
-        Json::ArrayIndex dialogs_size = dialogs.size();
-        for ( Json::ArrayIndex i = 0; i != dialogs_size; ++i )
-        {
-          Utilities::validateJson( dialogs[i], "name", Utilities::JSON_TYPE_STRING );
-          std::string dialog_name = dialogs[i]["name"].asString();
-
-          InputHandler* dialogInHandler = this->inputHandler(); // Default is the same handler as the parent
-          if ( Utilities::validateJson( dialogs[i], "input_mapping", Utilities::JSON_TYPE_STRING, false ) )
-          {
-            dialogInHandler = Manager::getInstance()->getInputManager()->requestHandler( dialogs[i]["input_mapping"].asString() );
-          }
-
-          _subDialogs.addObject( new Dialog( _cameraHUD, dialogs[i], dialogInHandler ), dialog_name );
-        }
-        INFO_STREAM << "Loaded " << dialogs_size << " children";
-      }
-
-
-      // Load the Scene Elements
-      INFO_LOG( "Building the dialog scene" );
-      Json::Value elements = json_data["elements"];
-      Json::ArrayIndex elements_size = elements.size();
-      for ( Json::ArrayIndex i = 0; i != elements_size; ++i )
-      {
-        Utilities::validateJson( elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
-
-        // Load the necessary info
-        std::string resource_name = elements[i]["resource_name"].asString();
-        INFO_STREAM << "Loading resource : " << resource_name;
-
-        // Determine the ID number and spawn the element
-        Drawable* newElement = man->spawn( resource_name );
-        DEBUG_STREAM << "ELEMENT = " << newElement;
-        Utilities::jsonProcessPosition( elements[i], newElement, _cameraHUD );
-        _elements.push_back( newElement );
-        INFO_LOG( "Resource loaded." );
-  
-        // If animated, add it to the animated cache
-        if ( newElement->hasAnimation() )
-        {
-          INFO_STREAM << "Resource is animated";
-          _animated.push_back( newElement );
-        }
-
-        // If it has interaction, try to cast it to a Button*
-        if ( newElement->hasInteraction() )
-        {
-          INFO_LOG( "Resource is interactable." );
-
-          Button* b_pointer = dynamic_cast< Button* >( newElement );
-          if ( b_pointer != nullptr )
-          {
-            INFO_LOG( "Caching resource as a button" );
-
-            Utilities::validateJson( elements[i], "action", Utilities::JSON_TYPE_STRING );
-            std::string action_name = elements[i]["action"].asString();
-
-            if ( action_name != "" )
-            {
-              // What is the base context id
-              InputAction action_id = getActionID( action_name );
-              if ( action_id == INPUT_ACTION_NULL ) // Its not a standard action => must be option specific
-              {
-                // Get the name of the corresponding sub dialog
-                action_id = (InputAction)( (unsigned int)action_id + (unsigned int)_subDialogs.getID( action_name ) );
-              }
-              b_pointer->setOption( action_id );
-            }
-            else
-            {
-              WARN_LOG( "No action assigned to this button" );
-            }
-
-            _buttons.addButton( b_pointer );
-          }
-        }
-      }
-
-
-      INFO_LOG( "Configuring Dialog Options" );
-      // Check for the known options
-      Json::Value options = json_data["options"];
-      if ( Utilities::validateJson( options, "can_cancel", Utilities::JSON_TYPE_BOOLEAN, false ) )
-      {
-        _canCancel = options["can_cancel"].asBool();
-      }
-
-      INFO_LOG( "Configuring action handler for dialog" );
-      this->registerActions( inputHandler() );
-    }
-    catch ( Exception& ex )
-    {
-      if ( ex.isRecoverable() )
-      {
-        ERROR_STREAM << "An error occured building dialog: " << ex.what();
-      }
-      else
-      {
-        FAILURE_STREAM << "An error occured building dialog: " << ex.what();
-        FAILURE_LOG( "Error is non-recoverable" );
-        throw ex;
-      }
-    }
   }
 
 
   Dialog::~Dialog()
   {
-    // Delete the subDialogs
-    _subDialogs.clear();
+    // Clear the button cache
+    _buttons.clear();
 
     // Clear the caches
     _animated.clear();
-    _buttons.clear();
 
     // Delete the background
     delete _background;
@@ -196,6 +49,8 @@ namespace Regolith
     {
       (*it)->update( time );
     }
+
+    this->_update( time );
   }
 
 
@@ -207,22 +62,14 @@ namespace Regolith
       _background->render( _cameraHUD );
 
     // Render each element in the element list
+    DEBUG_STREAM << "Rendering " << _elements.size() << " Dialog elements";
     ElementList::iterator end = _elements.end();
     for ( ElementList::iterator it = _elements.begin(); it != end; ++it )
     {
       (*it)->render( _cameraHUD );
     }
-  }
 
-
-  Dialog* Dialog::selectDialog( unsigned int n )
-  {
-    return _subDialogs[ n ];
-  }
-
-
-  void Dialog::raiseContextEvent( ContextEvent )
-  {
+    this->_render( _cameraHUD );
   }
 
 
@@ -232,18 +79,11 @@ namespace Regolith
     handler->registerInputRequest( this, INPUT_ACTION_NEXT );
     handler->registerInputRequest( this, INPUT_ACTION_PREV );
     handler->registerInputRequest( this, INPUT_ACTION_SELECT );
-    handler->registerInputRequest( this, INPUT_ACTION_PAUSE );
     handler->registerInputRequest( this, INPUT_ACTION_BACK );
     handler->registerInputRequest( this, INPUT_ACTION_CANCEL );
     handler->registerInputRequest( this, INPUT_ACTION_MOUSE_MOVE );
-    handler->registerInputRequest( this, INPUT_ACTION_JUMP ); // Bind the jump key just in case!
     handler->registerInputRequest( this, INPUT_ACTION_CLICK ); // Bind the mouse click
   }
-
-
-//  void Dialog::eventAction( const RegolithEvent& event )
-//  {
-//  }
 
 
   void Dialog::booleanAction( const InputAction& action, bool value )
@@ -271,18 +111,13 @@ namespace Regolith
       case INPUT_ACTION_PAUSE :
       case INPUT_ACTION_BACK :
       case INPUT_ACTION_CANCEL :
-        if ( _canCancel && value ) this->takeFocus();
+        if ( _canCancel && value ) Manager::getInstance()->closeContext();
         break;
 
       default :
         break;
     }
   }
-
-
-//  void Dialog::floatAction( const InputAction& action, float )
-//  {
-//  }
 
 
   void Dialog::vectorAction( const InputAction& action, const Vector& vec )
@@ -321,6 +156,43 @@ namespace Regolith
     }
   }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Menu Dialog
+
+  MenuDialog::MenuDialog( Camera* camera, std::string inputMap ) :
+    Dialog( camera, inputMap ),
+    _subDialogs("sub_dialogs")
+  {
+  }
+
+  
+  MenuDialog::~MenuDialog()
+  {
+    // Delete the subDialogs
+    _subDialogs.clear();
+  }
+
+
+  Dialog* MenuDialog::selectDialog( unsigned int n )
+  {
+    return _subDialogs[ n ];
+  }
+
+
+  void MenuDialog::raiseContextEvent( ContextEvent event )
+  {
+    switch ( event )
+    {
+      default :
+        int dialogNum = (int)event - (int)CONTEXT_EVENT_OPTIONS;
+        if ( dialogNum >= 0 )
+        {
+          Manager::getInstance()->openContext( this->selectDialog( dialogNum ) );
+        }
+        break;
+    }
+  }
 
 }
 

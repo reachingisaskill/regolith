@@ -273,10 +273,12 @@
     "scenes" :
     [
       {
+        "name" : "title_page",
         "file_name" : "test_data/test_title.json",
         "type" : "title"
       },
       {
+        "name" : "test_scene",
         "file_name" : "test_data/test_scene.json",
         "type" : "platformer"
       }

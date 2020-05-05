@@ -15,6 +15,8 @@ namespace Regolith
 
   class ScenePlatformer : public Scene
   {
+    friend class PlatformerSceneFactory;
+
     private:
       // All memory is owned by the base resource list
       Drawable* _player;
@@ -30,21 +32,6 @@ namespace Regolith
     protected:
       // Function for derived classes to implement when the pause signal is received
       virtual void onPause();
-
-      // Loads the options
-      virtual void _loadOptions( Json::Value& );
-
-
-
-      // Function to build the camera objects
-      void _loadSpawnPoints( Json::Value& );
-
-      // Override this function to allow the base class to build components specific to this scene type
-      virtual void _loadSceneSpecificComponents( Json::Value& );
-
-      // Load the player model
-      void _loadPlayer( Json::Value& );
-
 
       // Derived class render
       virtual void _render();

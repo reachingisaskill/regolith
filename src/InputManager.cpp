@@ -1,6 +1,7 @@
 
 #include "InputManager.h"
 #include "Controllable.h"
+#include "Manager.h"
 
 #include "logtastic.h"
 
@@ -9,7 +10,8 @@ namespace Regolith
 {
 
   InputManager::InputManager() :
-    _inputHandlers( "input_handlers" ),
+//    _inputHandlers( "input_handlers" ),
+    _inputMappers( "input_mapping_sets" ),
     _eventMaps(),
     _theEvent()
   {
@@ -57,7 +59,7 @@ namespace Regolith
 
         DEBUG_LOG( "  Keyboard key-press type event" );
         event_type = INPUT_TYPE_KEYBOARD;
-        mapper = handler->_inputMaps[ event_type ];
+        mapper = handler->_inputMaps->mapping[ event_type ];
         action = mapper->getAction( sdl_event );
         if ( action == INPUT_ACTION_NULL ) break;
 
@@ -73,7 +75,7 @@ namespace Regolith
         if ( handler == nullptr ) break;
 
         event_type = INPUT_TYPE_MOUSE_MOVE;
-        mapper = handler->_inputMaps[ event_type ];
+        mapper = handler->_inputMaps->mapping[ event_type ];
         action = mapper->getAction( sdl_event );
         DEBUG_STREAM << "  Regolith Mouse Motion Event";
 
@@ -94,7 +96,7 @@ namespace Regolith
 
         DEBUG_LOG( "  Mouse button-press type event" );
         event_type = INPUT_TYPE_MOUSE_BUTTON;
-        mapper = handler->_inputMaps[ event_type ];
+        mapper = handler->_inputMaps->mapping[ event_type ];
         action = mapper->getAction( sdl_event );
         if ( action == INPUT_ACTION_NULL ) break;
 
@@ -202,14 +204,38 @@ namespace Regolith
   }
 
 
-  InputHandler* InputManager::requestHandler( std::string name )
+  void InputManager::registerInputAction( std::string mapping, InputEventType event_type, unsigned int code, InputAction event )
   {
-    if ( ! _inputHandlers.exists( name ) ) 
+    _inputMappers.get( mapping )->mapping[ event_type ]->registerAction( code, event );
+  }
+
+
+  InputAction InputManager::getRegisteredInputAction( std::string mapping, InputEventType event_type, unsigned int code )
+  {
+    return _inputMappers.get( mapping )->mapping[ event_type ]->getRegisteredAction( code );
+  }
+
+
+//  InputHandler* InputManager::requestHandler( std::string name )
+//  {
+//    if ( ! _inputHandlers.exists( name ) ) 
+//    {
+//      _inputHandlers.addObject( new InputHandler(), name );
+//    }
+//
+//    return _inputHandlers.get( name );
+//  }
+
+
+  InputMappingSet* InputManager::requestMapping( std::string name )
+  {
+    if ( ! _inputMappers.exists( name ) ) 
     {
-      _inputHandlers.addObject( new InputHandler(), name );
+      INFO_STREAM << "Creating new input mapping set: " << name;
+      _inputMappers.addObject( new InputMappingSet(), name );
     }
 
-    return _inputHandlers.getByName( name );
+    return _inputMappers.get( name );
   }
 
 
@@ -284,33 +310,47 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Input Handler
+  // Input Mapping Set
 
-  InputHandler::InputHandler() :
-    _inputMaps(),
-    _actionMaps()
+  InputMappingSet::InputMappingSet() :
+    mapping()
   {
     for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
     {
-      _inputMaps[ i ] = nullptr; 
+      mapping[ i ] = nullptr; 
     }
 
-    _inputMaps[ INPUT_TYPE_KEYBOARD ] = new KeyboardMapping();
-    _inputMaps[ INPUT_TYPE_MOUSE_BUTTON ] = new MouseMapping();
-    _inputMaps[ INPUT_TYPE_MOUSE_MOVE ] = new MotionMapping();
+    mapping[ INPUT_TYPE_KEYBOARD ] = new KeyboardMapping();
+    mapping[ INPUT_TYPE_MOUSE_BUTTON ] = new MouseMapping();
+    mapping[ INPUT_TYPE_MOUSE_MOVE ] = new MotionMapping();
+  }
+
+
+  InputMappingSet::~InputMappingSet()
+  {
+    for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
+    {
+      if ( mapping[ i ] != nullptr )
+      {
+        delete mapping[ i ];
+        mapping[ i ] = nullptr;
+      }
+    }
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Input Handler
+
+  InputHandler::InputHandler( std::string mappingName ) :
+    _inputMaps( Manager::getInstance()->getInputManager()->requestMapping( mappingName ) ),
+    _actionMaps()
+  {
   }
 
 
   InputHandler::~InputHandler()
   {
-    for ( size_t i = 0; i < INPUT_TYPE_TOTAL; ++i )
-    {
-      if ( _inputMaps[ i ] != nullptr )
-      {
-        delete _inputMaps[ i ];
-        _inputMaps[ i ] = nullptr;
-      }
-    }
   }
 
 
@@ -318,18 +358,6 @@ namespace Regolith
   {
     INFO_STREAM << "Registered input request for action: " << action << " " << object;
     _actionMaps[action].insert( object );
-  }
-
-
-  void InputHandler::registerInputAction( InputEventType event_type, unsigned int code, InputAction event )
-  {
-    _inputMaps[ event_type ]->registerAction( code, event );
-  }
-
-
-  InputAction InputHandler::getRegisteredInputAction( InputEventType event_type, unsigned int code )
-  {
-    return _inputMaps[ event_type ]->getRegisteredAction( code );
   }
 
 }

@@ -13,42 +13,38 @@ namespace Regolith
 {
 
   // Forward defines
-  class SceneFactory_base;
+  class SceneFactory;
   class Window;
   class ObjectBuilder;
   class Scene;
 
   // Typedefs
-  typedef std::map< std::string, SceneFactory_base* > SceneFactoryMap;
+  typedef std::map< std::string, SceneFactory* > SceneFactoryMap;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  class SceneFactory_base
+  class SceneFactory
   {
     private :
-      std::string _name;
+
+    protected :
+      void configureTeams( Scene* ) const;
+      void buildSounds( Scene*, Json::Value& ) const;
+      void buildBackground( Scene*, Json::Value& ) const;
+      void buildCameras( Scene*, Json::Value& ) const;
+      void buildEnvironment( Scene*, Json::Value& ) const;
+      void buildHUD( Scene*, Json::Value& ) const;
+      void buildDialogs( Scene*, Json::Value& ) const;
+      void buildOptions( Scene*, Json::Value& ) const;
 
     public :
-      SceneFactory_base( std::string n ) : _name( n ) {}
+      SceneFactory() {}
 
-      virtual ~SceneFactory_base() {}
-
-      std::string getSceneName() const { return _name; }
-
-      virtual Scene* build( std::string ) const = 0;
-  };
-
-
-  template < class SCENE >
-  class SceneFactory : public SceneFactory_base
-  {
-    private :
-    public :
-
-      SceneFactory( std::string n ) : SceneFactory_base( n ) {}
       virtual ~SceneFactory() {}
 
-      virtual Scene* build( std::string ) const;
+      virtual const char* getSceneName() const = 0;
+
+      virtual Scene* build( Json::Value& ) const = 0;
   };
 
 
@@ -57,9 +53,6 @@ namespace Regolith
   class SceneBuilder
   {
     private:
-      SDL_Renderer* _theRenderer;
-      Window* _window;
-      ObjectBuilder* _objectBuilder;
       SceneFactoryMap _factories;
 
     protected:
@@ -67,13 +60,9 @@ namespace Regolith
     public:
       SceneBuilder();
 
-      SceneBuilder( SDL_Renderer*, Window*, ObjectBuilder* );
-
       virtual ~SceneBuilder();
 
-      SDL_Renderer* getRenderer() const { return this->_theRenderer; }
-
-      void addFactory( SceneFactory_base* );
+      void addFactory( SceneFactory* );
 
       // Only needs a json object containing all the relevant info
       Scene* build( Json::Value& );
@@ -81,13 +70,40 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Template member function definitions
+  // Scene Factories
 
-  template < class SCENE >
-  Scene* SceneFactory<SCENE>::build( std::string filename ) const
+//////////////////////////////////////////////////
+  // Title Scene
+
+  class TitleSceneFactory : public SceneFactory
   {
-    return new SCENE( filename );
-  }
+    private :
+    public :
+      TitleSceneFactory() {}
+
+      virtual ~TitleSceneFactory() {}
+
+      virtual const char* getSceneName() const override { return "title"; }
+
+      virtual Scene* build( Json::Value& ) const override;
+  };
+
+
+//////////////////////////////////////////////////
+  // Platformer Scene
+
+  class PlatformerSceneFactory : public SceneFactory
+  {
+    private :
+    public :
+      PlatformerSceneFactory() {}
+
+      virtual ~PlatformerSceneFactory() {}
+
+      virtual const char* getSceneName() const override { return "platformer"; }
+
+      virtual Scene* build( Json::Value& ) const override;
+  };
 
 }
 

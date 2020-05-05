@@ -59,7 +59,7 @@ namespace Regolith
   }
 
 
-  Drawable* ObjectBuilder::build( Json::Value jsonObject )
+  Drawable* ObjectBuilder::build( Json::Value& jsonObject )
   {
     std::string object_type = jsonObject["resource_type"].asString();
     INFO_STREAM << "Building texture of type : " << object_type;

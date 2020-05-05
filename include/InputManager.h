@@ -16,6 +16,25 @@ namespace Regolith
   class InputHandler;
   typedef std::set< Controllable* > ControllableSet;
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Input Mapping Set
+
+  /*
+   * Defines a class that contains a unique set of input mappers for each context type
+   */
+
+  class InputMappingSet
+  {
+    InputMappingSet( const InputMappingSet& ) = delete;
+    InputMappingSet& operator=( const InputMappingSet& ) = delete;
+    public:
+      InputMapping* mapping[ INPUT_TYPE_TOTAL ];
+
+      InputMappingSet();
+      ~InputMappingSet();
+  };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Input Manager class
 
@@ -32,7 +51,8 @@ namespace Regolith
 
     private:
       // Named vector of input handlers. Manager owns their memory
-      NamedVector<InputHandler, true> _inputHandlers;
+//      NamedVector<InputHandler, true> _inputHandlers;
+      NamedVector<InputMappingSet, true> _inputMappers;
 
       // Map the input actions to the list of drawable objects that request callbacks
       ControllableSet _eventMaps[ REGOLITH_EVENT_TOTAL ];
@@ -67,8 +87,19 @@ namespace Regolith
       RegolithEvent getRegisteredEvent( InputEventType, unsigned int );
 
 
+
+      // Register an input action to the mapper with the proveded name
+      void registerInputAction( std::string, InputEventType event_type, unsigned int code, InputAction event );
+
+      // Get the registered input action from the request mapper, for a specific event type and event code
+      InputAction getRegisteredInputAction( std::string, InputEventType event_type, unsigned int code );
+
+
       // Requests an input handler. If it exists, return the pointer, otherwise create it.
-      InputHandler* requestHandler( std::string );
+//      InputHandler* requestHandler( std::string );
+
+      // Requests an input handler. If it exists, return the pointer, otherwise create it.
+      InputMappingSet* requestMapping( std::string );
 
 
       // Functions to manually push events to objects without the SDL event queue
@@ -92,14 +123,14 @@ namespace Regolith
     friend class InputManager;
     private:
       // Map the array of mapping object - one for each input event type
-      // This class owns this memory
-      InputMapping* _inputMaps[ INPUT_TYPE_TOTAL ];
+      InputMappingSet* _inputMaps;
 
       // Array of sets of controllable objects - one for each input action
       ControllableSet _actionMaps[ INPUT_ACTION_TOTAL ];
 
     public :
-      InputHandler();
+      // Just pass the name of the required input mapping
+      explicit InputHandler( std::string );
 
       ~InputHandler();
 
@@ -111,11 +142,11 @@ namespace Regolith
 
 
 
-      // Register a user action (event+mapping id) to an input action
-      void registerInputAction( InputEventType, unsigned int, InputAction );
-
-      // Return the registered action for a given event type and mapping id
-      InputAction getRegisteredInputAction( InputEventType, unsigned int );
+//      // Register a user action (event+mapping id) to an input action
+//      void registerInputAction( InputEventType, unsigned int, InputAction );
+//
+//      // Return the registered action for a given event type and mapping id
+//      InputAction getRegisteredInputAction( InputEventType, unsigned int );
   };
 
 }

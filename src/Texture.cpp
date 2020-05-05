@@ -1,4 +1,4 @@
-//#define LOGTASTIC_DEBUG_OFF
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Texture.h"
 #include "Exception.h"

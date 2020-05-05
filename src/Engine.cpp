@@ -13,7 +13,7 @@ namespace Regolith
     _currentWindow( nullptr ),
     _currentScene( nullptr ),
     _frameTimer(),
-    _defaultColor( { 255, 255, 255, 255 } ),
+    _defaultColor( { 0, 0, 0, 255 } ),
     _quit( false ),
     _status( 0 )
   {
@@ -47,6 +47,7 @@ namespace Regolith
 
       while ( ! _status )
       {
+        DEBUG_LOG( "RENDER LOOP START" );
 
         // Handle events globally and context-specific actions using the scene's input handler
         _inputManager->handleEvents( contexts.front()->inputHandler() );
@@ -56,39 +57,71 @@ namespace Regolith
 
         Uint32 time = _frameTimer.lap();
 
-        contexts_end = contexts.rend();
-        for ( ContextStack::reverse_iterator context_it = contexts.rbegin(); context_it != contexts_end; ++context_it )
+        if ( ! contexts.empty() )
         {
-          if ( (*context_it)->isAnimated() )
+          DEBUG_STREAM << " CONTEXT STACK SIZE : " << contexts.size();
+          contexts_end = contexts.rend();
+          for ( ContextStack::reverse_iterator context_it = contexts.rbegin(); context_it != contexts_end; ++context_it )
           {
-            (*context_it)->update( time );
+            if ( (*context_it)->isAnimated() )
+            {
+              (*context_it)->update( time );
+            }
+
+            if ( (*context_it)->isVisible() )
+            {
+              (*context_it)->render();
+            }
           }
 
-          if ( (*context_it)->isVisible() )
-          {
-            (*context_it)->render();
-          }
+          DEBUG_LOG( "RENDER" );
+          SDL_RenderPresent( _theRenderer );
+        }
+        else
+        {
+          WARN_LOG( "No contexts left on stack. Exiting" );
+          _status = 1; // Can't continue with no contexts
         }
 
-        DEBUG_LOG( "RENDER" );
-        SDL_RenderPresent( _theRenderer );
-  //      if ( count++ > 100 )
-  //      {
-  //        _quit = true;
-  //      }
        }
 
+      // Switch state to be used later. Useful for dropping in loading screens etc in a multithreaded engine
+      switch ( _status )
+      {
+        default :
+          break;
+      }
 
-      // Story interactions go here!
+      // Impossible to continue if there are not contexts
+      if ( contexts.empty() )
+      {
+        INFO_LOG( "Context stack is empty. Quitting." );
+        _status = 1;
+        _quit = true;
+      }
     }
   }
 
 
   void Engine::setScene( Scene* scene )
   {
+    // If a scene is already loaded, end it
+    if ( _currentScene != nullptr )
+    {
+      DEBUG_LOG( "Stopping current scene" );
+      _currentScene->stop();
+      _currentScene->takeFocus();
+    }
+
+    // Update the current scene pointer
     _currentScene = scene;
-    _currentScene->giveFocus(); // This scene is now the current context for input and events
+
+    // Call the scene startup function
     _currentScene->start();
+
+    // Tell the scene it has focus
+    // Pushes itself onto the context stack
+    _currentScene->giveFocus();
   }
 
 

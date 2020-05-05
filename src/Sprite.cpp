@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Sprite.h"
 

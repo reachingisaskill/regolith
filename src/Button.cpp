@@ -1,8 +1,10 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Button.h"
 
 #include "Manager.h"
 #include "Camera.h"
+#include "Signal.h"
 
 #include "logtastic.h"
 
@@ -16,8 +18,7 @@ namespace Regolith
     _collision( col ),
     _destination( { 0, 0, tex.getWidth(), tex.getHeight() } ),
     _state( STATE_NORMAL ),
-    _actionName(),
-    _actionNumber( INPUT_ACTION_NULL )
+    _actions()
   {
     if ( _collision == nullptr )
     {
@@ -32,8 +33,7 @@ namespace Regolith
     _collision( (but._collision == nullptr) ? nullptr : but._collision->clone() ),
     _destination( but._destination ),
     _state( but._state ),
-    _actionName( but._actionName),
-    _actionNumber( but._actionNumber )
+    _actions( but._actions )
   {
     if ( _collision == nullptr )
     {
@@ -170,7 +170,7 @@ namespace Regolith
       case STATE_FOCUSSED :
       case STATE_DOWN :
         _state = STATE_NORMAL;
-        Manager::getInstance()->currentContext()->booleanAction( _actionNumber, true );
+        this->click();
         break;
 
       case STATE_NORMAL :
@@ -214,6 +214,16 @@ namespace Regolith
       case STATE_INACTIVE :
       default :
         break;
+    }
+  }
+
+
+  void Button::click()
+  {
+    std::vector< Signal* >::iterator end = _actions.end();
+    for ( std::vector< Signal* >::iterator it = _actions.begin(); it != end; ++it )
+    {
+      (*it)->trigger();
     }
   }
 

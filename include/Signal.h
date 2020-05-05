@@ -18,9 +18,10 @@ namespace Regolith
 
   // Forward declaration
   class Signal;
+  class Context;
 
   // Function to interpret the json data and return a built signal pointer
-  Signal* makeSignal( Json::Value& );
+  Signal* makeSignal( Json::Value&, Context* );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Signal Base class
@@ -157,6 +158,23 @@ namespace Regolith
       // Con/Destruction
       ContextEventSignal( ContextEvent );
       virtual ~ContextEventSignal() {}
+
+      void trigger() const;
+  };
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Scene Change Signal
+
+  class SceneChangeSignal : public Signal
+  {
+    private:
+      unsigned int _theScene;
+
+    public :
+      // Con/Destruction
+      SceneChangeSignal( unsigned int );
+      virtual ~SceneChangeSignal() {}
 
       void trigger() const;
   };

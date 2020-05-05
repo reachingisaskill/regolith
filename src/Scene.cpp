@@ -15,8 +15,9 @@ namespace Regolith
 {
 
 
-  Scene::Scene( std::string json_file ) :
-    _sceneFile( json_file ),
+  Scene::Scene( std::string inputHandler ) :
+    Context( inputHandler ),
+    _isLoaded( false ),
     _paused( false ),
     _defaultMusic( -1 ),
     _background( nullptr ),
@@ -68,282 +69,6 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // The entry to the building algorithm
-
-  void Scene::load()
-  {
-    INFO_STREAM <<  "Building Scene from json file: " << _sceneFile;
-
-    INFO_LOG( "Preparing collision data structure" );
-    _collisionElements.clear();
-    unsigned int numberTeams = Manager::getInstance()->getNumberTeams();
-    for ( unsigned int i = 0; i < numberTeams; ++i )
-    {
-      _collisionElements.push_back( ElementList() );
-    }
-
-    INFO_LOG( "Loading Json Data" );
-    Json::Value json_data = this->_loadConfig();
-
-
-    // If a mapping object is indicated get a pointer to it from the manager
-    if ( Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      INFO_LOG( "Configuring Scene InputHandler" );
-      this->registerInputHandler( Manager::getInstance()->getInputManager()->requestHandler( json_data["input_mapping"].asString() ) );
-    }
-
-    try
-    {
-      Utilities::validateJson( json_data, "sounds", Utilities::JSON_TYPE_OBJECT, true );
-      Utilities::validateJson( json_data, "elements", Utilities::JSON_TYPE_OBJECT, true );
-      Utilities::validateJson( json_data, "cameras", Utilities::JSON_TYPE_OBJECT, true );
-      Utilities::validateJson( json_data, "dialog_windows", Utilities::JSON_TYPE_ARRAY, true );
-
-      INFO_LOG( "Loading sounds" );
-      this->_loadSounds( json_data["sounds"] );
-
-      INFO_LOG( "Building caches" );
-      this->_loadCaches( json_data["elements"] );
-
-      INFO_LOG( "Loading cameras" );
-      this->_loadCameras( json_data["cameras"] );
-
-      INFO_LOG( "Building Dialog Windows" );
-      this->_loadDialogs( json_data["dialog_windows"] );
-
-      if ( Utilities::validateJson( json_data, "options", Utilities::JSON_TYPE_OBJECT, false ) )
-      {
-        INFO_LOG( "Configuring Scene options" );
-        this->_loadOptions( json_data["options"] );
-      }
-
-      INFO_LOG( "Loading Scene-Specific Components" );
-      this->_loadSceneSpecificComponents( json_data );
-
-      INFO_LOG( "Registering input actions" );
-      this->registerActions( inputHandler() );
-
-    }
-    catch ( Exception& ex )
-    {
-      FAILURE_LOG( "Scene Failed to Load" );
-      throw ex;
-    }
-    catch ( std::exception& e )
-    {
-      FAILURE_STREAM << "Scene Failed to Load with unexpected exception: " << e.what();
-      Exception ex( "Scene::load()", "Unexpected Exception" );
-      ex.addDetail( "What", e.what() );
-      throw ex;
-    }
-    catch ( ... )
-    {
-      FAILURE_LOG( "Scene Failed to Load with unknown exception" );
-      Exception ex( "Scene::load()", "Unknown Exception" );
-      throw ex;
-    }
-
-    INFO_LOG( "Scene Successfuly Built" );
-  }
-
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // All the loading functions to import Json data and build the necessary objects
-
-  Json::Value Scene::_loadConfig()
-  {
-    try
-    {
-      Json::Value json_data;
-
-      std::ifstream input( _sceneFile );
-      Json::CharReaderBuilder reader_builder;
-      Json::CharReader* reader = reader_builder.newCharReader();
-      std::string errors;
-      bool result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
-      if ( ! result )
-      {
-        ERROR_LOG( "Found errors parsing json" );
-        ERROR_STREAM << "\"" << errors << "\"";
-      }
-      delete reader;
-
-      return json_data;
-    }
-    catch ( std::ios_base::failure& f )
-    {
-      Exception ex( "Scene::_loadConfig()", "IFStream failure", false );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", f.what() );
-      throw ex;
-    }
-    catch ( std::runtime_error& rt )
-    {
-      Exception ex( "Scene::_loadConfig()", "Json parsing failure" );
-      ex.addDetail( "File name", _sceneFile );
-      ex.addDetail( "What", rt.what() );
-      throw ex;
-    }
-  }
-
-
-  void Scene::_loadSounds( Json::Value& json_data )
-  {
-    if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      std::string name = json_data["default_music"].asString();
-      _defaultMusic = audioHandler()->getMusicID( name );
-    }
-  }
-
-
-  void Scene::_loadCaches( Json::Value& json_data )
-  {
-    Utilities::validateJson( json_data, "background", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "scene_elements", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "hud_elements", Utilities::JSON_TYPE_ARRAY );
-
-    // Load the scene background
-    INFO_LOG( "Building the background" );
-    std::string background_resource = json_data["background"].asString();
-    _background = Manager::getInstance()->spawn( background_resource );
-
-    if ( ! _background->hasCollision() )
-    {
-      FAILURE_LOG( "Backgroud sprite does not have any collision. Cannot define containment within scene" );
-      Exception ex( "Scene::_loadCaches()", "Background sprite does not have any associated collision." );
-      throw ex;
-    }
-
-    if ( _background->hasAnimation() )
-    {
-      _animatedElements.push_back( _background );
-    }
-
-
-    // Load the Scene Elements
-    INFO_LOG( "Building the scene" );
-    Json::Value scene_elements = json_data["scene_elements"];
-    Json::ArrayIndex scene_elements_size = scene_elements.size();
-    for ( Json::ArrayIndex i = 0; i != scene_elements_size; ++i )
-    {
-      Utilities::validateJson( scene_elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( scene_elements[i], "position", Utilities::JSON_TYPE_ARRAY );
-
-      // Load the necessary info
-      std::string resource_name = scene_elements[i]["resource_name"].asString();
-      int x = scene_elements[i]["position"][0].asInt();
-      int y = scene_elements[i]["position"][1].asInt();
-      Vector pos( x, y );
-
-      this->spawn( resource_name, pos );
-    }
-
-
-    // Load the HUD Elements
-    INFO_LOG( "Building the HUD" );
-    Json::Value hud_elements = json_data["hud_elements"];
-    Json::ArrayIndex hud_elements_size = hud_elements.size();
-    for ( Json::ArrayIndex i = 0; i != hud_elements_size; ++i )
-    {
-      Utilities::validateJson( hud_elements[i], "resource_name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( hud_elements[i], "position", Utilities::JSON_TYPE_ARRAY );
-
-      // Load the necessary info
-      std::string resource_name = hud_elements[i]["resource_name"].asString();
-      float x = hud_elements[i]["position"][0].asFloat();
-      float y = hud_elements[i]["position"][1].asFloat();
-      Vector pos( x, y );
-
-      this->spawnHUD( resource_name, pos );
-    }
-  }
-
-
-  void Scene::_loadDialogs( Json::Value& dialog_windows )
-  {
-    Json::ArrayIndex dialog_windows_size = dialog_windows.size();
-    for ( Json::ArrayIndex i = 0; i != dialog_windows_size; ++i )
-    {
-      Utilities::validateJson( dialog_windows[i], "name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( dialog_windows[i], "dialog", Utilities::JSON_TYPE_OBJECT );
-
-      InputHandler* dialogInHandler = this->inputHandler(); // Default is the same handler as the parent
-      if ( Utilities::validateJson( dialog_windows[i], "input_mapping", Utilities::JSON_TYPE_STRING, false ) )
-      {
-        dialogInHandler = Manager::getInstance()->getInputManager()->requestHandler( dialog_windows[i]["input_mapping"].asString() );
-      }
-
-      std::string name = dialog_windows[i]["name"].asString();
-
-      INFO_STREAM << "Building dialog window: " << name;
-      Dialog* newDialog = new Dialog( _theHUD, dialog_windows[i]["dialog"], dialogInHandler );
-
-      _dialogWindows.addObject( newDialog, name );
-    }
-  }
-
-
-  void Scene::_loadCameras( Json::Value& json_data )
-  {
-    Utilities::validateJson( json_data, "start_position", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "type", Utilities::JSON_TYPE_STRING );
-
-    // Configure the camera objects
-    int camera_x = json_data["start_position"][0].asInt();
-    int camera_y = json_data["start_position"][1].asInt();
-    int camera_width = json_data["width"].asInt();
-    int camera_height = json_data["height"].asInt();
-
-    INFO_LOG( "Configuring scene camera" );
-    std::string camera_type = json_data["type"].asString();
-    _theCamera = new Camera( _background->getWidth(), _background->getHeight(), camera_width, camera_height );
-    _theCamera->setPosition( camera_x, camera_y );
-    _theCamera->registerActions( inputHandler() );
-
-    if ( camera_type == "fixed" )
-    {
-      INFO_LOG( "Setting mode to fixed camera" );
-      _theCamera->setMode( CAMERA_FIXED );
-    }
-    else if ( camera_type == "flying" )
-    {
-      INFO_LOG( "Setting mode to flying camera" );
-      _theCamera->setMode( CAMERA_FLYING );
-    }
-    else if ( camera_type == "following" )
-    {
-      INFO_LOG( "Setting mode to flying camera" );
-      _theCamera->setMode( CAMERA_FOLLOWING );
-    }
-    else if ( camera_type == "constant_velocity" )
-    {
-      INFO_LOG( "Setting mode to flying camera" );
-      _theCamera->setMode( CAMERA_CONSTANT_VELOCITY );
-    }
-    else
-    {
-      FAILURE_STREAM << "Unknown camera type found : " << camera_type;
-      Exception ex( "Scene::_loadCameras()", "Unknown Camera Type" );
-      ex.addDetail( "Camera Type", camera_type );
-      throw ex;
-    }
-
-    INFO_LOG( "Configuring HUD camera" );
-    _theHUD = new Camera( camera_width, camera_height, camera_width, camera_height );
-  }
-
-
-  void Scene::_loadOptions( Json::Value& )
-  {
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
   // Scene update and render functions
 
   void Scene::update( Uint32 time )
@@ -355,8 +80,9 @@ namespace Regolith
       (*it)->update( time );
     }
 
-    // Update the camera position
+    // Update the scene camera position
     _theCamera->update( time );
+    // The HUD camera doesn't change! (At least not in this version...)
 
     // Call the derived class udpated function
     this->_update( time );
@@ -609,7 +335,7 @@ namespace Regolith
       case REGOLITH_EVENT_QUIT :
       case REGOLITH_EVENT_SCENE_END :
       case REGOLITH_EVENT_CONTEXT_END :
-        this->onQuit();
+        this->onStop();
         break;
 
       case REGOLITH_EVENT_SCENE_PAUSE :
@@ -620,6 +346,7 @@ namespace Regolith
       case REGOLITH_EVENT_SCENE_RESUME :
         if ( this->isPaused() )
           this->resume();
+        break;
 
       case REGOLITH_EVENT_FULLSCREEN :
         break;

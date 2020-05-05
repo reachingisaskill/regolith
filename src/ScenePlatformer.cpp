@@ -15,8 +15,8 @@ namespace Regolith
 {
 
 
-  ScenePlatformer::ScenePlatformer( std::string json_file ) :
-    Scene( json_file ),
+  ScenePlatformer::ScenePlatformer( std::string mapping ) :
+    Scene( mapping ),
     _player( nullptr ),
     _pauseMenu( nullptr ),
     _spawnPoints(),
@@ -33,93 +33,6 @@ namespace Regolith
 
     INFO_LOG( "Clearing Spawn Points" );
     _spawnPoints.clear();
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // All the loading functions to import Json data and build the necessary objects
-
-
-  void ScenePlatformer::_loadSceneSpecificComponents( Json::Value& json_data )
-  {
-    if ( ! json_data.isMember( "player" ) )
-    {
-      FAILURE_LOG( "Could not find player data in json data file" );
-      Exception ex( "Scene::_loadSceneSpecificComponents()", "No player member found in Json Data", false);
-      ex.addDetail( "File name", getSceneFile() );
-      throw ex;
-    }
-    INFO_LOG( "Loading spawn points" );
-    this->_loadPlayer( json_data["player"] );
-
-    if ( ! json_data.isMember( "spawn_points" ) )
-    {
-      FAILURE_LOG( "Could not find spawn_points data in json data file" );
-      Exception ex( "Scene::_loadSceneSpecificComponents()", "No spawn_points member found in Json Data", false);
-      ex.addDetail( "File name", getSceneFile() );
-      throw ex;
-    }
-    INFO_LOG( "Loading spawn points" );
-    this->_loadSpawnPoints( json_data["spawn_points"] );
-  }
-
-
-  void ScenePlatformer::_loadPlayer( Json::Value& player )
-  {
-    // Load the scene player character
-    INFO_LOG( "Building the player" );
-    Utilities::validateJson( player, "position", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( player, "resource_name", Utilities::JSON_TYPE_STRING );
-
-    std::string player_resource = player["resource_name"].asString();
-    int player_x = player["position"][0].asInt();
-    int player_y = player["position"][1].asInt();
-    Vector pos( player_x, player_y );
-
-    _player = Manager::getInstance()->getResource( player_resource );
-    _player->setPosition( pos );
-    _currentPlayerSpawn = pos;
-
-    // Add object to collision caches, etc, and register actions
-    this->addSpawned( _player );
-
-    // Tell the current camera object to follow the player
-    this->getCamera()->followMe( _player );
-  }
-
-
-  void ScenePlatformer::_loadSpawnPoints( Json::Value& spawnpoints )
-  {
-    INFO_LOG( "Loading spawn points into queue" );
-    if ( ! spawnpoints.isArray() )
-    {
-      FAILURE_LOG( "Spawn point list is not an array" );
-      Exception ex( "ScenePlatformer::_loadSpawnPoints()", "Expected spawn point list to be an array" );
-      ex.addDetail( "File name", getSceneFile() );
-      throw ex;
-    }
-
-    Json::ArrayIndex spawnpoints_size = spawnpoints.size();
-    for ( Json::ArrayIndex i = 0; i != spawnpoints_size; ++i )
-    {
-      Utilities::validateJsonArray( spawnpoints[i], 2, Utilities::JSON_TYPE_FLOAT );
-
-      float x = spawnpoints[i][0].asFloat();
-      float y = spawnpoints[i][1].asFloat();
-
-      _spawnPoints.push_back( Vector( x, y ) );
-    }
-    INFO_STREAM << "Loaded " << spawnpoints_size << " spawn points into scene";
-  }
-
-
-  void ScenePlatformer::_loadOptions( Json::Value& options )
-  {
-    if ( Utilities::validateJson( options, "on_pause", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      std::string dialog_name = options["on_pause"].asString();
-      _pauseMenu = dialogWindows().getByName( dialog_name );
-    }
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -212,7 +125,8 @@ namespace Regolith
     DEBUG_LOG( "On pause called" );
     if ( _pauseMenu != nullptr )
     {
-      transferFocus( _pauseMenu );
+      DEBUG_LOG( "Opening Pause Menu" );
+      Manager::getInstance()->openContext( _pauseMenu );
     }
   }
 

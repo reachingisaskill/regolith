@@ -25,20 +25,21 @@ namespace Regolith
    */
   class Context : public Controllable
   {
+    // Contexts should not be copyable
+    Context( const Context& ) = delete;
+    Context& operator=( const Context& ) = delete;
+
     private:
       // Pointer to the Input manager owned input handler
-      InputHandler* _theInput;
+      InputHandler _theInput;
       AudioHandler _theAudio;
 
       std::map< std::string, unsigned int > _contextEvents;
 
     public:
-      explicit Context( InputHandler* h = nullptr );
+      explicit Context( std::string );
 
       virtual ~Context() {}
-
-      // This function MUST be called durng the configuration of the class if any user input is to be received.
-      void registerInputHandler( InputHandler* h ) { _theInput = h; }
 
 
       // Flag to see it needs updating with the current time
@@ -57,22 +58,25 @@ namespace Regolith
       
 
       // Return the input handler for this context
-      InputHandler* inputHandler() { return _theInput; }
+      InputHandler* inputHandler() { return &_theInput; }
 
       // Return the audio handler for this context
       AudioHandler* audioHandler() { return &_theAudio; }
 
 
-      // Called by the manager to tell the derived class that it now has focus again
-      virtual void returnFocus();
+//      // Takes the focus from the current context and passes it to the new context
+//      void transferFocus( Context* newContext );
+//
+//      // Takes the focus from the current context and passes it to the new context
+//      void openContext( Context* newContext );
 
-      // Takes the focus from the current context and passes it to the new context
-      void transferFocus( Context* newContext );
-
-      // Pushes current context onto the context stack - now has focus
+      // Called by the manager once a context is pushed onto the front of the context stack
       void giveFocus();
 
-      // Pops the class from the context stack
+      // Called by the manager to tell the derived class that it that focus has returned from a subsequent context
+      virtual void returnFocus();
+
+      // Called by the manager immediately before a context is popped from the front of the context stack
       void takeFocus();
 
 

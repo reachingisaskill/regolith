@@ -9,6 +9,7 @@
 #include <SDL2/SDL_mixer.h>
 
 #include <map>
+#include <limits>
 
 
 #define REGOLITH_VERSION_NUMBER "0.1"
@@ -84,7 +85,7 @@ namespace Regolith
 
   // In-scene triggers
   // Don't forget to update the string names!
-  enum ContextEvent : unsigned int
+  enum ContextEvent : int
   {
     CONTEXT_EVENT_NULL,
 
@@ -104,7 +105,7 @@ namespace Regolith
 
     CONTEXT_EVENT_OPTIONS, // Eveything beyond this point can be considered a numerical value
 
-    CONTEXT_EVENT_TOTAL = (unsigned int) -1 // Set to the maximum unsinged int
+    CONTEXT_EVENT_TOTAL = std::numeric_limits<int>::max() // Set to the maximum unsinged int
   };
 
 

@@ -18,13 +18,11 @@ namespace Regolith
   class Scene;
 
 
-  // Typedefs
-  typedef std::map< std::string, ObjectFactory_base* > FactoryMap;
-
-
-
   class ObjectBuilder
   {
+    // Typedefs
+    typedef std::map< std::string, ObjectFactory_base* > FactoryMap;
+
     private:
       FactoryMap _factories;
       SDL_Renderer* _theRenderer;
@@ -48,7 +46,7 @@ namespace Regolith
       void addFactory( ObjectFactory_base* );
 
       // Only needs a json object containing all the relevant info
-      Drawable* build( Json::Value );
+      Drawable* build( Json::Value& );
   };
 
 }

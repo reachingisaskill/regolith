@@ -26,9 +26,8 @@ int main( int, char** )
     man->init( test_config );
 
     INFO_LOG( "Starting rendering loop" );
-    Scene* the_scene = man->loadScene( 0 );
+    man->loadScene( 0 );
 
-    man->getEnginePointer()->setScene( the_scene );
     man->getEnginePointer()->run();
 
   }

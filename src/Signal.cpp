@@ -127,6 +127,21 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Scene Change Signal
+
+  SceneChangeSignal::SceneChangeSignal( unsigned int scene ) :
+    _theScene( scene )
+  {
+  }
+
+
+  void SceneChangeSignal::trigger() const
+  {
+    Manager::getInstance()->loadScene( _theScene );
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
   // Building functions
 
   Signal* makeSignal( Json::Value& json_data, Context* context )
@@ -201,6 +216,12 @@ namespace Regolith
       INFO_STREAM << " Signal type: " << type;
       Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
       newSignal = new ContextEventSignal( context->getContextEventID( json_data["event"].asString() ) );
+    }
+    else if ( type == "scene_change" )
+    {
+      INFO_STREAM << " Signal type: " << type;
+      Utilities::validateJson( json_data, "scene_name", Utilities::JSON_TYPE_STRING );
+      newSignal = new SceneChangeSignal( Manager::getInstance()->getSceneID( json_data["scene_name"].asString() ) );
     }
     else
     {

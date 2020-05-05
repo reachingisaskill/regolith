@@ -10,6 +10,7 @@
 
 namespace Regolith
 {
+  class Signal;
 
   class Button : public Drawable
   {
@@ -31,8 +32,7 @@ namespace Regolith
 
       State _state;
 
-      std::string _actionName;
-      InputAction _actionNumber;
+      std::vector< Signal* > _actions;
 
 
     public :
@@ -78,18 +78,8 @@ namespace Regolith
       virtual Drawable* clone() const;
 
 
-      // Set the action name
-      void setActionName( std::string name ) { _actionName = name; }
-
-      // Set the action name
-      std::string getActionName() { return _actionName; }
-
-
-      // Set the enumerated option number
-      void setOption( InputAction e ) { _actionNumber = e; }
-
-      // Get the enumerated option number
-      InputAction getOption() { return _actionNumber; }
+      // Add an action to the button
+      void addAction( Signal* s ) { _actions.push_back( s ); }
       
 
       // Sets the current state to focussed if button is active
@@ -109,6 +99,9 @@ namespace Regolith
 
       // Deactivates the button
       void deactivate();
+
+      // Trigger the actions
+      void click();
   };
 
 }

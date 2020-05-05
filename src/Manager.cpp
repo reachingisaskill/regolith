@@ -22,10 +22,11 @@ namespace Regolith
     _fonts(),
     _theBuilder( new ObjectBuilder() ),
     _theSceneBuilder( new SceneBuilder() ),
+    _theDialogBuilder( new DialogBuilder() ),
     _rawTextures(),
     _teamNames(),
     _resources( "global_resource_list" ),
-    _scenes(),
+    _scenes( "gloabl_scene_list" ),
     _title(),
     _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
@@ -40,8 +41,11 @@ namespace Regolith
     _theBuilder->addFactory( new ButtonFactory() );
 
     // Set up the scene factories
-    _theSceneBuilder->addFactory( new SceneFactory<SceneTitle>( "title" ) );
-    _theSceneBuilder->addFactory( new SceneFactory<ScenePlatformer>( "platformer" ) );
+    _theSceneBuilder->addFactory( new TitleSceneFactory() );
+    _theSceneBuilder->addFactory( new PlatformerSceneFactory() );
+
+    // Set up the dialog factories
+    _theDialogBuilder->addFactory( new MenuDialogFactory() );
 
     // Create the default teams
     _teamNames[ "hud" ] = DEFAULT_TEAM_HUD;
@@ -52,19 +56,55 @@ namespace Regolith
 
 
 
-  void Manager::popContext()
+  void Manager::openContext( Context* c )
   {
-    DEBUG_LOG( "Popping Context" );
-    // Remove the top element
-    _contexts.pop_front();
+    DEBUG_LOG( "Opening Context" );
+    
+    _contexts.push_front( c );
+    c->giveFocus();
+  }
 
-    // If there's any left, tell them focus has returned
+
+  void Manager::transferContext( Context* c )
+  {
+    DEBUG_LOG( "Transferring Context" );
+
+    _contexts.front()->takeFocus();
+    _contexts.pop_front();
+    
+    _contexts.push_front( c );
+    c->giveFocus();
+  }
+
+
+  void Manager::closeContext()
+  {
+    DEBUG_LOG( "Closing Current Context" );
+    
+    _contexts.front()->takeFocus();
+    _contexts.pop_front();
+    
     if ( ! _contexts.empty() )
     {
       DEBUG_LOG( "Returning focus" );
       _contexts.front()->returnFocus();
     }
   }
+
+
+//  void Manager::popContext()
+//  {
+//    DEBUG_LOG( "Popping Context" );
+//    // Remove the top element
+//    _contexts.pop_front();
+//
+//    // If there's any left, tell them focus has returned
+//    if ( ! _contexts.empty() )
+//    {
+//      DEBUG_LOG( "Returning focus" );
+//      _contexts.front()->returnFocus();
+//    }
+//  }
 
 
   Manager::~Manager()
@@ -75,10 +115,7 @@ namespace Regolith
 
 
     // Remove each of scenes and clear the vector
-    for ( size_t i = 0; i < _scenes.size(); ++i )
-    {
-      delete _scenes[i];
-    }
+    INFO_LOG( "Deleteing Scenes" );
     _scenes.clear();
 
 
@@ -171,28 +208,24 @@ namespace Regolith
 
   Scene* Manager::getScene( size_t scene_num )
   {
-    if ( scene_num >= _scenes.size() )
-    {
-      FAILURE_STREAM << "Request scene out of bounds : " << scene_num;
-      Exception ex( "Manager::getScene()", "Scene number out of bounds", false );
-      ex.addDetail( "Scene number", scene_num );
-      throw ex;
-    }
     return _scenes[ scene_num ];
   }
 
 
-  Scene* Manager::loadScene( size_t scene_num )
+  void Manager::loadScene( size_t scene_num )
   {
-    if ( scene_num >= _scenes.size() )
+    DEBUG_STREAM << "Load Scene: " << scene_num;
+
+    DEBUG_STREAM << "Closing " << _contexts.size() << " open contexts";
+    while ( ! _contexts.empty() )
     {
-      FAILURE_STREAM << "Request scene out of bounds : " << scene_num;
-      Exception ex( "Manager::getScene()", "Scene number out of bounds", false );
-      ex.addDetail( "Scene number", scene_num );
-      throw ex;
+      closeContext();
     }
-    _scenes[ scene_num ]->load();
-    return _scenes[ scene_num ];
+
+    DEBUG_LOG( "Loading new scene" );
+    Scene* theScene = _scenes[ scene_num ];
+    _contexts.push_front( theScene );
+    _theEngine->setScene( theScene );
   }
 
 
@@ -205,7 +238,7 @@ namespace Regolith
     if ( found == _rawTextures.end() )
     {
       ERROR_STREAM << "Failed to find raw texture with name: " << name;
-      Exception ex( "Scene::findRawTexture()", "Could not find raw texture", true );
+      Exception ex( "ID::findRawTexture()", "Could not find raw texture", true );
       ex.addDetail( "Texture name", name );
       throw ex;
     }

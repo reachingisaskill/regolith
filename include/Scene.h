@@ -29,15 +29,18 @@ namespace Regolith
 
   class Scene : public Context
   {
+    friend class SceneFactory;
+
     private:
       // Scene state information
-      std::string _sceneFile;
+      bool _isLoaded;
       bool _paused;
       int _defaultMusic;
 
       // Containers storing drawable objects - the scene and the hud elements
       // All memory is owned by Scene
       Drawable* _background;
+      Drawable* _foreground;
       ElementList _sceneElements;
       ElementList _hudElements;
 
@@ -67,36 +70,8 @@ namespace Regolith
       virtual void onResume() {}
 
       // Function for derived classes to implement when the quit signal is received (auto saving?)
-      virtual void onQuit() {}
+      virtual void onStop() {}
 
-
-      // Function to parse the json document
-      Json::Value _loadConfig();
-
-      // Function to load the input configuration
-      void _loadInput( Json::Value& );
-
-      // Function to load all the sound files
-      void _loadSounds( Json::Value& );
-
-      // Function to build all the caches/acceleration structures
-      void _loadCaches( Json::Value& );
-
-      // Function to build the camera objects
-      void _loadCameras( Json::Value& );
-
-      // Function to build all the HUD structures
-      void _loadHUD( Json::Value& );
-
-      // Function to build the dialog boxes
-      void _loadDialogs( Json::Value& );
-
-      // Function to build the remaining configuration - should be implemeted by the derived classes
-      virtual void _loadOptions( Json::Value& );
-
-
-      // Override this function to allow the base class to build components specific to this scene type
-      virtual void _loadSceneSpecificComponents( Json::Value& ) = 0;
 
 
       // Derived class rendering function
@@ -117,24 +92,19 @@ namespace Regolith
       Drawable* getBackground() { return _background; }
 
     public:
-      // Set the necessary parameters
+      // Set the input mapping name
       Scene( std::string );
 
       // Remove all the cached data and clean up
       virtual ~Scene();
 
 
+
       // Start the scene
       void start() { this->onStart(); }
 
-
-      // Load the scene from the specified file
-      void load();
-
-
-      // Return a copy of the scene file
-      std::string getSceneFile() { return _sceneFile; }
-
+      // Stop the scene
+      void stop() { this->onStop(); }
 
       // Pause logic
       void pause() { _paused = true; this->onPause(); }

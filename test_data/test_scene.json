@@ -83,26 +83,25 @@
   "dialog_windows" :
   [
     {
+      "input_mapping" : "title",
       "name" : "pause_menu",
-      "dialog" :
-      {
-        "name" : "pause_menu_top",
-        "elements" :
-        [
-          {
-            "resource_name" : "pause_text",
-            "position" : [0, 0],
-            "alignment" :
-            {
-              "horizontal" : "centre",
-              "vertical" : "centre"
-            }
-          }
-        ],
-        "options" :
+      "dialog_type" : "menu",
+
+      "elements" :
+      [
         {
-          "can_cancel" : true
+          "resource_name" : "pause_text",
+          "position" : [0, 0],
+          "alignment" :
+          {
+            "horizontal" : "centre",
+            "vertical" : "centre"
+          }
         }
+      ],
+      "options" :
+      {
+        "can_cancel" : true
       }
     }
   ]

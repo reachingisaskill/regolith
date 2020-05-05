@@ -6,9 +6,9 @@
 namespace Regolith
 {
 
-  Context::Context( InputHandler* h ) :
+  Context::Context( std::string mappingName ) :
     Controllable(),
-    _theInput( h ),
+    _theInput( mappingName ),
     _theAudio( Manager::getInstance()->getAudioManager() ),
     _contextEvents()
   {
@@ -17,22 +17,28 @@ namespace Regolith
 
   void Context::giveFocus()
   {
-    Manager::getInstance()->pushContext( this );
     _theAudio.play();
   }
 
 
-  void Context::transferFocus( Context* newContext )
-  {
-    _theAudio.pause();
-    newContext->giveFocus();
-  }
+//  void Context::openContext( Context* newContext )
+//  {
+//    _theAudio.pause();
+//    newContext->giveFocus();
+//  }
+//
+//
+//  void Context::transferFocus( Context* newContext )
+//  {
+//    _theAudio.stop();
+//    Manager::getInstance()->popContext();
+//    newContext->giveFocus();
+//  }
 
 
   void Context::takeFocus()
   {
     _theAudio.stop();
-    Manager::getInstance()->popContext();
   }
 
 
