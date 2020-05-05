@@ -253,9 +253,9 @@ namespace Regolith
       Utilities::validateJson( dialog_windows[i], "name", Utilities::JSON_TYPE_STRING );
       std::string name = dialog_windows[i]["name"].asString();
 
-      INFO_STREAM << "Building dialog window: " << name;
       Dialog* newDialog = builder->build( dialog_windows[i], scene->_theHUD );
       scene->_dialogWindows.addObject( newDialog, name );
+      INFO_STREAM << "Building dialog window: " << name << " @ " << newDialog;
     }
   }
 
@@ -314,6 +314,7 @@ namespace Regolith
       Utilities::validateJson( json_data["options"], "starting_dialog", Utilities::JSON_TYPE_STRING, true );
       std::string dialog_name = json_data["options"]["starting_dialog"].asString();
       theScene->_startingDialog = theScene->dialogWindows().get( dialog_name );
+      DEBUG_STREAM << "Starting Dialog  @ " << theScene->_startingDialog;
     }
 
     INFO_LOG( "Registering input actions" );

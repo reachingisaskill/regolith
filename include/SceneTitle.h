@@ -33,7 +33,7 @@ namespace Regolith
       virtual void _resolveCollisions();
 
     public:
-      // Set the necessary parameters
+      // Name of input mapping
       SceneTitle( std::string );
 
       // Remove all the cached data and clean up

@@ -431,7 +431,7 @@ namespace Regolith
 
       Scene* new_scene = _theSceneBuilder->build( scene_data[i] );
       _scenes.set( name, new_scene );
-      INFO_STREAM << "Configured Scene: " << name;
+      INFO_STREAM << "Configured Scene: " << name << " @ " << new_scene;
     }
   }
 

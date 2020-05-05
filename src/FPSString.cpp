@@ -1,4 +1,4 @@
-#define LOGTASTIC_DEBUG_OFF
+//#define LOGTASTIC_DEBUG_OFF
 
 #include "FPSString.h"
 
@@ -27,7 +27,7 @@ namespace Regolith
 
   FPSString::FPSString( const FPSString& other ) :
     Drawable( other ),
-    _theTexture( other._theTexture ),
+    _theTexture( { nullptr, 0, 0 } ),
     _phrase( other._phrase ),
     _frameCounter( other._frameCounter ),
     _limit( other._limit ),
@@ -37,6 +37,7 @@ namespace Regolith
     _theColor( other._theColor ),
     _destination( other._destination )
   {
+    updateString();
   }
 
 
@@ -61,7 +62,7 @@ namespace Regolith
 
     if ( _tickCount > _limit )
     {
-      DEBUG_STREAM << _tickCount << ", " << _limit << ", " << _frameCounter;
+      DEBUG_STREAM << "FPS UPDATE " <<  _tickCount << ", " << _limit << ", " << _frameCounter << " : " << _theTexture.texture;
       SDL_DestroyTexture( _theTexture.texture );
 
       updateString();

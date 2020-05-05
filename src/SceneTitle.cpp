@@ -15,8 +15,9 @@ namespace Regolith
 {
 
 
-  SceneTitle::SceneTitle( std::string json_file ) :
-    Scene( json_file )
+  SceneTitle::SceneTitle( std::string h ) :
+    Scene( h ),
+    _startingDialog( nullptr )
   {
   }
 
@@ -60,6 +61,7 @@ namespace Regolith
       audioHandler()->setSong( defaultMusic() );
     }
 
+    DEBUG_STREAM << "Opening starting dialog: " << _startingDialog;
     Manager::getInstance()->openContext( _startingDialog );
   }
 

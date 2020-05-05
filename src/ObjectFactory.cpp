@@ -243,9 +243,10 @@ namespace Regolith
     newSprite->setFrameCount( frameCount );
     newSprite->setFont( font );
     newSprite->setColor( color );
-    newSprite->updateString();
 
     buildDrawable( newSprite, json_data );
+
+    newSprite->updateString();
 
     return newSprite;
   }

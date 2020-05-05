@@ -176,7 +176,7 @@ namespace Regolith
       std::string name = json_data["name"].asString();
       std::string mapping = json_data["input_mapping"].asString();
 
-      MenuDialog* theDialog = new MenuDialog( theCamera, mapping );
+      theDialog = new MenuDialog( theCamera, mapping );
 
 
       INFO_LOG( "Checking for background sprite" );
@@ -213,6 +213,8 @@ namespace Regolith
 
       INFO_LOG( "Configuring action handler for dialog" );
       theDialog->registerActions( theDialog->inputHandler() );
+
+      DEBUG_STREAM << "Build Dialog: " << name << " @ " << theDialog;
     }
     catch ( Exception& ex )
     {
@@ -227,6 +229,7 @@ namespace Regolith
         throw ex;
       }
     }
+    DEBUG_STREAM << "Build Dialog @ " << theDialog;
 
     return theDialog;
   }
