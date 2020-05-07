@@ -76,26 +76,27 @@ LIB_LINK_FLAGS = -Wl,-rpath=$(realpath ${LIB_DIR}) -l${LIB_NAME} -L${LIB_DIR}
 
 # Find The Files
 EXE_FILES = ${shell ls $(EXE_SRC_DIR)}
-SRC_FILES = ${shell ls $(SRC_DIR)}
+#SRC_FILES = ${shell ls $(SRC_DIR)}
+SRC_FILES = ${shell find $(SRC_DIR) -type f | cut -d '/' -f 2-}
 INC_FILES = ${shell ls $(INC_DIR)}
 
 # Executable Source Files
 EXE_SRC = $(filter %.cxx,${EXE_FILES})
 
 
-
 INCLUDE = $(patsubst %.h,${INC_DIR}/%.h,$(filter %.h,$(INC_FILES)))
 INCLUDE+= $(patsubst %.hpp,${INC_DIR}/%.hpp,$(filter %.hpp,$(INC_FILES)))
 
-SOURCES = $(patsubst %.cpp,${SRC_DIR}/%.cpp,$(filter %.cpp,$(SRC_FILES)))
+#SOURCES = $(patsubst %.cpp,${SRC_DIR}/%.cpp,$(filter %.cpp,$(SRC_FILES)))
+SOURCES = $(filter %.cpp,$(SRC_FILES))
 
-OBJECTS = $(patsubst %.cpp,$(TMP_DIR)/%.o,$(filter %.cpp,$(SRC_FILES)))
+#OBJECTS = $(patsubst %.cpp,$(TMP_DIR)/%.o,$(filter %.cpp,$(SRC_FILES)))
+OBJECTS = $(patsubst %.cpp,$(TMP_DIR)/%.o,$(SRC_FILES))
 EXE_OBJ = $(patsubst %.cxx,$(TMP_DIR)/%.o,${EXE_SRC})
 
 LIBRARY   = ${LIB_DIR}/lib${LIB_NAME}.so
 PROGRAMS  = $(patsubst %.cxx,${BIN_DIR}/%,${EXE_SRC})
 PROGNAMES = $(notdir ${PROGRAMS})
-
 
 
 .PHONY : program all _all build install clean buildall directories includes intro single_intro check_install
@@ -145,6 +146,7 @@ ${EXE_OBJ} : ${TMP_DIR}/%.o : ${EXE_SRC_DIR}/%.cxx ${INCLUDE}
 
 ${OBJECTS} : ${TMP_DIR}/%.o : ${SRC_DIR}/%.cpp ${INCLUDE}
 	@echo " - Compiling Source : " $(notdir $(basename $@))
+	@mkdir -p $(dir $@)
 	@${CCC} ${LIB_COMP_FLAGS} -c $< -o $@ ${INC_FLAGS}
 
 
@@ -170,7 +172,7 @@ ${TMP_DIR} :
 
 
 clean :
-	rm -f ${TMP_DIR}/*
+	rm -rf ${TMP_DIR}/*
 	rm -f ${PROGRAMS}
 
 purge :	
