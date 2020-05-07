@@ -1,6 +1,6 @@
 
 #include "regolith.h"
-#include "TestPlayer.h"
+#include "Test/TestPlayer.h"
 
 #include "logtastic.h"
 

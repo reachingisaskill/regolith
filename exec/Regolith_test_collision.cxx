@@ -1,7 +1,7 @@
 #define TESTASS_APPROX_LIMIT 1.0E-6
 
 #include "regolith.h"
-#include "TestDrawable.h"
+#include "Test/TestDrawable.h"
 
 #include "testass.h"
 #include "logtastic.h"
