@@ -23,8 +23,8 @@ For example, 2D platformer requires the "Player" model, including how it reacts 
 It is currently only available on Linux, my preferred development environment. Although a windows port is in development (come back later...).
 
 It requires other libraries to be available: 
-  - Logtastic (http://github.com/reachingisaskill/logtastic-logging-library)
-  - Testass (http://github.com/reachingisaskill/testass-testing-and-assertion)
+  - Logtastic (https://github.com/reachingisaskill/logtastic-logging-library)
+  - Testass (https://github.com/reachingisaskill/testass-testing-and-assertion)
 
 They must both be built somewhere and their setup files "source"ed.
 
