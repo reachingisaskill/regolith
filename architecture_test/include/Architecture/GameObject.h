@@ -33,6 +33,7 @@ namespace Regolith
         bool hasTexture() const { return false; }
         bool hasInteraction() const { return false; }
         bool hasMovement() const { return false; }
+        bool isPhysical() const override { return false; }
     };
 
   }

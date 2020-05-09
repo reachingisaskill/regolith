@@ -37,6 +37,11 @@ namespace Regolith
         virtual ~PhysicalObject() {}
 
 
+        // Tells the user that derived classes come from a physical object.
+        // Warning: overriding this function change the value may prevent items from being added to context layers
+        bool isPhysical() const override { return true; }
+
+
         // Function to create to an copied instance at the specified position
         PhysicalObject* clone( Vector ) const = 0;
 
