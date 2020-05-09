@@ -3,7 +3,7 @@
 #define REGOLITH_COMPONENT_CAMERA_H_
 
 #include "Global/Global.h"
-#include "Architecture/Component.h"
+#include "Architecture/Animated.h"
 #include "Architecture/ControllableInterface.h"
 
 
@@ -12,7 +12,7 @@ namespace Regolith
   class PhysicalObject;
 
 
-  class Camera : public Component
+  class Camera : public Animated
   {
     private:
       float _layerWidth;
