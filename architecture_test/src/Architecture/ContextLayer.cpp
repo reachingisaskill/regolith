@@ -8,13 +8,13 @@ namespace Regolith
   {
 
     ContextLayer::ContextLayer( Vector pos, float w, float h ) :
+      _camera(),
       _position( pos ),
-      _width( w ),
-      _height( h ),
       drawables(),
       moveables(),
       teams()
     {
+      _camera.configure( w, h );
     }
 
 

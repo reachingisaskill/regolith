@@ -20,6 +20,9 @@ namespace Regolith
      */
     class Component
     {
+      Component( const Component& ) = delete;
+      Conponent& operator=( const Component& ) = delete;
+
       public :
         // Make the detructor virtual
         virtual ~Component() {}

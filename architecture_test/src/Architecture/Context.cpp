@@ -1,5 +1,6 @@
 
 #include "Architecture/Context.h"
+#include "Components/Camera.h"
 
 #include "logtastic.h"
 
@@ -56,6 +57,12 @@ namespace Regolith
         (*it)->udpate( time );
         ++it;
       }
+
+      NamedVector< Layer, true >:: iterator layers_end = _layers.end();
+      for ( NamedVector<Layer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
+      {
+        (*layer_it)->update( time );
+      }
     }
 
 
@@ -88,6 +95,8 @@ namespace Regolith
       NamedVector< Layer, true >:: iterator layers_end = _layers.end();
       for ( NamedVector<Layer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
       {
+        const Camera& layerCamera = (*layer_it)->getCamera();
+
         DrawableList& drawables = (*layer_it)->drawables;
         DrawableList::iterator draw_it = drawables.begin();
         DrawableList::iterator draw_end = drawables.end();
@@ -99,7 +108,7 @@ namespace Regolith
           }
           else
           {
-            (*draw_it)->render(...);
+            (*draw_it)->render( layerCamera );
             ++draw_it;
           }
         }
@@ -140,6 +149,27 @@ namespace Regolith
           }
         }
       }
+    }
+
+
+    void Context::openChildContext( unsigned int id )
+    {
+      Manager::getInstance()->openContext( _childContexts[ id ] );
+    }
+
+
+    void Context::spawn( unsigned int id, unsigned int layer, const Vector& position )
+    {
+    }
+
+
+    void Context::addSpawnedObject( PhysicalObject*, unsigned int, const Vector& )
+    {
+    }
+
+
+    virtual void Context::cacheObject( GameObject* )
+    {
     }
 
   }

@@ -22,11 +22,13 @@ namespace Regolith
         float _mass;
         float _inverseMass;
         Vector _forces;
+        Vector _inputForce;
         Vector _velocity;
 
       protected:
         void setMass( float );
         void setVelocity( Vector v ) { _velocity = v; } 
+        void setInputForce( Vector f ) { _inputForce = f; }
 
       public:
         Movable();
@@ -49,6 +51,7 @@ namespace Regolith
         float getMass() const { return _mass; }
         Vector getVelocity() const { return _velocity; }
         Vector getForces() const { return _forces; }
+        Vector getInputForce() const { return _inputForce; }
     };
 
   }
