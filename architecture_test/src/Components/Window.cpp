@@ -11,10 +11,6 @@
 namespace Regolith
 {
 
-  static float Window::_scaleX = 1.0;
-  static float Window::_scaleY = 1.0;
-
-
   Window::Window() :
     _theWindow( nullptr ),
     _title(),
@@ -25,7 +21,9 @@ namespace Regolith
     _mouseFocus( false ),
     _keyboardFocus( false ),
     _minimized( false ),
-    _fullscreen( false )
+    _fullscreen( false ),
+    _scaleX( 1.0 ),
+    _scaleY( 1.0 )
   {
   }
 
@@ -95,7 +93,7 @@ namespace Regolith
         _width = e.window.data1;
         _height = e.window.data2;
         _scaleX = (float)_width / (float)_resolutionWidth;
-        _scaleX = (float)_height / (float)_resolutionHeight;
+        _scaleY = (float)_height / (float)_resolutionHeight;
         updateCaption = true;
 //        SDL_RenderPresent( _theRenderer );
         break;

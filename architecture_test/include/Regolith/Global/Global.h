@@ -9,6 +9,7 @@
 #include "Global/Vector.h"
 #include "Global/Singleton.h"
 #include "Global/NamedVector.h"
+#include "Global/Exception.h"
 
 
 #endif // REGOLITH_GLOBAL_GLOBAL_H_

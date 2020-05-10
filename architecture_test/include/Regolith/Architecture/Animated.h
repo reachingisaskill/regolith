@@ -2,8 +2,9 @@
 #ifndef REGOLITH_ARCHITECTURE_ANIMATED_H_
 #define REGOLITH_ARCHITECTURE_ANIMATED_H_
 
-#include "Global/Global.h"
-#include "Architecture/GameObject.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/AnimatedInterface.h"
+#include "Regolith/Architecture/GameObject.h"
 
 
 namespace Regolith
@@ -12,17 +13,17 @@ namespace Regolith
   {
 
     /*
-     * Class which defines the interface for animated objects.
+     * Class which defines the interface for gameobjects that are animated.
      * This is any object, visible or not, that requires a call to void update( timestep ) on every frame
      */
-    class Animated : virtual public GameObject
+    class Animated : virtual public AnimatedInterface, virtual public GameObject
     {
       public:
         virtual ~Animated() {}
 
         bool hasAnimation() const override { return true; }
 
-        void update( Uint32 ) = 0;
+//        void update( Uint32 ) override = 0;
     };
 
   }

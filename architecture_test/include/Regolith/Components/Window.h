@@ -13,14 +13,9 @@ namespace Regolith
 
   /*
    * Window wrapper class.
-   * Inherits a singleton patter to make access to window parameters through static members more simple.
-   * If multiple windows are required in future applications, make this a value templated class, on the 
-   * integer template parameter: <int WINDOW_NUMBER>.
    */
-  class Window : public Component, public Singleton< Window >
+  class Window : public Component
   {
-    friend class Singleton<Window>;
-
     private:
       SDL_Window* _theWindow;
       std::string _title;
@@ -33,14 +28,15 @@ namespace Regolith
       bool _minimized;
       bool _fullscreen;
 
-      static float _scaleX;
-      static float _scaleY;
+      float _scaleX;
+      float _scaleY;
 
     protected:
+
+    public:
       // Empty private initialisation
       Window();
 
-    public:
       // On destruction delete the window pointer
       virtual ~Window() { this->free(); }
 
@@ -76,8 +72,8 @@ namespace Regolith
 
 
       // Static member functions to return the current scale factors for rendering
-      static float renderScaleX() { return _scaleX; }
-      static float renderScaleY() { return _scaleY; }
+      const float& renderScaleX() { return _scaleX; }
+      const float& renderScaleY() { return _scaleY; }
   };
 
 }

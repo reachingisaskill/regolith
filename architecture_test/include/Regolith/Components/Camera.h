@@ -3,7 +3,7 @@
 #define REGOLITH_COMPONENT_CAMERA_H_
 
 #include "Global/Global.h"
-#include "Architecture/Animated.h"
+#include "Architecture/AnimatedInterface.h"
 #include "Architecture/ControllableInterface.h"
 
 
@@ -12,7 +12,7 @@ namespace Regolith
   class PhysicalObject;
 
 
-  class Camera : public Animated
+  class Camera : public Interfaces::AnimatedInterface
   {
     private:
       float _layerWidth;
@@ -51,7 +51,7 @@ namespace Regolith
 
 
       // Function to update the camera's behavious on every frame
-      virtual void update( Uint32 );
+      virtual void update( Uint32 ) override;
 
       float getX() const { return _x; }
       float getY() const { return _y; }
