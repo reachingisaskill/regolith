@@ -9,7 +9,7 @@
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*
@@ -23,7 +23,7 @@ namespace Regolith
 
         bool hasAnimation() const override { return true; }
 
-//        void update( Uint32 ) override = 0;
+//        void update( float ) override = 0;
     };
 
   }

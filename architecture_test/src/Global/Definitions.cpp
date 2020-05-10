@@ -1,5 +1,6 @@
 
-#include "Managers/Definitions.h"
+#include "Regolith/Global/SDL.h"
+#include "Regolith/Global/Definitions.h"
 
 #include <string>
 

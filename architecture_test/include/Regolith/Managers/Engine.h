@@ -13,6 +13,8 @@
 namespace Regolith
 {
 
+  typedef std::deque< Context* > ContextStack;
+
 
   class Engine : public Component
   {

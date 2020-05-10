@@ -1,8 +1,6 @@
 
-#ifndef REGOLITH_VECTOR_H_
-#define REGOLITH_VECTOR_H_
-
-#include "Managers/Definitions.h"
+#ifndef REGOLITH_UTILITIES_VECTOR_H_
+#define REGOLITH_UTILITIES_VECTOR_H_
 
 #include <ostream>
 
@@ -97,5 +95,5 @@ namespace Regolith
   const Vector unitVector_y( 0.0f, 1.0f );
 }
 
-#endif // REGOLITH_VECTOR_H_
+#endif // REGOLITH_UTILITIES_VECTOR_H_
 

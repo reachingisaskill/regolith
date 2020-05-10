@@ -3,7 +3,7 @@
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     Movable::Movable() :

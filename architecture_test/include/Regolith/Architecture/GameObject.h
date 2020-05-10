@@ -2,11 +2,12 @@
 #ifndef REGOLITH_ARCHITECTURE_GAME_OBJECT_H_
 #define REGOLITH_ARCHITECTURE_GAME_OBJECT_H_
 
+#include "Regolith/Architecture/MassProduceable.h"
 
 namespace Regolith
 {
 
-  namespace Interfaces
+  namespace Architecture : public MassProduceable
   {
 
     /*

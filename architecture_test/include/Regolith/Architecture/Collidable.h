@@ -2,14 +2,14 @@
 #ifndef REGOLITH_ARCHITECTURE_COLLIDABLE_H_
 #define REGOLITH_ARCHITECTURE_COLLIDABLE_H_
 
-#include "Global/Global.h"
-#include "Architecture/PhysicalObject.h"
-#include "GamePlay/Collision.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/GamePlay/Collision.h"
 
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*

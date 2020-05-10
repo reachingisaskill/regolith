@@ -7,7 +7,7 @@
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*
@@ -19,7 +19,7 @@ namespace Regolith
       public:
         virtual ~AnimatedInterface() {}
 
-        virtual void update( Uint32 ) = 0;
+        virtual void update( float ) = 0;
     };
 
   }

@@ -2,8 +2,8 @@
 #ifndef REGOLITH_ARCHITECTURE_DRAWABLE_H_
 #define REGOLITH_ARCHITECTURE_DRAWABLE_H_
 
-#include "Global/Global.h"
-#include "Architecture/PhysicalObject.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 
 
 namespace Regolith
@@ -11,7 +11,7 @@ namespace Regolith
 
   class Camera;
 
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*

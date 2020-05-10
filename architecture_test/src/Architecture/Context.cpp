@@ -1,13 +1,13 @@
 
-#include "Architecture/Context.h"
-#include "Components/Camera.h"
+#include "Regolith/Architecture/Context.h"
+#include "Regolith/Components/Camera.h"
 
 #include "logtastic.h"
 
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     Context::Context( Vector pos, float w, float h ) :
@@ -48,7 +48,7 @@ namespace Regolith
     }
 
 
-    void Context::update( Uint32 time )
+    void Context::update( float time )
     {
       AnimatedList::iterator it = _animatedObjects.begin();
       AnimatedList::iterator end =  _animatedObjects.end();
@@ -66,7 +66,7 @@ namespace Regolith
     }
 
 
-    void Context::step( Uint32 time )
+    void Context::step( float time )
     {
       NamedVector< Layer, true >:: iterator layers_end = _layers.end();
       for ( NamedVector<Layer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )

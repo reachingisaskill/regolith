@@ -2,12 +2,12 @@
 #ifndef REGOLITH_ARCHITECTURE_PHYSICAL_OBJECT_H_
 #define REGOLITH_ARCHITECTURE_PHYSICAL_OBJECT_H_
 
-#include "Global/Global.h"
-#include "Architecture/GameObject.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/GameObject.h"
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*
@@ -43,7 +43,7 @@ namespace Regolith
 
 
         // Function to create to an copied instance at the specified position
-        PhysicalObject* clone( Vector ) const = 0;
+        PhysicalObject* clone( const Vector& ) const = 0;
 
 
         // Function to determine if existing instance should be remove from the context

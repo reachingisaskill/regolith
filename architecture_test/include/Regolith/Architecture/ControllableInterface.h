@@ -2,7 +2,7 @@
 #ifndef REGOLITH_ARCHITECTURE_CONTROLLABLE_INTERFACE_H_
 #define REGOLITH_ARCHITECTURE_CONTROLLABLE_INTERFACE_H_
 
-#include "Global/Global.h"
+#include "Regolith/Global/Global.h"
 
 
 namespace Regolith
@@ -11,7 +11,7 @@ namespace Regolith
   // Forward declarations
   class InputHandler;
 
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*

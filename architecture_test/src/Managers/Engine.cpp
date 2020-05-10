@@ -53,7 +53,8 @@ namespace Regolith
 
         SDL_SetRenderDrawColor( _theRenderer, _defaultColor.r, _defaultColor.g, _defaultColor.b, _defaultColor.a );
         SDL_RenderClear( _theRenderer );
-        Uint32 time = _frameTimer.lap();
+
+        float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
 
 
         DEBUG_STREAM << " CONTEXT STACK SIZE : " << _contextStack.size();

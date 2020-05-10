@@ -2,9 +2,9 @@
 #ifndef REGOLITH_COMPONENT_CAMERA_H_
 #define REGOLITH_COMPONENT_CAMERA_H_
 
-#include "Global/Global.h"
-#include "Architecture/AnimatedInterface.h"
-#include "Architecture/ControllableInterface.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/AnimatedInterface.h"
+#include "Regolith/Architecture/ControllableInterface.h"
 
 
 namespace Regolith

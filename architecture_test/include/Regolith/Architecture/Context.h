@@ -2,14 +2,16 @@
 #ifndef REGOLITH_ARCHITECTURE_CONTEXT_H_
 #define REGOLITH_ARCHITECTURE_CONTEXT_H_
 
-#include "Global/Global.h"
-#include "Architecture/ControllableInterface.h"
-#include "Architecture/Component.h"
-#include "Architecture/Animated.h"
-#include "Architecture/PhysicalObject.h"
-#include "Architecture/Layer.h"
-#include "Managers/InputManager.h"
-#include "Managers/AudioManager.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/MassProduceable.h"
+#include "Regolith/Architecture/ControllableInterface.h"
+#include "Regolith/Architecture/Component.h"
+#include "Regolith/Architecture/Animated.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Architecture/ContextLayer.h"
+#include "Regolith/Managers/InputManager.h"
+#include "Regolith/Managers/AudioManager.h"
+#include "Regolith/Utilities/NamedVector.h"
 
 #include <list>
 
@@ -17,7 +19,7 @@
 namespace Regolith
 {
 
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*
@@ -30,7 +32,7 @@ namespace Regolith
      * The standard rendering interface is still to use the current scene, and let the scene
      * call the rendering function for the current context.
      */
-    class Context : public ControllableInterface, public Component
+    class Context : public MassProduceable, public ControllableInterface, public Component
     {
       // Contexts should not be copyable
       Context( const Context& ) = delete;
@@ -89,7 +91,7 @@ namespace Regolith
 
       public:
         // Basic Constructor: position, width, height
-        Context( Vector, float, float );
+        Context();
 
         // Destroctor
         virtual ~Context();
@@ -112,11 +114,11 @@ namespace Regolith
 
 
         // Update the animated objects
-        void update( Uint32 );
+        void update( float );
 
 
         // Update the moveable objects
-        void step( Uint32 );
+        void step( float );
 
 
         // Render all the objects

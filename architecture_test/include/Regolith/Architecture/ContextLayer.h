@@ -2,19 +2,19 @@
 #ifndef REGOLITH_ARCHITECTURE_CONTEXT_LAYER_H_
 #define REGOLITH_ARCHITECTURE_CONTEXT_LAYER_H_
 
-#include "Global/Global.h"
-#include "Achitecture/PhysicalObject.h"
-#include "Achitecture/Drawable.h"
-#include "Achitecture/Movable.h"
-#include "Achitecture/Collidable.h"
-#include "Components/Camera.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Architecture/Drawable.h"
+#include "Regolith/Architecture/Movable.h"
+#include "Regolith/Architecture/Collidable.h"
+#include "Regolith/Components/Camera.h"
 
 #include <list>
 
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     typedef std::list< Drawable* > DrawableList;

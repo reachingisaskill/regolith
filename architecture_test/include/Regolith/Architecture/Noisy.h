@@ -2,8 +2,8 @@
 #ifndef REGOLITH_ARCHITECTURE_NOISY_H_
 #define REGOLITH_ARCHITECTURE_NOISY_H_
 
-#include "Global/Global.h"
-#include "Architecture/GameObject.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/GameObject.h"
 
 
 namespace Regolith
@@ -11,7 +11,7 @@ namespace Regolith
   // Forward declarations
   class AudioHandler;
 
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*

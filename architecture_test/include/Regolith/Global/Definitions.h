@@ -2,6 +2,8 @@
 #ifndef REGOLITH_DEFINITIONS_H_
 #define REGOLITH_DEFINITIONS_H_
 
+#include "Regolith/Global/Json.h"
+
 #include <map>
 #include <limits>
 

@@ -2,7 +2,7 @@
 #ifndef REGOLITH_ARCHITECTURE_INTERACTABLE_H_
 #define REGOLITH_ARCHITECTURE_INTERACTABLE_H_
 
-#include "Global/Global.h"
+#include "Regolith/Global/Global.h"
 
 #include <vector>
 
@@ -11,7 +11,7 @@ namespace Regolith
 {
   class Signal;
 
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*

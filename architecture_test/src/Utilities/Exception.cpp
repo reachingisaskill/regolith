@@ -1,5 +1,5 @@
 
-#include "Regolith/Global/Exception.h"
+#include "Regolith/Utilities/Exception.h"
 
 
 typedef std::vector< std::string > DetailVector;

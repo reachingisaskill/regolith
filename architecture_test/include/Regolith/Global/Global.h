@@ -3,13 +3,13 @@
 #define REGOLITH_GLOBAL_GLOBAL_H_
 
 
-#include "Global/Definitions.h"
-#include "Global/Version.h"
-#include "Global/SDL.h"
-#include "Global/Vector.h"
-#include "Global/Singleton.h"
-#include "Global/NamedVector.h"
-#include "Global/Exception.h"
+#include "Regolith/Global/Version.h"
+#include "Regolith/Global/SDL.h"
+#include "Regolith/Global/Json.h"
+#include "Regolith/Global/Definitions.h"
+
+#include "Regolith/Utilities/Vector.h"
+#include "Regolith/Utilities/Exception.h"
 
 
 #endif // REGOLITH_GLOBAL_GLOBAL_H_

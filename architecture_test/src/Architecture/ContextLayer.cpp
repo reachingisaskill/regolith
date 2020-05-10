@@ -4,7 +4,7 @@
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     ContextLayer::ContextLayer( Vector pos, float w, float h ) :

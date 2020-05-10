@@ -1,14 +1,15 @@
 
-#ifndef _REGOLITH_NAMED_VECTOR_H_
-#define _REGOLITH_NAMED_VECTOR_H_
+#ifndef REGOLITH_UTILITIES_NAMED_VECTOR_H_
+#define REGOLITH_UTILITIES_NAMED_VECTOR_H_
 
-#include "Components/Exception.h"
+#include "Regolith/Utilities/Exception.h"
 
 #include "logtastic.h"
 
 #include <vector>
 #include <map>
 #include <string>
+
 
 namespace Regolith
 {
@@ -434,5 +435,5 @@ namespace Regolith
 
 }
 
-#endif // _REGOLITH_NAMED_VECTOR_H_
+#endif // REGOLITH_UTILITIES_NAMED_VECTOR_H_
 

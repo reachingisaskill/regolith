@@ -2,14 +2,14 @@
 #ifndef REGOLITH_ARCHITECTURE_MOVABLE_H_
 #define REGOLITH_ARCHITECTURE_MOVABLE_H_
 
-#include "Global/Global.h"
-#include "Architecture/PhysicalObject.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 
 
 namespace Regolith
 {
 
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*
@@ -40,7 +40,7 @@ namespace Regolith
 
 
         // Performs the integration step
-        void step( Uint32 );
+        void step( float );
 
 
         // Add a force to the object

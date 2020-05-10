@@ -2,14 +2,14 @@
 #ifndef REGOLITH_ARCHITECTURE_CONTROLLABLE_H_
 #define REGOLITH_ARCHITECTURE_CONTROLLABLE_H_
 
-#include "Global/Global.h"
-#include "Architecture/GameObject.h"
-#include "Architecture/ControllableInterface.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/ControllableInterface.h"
 
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*

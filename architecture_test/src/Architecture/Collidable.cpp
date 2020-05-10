@@ -4,7 +4,7 @@
 
 namespace Regolith
 {
-  namespace Interfaces
+  namespace Architecture
   {
 
     Collidable::Collidable() :

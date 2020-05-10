@@ -23,9 +23,7 @@ namespace Regolith
 
   // Useful typedefs
   typedef std::map< std::string, RawTexture > RawTextureMap;
-  typedef std::vector< Scene* > SceneList;
   typedef std::map< std::string, TTF_Font* > FontMap;
-  typedef std::deque< Context* > ContextStack;
   typedef std::map< std::string, unsigned int > TeamNameMap;
 
 
@@ -52,8 +50,15 @@ namespace Regolith
       FontMap _fonts;
       RawTextureMap _rawTextures;
       TeamNameMap _teamNames;
-      NamedVector<Drawable, true> _objects;
+
+      // All objects that aren't spawnable - two containers removes type casting and validating
+      NamedVector<GameObject, true > _gameObjects;
+      // Spawnable objects
+      NamedVector<PhysicalObject, true> _physicalObjects;
+      // Loadable contexts
       NamedVector<Context, true> _contexts;
+
+
 
       // Useful global constants
       std::string _title;
@@ -104,10 +109,10 @@ namespace Regolith
       // Get the pointers to various managers and builders
 
       // Return a pointer to the texture builder
-      ObjectBuilder* getObjectFactory() { return _objectFactory; }
+      ObjectFactory& getObjectFactory() { return _objectFactory; }
 
       // Return a pointer to the Scene builder
-      SceneBuilder* getContextFactory() { return _contextFactory; }
+      ContextFactory& getContextFactory() { return _contextFactory; }
 
       // Get the pointer to the window
       SDL_Renderer* getRendererPointer() { return _theRenderer; }
@@ -128,8 +133,11 @@ namespace Regolith
       ////////////////////////////////////////////////////////////////////////////////
       // Context Memory
 
-      // Return a pointer to the required scene
-      Context* getContext( size_t );
+      // Return a pointer to a requested context
+      Context* getContext( std::string name ) { return _contexts.get( name ); }
+
+      // Return a pointer to a requested context
+      Context* getContext( unsigned int id ) { return _contexts[ id ]; }
 
       // Return the ID number for a given scene
       unsigned int getContextID( std::string name ) const { return _contexts.getID( name ); }
@@ -149,7 +157,7 @@ namespace Regolith
 
 
       ////////////////////////////////////////////////////////////////////////////////
-      // Texture and resource access functionality
+      // Texture and object access functionality
 
       // Return a raw texture container with the given name
       RawTexture findRawTexture( std::string ) const;
@@ -160,17 +168,26 @@ namespace Regolith
       // Return the team ID for a given name
       unsigned int getTeamID( std::string name ) { return _teamNames[name]; }
 
-      // Return a pointer to a given resource
-      Drawable* getResource( std::string name ) { return _resources.get( name ); }
+      // Return the ID for a given object name
+      unsigned int getGameObjectID( std::string name ) { return _gameObjects.getID( name ); }
 
-      // Return a pointer to a given resource
-      Drawable* getResource( unsigned int i ) { return _resources[i]; }
+      // Return the ID for a given object name
+      unsigned int getPhysicalObjectID( std::string name ) { return _physicalObjects.getID( name ); }
 
+
+      // Get a global object pointer
+      // Return a pointer to a given object. (Please don't delete it!)
+      GameObject* getGameObject( std::string name ) { return _gameObjects.get( name ); }
+
+      // Return a pointer to a given object. (Please don't delete it!)
+      GameObject* getPhysicalObject( std::string name ) { return _physicalObjects.get( name ); }
+
+//      // Return a pointer to a given resource
+//      GameObject* getObject( unsigned int i ) { return _objects[i]; }
+
+      // Spawn a cloned object - caller accepts ownership of memory
       // Spawn a new instance of a resource and return the memory to the caller
-      Drawable* spawn( std::string name, Vector pos = Vector(0.0) ) { return _resources.get( name )->cloneAt( pos ); }
-
-      // Spawn a new instance of a resource and return the memory to the caller
-      Drawable* spawn( unsigned int i, Vector pos ) { return _resources[i]->cloneAt( pos ); }
+      PhysicalObject* spawn( unsigned int i, const Vector& pos ) { return _objects[i]->cloneAt( pos ); }
 
 
       ////////////////////////////////////////////////////////////////////////////////

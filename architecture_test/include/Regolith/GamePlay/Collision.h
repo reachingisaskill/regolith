@@ -2,8 +2,8 @@
 #ifndef REGOLITH_COLLISION_H_
 #define REGOLITH_COLLISION_H_
 
-#include "Components/Vector.h"
-#include "Architecture/Drawable.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/Drawable.h"
 
 
 namespace Regolith

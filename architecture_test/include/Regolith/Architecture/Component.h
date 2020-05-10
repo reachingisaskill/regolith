@@ -2,7 +2,7 @@
 #ifndef REGOLITH_ARCHITECTURE_COMPONENT_H_
 #define REGOLITH_ARCHITECTURE_COMPONENT_H_
 
-#include "Global/Global.h"
+#include "Regolith/Global/Global.h"
 
 
 namespace Regolith
@@ -12,7 +12,7 @@ namespace Regolith
   class InputManager;
 
 
-  namespace Interfaces
+  namespace Architecture
   {
 
     /*
