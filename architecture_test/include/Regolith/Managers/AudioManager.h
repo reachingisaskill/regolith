@@ -52,14 +52,14 @@ namespace Regolith
 
     public :
       // Contstructor
-      AudioManager( unsigned int, int, int, Uint16 format = MIX_DEFAULT_FORMAT );
+      AudioManager();
 
       // Destructor
       ~AudioManager();
 
 
       // Build the audio handler and load all the files
-      void configure( Json::Value&, Json::Value& );
+      void configure( Json::Value& );
 
 
 

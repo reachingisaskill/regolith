@@ -1,7 +1,7 @@
 
 #include "Regolith/Managers/AudioManager.h"
 #include "Regolith/Utilities/Exception.h"
-#include "Regolith/Utilities/Utilities.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 #include "logtastic.h"
 
@@ -21,31 +21,18 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Audio Manager member functions
 
-  AudioManager::AudioManager( unsigned int freq, int chan, int chun, Uint16 format ) :
-    _frequency( freq ),
-    _format( format ),
-    _channels( chan ),
-    _chunkSize( chun ),
-    _fadeTime( 2000 ),
+  AudioManager::AudioManager() :
+    _frequency( 0 ),
+    _format( 0 ),
+    _channels( 0 ),
+    _chunkSize( 0 ),
+    _fadeTime( 200 ),
     _playbackChannelCounter( 0 ),
     _musics( "music_files" ),
     _effects( "chunk_files" ),
     _volumeMusic( 1.0 ), // Defaults to full volume
     _volumeChunk( 1.0 ) // Defaults to full volume
   {
-    if ( Mix_OpenAudio( _frequency, _format, _channels, _chunkSize ) == -1 )
-    {
-      FAILURE_STREAM << "Could not open audio device with the required configuration: " << _frequency << "Hz, " << _channels << " channels, " << _chunkSize << "byte chunks.";
-      Exception ex( "AudioManager::AudioManager()", "Failed to initialise audio device" );
-      ex.addDetail( "Mix Error", Mix_GetError() );
-      ex.addDetail( "Frequency", _frequency );
-      ex.addDetail( "Channels", _channels );
-      ex.addDetail( "Chunk Size", _chunkSize );
-      ex.addDetail( "Format", _format );
-      throw ex;
-    }
-
-    INFO_STREAM << "Initialised Audio Device: " << _frequency << "Hz, " << _channels << " channels, " << _chunkSize << "byte chunks.";
   }
 
 
@@ -126,8 +113,46 @@ namespace Regolith
   }
 
 
-  void AudioManager::configure( Json::Value& music_files, Json::Value& effect_files )
+  void AudioManager::configure( Json::Value& json_data )
   {
+    Utilities::validateJson( json_data, "frequency", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "format", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "channels", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "chunk_size", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "music_files", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "effect_files", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "music_volume", Utilities::JSON_TYPE_FLOAT );
+    Utilities::validateJson( json_data, "effect_volume", Utilities::JSON_TYPE_FLOAT );
+
+    _frequency = json_data["frequency"].asInt();
+    _format = json_data["format"].asInt();
+    _channels = json_data["channels"].asInt();
+    _chunkSize = json_data["chunk_size"].asInt();
+
+    if ( Utilities::validateJson( json_data, "chunk_size", Utilities::JSON_TYPE_INTEGER, false ) )
+      _fadeTime = json_data["fade_time"].asInt();
+
+    if ( Mix_OpenAudio( _frequency, _format, _channels, _chunkSize ) == -1 )
+    {
+      Exception ex( "AudioManager::AudioManager()", "Failed to initialise audio device" );
+      ex.addDetail( "Mix Error", Mix_GetError() );
+      ex.addDetail( "Frequency", _frequency );
+      ex.addDetail( "Channels", _channels );
+      ex.addDetail( "Chunk Size", _chunkSize );
+      ex.addDetail( "Format", _format );
+      throw ex;
+    }
+
+    INFO_STREAM << "Initialised Audio Device: " << _frequency << "Hz, " << _channels << " channels, " << _chunkSize << "byte chunks.";
+
+    _volumeMusic = json_data["music_volume"].asFloat();
+    _volumeChunk = json_data["effect_volume"].asFloat();
+
+
+    Json::Value& music_files = json_data["music_files"];
+    Json::Value& effect_files = json_data["effect_files"];
+
+
     INFO_LOG( "Audio Manager: Loading music files" );
     Json::ArrayIndex music_size = music_files.size();
     for ( Json::ArrayIndex i = 0; i < music_size; ++i )

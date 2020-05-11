@@ -9,55 +9,56 @@
 
 namespace Regolith
 {
-  namespace Architecture
+
+  /*
+   * Defines the interface for object that can be collide. 
+   * Main collision logic is within the Collision class definition.
+   */
+  class Collidable : virtual public PhysicalObject
   {
+    private:
+      Collision _collision;
+      bool _collisionActive;
+      unsigned int _collisionType;
+      int _teamID;
 
-    /*
-     * Defines the interface for object that can be collide. 
-     * Main collision logic is within the Collision class definition.
-     */
-    class Collidable : virtual public PhysicalObject
-    {
-      private:
-        Collision _collision;
-        bool _collisionActive;
-        unsigned int _collisionType;
-        int _teamID;
+    protected:
+      void setCollision( Collision c ) { _collision = c; }
+      void setCollisionActive( bool c ) { _collisionActive = c; }
+      void setCollisionType( unsigned int t ) { _collisionType = t; }
+      void setTeam( int t ) { _teamID = t; }
 
-      protected:
-        void setCollision( Collision c ) { _collision = c; }
-        void setCollisionActive( bool c ) { _collisionActive = c; }
-        void setCollisionType( unsigned int t ) { _collisionType = t; }
-        void setTeam( int t ) { _teamID = t; }
+    public:
+      Collidable();
 
-      public:
-        Collidable();
-
-        virtual ~Collidable() {}
+      virtual ~Collidable() {}
 
 
-        // Return the team id - determines collision interactions
-        int getTeam() const { return _teamID; }
+      virtual void configure( Json::Value& ) override;
 
 
-        // Signifies that the object has the collidable interface
-        virtual bool hasCollision() const override { return true; }
+      // Return the team id - determines collision interactions
+      int getTeam() const { return _teamID; }
 
 
-        // Shortcut function. Skip collision if its not active
-        bool collisionActive() const { return _collisionActive; }
+      // Signifies that the object has the collidable interface
+      virtual bool hasCollision() const override { return true; }
 
 
-        // Returns the type of collision interaction that occurs with this object
-        unsigned int collisionType() const { return _collisionType; }
+      // Shortcut function. Skip collision if its not active
+      bool collisionActive() const { return _collisionActive; }
 
 
-        // Function called when a collision is found with another object
-        void onCollision( unsigned int, const Vector& ) = 0;
+      // Returns the type of collision interaction that occurs with this object
+      unsigned int collisionType() const { return _collisionType; }
 
-    };
 
-  }
+      // Function called when a collision is found with another object
+      // Overlap vector, other object pointer
+      virtual void onCollision( const Vector&, const Collidable* ) = 0;
+
+  };
+
 }
 
 #endif // REGOLITH_ARCHITECTURE_COLLIDABLE_H_

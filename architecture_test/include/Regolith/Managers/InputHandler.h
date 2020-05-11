@@ -23,9 +23,11 @@ namespace Regolith
 
     public :
       // Just pass the name of the required input mapping
-      explicit InputHandler( std::string );
+      InputHandler();
 
       ~InputHandler();
+
+      void configure( std::string );
 
       // Return the set of objects that requested the input action
       ControllableSet& getRegisteredObjects( InputAction action ) { return _actionMaps[ action ]; }

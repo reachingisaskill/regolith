@@ -77,9 +77,9 @@ namespace Regolith
   }
 
 
-  void Window::registerEvents( InputManager* manager )
+  void Window::registerEvents( InputManager& manager )
   {
-    manager->registerEventRequest( this, REGOLITH_EVENT_WINDOW );
+    manager.registerEventRequest( this, REGOLITH_EVENT_WINDOW );
   }
 
 

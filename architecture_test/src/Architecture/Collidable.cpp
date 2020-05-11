@@ -1,20 +1,17 @@
 
-#include "Architecture/Collidable.h"
+#include "Regolith/Architecture/Collidable.h"
 
 
 namespace Regolith
 {
-  namespace Architecture
+
+  Collidable::Collidable() :
+    PhysicalObject(),
+    _collision(),
+    _collisionActive( false ),
+    _collisionType( 0 )
   {
-
-    Collidable::Collidable() :
-      PhysicalObject(),
-      _collision(),
-      _collisionActive( false ),
-      _collisionType( 0 )
-    {
-    }
-
   }
+
 }
 

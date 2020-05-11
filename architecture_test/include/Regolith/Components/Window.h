@@ -42,7 +42,7 @@ namespace Regolith
 
 
       // Configure the window return the SDL renderer
-      SDL_Renderer* init( int, int );
+      SDL_Renderer* init( std::string, int, int );
 
 
       // Get the current window dimensions
@@ -65,10 +65,10 @@ namespace Regolith
 
       // Component event handling functionality
       // Register game-wide events with the manager
-      virtual void registerEvents( InputManager* );
+      virtual void registerEvents( InputManager& ) override;
 
       // Regolith events
-      virtual void eventAction( const RegolithEvent&, const SDL_Event& );
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override;
 
 
       // Static member functions to return the current scale factors for rendering

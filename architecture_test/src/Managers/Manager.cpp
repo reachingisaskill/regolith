@@ -1,6 +1,6 @@
 
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/Engine.h"
+#include "Regolith/Components/Engine.h"
 #include "Regolith/Components/Window.h"
 
 #include "logtastic.h"
@@ -13,15 +13,15 @@ namespace Regolith
     _theWindow(),
     _theInput(),
     _theAudio(),
-    _theEngine( _theWindow, _theInput, _defaultColor ),
+    _theEngine( _theInput, _defaultColor ),
     _theRenderer( nullptr ),
     _objectFactory(),
     _contextFactory(),
     _fonts(),
     _rawTextures(),
     _teamNames(),
-    _physicalObjects( "manager_physical_object_list" ),
     _gameObjects( "manager_game_object_list" ),
+    _physicalObjects( "manager_physical_object_list" ),
     _contexts( "manager_context_list" ),
     _title(),
     _defaultFont( nullptr ),
@@ -31,22 +31,17 @@ namespace Regolith
     _gravityConst( 0.0, 0.01 ),
     _dragConst( 0.005 )
   {
-    // Set up the object factory
-    _objectFactory.addBuilder( new SpriteBuilder() );
-    _objectFactory.addBuilder( new FPSStringBuilder() );
-    _objectFactory.addBuilder( new ButtonBuilder() );
-
-    // Set up the context factory
-    _contextFactory->addBuilder( new TitleSceneFactory() );
-    _contextFactory->addBuilder( new PlatformerSceneFactory() );
-    _contextFactory->addBuilder( new MenuDialogFactory() );
-
-//    // Create the default team
-//    _teamNames[ "hud" ] = DEFAULT_TEAM_HUD;
-//    _teamNames[ "environment" ] = DEFAULT_TEAM_ENVIRONMENT;
-//    _teamNames[ "npc" ] = DEFAULT_TEAM_NPC;
-//    _teamNames[ "player" ] = DEFAULT_TEAM_PLAYER;
+//    // Set up the object factory
+//    _objectFactory.addBuilder<Sprite>( "sprite" );
+//    _objectFactory.addBuilder<FPSString>( "fps_string" );
+//    _objectFactory.addBuilder<Button>( "button" );
+//
+//    // Set up the context factory
+//    _contextFactory.addBuilder<Platformer>( "platformer" );
+//    _contextFactory.addBuilder<MenuDialog>( "menu_dialog" );
+//    _contextFactory.addBuilder<Title>( "title_scene" );
   }
+
 
   Manager::~Manager()
   {
@@ -56,8 +51,11 @@ namespace Regolith
     INFO_LOG( "Deleteing Scenes" );
     _contexts.clear();
 
-    INFO_LOG( "Deleting Resources" );
-    _objects.clear();
+    INFO_LOG( "Deleting Physical Objects" );
+    _physicalObjects.clear();
+
+    INFO_LOG( "Deleting GameObjects" );
+    _gameObjects.clear();
 
     INFO_LOG( "Clearing team list" );
     _teamNames.clear();
@@ -79,10 +77,6 @@ namespace Regolith
     INFO_LOG( "Destroying the renderer" );
     SDL_DestroyRenderer( _theRenderer );
     _theRenderer = nullptr;
-
-    INFO_LOG( "Destroying the window" );
-    delete _theWindow;
-    _theWindow = nullptr;
 
     INFO_LOG( "Closing the SDL subsystems" );
     TTF_Quit();
@@ -116,13 +110,15 @@ namespace Regolith
   }
 
 
-  void Manager::setContextStack( Context* context )
+  void Manager::setContextStack( Context* c )
   {
     DEBUG_LOG( "Closing All Contexts" );
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, c ) );
   }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Utility functions
 
   void Manager::run()
   {
@@ -133,7 +129,7 @@ namespace Regolith
       throw ex;
     }
 
-    // Open the first context
+    // Reset the stack to the first context
     setContextStack( _contexts[0] );
 
     // Start the engine!
@@ -152,15 +148,6 @@ namespace Regolith
     return find->second;
   }
 
-
-  Context* Manager::getContext( size_t context_num )
-  {
-    return _contexts[ context_num ];
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Return existing texture pointer
 
   RawTexture Manager::findRawTexture( std::string name ) const
   {

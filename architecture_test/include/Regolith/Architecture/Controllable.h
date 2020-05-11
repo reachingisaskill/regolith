@@ -9,23 +9,24 @@
 
 namespace Regolith
 {
-  namespace Architecture
+
+  /*
+   * This class defines the base class for game objects that can respond to hardware input controls
+   */
+  class Controllable : public ControllableInterface, virtual public GameObject
   {
+    public :
+      // Make the detructor virtual
+      virtual ~Controllable() {}
 
-    /*
-     * This class defines the base class for game objects that can respond to hardware input controls
-     */
-    class Controllable : public ControllableInterface, virtual public GameObject
-    {
-      public :
-        // Make the detructor virtual
-        virtual ~Controllable() {}
 
-        bool hasInput() const { return true; }
+      virtual void configure( Json::Value& ) override {}
 
-    };
 
-  }
+      bool hasInput() const { return true; }
+
+  };
+
 }
 
 #endif // REGOLITH_ARCHITECTURE_CONTROLLABLE_H_

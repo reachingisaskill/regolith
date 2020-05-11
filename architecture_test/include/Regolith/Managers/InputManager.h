@@ -70,6 +70,11 @@ namespace Regolith
       virtual ~InputManager();
 
 
+      // Initialise the Input mappings and handling configuration
+      void configure( Json::Value& );
+
+
+
       // Iterate through all the SDL events and use the provided input handler to distribute user events
       void handleEvents( InputHandler* );
 

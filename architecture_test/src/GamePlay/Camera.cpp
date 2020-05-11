@@ -1,8 +1,8 @@
 
-#include "Components/Camera.h"
-
-#include "Architecture/PhysicalObject.h"
-#include "Components/Window.h"
+#include "Regolith/GamePlay/Camera.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Managers/Manager.h"
+#include "Regolith/Components/Window.h"
 
 #include "logtastic.h"
 
@@ -11,8 +11,8 @@ namespace Regolith
 {
 
   Camera::Camera() :
-    _sceneWidth( 0 ),
-    _sceneHeight( 0 ),
+    _layerWidth( 0 ),
+    _layerHeight( 0 ),
     _limitX( 0 ),
     _limitY( 0 ),
     _x( 0 ),
@@ -20,16 +20,22 @@ namespace Regolith
     _zoom( 1.0 ),
     _theObject( nullptr ),
     _offsetX( 0 ),
-    _offsetY( 0 )
+    _offsetY( 0 ),
+    _scaleX( Manager::getInstance()->getWindow().renderScaleX() ),
+    _scaleY( Manager::getInstance()->getWindow().renderScaleY() )
   {
   }
 
 
   void Camera::configure( int scene_width, int scene_height )
   {
-    _sceneWidth = scene_width;
-    _sceneHeight = scene_height;
-    INFO_STREAM << "Camera::configure() : ScenePlatformer Dims: " << _sceneWidth << ", " << _sceneHeight << ", Camera Dims: " << _windowWidth << ", " << _windowHeight << ", Limits: " << _limitX << ", " << _limitY << ", Pos: " << _x << ", " << _y;
+    _layerWidth = scene_width;
+    _layerHeight = scene_height;
+
+    _limitX = scene_width - Manager::getInstance()->getWindow().getResolutionWidth();
+    _limitY = scene_height - Manager::getInstance()->getWindow().getResolutionHeight();
+
+    INFO_STREAM << "Camera configured. Dims: " << _layerWidth << ", " << _layerHeight << ", Limits: " << _limitX << ", " << _limitY << ", Pos: " << _x << ", " << _y;
   }
 
 
@@ -52,18 +58,18 @@ namespace Regolith
   }
 
 
-  SDL_Rect Camera::place( const SDL_Rect& rect )
+  SDL_Rect Camera::place( const SDL_Rect& rect ) const
   {
     SDL_Rect newRect;
-    newRect.x = (rect.x - _x) * Window::renderScaleX();
-    newRect.y = (rect.y - _y) * Window::renderScaleY();
-    newRect.w = rect.w * Window::renderScaleX();
-    newRect.h = rect.h * Window::renderScaleY();
+    newRect.x = (rect.x - _x) * _scaleX;
+    newRect.y = (rect.y - _y) * _scaleY;
+    newRect.w = rect.w * _scaleX;
+    newRect.h = rect.h * _scaleY;
     return newRect;
   }
 
 
-  void Camera::update( Uint32 time )
+  void Camera::update( float )
   {
     // If there's nothing to follow, don't move
     if ( _theObject == nullptr ) return;

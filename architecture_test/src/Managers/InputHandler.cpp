@@ -1,11 +1,13 @@
 
 #include "Regolith/Managers/InputHandler.h"
+#include "Regolith/Managers/Manager.h"
+
 
 namespace Regolith
 {
 
-  InputHandler::InputHandler( std::string mappingName ) :
-    _inputMaps( Manager::getInstance()->getInputManager().requestMapping( mappingName ) ),
+  InputHandler::InputHandler() :
+    _inputMaps( nullptr ),
     _actionMaps()
   {
   }
@@ -13,6 +15,12 @@ namespace Regolith
 
   InputHandler::~InputHandler()
   {
+  }
+
+
+  void InputHandler::configure( std::string mappingName )
+  {
+    _inputMaps = Manager::getInstance()->getInputManager().requestMapping( mappingName );
   }
 
 

@@ -39,7 +39,7 @@ namespace Regolith
   Exception::Exception( const Exception&& ex ) :
     _error( std::move(ex._error) ),
     _details( std::move(ex._details) ),
-    _elucidate()
+    _elucidate(),
     _recoverable( std::move(ex._recoverable) )
   {
   }

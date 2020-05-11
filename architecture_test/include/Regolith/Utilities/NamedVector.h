@@ -28,8 +28,8 @@ namespace Regolith
     typedef std::vector< DATA* > DataVector;
 
     public:
-      typedef std::vector< DATA* >::iterator iterator;
-      typedef std::vector< DATA* >::const_iterator const_iterator;
+      typedef typename std::vector< DATA* >::iterator iterator;
+      typedef typename std::vector< DATA* >::const_iterator const_iterator;
 
     private :
       std::string _storageType;
@@ -235,6 +235,10 @@ namespace Regolith
     typedef std::map< std::string, size_t > NameMap;
     typedef std::vector< DATA* > DataVector;
 
+    public:
+      typedef typename std::vector< DATA* >::iterator iterator;
+      typedef typename std::vector< DATA* >::const_iterator const_iterator;
+
     private :
       std::string _storageType;
       NameMap _names;
@@ -267,6 +271,13 @@ namespace Regolith
       bool exists( std::string ) const;
 
       bool exists( size_t ) const;
+
+
+      iterator begin() { return _data.begin(); }
+      const_iterator begin() const { return _data.begin(); }
+
+      iterator end() { return _data.end(); }
+      const_iterator end() const { return _data.end(); }
 
       size_t mapSize() const { return _names.size(); }
       size_t vectorSize() const { return _data.size(); }

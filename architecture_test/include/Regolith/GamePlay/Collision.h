@@ -3,7 +3,6 @@
 #define REGOLITH_COLLISION_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/Drawable.h"
 
 
 namespace Regolith
@@ -21,29 +20,33 @@ namespace Regolith
   // Forward declarations
   class Contact;
   class Collision;
+  class Collidable;
 
   // Function that produces the contact class
-  bool collides( Drawable*, Drawable*, Contact& );
+  bool collides( Collidable*, Collidable*, Contact& );
 
   // Function that returns true if the first object contains the second object
-  bool contains( Drawable*, Drawable* );
+  bool contains( Collidable*, Collidable* );
 
   // Function that returns true if the object contains point
-  bool contains( Drawable*, const Vector& );
+  bool contains( Collidable*, const Vector& );
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Base class for all collision models
   class Collision
   {
-    friend bool collides( Drawable*, Drawable*, Contact& );
-    friend bool contains( Drawable*, Drawable* );
-    friend bool contains( Drawable*, const Vector& );
+    friend bool collides( Collidable*, Collidable*, Contact& );
+    friend bool contains( Collidable*, Collidable* );
+    friend bool contains( Collidable*, const Vector& );
+
     private:
       // Position with respect to the owning drawable object
       Vector _position;
       float _width;
       float _height;
+
+      // Add daughter collision objects
 
     public:
       Collision();
@@ -55,9 +58,6 @@ namespace Regolith
       Vector& position() { return _position; }
       float& width() { return _width; }
       float& height() { return _height; }
-
-      virtual Collision* clone() const;
-
   };
 
 
@@ -66,22 +66,24 @@ namespace Regolith
   class Contact
   {
     private:
-      Vector _normal;
-      float _overlap;
+      Vector _overlap1;
+      Vector _overlap2;
 
-      Drawable* _object1;
-      Drawable* _object2;
+      Collidable* _object1;
+      Collidable* _object2;
 
     public:
       Contact();
 
-      void set( Drawable*, Drawable*, Vector, float );
+      void set( Collidable*, Collidable*, Vector, float );
 
       void applyContact();
 
-      Vector& normal() { return _normal; }
+      const Vector& overlap1() { return _overlap1; }
+      const Vector& overlap2() { return _overlap2; }
 
-      float& overlap() { return _overlap; }
+      const Collidable* object1() { return _object1; }
+      const Collidable* object2() { return _object2; }
 
   };
 

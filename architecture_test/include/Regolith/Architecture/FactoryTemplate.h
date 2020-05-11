@@ -13,82 +13,77 @@
 
 namespace Regolith
 {
-  namespace Architecture
+
+  template< class TYPE >
+  class FactoryTemplate
   {
+    typedef std::map< std::string, FactoryBuilderBase< TYPE >* > BuilderMap;
 
-    template< class TYPE >
-    class FactoryTemplate
-    {
-      typedef std::map< std::string, FactoryBuilderBase< TYPE >* > BuilderMap;
+    private:
+      BuilderMap _builders;
 
-      private:
-        BuilderMap _builders;
+    public:
+      FactoryTemplate() : _builders() {}
 
-      public:
-        FactoryTemplate() : _builders() {}
+      virtual ~FactoryTemplate();
 
-        virtual ~FactoryTemplate();
+      template < class DERIVED >
+      void addBuilder( std::string );
 
-        template < class DERIVED >
-        void addBuilder( std::string );
-
-        virtual TYPE* build( Json::Value& ) const;
-    };
+      virtual TYPE* build( Json::Value& ) const;
+  };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-    // Template Member Functions
+  // Template Member Functions
 
 
-    template < class TYPE >
-    FactoryTemplate::~FactoryTemplate()
+  template < class TYPE >
+  FactoryTemplate<TYPE>::~FactoryTemplate()
+  {
+    for ( typename BuilderMap::iterator it = _builders.begin(); it != _builders.end(); ++it )
     {
-      for ( BuilderMap::iterator it = _builders.begin(); it != _builders.end(); ++it )
-      {
-        delete it->second;
-      }
-      _builders.clear();
+      delete it->second;
     }
-
-
-    template< class TYPE >
-    TYPE* FactoryTemplate::build( Json::Value& data ) const
-    {
-      Utilities::validateJson( data, "type", JSON_TYPE_STRING, true );
-
-      std::string name = data["type"];
-
-      BuilderMap::iterator found = _builders.find( name );
-
-      if ( found == _builders.end() )
-      {
-        FAILURE_STREAM << "Could not find requested builder for type: " << name;
-        Exception ex( "FactoryTemplate<>::build()", "Could not find requested builder" );
-        ex.addDetail( "Type name", name );
-        throw ex;
-      }
-
-      return found->second->create( data );
-    }
-
-
-    template < class TYPE, class DERIVED >
-    void FactoryTemplate<TYPE>::addBuilder<DERIVED>( std::string type_name )
-    {
-      BuilderMap::iterator found = _builders.find( type_name );
-      if ( found != _builders.end() )
-      {
-        WARN_STREAM << "A builder already exists with type name: " << name << ". It will be replaced.";
-        _builders.erase( found );
-      }
-      
-      _builders[ type_name ] = new FactoryBuilder< DERIVED >();
-    }
-
+    _builders.clear();
   }
+
+
+  template< class TYPE >
+  TYPE* FactoryTemplate<TYPE>::build( Json::Value& data ) const
+  {
+    Utilities::validateJson( data, "type", Utilities::JSON_TYPE_STRING, true );
+
+    std::string name = data["type"].asString();
+
+    typename BuilderMap::const_iterator found = _builders.find( name );
+
+    if ( found == _builders.end() )
+    {
+      FAILURE_STREAM << "Could not find requested builder for type: " << name;
+      Exception ex( "FactoryTemplate<>::build()", "Could not find requested builder" );
+      ex.addDetail( "Type name", name );
+      throw ex;
+    }
+
+    return found->second->create( data );
+  }
+
+
+  template < class TYPE > template < class DERIVED >
+  void FactoryTemplate<TYPE>::addBuilder( std::string type_name )
+  {
+    typename BuilderMap::iterator found = _builders.find( type_name );
+    if ( found != _builders.end() )
+    {
+      WARN_STREAM << "A builder already exists with type name: " << type_name << ". It will be replaced.";
+      _builders.erase( found );
+    }
+    
+    _builders[ type_name ] = new FactoryBuilder< TYPE, DERIVED >();
+  }
+
 }
-
-
 
 #endif // REGOLITH_ARCHITECTURE_FACTORY_TEMPLATE_H_
 

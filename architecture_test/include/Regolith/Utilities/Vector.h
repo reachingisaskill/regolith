@@ -2,6 +2,8 @@
 #ifndef REGOLITH_UTILITIES_VECTOR_H_
 #define REGOLITH_UTILITIES_VECTOR_H_
 
+#include "Regolith/Global/Global.h"
+
 #include <ostream>
 
 

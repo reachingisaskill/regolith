@@ -1,13 +1,12 @@
 
-#ifndef REGOLITH_MANAGERS_ENGINE_H_
-#define REGOLITH_MANAGERS_ENGINE_H_
+#ifndef REGOLITH_COMPONENTS_ENGINE_H_
+#define REGOLITH_COMPONENTS_ENGINE_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
 #include "Regolith/Architecture/Context.h"
 #include "Regolith/Managers/InputManager.h"
-#include "Regolith/Components/Window.h"
-#include "Regolith/Components/Timer.h"
+#include "Regolith/GamePlay/Timer.h"
 
 
 namespace Regolith
@@ -18,9 +17,11 @@ namespace Regolith
 
   class Engine : public Component
   {
-    class StackOperation;
+    public:
+      class StackOperation;
 
-    typedef std::queue< StackOperation > StackOperationQueue;
+    private:
+      typedef std::queue< StackOperation > StackOperationQueue;
 
     private:
       SDL_Renderer* _theRenderer;
@@ -37,7 +38,7 @@ namespace Regolith
       bool _pause;
 
     protected:
-      void performStackOperations()
+      void performStackOperations();
 
     public:
       // Create the engine with the required references in place
@@ -47,7 +48,7 @@ namespace Regolith
       virtual ~Engine();
 
       // Set the renderer pointer - now ready to run
-      void setRenderer( SDL_Renderer* rend ) { _renderer = rend; }
+      void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
 
       // Start the engine running. In order to stop it the quit() function must be used.
       void run();
@@ -65,7 +66,7 @@ namespace Regolith
 
       // Fulfill the interface for a component
       // Register game-wide events with the manager
-      virtual void registerEvents( InputManager& );
+      virtual void registerEvents( InputManager& ) override;
 
       // Interfaces for input
       virtual void eventAction( const RegolithEvent&, const SDL_Event& );
@@ -78,7 +79,7 @@ namespace Regolith
        * The operations are cached until they can be safely performed without accidentally invalidating the
        * stack iterators.
        */
-      class StackOperation
+      struct StackOperation
       {
         enum Operation : char
         {
@@ -97,5 +98,5 @@ namespace Regolith
   
 }
 
-#endif // REGOLITH_MANAGERS_ENGINE_H_
+#endif // REGOLITH_COMPONENTS_ENGINE_H_
 

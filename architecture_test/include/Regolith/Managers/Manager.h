@@ -3,10 +3,16 @@
 #define REGOLITH_MANAGER_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Architecture/Context.h"
+#include "Regolith/Architecture/FactoryTemplate.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Managers/AudioManager.h"
-#include "Regolith/Contexts/ContextFactory.h"
-#include "Regolith/GameObjects/ObjectFactory.h"
+#include "Regolith/Components/Window.h"
+#include "Regolith/Components/Engine.h"
+#include "Regolith/GamePlay/Texture.h"
+#include "Regolith/Utilities/Singleton.h"
 
 #include <vector>
 #include <map>
@@ -17,14 +23,15 @@
 namespace Regolith
 {
   // Forward declarations
-  class Engine;
   class Context;
-  class Window;
 
   // Useful typedefs
   typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::map< std::string, TTF_Font* > FontMap;
   typedef std::map< std::string, unsigned int > TeamNameMap;
+
+  typedef FactoryTemplate< GameObject > ObjectFactory;
+  typedef FactoryTemplate< Context > ContextFactory;
 
 
   // Manager class
@@ -89,9 +96,9 @@ namespace Regolith
       // Load all the texture files
       void _loadTextures( Json::Value& );
       // Load all the resources
-      void _loadResources( Json::Value& );
-      // Load the story
-      void _loadStory( Json::Value& );
+      void _loadGameObjects( Json::Value& );
+      // Load all the resources
+      void _loadContexts( Json::Value& );
 
     public:
       virtual ~Manager();
@@ -187,7 +194,7 @@ namespace Regolith
 
       // Spawn a cloned object - caller accepts ownership of memory
       // Spawn a new instance of a resource and return the memory to the caller
-      PhysicalObject* spawn( unsigned int i, const Vector& pos ) { return _objects[i]->cloneAt( pos ); }
+      PhysicalObject* spawn( unsigned int i, const Vector& pos ) { return _physicalObjects[i]->clone( pos ); }
 
 
       ////////////////////////////////////////////////////////////////////////////////

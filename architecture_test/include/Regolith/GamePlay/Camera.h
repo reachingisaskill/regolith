@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_COMPONENT_CAMERA_H_
-#define REGOLITH_COMPONENT_CAMERA_H_
+#ifndef REGOLITH_GAMEPLAY_CAMERA_H_
+#define REGOLITH_GAMEPLAY_CAMERA_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/AnimatedInterface.h"
@@ -12,7 +12,7 @@ namespace Regolith
   class PhysicalObject;
 
 
-  class Camera : public Interfaces::AnimatedInterface
+  class Camera : public AnimatedInterface
   {
     private:
       float _layerWidth;
@@ -28,6 +28,10 @@ namespace Regolith
       PhysicalObject* _theObject;
       float _offsetX;
       float _offsetY;
+
+      // References to the global window scaling ratios
+      const float& _scaleX;
+      const float& _scaleY;
 
 
     protected:
@@ -50,8 +54,8 @@ namespace Regolith
 
 
 
-      // Function to update the camera's behavious on every frame
-      virtual void update( Uint32 ) override;
+      // Function to update the camera's behaviour on every frame
+      virtual void update( float ) override;
 
       float getX() const { return _x; }
       float getY() const { return _y; }
@@ -70,17 +74,9 @@ namespace Regolith
       // Function to follow an element
       // Update the objects behaviour based on the provided timestep
       virtual void followMe( PhysicalObject* );
-
-
-
-      // Update the objects behaviour based on the provided timestep
-      virtual void registerEvents( InputManager* ) override {}
-
-      // Actions following regolith events
-      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
   };
 
 }
 
-#endif // REGOLITH_COMPONENT_CAMERA_H_
+#endif // REGOLITH_GAMEPLAY_CAMERA_H_
 

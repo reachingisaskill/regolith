@@ -2,10 +2,7 @@
 #ifndef REOGLITH_SIGNAL_H_
 #define REOGLITH_SIGNAL_H_
 
-#include "Managers/Definitions.h"
-#include "Components/Vector.h"
-
-#include <json/json.h>
+#include "Regolith/Global/Global.h"
 
 
 namespace Regolith

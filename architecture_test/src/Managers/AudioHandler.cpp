@@ -1,12 +1,13 @@
 
 #include "Regolith/Managers/AudioHandler.h"
+#include "Regolith/Managers/Manager.h"
 
 
 namespace Regolith
 {
 
-  AudioHandler::AudioHandler( AudioManager* manager ) :
-    _manager( manager ),
+  AudioHandler::AudioHandler() :
+    _manager( Manager::getInstance()->getAudioManager() ),
     _channels(),
     _state( MUSIC_STATE_STOPPED )
   {
@@ -118,13 +119,13 @@ namespace Regolith
 
   void AudioHandler::setSong( unsigned int n )
   {
-    _manager->playTrack( n );
+    _manager.playTrack( n );
   }
 
 
   void AudioHandler::triggerEffect( unsigned int num )
   {
-    _manager->playChunk( num );
+    _manager.playChunk( num );
   }
 
 }

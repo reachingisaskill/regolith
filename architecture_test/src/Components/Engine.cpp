@@ -1,6 +1,6 @@
 
-#include "Managers/Engine.h"
-#include "Managers/Manager.h"
+#include "Regolith/Components/Engine.h"
+#include "Regolith/Managers/Manager.h"
 
 #include "logtastic.h"
 
@@ -12,7 +12,7 @@ namespace Regolith
     _theRenderer( nullptr ),
     _inputManager( input ),
     _defaultColor( color ),
-    _contextStack()
+    _contextStack(),
     _frameTimer(),
     _quit( false ),
     _pause( false )
@@ -46,14 +46,14 @@ namespace Regolith
     while ( ! _quit )
     {
       // Handle global events with no context
-      _inputManager->handleEvents( nullptr );
+      _inputManager.handleEvents( nullptr );
 
       while ( ! _pause )
       {
         DEBUG_LOG( "RENDER LOOP START" );
 
         // Handle events globally and context-specific actions using the contexts input handler
-        _inputManager->handleEvents( _contextStack.front()->inputHandler() );
+        _inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
 
         SDL_SetRenderDrawColor( _theRenderer, _defaultColor.r, _defaultColor.g, _defaultColor.b, _defaultColor.a );
@@ -77,7 +77,7 @@ namespace Regolith
 
 
         // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
-        if ( ! _contextStackOperationQueue.empty() )
+        if ( ! _stackOperationQueue.empty() )
         {
           performStackOperations();
         }
@@ -95,11 +95,11 @@ namespace Regolith
   }
 
 
-  void Engine::registerEvents( InputManager* manager )
+  void Engine::registerEvents( InputManager& manager )
   {
-    manager->registerEventRequest( this, REGOLITH_EVENT_QUIT );
-    manager->registerEventRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
-    manager->registerEventRequest( this, REGOLITH_EVENT_ENGINE_RESUME );
+    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
+    manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
+    manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_RESUME );
   }
 
 
@@ -130,10 +130,11 @@ namespace Regolith
 
   void Engine::performStackOperations()
   {
-    StackOperationQueue::iterator end = _stackOperationQueue.end();
-    for ( StackOperationQueue::iterator it = _stackOperationQueue.begin(); it != end; ++it )
+    while ( ! _stackOperationQueue.empty() )
     {
-      switch ( it->operation )
+      StackOperation& sop = _stackOperationQueue.front();
+
+      switch ( sop.operation )
       {
         case StackOperation::PUSH :
           DEBUG_LOG( "Opening New Context" );
@@ -141,7 +142,7 @@ namespace Regolith
           {
             _contextStack.front()->pauseContext();
           }
-          _contextStack.push_front( it->context );
+          _contextStack.push_front( sop.context );
           _contextStack.front()->startContext();
           break;
 
@@ -168,7 +169,7 @@ namespace Regolith
             _contextStack.pop_front();
           }
           DEBUG_LOG( "Loading new base context" );
-          _contextStack.push_front( it->context );
+          _contextStack.push_front( sop.context );
           _contextStack.front()->startContext();
           break;
 
@@ -179,7 +180,7 @@ namespace Regolith
             _contextStack.front()->stopContext();
             _contextStack.pop_front();
           }
-          _contextStack.push_front( c );
+          _contextStack.push_front( sop.context );
           _contextStack.front()->startContext();
           break;
       }
@@ -190,8 +191,8 @@ namespace Regolith
     //  - We hit the beginning of the stack, OR
     //  - One of the contexts overrides all the previous ones.
     _visibleStackStart = _contextStack.rend();
-    while ( ( _visibleStackStart != _contextStack.begin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
-      --_visibleStackStart();
+    while ( ( _visibleStackStart != _contextStack.rbegin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
+      --_visibleStackStart;
 
     // Set the end iterator
     _visibleStackEnd = _contextStack.rend();

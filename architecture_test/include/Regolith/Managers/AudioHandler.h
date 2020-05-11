@@ -20,7 +20,7 @@ namespace Regolith
   {
     typedef std::vector<int> ChannelLookup;
     private:
-      AudioManager* _manager;
+      AudioManager& _manager;
 
       ChannelLookup _channels;
 
@@ -33,7 +33,7 @@ namespace Regolith
 
     public:
       // Constructor
-      AudioHandler( AudioManager* );
+      AudioHandler();
 
       // Destructor
       ~AudioHandler();
@@ -44,14 +44,14 @@ namespace Regolith
 
 
       // Return a pointer to the audio manager
-      AudioManager* getManager() { return _manager; }
+      AudioManager& getManager() { return _manager; }
 
 
       // Get the id for a track from the manager
-      unsigned int getMusicID( std::string name ) { return _manager->getMusicID( name ); }
+      unsigned int getMusicID( std::string name ) { return _manager.getMusicID( name ); }
 
       // Get the id number for a sound effect from the handler
-      unsigned int getEffectID( std::string name ) { return _manager->getEffectID( name ); }
+      unsigned int getEffectID( std::string name ) { return _manager.getEffectID( name ); }
 
 
       // Set the scene-music using the manager

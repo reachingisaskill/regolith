@@ -29,12 +29,13 @@ namespace Regolith
     RegolithEvent event;
 
     ControllableSet::iterator end;
+    ComponentSet::iterator components_end;
 
     DEBUG_STREAM << "Handling events";
 
     while ( SDL_PollEvent( &_theEvent ) != 0 )
     {
-      switch ( sdl_event.type )
+      switch ( _theEvent.type )
       {
         //////////////////////////////////////////////////
         // Input-type events
@@ -45,7 +46,7 @@ namespace Regolith
           DEBUG_LOG( "  Keyboard key-press type event" );
           event_type = INPUT_TYPE_KEYBOARD;
           mapper = handler->_inputMaps->mapping[ event_type ];
-          action = mapper->getAction( sdl_event );
+          action = mapper->getAction( _theEvent );
           if ( action == INPUT_ACTION_NULL ) break;
 
           end = handler->getRegisteredObjects( action ).end();
@@ -61,7 +62,7 @@ namespace Regolith
 
           event_type = INPUT_TYPE_MOUSE_MOVE;
           mapper = handler->_inputMaps->mapping[ event_type ];
-          action = mapper->getAction( sdl_event );
+          action = mapper->getAction( _theEvent );
           DEBUG_STREAM << "  Regolith Mouse Motion Event";
 
           end = handler->getRegisteredObjects( action ).end();
@@ -82,7 +83,7 @@ namespace Regolith
           DEBUG_LOG( "  Mouse button-press type event" );
           event_type = INPUT_TYPE_MOUSE_BUTTON;
           mapper = handler->_inputMaps->mapping[ event_type ];
-          action = mapper->getAction( sdl_event );
+          action = mapper->getAction( _theEvent );
           if ( action == INPUT_ACTION_NULL ) break;
 
           end = handler->getRegisteredObjects( action ).end();
@@ -116,25 +117,25 @@ namespace Regolith
         case SDL_WINDOWEVENT :
           event = REGOLITH_EVENT_WINDOW;
           DEBUG_STREAM << "  Regolith Window Event";
-          end = this->getRegisteredComponents( event ).end();
-          for ( ControllableSet::iterator it = this->getRegisteredComponents( event ).begin(); it != end; ++it )
+          components_end = this->getRegisteredComponents( event ).end();
+          for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
           {
             DEBUG_STREAM << "  Propagating event : " << event;
-            (*it)->eventAction( event, sdl_event );
+            (*it)->eventAction( event, _theEvent );
           }
           break;
 
 
         case SDL_USEREVENT :
-          event = (RegolithEvent)sdl_event.user.code;
+          event = (RegolithEvent)_theEvent.user.code;
           DEBUG_STREAM << "  Regolith User Event " << event;
 
           if ( event == REGOLITH_EVENT_NULL ) break;
-          end = this->getRegisteredComponents( event ).end();
-          for ( ControllableSet::iterator it = this->getRegisteredComponents( event ).begin(); it != end; ++it )
+          components_end = this->getRegisteredComponents( event ).end();
+          for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
           {
             DEBUG_STREAM << "  Propagating event : " << event;
-            (*it)->eventAction( event, sdl_event );
+            (*it)->eventAction( event, _theEvent );
           }
           break;
 
@@ -313,5 +314,104 @@ namespace Regolith
     }
   }
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+  // Input Manager Init
+
+  void InputManager::configure( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "keymappings", Utilities::JSON_TYPE_ARRAY );
+
+
+    // Configure the input objects
+    Json::Value required = json_data["require"];
+    Json::Value keymaps = json_data["keymappings"];
+
+    // Quick vallidation - TODO: add a hardware check function to makesure hardware actually exists
+    Json::ArrayIndex required_size = required.size();
+    for ( Json::ArrayIndex i = 0; i != required_size; ++i )
+    {
+      if ( required[i].asString() == "controller" )
+      {
+        WARN_LOG( "Controllers are not yet supported!" );
+      }
+      else if ( required[i].asString() == "joystick" )
+      {
+        WARN_LOG( "Joystick is not yet supported!" );
+      }
+    }
+
+
+    Json::ArrayIndex keymaps_size = required.size();
+    for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
+    {
+      Utilities::validateJson( keymaps[i], "name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( keymaps[i], "keymapping", Utilities::JSON_TYPE_ARRAY );
+
+      std::string mapping_name = keymaps[i]["name"].asString();
+      Json::Value keymapping = keymaps[i]["keymapping"];
+
+      // Create the an empty mapping object
+      requestMapping( mapping_name );
+
+      // Loop over the key mapping hardware
+      Json::ArrayIndex keymapping_size = keymapping.size();
+      for ( Json::ArrayIndex j = 0; j != keymapping_size; ++j )
+      {
+        Utilities::validateJson( keymapping[j], "type", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( keymapping[j], "mapping", Utilities::JSON_TYPE_OBJECT );
+
+        std::string type = keymapping[j]["type"].asString();
+        Json::Value keys = keymapping[j]["mapping"];
+
+        if ( type == "keyboard" )
+        {
+          INFO_LOG( "Loading Keyboard Mapping." );
+
+          Json::Value::const_iterator keys_end = keys.end();
+          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
+          {
+            SDL_Scancode code = getScancodeID( it.key().asString() );
+            InputAction action = getActionID( it->asString() );
+            registerInputAction( mapping_name, INPUT_TYPE_KEYBOARD, code, action );
+            INFO_STREAM << "Key Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+          }
+        }
+
+        else if ( type == "mouse_buttons" )
+        {
+          INFO_LOG( "Loading Mouse Button Mapping." );
+
+          Json::Value::const_iterator keys_end = keys.end();
+          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
+          {
+            MouseButton code = getMouseButtonID( it.key().asString() );
+            InputAction action = getActionID( it->asString() );
+            registerInputAction( mapping_name, INPUT_TYPE_MOUSE_BUTTON, code, action );
+            INFO_STREAM << "Mouse Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+          }
+        }
+
+        else if ( type == "mouse_movement" )
+        {
+          INFO_LOG( "Loading Mouse Movement." );
+
+          // Only require the movement input - it must be present if a mouse movement mapping is provided
+          Utilities::validateJson( keys, "movement", Utilities::JSON_TYPE_STRING );
+
+          unsigned code = 0; // Dummy variable - only one thing to map with mouse movement!
+          InputAction action = getActionID( keys["movement"].asString() );
+          registerInputAction( mapping_name, INPUT_TYPE_MOUSE_MOVE, code, action );
+          INFO_STREAM << "Registered : mouse movement as action to map: " << mapping_name << " -- " << keys["movement"].asString() << "(" << action << ")";
+        }
+        else
+        {
+          WARN_LOG( "Key mapping specified for an unsupported interface." );
+          WARN_LOG( "Please try again with a future version." );
+        }
+      }
+    }
+  }
 }
 

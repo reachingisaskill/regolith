@@ -1,25 +1,16 @@
 
-#include "Architecture/Drawable.h"
+#include "Regolith/Architecture/Drawable.h"
+#include "Regolith/Managers/Manager.h"
+
 
 namespace Regolith
 {
-  namespace Architecture
+
+  Drawable::Drawable() :
+    PhysicalObject(),
+    _theRenderer( Manager::getInstance()->getRendererPointer() )
   {
-
-
-    Drawable::Drawable() :
-      PhysicalObject(),
-      _theRenderer( nullptr )
-    {
-    }
-
-
-    Drawable::Drawable( SDL_Renderer* r ) :
-      PhysicalObject(),
-      _theRenderer( r )
-    {
-    }
-
   }
+
 }
 
