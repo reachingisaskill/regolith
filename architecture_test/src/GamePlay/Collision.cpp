@@ -9,154 +9,142 @@
 namespace Regolith
 {
 
+  void callback( Collidable* obj1, Collidable* obj2, const Vector& normal, const float overlap )
+  {
+    Vector overlap1 = (-overlap)*normal;
+    Vector overlap2 =   overlap *normal;
+    obj1->onCollision( overlap1, obj2 );
+    obj2->onCollision( overlap2, obj1 );
+  }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Collides functions
 
-  bool collides( Collidable* object1, Collidable* object2, Contact& cont )
+  void collides( Collidable* object1, Collidable* object2 )
   {
     DEBUG_LOG( "Checking Collision" );
-    if ( ( ! object1->collisionActive()) || ( ! object2->collisionActive() ) ) return false;
 
-    Collision* collisions1 = nullptr;
-    Collision* collisions2 = nullptr;
-    unsigned int number1 = object1->getCollision( collisions1 );
-    unsigned int number2 = object2->getCollision( collisions2 );
-    Vector pos1;
-    Vector pos2;
+    const Collision& collision1 = object1->getCollision();
+    const Collision& collision2 = object2->getCollision();
 
-    Collision* c_iter1 = collisions1;
-    Collision* c_iter2;
-    for ( unsigned int i = 0; i < number1; ++i, ++c_iter1 )
+    Vector pos1 = object1->position() + collision1.position(); // Move into global coordinate system
+    Vector pos2 = object2->position() + collision2.position(); // Move into global coordinate system
+
+    DEBUG_STREAM << " Global Pos1 : " << pos1 << " W = " << collision1.width() << " H = " << collision1.height();
+    DEBUG_STREAM << " Global Pos2 : " << pos2 << " W = " << collision2.width() << " H = " << collision2.height();
+
+
+    // X Axis
+    float diff_x = pos2.x() - pos1.x();
+
+    ////////////////////////////////////////////////// 
+    // IF OBJ2 IN FRONT OBJ1 - X
+    if ( diff_x > 0.0 ) 
     {
-      pos1 = object1->position() + c_iter1->position(); // Move into global coordinate system
-      DEBUG_STREAM << " Global Pos1, " << i << " : " << pos1 << " W = " << c_iter1->width() << " H = " << c_iter1->height();
+      float overlap_x = collision1.width() - diff_x;
+      DEBUG_STREAM << " Diff_x = " << diff_x << ", Overlap = " << overlap_x;
 
-      c_iter2 = collisions2;
-      for ( unsigned int j = 0; j < number2; ++j, ++c_iter2 )
+      if ( overlap_x > 0.0 )
       {
-        pos2 = object2->position() + c_iter2->position(); // Move into global coordinate system
-        DEBUG_STREAM << "   Global Pos2, " << j << " : " << pos2 << " W = " << c_iter2->width() << " H = " << c_iter2->height();
+        // Y Axis
+        float diff_y = pos2.y() - pos1.y();
 
-        // X Axis
-        float diff_x = pos2.x() - pos1.x();
         ////////////////////////////////////////////////// 
-        // IF OBJ2 IN FRONT OBJ1 - X
-        if ( diff_x > 0.0 ) 
+        // IF OBJ2 IN FRONT OBJ1 - Y
+        if ( diff_y >= 0.0 )
         {
-          float overlap_x = c_iter1->_width - diff_x;
-          DEBUG_STREAM << "   Diff_x = " << diff_x << ", Overlap = " << overlap_x;
+          float overlap_y = collision1.height() - diff_y;
 
-          if ( overlap_x > 0.0 )
+          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
+
+          if ( overlap_y > 0.0 )
           {
-            // Y Axis
-            float diff_y = pos2.y() - pos1.y();
-            ////////////////////////////////////////////////// 
-            // IF OBJ2 IN FRONT OBJ1 - Y
-            if ( diff_y >= 0.0 )
+            // Both X & Y overlap - set the reference contact object
+            if ( overlap_x >= overlap_y )
             {
-              float overlap_y = c_iter1->_height - diff_y;
-
-              DEBUG_STREAM << "   Diff_y = " << diff_y << ", Overlap = " << overlap_y;
-              if ( overlap_y > 0.0 )
-              {
-                // Both X & Y overlap - set the reference contact object
-                if ( overlap_x >= overlap_y )
-                {
-                  cont.set( object1, object2, unitVector_y, overlap_y );
-                  return true;
-                }
-                else
-                {
-                  cont.set( object1, object2, unitVector_x, overlap_x );
-                  return true;
-                }
-              }
+              callback( object1, object2, unitVector_y, overlap_y );
             }
-            ////////////////////////////////////////////////// 
-            // IF OBJ2 BEHIND OBJ1 - Y
             else
             {
-              float overlap_y = c_iter2->_height + diff_y;
-
-              DEBUG_STREAM << "   Diff_y = " << diff_y << ", Overlap = " << overlap_y;
-              if ( overlap_y > 0.0 )
-              {
-                // Both X & Y overlap - set the reference contact object
-                if ( overlap_x >= overlap_y )
-                {
-                  cont.set( object1, object2, -unitVector_y, overlap_y );
-                  return true;
-                }
-                else
-                {
-                  cont.set( object1, object2, unitVector_x, overlap_x );
-                  return true;
-                }
-              }
+              callback( object1, object2, unitVector_x, overlap_x );
             }
           }
         }
         ////////////////////////////////////////////////// 
-        // IF OBJ2 BEHIND OBJ1 - X
+        // IF OBJ2 BEHIND OBJ1 - Y
         else
         {
-          float overlap_x = c_iter2->_width + diff_x;
-          DEBUG_STREAM << "   Diff_x = " << diff_x << ", Overlap = " << overlap_x;
+          float overlap_y = collision2.height() + diff_y;
 
-          if ( overlap_x > 0.0 )
+          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
+          if ( overlap_y > 0.0 )
           {
-            // Y Axis
-            float diff_y = pos2.y() - pos1.y();
-            ////////////////////////////////////////////////// 
-            // IF OBJ2 IN FRONT OBJ1 - Y
-            if ( diff_y >= 0.0 )
+            // Both X & Y overlap - set the reference contact object
+            if ( overlap_x >= overlap_y )
             {
-              float overlap_y = c_iter1->_height - diff_y;
-
-              DEBUG_STREAM << "   Diff_y = " << diff_y << ", Overlap = " << overlap_y;
-              if ( overlap_y > 0.0 )
-              {
-                // Both X & Y overlap - set the reference contact object
-                if ( overlap_x >= overlap_y )
-                {
-                  cont.set( object1, object2, unitVector_y, overlap_y );
-                  return true;
-                }
-                else
-                {
-                  cont.set( object1, object2, -unitVector_x, overlap_x );
-                  return true;
-                }
-              }
+              callback( object1, object2, -unitVector_y, overlap_y );
             }
-            ////////////////////////////////////////////////// 
-            // IF OBJ2 BEHIND OBJ1 - Y
             else
             {
-              float overlap_y = c_iter2->_height + diff_y;
-
-              DEBUG_STREAM << "   Diff_y = " << diff_y << ", Overlap = " << overlap_y;
-              if ( overlap_y > 0.0 )
-              {
-                // Both X & Y overlap - set the reference contact object
-                if ( overlap_x >= overlap_y )
-                {
-                  cont.set( object1, object2, -unitVector_y, overlap_y );
-                  return true;
-                }
-                else
-                {
-                  cont.set( object1, object2, -unitVector_x, overlap_x );
-                  return true;
-                }
-              }
+              callback( object1, object2, unitVector_x, overlap_x );
             }
           }
         }
       }
     }
+    ////////////////////////////////////////////////// 
+    // IF OBJ2 BEHIND OBJ1 - X
+    else
+    {
+      float overlap_x = collision2.width() + diff_x;
+      DEBUG_STREAM << " Diff_x = " << diff_x << ", Overlap = " << overlap_x;
 
-    return false;
+      if ( overlap_x > 0.0 )
+      {
+        // Y Axis
+        float diff_y = pos2.y() - pos1.y();
+        ////////////////////////////////////////////////// 
+        // IF OBJ2 IN FRONT OBJ1 - Y
+        if ( diff_y >= 0.0 )
+        {
+          float overlap_y = collision1.height() - diff_y;
+
+          DEBUG_STREAM << "   Diff_y = " << diff_y << ", Overlap = " << overlap_y;
+          if ( overlap_y > 0.0 )
+          {
+            // Both X & Y overlap - set the reference contact object
+            if ( overlap_x >= overlap_y )
+            {
+              callback( object1, object2, unitVector_y, overlap_y );
+            }
+            else
+            {
+              callback( object1, object2, -unitVector_x, overlap_x );
+            }
+          }
+        }
+        ////////////////////////////////////////////////// 
+        // IF OBJ2 BEHIND OBJ1 - Y
+        else
+        {
+          float overlap_y = collision2.height() + diff_y;
+
+          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
+          if ( overlap_y > 0.0 )
+          {
+            // Both X & Y overlap - set the reference contact object
+            if ( overlap_x >= overlap_y )
+            {
+              callback( object1, object2, -unitVector_y, overlap_y );
+            }
+            else
+            {
+              callback( object1, object2, -unitVector_x, overlap_x );
+            }
+          }
+        }
+      }
+    }
   }
 
 
@@ -166,39 +154,29 @@ namespace Regolith
   bool contains( Collidable* parent, Collidable* child )
   {
     DEBUG_LOG( "Checking Containment" );
-    if ( ( ! parent->collisionActive()) || ( ! child->collisionActive() ) ) return false;
 
-    Collision* parent_coll = nullptr;
-    Collision* child_coll = nullptr;
-    unsigned int p_number = parent->getCollision( parent_coll );
-    unsigned int c_number = child->getCollision( child_coll );
+    const Collision& parent_coll = parent->getCollision();
+    const Collision& child_coll = child->getCollision();
+
     Vector parent_pos;
     Vector child_pos;
 
-    Collision* p_iter = parent_coll;
-    Collision* c_iter;
-    for ( unsigned int i = 0; i < p_number; ++i, ++p_iter )
+    parent_pos = parent->position() + parent_coll.position(); // Move into global coordinate system
+    DEBUG_STREAM << " Global Pos1 : " << parent_pos << " W = " << parent_coll.width() << " H = " << parent_coll.height();
+
+    child_pos = child->position() + child_coll.position(); // Move into global coordinate system
+    DEBUG_STREAM << "   Global Pos2 : " << child_pos << " W = " << child_coll.width() << " H = " << child_coll.height();
+
+
+    // X Axis
+    float diff_x = child_pos.x() - parent_pos.x();
+    if ( ( diff_x > -child_coll.width() ) && ( diff_x < parent_coll.width() ) ) 
     {
-      parent_pos = parent->position() + p_iter->position(); // Move into global coordinate system
-      DEBUG_STREAM << " Global Pos1, " << i << " : " << parent_pos << " W = " << p_iter->width() << " H = " << p_iter->height();
-
-      c_iter = child_coll;
-      for ( unsigned int j = 0; j < c_number; ++j, ++c_iter )
+      // Y Axis
+      float diff_y = child_pos.y() - parent_pos.y();
+      if ( ( diff_y > child_coll.height() ) && ( diff_y < parent_coll.height() ) )
       {
-        child_pos = child->position() + c_iter->position(); // Move into global coordinate system
-        DEBUG_STREAM << "   Global Pos2, " << j << " : " << child_pos << " W = " << c_iter->width() << " H = " << c_iter->height();
-
-        // X Axis
-        float diff_x = child_pos.x() - parent_pos.x();
-        if ( ( diff_x > -c_iter->_width ) && ( diff_x < p_iter->_width ) ) 
-        {
-          // Y Axis
-          float diff_y = child_pos.y() - parent_pos.y();
-          if ( ( diff_y > -c_iter->_height ) && ( diff_y < p_iter->_height ) )
-          {
-            return true;
-          }
-        }
+        return true;
       }
     }
 
@@ -209,27 +187,19 @@ namespace Regolith
   bool contains( Collidable* object, const Vector& point )
   {
     DEBUG_LOG( "Checking Point Containment" );
-    if ( ( ! object->collisionActive()) ) return false;
 
-    Collision* collision = nullptr;
-    unsigned int number = object->getCollision( collision );
-    Vector pos;
+    const Collision& collision = object->getCollision();
+    Vector pos = object->position() + collision.position(); // Move into global coordinate system
+    DEBUG_STREAM << " Global Pos1 : " << pos << " W = " << collision.width() << " H = " << collision.height();
 
-    Collision* iter = collision;
-    for ( unsigned int i = 0; i < number; ++i, ++iter )
+    // X Axis
+    float diff_x = point.x() - pos.x();
+    if ( ( diff_x > 0.0 ) && ( diff_x < collision.width() ) )
     {
-      pos = object->position() + iter->position(); // Move into global coordinate system
-      DEBUG_STREAM << " Global Pos1, " << i << " : " << pos << " W = " << iter->width() << " H = " << iter->height();
-
-      // X Axis
-      float diff_x = point.x() - pos.x();
-      if ( ( diff_x > 0.0 ) && ( diff_x < iter->_width ) )
+      float diff_y = point.y() - pos.y();
+      if ( ( diff_y > 0.0 ) && ( diff_y < collision.height() ) ) 
       {
-        float diff_y = point.y() - pos.y();
-        if ( ( diff_y > 0.0 ) && ( diff_y < iter->_height ) ) 
-        {
-          return true;
-        }
+        return true;
       }
     }
 
@@ -284,8 +254,8 @@ namespace Regolith
 
   void Contact::applyContact()
   {
-    obj1->onCollision( overlap1, obj2 );
-    obj2->onCollision( overlap2, obj1 );
+    _object1->onCollision( _overlap1, _object2 );
+    _object2->onCollision( _overlap2, _object1 );
   }
 
   /*

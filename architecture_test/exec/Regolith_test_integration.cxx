@@ -1,6 +1,6 @@
 
 #include "Regolith.h"
-#include "Regolith/Test/TestPlayer.h"
+//#include "Regolith/Test/TestPlayer.h"
 
 #include "logtastic.h"
 
@@ -23,13 +23,13 @@ int main( int, char** )
   try
   {
     INFO_LOG( "Creating custom object builders" );
-    man->getObjectFactory()->addBuilder( new TestPlayerBuilder() );
+//    man->getObjectFactory()->addBuilder( new TestPlayerBuilder() );
 
     INFO_LOG( "Creating custom context builders" );
 //    man->getObjectFactory()->addBuilder( new TestContextBuilder() );
 
     INFO_LOG( "Initialising the manager" );
-    man->init( test_config );
+//    man->init( test_config );
 
     INFO_LOG( "Starting Regolith" );
     man->run();

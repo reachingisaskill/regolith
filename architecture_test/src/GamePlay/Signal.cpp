@@ -1,9 +1,10 @@
 
-#include "Signals/Signal.h"
-#include "Architecture/Context.h"
-#include "Managers/Manager.h"
-#include "Managers/InputManager.h"
-#include "Components/Utilities.h"
+#include "Regolith/GamePlay/Signal.h"
+#include "Regolith/Architecture/Context.h"
+#include "Regolith/Components/Engine.h"
+#include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/InputManager.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 #include "logtastic.h"
 
@@ -23,7 +24,7 @@ namespace Regolith
   void InputActionSignal::trigger() const
   {
     Manager* man = Manager::getInstance();
-    man->getInputManager()->simulateInputAction( man->currentContext()->inputHandler(), _theAction );
+    man->getInputManager().simulateInputAction( man->getCurrentContext()->inputHandler(), _theAction );
   }
 
 
@@ -40,7 +41,7 @@ namespace Regolith
   void InputBooleanSignal::trigger() const
   {
     Manager* man = Manager::getInstance();
-    man->getInputManager()->simulateBooleanAction( man->currentContext()->inputHandler(), _theAction, _theValue );
+    man->getInputManager().simulateBooleanAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
   }
 
 
@@ -57,7 +58,7 @@ namespace Regolith
   void InputFloatSignal::trigger() const
   {
     Manager* man = Manager::getInstance();
-    man->getInputManager()->simulateFloatAction( man->currentContext()->inputHandler(), _theAction, _theValue );
+    man->getInputManager().simulateFloatAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
   }
 
 
@@ -74,7 +75,7 @@ namespace Regolith
   void InputVectorSignal::trigger() const
   {
     Manager* man = Manager::getInstance();
-    man->getInputManager()->simulateVectorAction( man->currentContext()->inputHandler(), _theAction, _theValue );
+    man->getInputManager().simulateVectorAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
   }
 
 
@@ -92,7 +93,7 @@ namespace Regolith
   void InputMouseSignal::trigger() const
   {
     Manager* man = Manager::getInstance();
-    man->getInputManager()->simulateMouseAction( man->currentContext()->inputHandler(), _theAction, _click, _position );
+    man->getInputManager().simulateMouseAction( man->getCurrentContext()->inputHandler(), _theAction, _click, _position );
   }
 
 
@@ -112,39 +113,57 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Context Event Signal
-
-  ContextEventSignal::ContextEventSignal( ContextEvent event ) :
-    _theEvent( event )
-  {
-  }
-
-
-  void ContextEventSignal::trigger() const
-  {
-    Manager::getInstance()->currentContext()->raiseContextEvent( _theEvent );
-  }
+//  // Context Event Signal
+//
+//  ContextEventSignal::ContextEventSignal( ContextEvent event ) :
+//    _theEvent( event )
+//  {
+//  }
+//
+//
+//  void ContextEventSignal::trigger() const
+//  {
+//    Manager::getInstance()->getCurrentContext()->raiseContextEvent( _theEvent );
+//  }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Scene Change Signal
+  // Context Change Signal
 
-  SceneChangeSignal::SceneChangeSignal( unsigned int scene ) :
-    _theScene( scene )
+  ChangeContextSignal::ChangeContextSignal( Engine::StackOperation::Operation op, Context* cont ) :
+    _theContext( cont ),
+    _operation( op )
   {
   }
 
 
-  void SceneChangeSignal::trigger() const
+  void ChangeContextSignal::trigger() const
   {
-    Manager::getInstance()->loadScene( _theScene );
+    switch ( _operation )
+    {
+      case Engine::StackOperation::POP :
+        Manager::getInstance()->closeContext();
+        break;
+
+      case Engine::StackOperation::PUSH :
+        Manager::getInstance()->openContext( _theContext );
+        break;
+
+      case Engine::StackOperation::RESET :
+        Manager::getInstance()->setContextStack( _theContext );
+        break;
+
+      case Engine::StackOperation::TRANSFER :
+        Manager::getInstance()->transferContext( _theContext );
+        break;
+    }
   }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Building functions
 
-  Signal* makeSignal( Json::Value& json_data, Context* context )
+  Signal* makeSignal( Json::Value& json_data, Context* /*context*/ )
   {
     Signal* newSignal = nullptr;
 
@@ -211,17 +230,43 @@ namespace Regolith
       Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
       newSignal = new GameEventSignal( getRegolithEventID( json_data["event"].asString() ) );
     }
-    else if ( type == "context_event" )
+//    else if ( type == "context_event" )
+//    {
+//      INFO_STREAM << " Signal type: " << type;
+//      Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
+//      newSignal = new ContextEventSignal( context->getContextEventID( json_data["event"].asString() ) );
+//    }
+    else if ( type == "change_context" )
     {
       INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
-      newSignal = new ContextEventSignal( context->getContextEventID( json_data["event"].asString() ) );
-    }
-    else if ( type == "scene_change" )
-    {
-      INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "scene_name", Utilities::JSON_TYPE_STRING );
-      newSignal = new SceneChangeSignal( Manager::getInstance()->getSceneID( json_data["scene_name"].asString() ) );
+      Utilities::validateJson( json_data, "context_name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( json_data, "operation", Utilities::JSON_TYPE_STRING );
+
+      Engine::StackOperation::Operation op;
+      Context* context = nullptr;
+
+      if ( json_data["operation"].asString() == "open" )
+      {
+        op = Engine::StackOperation::PUSH;
+        context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
+      }
+      if ( json_data["operation"].asString() == "close" )
+      {
+        op = Engine::StackOperation::POP;
+        // No context name needed.
+      }
+      if ( json_data["operation"].asString() == "transfer" )
+      {
+        op = Engine::StackOperation::TRANSFER;
+        context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
+      }
+      if ( json_data["operation"].asString() == "reset" )
+      {
+        op = Engine::StackOperation::RESET;
+        context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
+      }
+
+      newSignal = new ChangeContextSignal( op, context );
     }
     else
     {

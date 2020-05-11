@@ -123,8 +123,6 @@ namespace Regolith
 
   void Context::resolveCollisions()
   {
-    Contact contact;
-
     NamedVector< ContextLayer, true >::iterator layers_end = _layers.end();
     for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
     {
@@ -137,21 +135,24 @@ namespace Regolith
       {
         for ( TeamMap::iterator opponent_it = opponent_start; opponent_it != opponents_end; ++opponent_it )
         {
+
           CollidableList::iterator collidable_end = team_it->second.end();
           for ( CollidableList::iterator collidable_it = team_it->second.begin(); collidable_it != collidable_end; ++collidable_it )
           {
+            if ( ! (*collidable_it)->collisionActive() ) continue;
+
             CollidableList::iterator enemy_end = opponent_it->second.end();
             for ( CollidableList::iterator enemy_it = opponent_it->second.begin(); enemy_it != enemy_end; ++enemy_it )
             {
-              if ( collides( (*collidable_it), (*enemy_it), contact ) )
-              {
-                contact.applyContact();
-              }
+              if ( ! (*enemy_it)->collisionActive() ) continue;
+
+              collides( (*collidable_it), (*enemy_it) );
             }
           }
+
+        }
         ++team_it;
         ++opponent_start;
-        }
       }
     }
   }

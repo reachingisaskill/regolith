@@ -1,8 +1,9 @@
 
-#ifndef REOGLITH_SIGNAL_H_
-#define REOGLITH_SIGNAL_H_
+#ifndef REOGLITH_GAMEPLAY_SIGNAL_H_
+#define REOGLITH_GAMEPLAY_SIGNAL_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Components/Engine.h"
 
 
 namespace Regolith
@@ -146,39 +147,39 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Event Signal
 
-  class ContextEventSignal : public Signal
-  {
-    private:
-      ContextEvent _theEvent;
-
-    public :
-      // Con/Destruction
-      ContextEventSignal( ContextEvent );
-      virtual ~ContextEventSignal() {}
-
-      void trigger() const;
-  };
+//  class ContextEventSignal : public Signal
+//  {
+//    private:
+//      ContextEvent _theEvent;
+//
+//    public :
+//      // Con/Destruction
+//      ContextEventSignal( ContextEvent );
+//      virtual ~ContextEventSignal() {}
+//
+//      void trigger() const;
+//  };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Scene Change Signal
+  // Context Change Signal
 
-  class SceneChangeSignal : public Signal
+  class ChangeContextSignal : public Signal
   {
     private:
-      unsigned int _theScene;
+      Context* _theContext;
+      Engine::StackOperation::Operation _operation;
 
     public :
       // Con/Destruction
-      SceneChangeSignal( unsigned int );
-      virtual ~SceneChangeSignal() {}
+      ChangeContextSignal( Engine::StackOperation::Operation, Context* c = nullptr );
+      virtual ~ChangeContextSignal() {}
 
       void trigger() const;
   };
-
 
 
 }
 
-#endif // REOGLITH_SIGNAL_H_
+#endif // REOGLITH_GAMEPLAY_SIGNAL_H_
 

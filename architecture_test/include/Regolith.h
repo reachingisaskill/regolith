@@ -3,7 +3,8 @@
 #define REGOLITH_REGOLITH_H_
 
 
-#include "Regolith/Global/GLobal.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Managers/Manager.h"
 
 
 #endif // REGOLITH_REGOLITH_H_

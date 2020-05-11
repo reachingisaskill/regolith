@@ -23,7 +23,7 @@ namespace Regolith
   class Collidable;
 
   // Function that produces the contact class
-  bool collides( Collidable*, Collidable*, Contact& );
+  void collides( Collidable*, Collidable* );
 
   // Function that returns true if the first object contains the second object
   bool contains( Collidable*, Collidable* );
@@ -36,7 +36,7 @@ namespace Regolith
   // Base class for all collision models
   class Collision
   {
-    friend bool collides( Collidable*, Collidable*, Contact& );
+    friend void collides( Collidable*, Collidable* );
     friend bool contains( Collidable*, Collidable* );
     friend bool contains( Collidable*, const Vector& );
 
@@ -55,9 +55,9 @@ namespace Regolith
 
       virtual ~Collision();
 
-      Vector& position() { return _position; }
-      float& width() { return _width; }
-      float& height() { return _height; }
+      const Vector& position() const { return _position; }
+      const float& width() const { return _width; }
+      const float& height() const { return _height; }
   };
 
 

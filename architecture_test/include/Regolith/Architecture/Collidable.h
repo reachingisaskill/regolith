@@ -49,6 +49,10 @@ namespace Regolith
       bool collisionActive() const { return _collisionActive; }
 
 
+      // Returns a reference to the collision object
+      const Collision& getCollision() const { return _collision; }
+
+
       // Returns the type of collision interaction that occurs with this object
       unsigned int collisionType() const { return _collisionType; }
 
