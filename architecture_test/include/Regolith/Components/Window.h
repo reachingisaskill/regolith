@@ -2,8 +2,8 @@
 #ifndef REGOLITH_COMPONENTS_WINDOW_H_
 #define REGOLITH_COMPONENTS_WINDOW_H_
 
-#include "Global/Global.h"
-#include "Architecture/Component.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/Component.h"
 
 #include <string>
 
@@ -38,7 +38,7 @@ namespace Regolith
       Window();
 
       // On destruction delete the window pointer
-      virtual ~Window() { this->free(); }
+      virtual ~Window();
 
 
       // Configure the window return the SDL renderer

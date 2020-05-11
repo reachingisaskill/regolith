@@ -1,6 +1,8 @@
 
 #include "Regolith/Utilities/Exception.h"
 
+#include "logtastic.h"
+
 
 typedef std::vector< std::string > DetailVector;
       
@@ -14,13 +16,22 @@ namespace Regolith
     _elucidate(),
     _recoverable( recoverable )
   {
+    if ( _recoverable )
+    {
+      FAILURE_STREAM << "Recoverable exception has been thrown from: " << function << ", with error: " << name;
+    }
+    else
+    {
+      FAILURE_STREAM << "Non-recoverable exception has been thrown from: " << function << ", with error: " << name;
+    }
   }
 
 
   Exception::Exception( const Exception& ex ) :
     _error( ex._error ),
     _details( ex._details ),
-    _elucidate()
+    _elucidate(),
+    _recoverable( ex._recoverable )
   {
   }
 
@@ -29,6 +40,7 @@ namespace Regolith
     _error( std::move(ex._error) ),
     _details( std::move(ex._details) ),
     _elucidate()
+    _recoverable( std::move(ex._recoverable) )
   {
   }
 

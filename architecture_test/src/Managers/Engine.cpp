@@ -8,9 +8,8 @@
 namespace Regolith
 {
 
-  Engine::Engine( Window& win, InputManager& input, SDL_Color& color ) :
+  Engine::Engine( InputManager& input, SDL_Color& color ) :
     _theRenderer( nullptr ),
-    _window( win ),
     _inputManager( input ),
     _defaultColor( color ),
     _contextStack()
@@ -28,6 +27,12 @@ namespace Regolith
 
   void Engine::run()
   {
+    if ( _theRenderer == nullptr )
+    {
+      Exception ex( "Engine::run()", "Renderer is not set" );
+      throw ex;
+    }
+
     // Reset the flags
     _quit = false;
     _pause = false;

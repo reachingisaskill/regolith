@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_MANAGERS_INPUT_HANDLER_H_
-#define REGOLITH_MANAGERS_INPUT_HANDLER_H_
+#ifndef REGOLITH_MANAGERS_INPUT_MANAGER_H_
+#define REGOLITH_MANAGERS_INPUT_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/ControllableInterface.h"
@@ -69,25 +69,17 @@ namespace Regolith
 
       virtual ~InputManager();
 
-      // Iterate through all the SDL events and call the registered event handlers
+
+      // Iterate through all the SDL events and use the provided input handler to distribute user events
       void handleEvents( InputHandler* );
 
-      // Hande a specific SDL event object
-      void handleEvent( SDL_Event&, InputHandler* );
 
 
       // Register the request from a drawable object to be called when a given event is raised
-      void registerEventRequest( ControllableInterface*, RegolithEvent );
+      void registerEventRequest( Component*, RegolithEvent );
 
       // Return the set of objects that requested the input action
-      ComponentSet& getRegisteredObjects( RegolithEvent );
-
-
-      // Register an action to a specific input code on a specific input event type (hardware!)
-      void registerEvent( InputEventType, unsigned int, RegolithEvent );
-
-      // Return the event current registered to current event type
-      RegolithEvent getRegisteredEvent( InputEventType, unsigned int );
+      ComponentSet& getRegisteredComponents( RegolithEvent );
 
 
 
@@ -96,6 +88,7 @@ namespace Regolith
 
       // Get the registered input action from the request mapper, for a specific event type and event code
       InputAction getRegisteredInputAction( std::string, InputEventType event_type, unsigned int code );
+
 
 
       // Requests an input handler. If it exists, return the pointer, otherwise create it.
@@ -111,45 +104,7 @@ namespace Regolith
   };
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Input Handler class
-
-  /*
-   * Defines the input mapping for scene-related funcionality: INPUT_ACTIONS
-   * is passed to the manager to provide access to the callback functions available in the current context
-   */
-  class InputHandler
-  {
-    friend class InputManager;
-    private:
-      // Map the array of mapping object - one for each input event type
-      InputMappingSet* _inputMaps;
-
-      // Array of sets of controllable objects - one for each input action
-      ControllableSet _actionMaps[ INPUT_ACTION_TOTAL ];
-
-    public :
-      // Just pass the name of the required input mapping
-      explicit InputHandler( std::string );
-
-      ~InputHandler();
-
-      // Return the set of objects that requested the input action
-      ControllableSet& getRegisteredObjects( InputAction action ) { return _actionMaps[ action ]; }
-
-      // Register the request from a drawable object to be called when a given event is raised
-      void registerInputRequest( ControllableInterface*, InputAction );
-
-
-
-//      // Register a user action (event+mapping id) to an input action
-//      void registerInputAction( InputEventType, unsigned int, InputAction );
-//
-//      // Return the registered action for a given event type and mapping id
-//      InputAction getRegisteredInputAction( InputEventType, unsigned int );
-  };
-
 }
 
-#endif // REGOLITH_MANAGERS_INPUT_HANDLER_H_
+#endif // REGOLITH_MANAGERS_INPUT_MANAGER_H_
 

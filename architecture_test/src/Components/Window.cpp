@@ -1,7 +1,7 @@
 
-#include "Components/Window.h"
-#include "Managers/Manager.h"
-#include "Managers/InputManager.h"
+#include "Regolith/Components/Window.h"
+#include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/InputManager.h"
 
 #include <iostream>
 #include <sstream>

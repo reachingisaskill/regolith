@@ -27,7 +27,7 @@ namespace Regolith
 
       public:
         // Simple contructor
-        Noisy() : _handler( nullptr ) {}
+        Noisy();
 
         // Make the destructor virtual
         virtual ~Noisy() {}
@@ -38,7 +38,7 @@ namespace Regolith
 
 
         // Interface used to trigger the above function. Ensures the handler pointer is recorded
-        void registerSounds( AudioHandler* h ) { _handler = h; this->registerSoundEffects( _handler ); }
+        void registerSounds( AudioHandler* h );
 
 
         // Play a registered sound

@@ -7,6 +7,8 @@
 #include <sstream>
 #include <exception>
 
+#include "logtastic.h"
+
 
 namespace Regolith
 {
@@ -64,6 +66,8 @@ namespace Regolith
     stream << variable << " = " << value;
 
     _details.push_back( stream.str() );
+
+    FAILURE_STREAM << "Exception has detail of variable: " << variable << " with value: " << value;
   }
 
 }
