@@ -17,6 +17,7 @@ namespace Regolith
     _theRenderer( nullptr ),
     _objectFactory(),
     _contextFactory(),
+    _signalFactory(),
     _fonts(),
     _rawTextures(),
     _teamNames(),

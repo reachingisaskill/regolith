@@ -1,6 +1,8 @@
 
 #include "Regolith/Architecture/Interactable.h"
 #include "Regolith/GamePlay/Signal.h"
+#include "Regolith/Managers/Manager.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 namespace Regolith
 {
@@ -11,6 +13,19 @@ namespace Regolith
     _triggerLimit( 0 ),
     _isLimited( false )
   {
+  }
+
+
+  Interactable::Interactable( const Interactable& in ) :
+    _actions(),
+    _triggerCount( in._triggerCount ),
+    _triggerLimit( in._triggerLimit ),
+    _isLimited( in._isLimited )
+  {
+    for ( SignalVector::const_iterator it = in._actions.begin(); it != in._actions.end(); ++it )
+    {
+      _actions.push_back( (*it)->clone() );
+    }
   }
 
 
@@ -31,6 +46,24 @@ namespace Regolith
 
     // Increment the counter
     ++_triggerCount;
+  }
+
+
+  void Interactable::configure( Json::Value& json_data )
+  {
+    if ( ! json_data.isArray() )
+    {
+      Exception ex( "Interactable::configure()", "Interaction data must be an array of signals" );
+      throw ex;
+    }
+
+    SignalFactory& factory = Manager::getInstance()->getSignalFactory();
+
+    for ( Json::ArrayIndex i = 0; i < json_data.size(); ++i )
+    {
+      addSignal( factory.build( json_data[i] ) );
+    }
+
   }
 
 }

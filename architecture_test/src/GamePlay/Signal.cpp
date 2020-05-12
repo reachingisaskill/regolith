@@ -15,8 +15,8 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Input Event Signal
 
-  InputActionSignal::InputActionSignal( InputAction action ) :
-    _theAction( action )
+  InputActionSignal::InputActionSignal() :
+    _theAction()
   {
   }
 
@@ -28,12 +28,20 @@ namespace Regolith
   }
 
 
+  void InputActionSignal::configure( Json::Value& json_data )
+  {
+    INFO_LOG( " Input Action Signal" );
+    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
+    _theAction = getActionID( json_data["action"].asString() );
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Boolean Action Signal
 
-  InputBooleanSignal::InputBooleanSignal( InputAction action, bool val ) :
-    _theAction( action ),
-    _theValue( val )
+  InputBooleanSignal::InputBooleanSignal() :
+    _theAction(),
+    _theValue()
   {
   }
 
@@ -44,13 +52,26 @@ namespace Regolith
     man->getInputManager().simulateBooleanAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
   }
 
+  void InputBooleanSignal::configure( Json::Value& json_data )
+  {
+    INFO_LOG( " Input Boolean Signal" );
+    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "value", Utilities::JSON_TYPE_BOOLEAN );
+
+    InputAction action = getActionID( json_data["action"].asString() );
+    bool value = json_data["value"].asBool();
+
+    _theAction = action;
+    _theValue = value;
+  }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Float Action Signal
 
-  InputFloatSignal::InputFloatSignal( InputAction action, float val ) :
-    _theAction( action ),
-    _theValue( val )
+  InputFloatSignal::InputFloatSignal() :
+    _theAction(),
+    _theValue()
   {
   }
 
@@ -62,12 +83,26 @@ namespace Regolith
   }
 
 
+  void InputFloatSignal::configure( Json::Value& json_data )
+  {
+    INFO_LOG( " Input Float Signal" );
+    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "value", Utilities::JSON_TYPE_FLOAT );
+
+    InputAction action = getActionID( json_data["action"].asString() );
+    bool value = json_data["value"].asFloat();
+
+    _theAction = action;
+    _theValue = value;
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Vector Action Signal
 
-  InputVectorSignal::InputVectorSignal( InputAction action, Vector val ) :
-    _theAction( action ),
-    _theValue( val )
+  InputVectorSignal::InputVectorSignal() :
+    _theAction(),
+    _theValue()
   {
   }
 
@@ -79,13 +114,28 @@ namespace Regolith
   }
 
 
+  void InputVectorSignal::configure( Json::Value& json_data )
+  {
+    INFO_LOG( " Input Vector Signal" );
+    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "vector", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data, 2, Utilities::JSON_TYPE_FLOAT );
+
+    InputAction action = getActionID( json_data["action"].asString() );
+    Vector value( json_data["vector"][0].asFloat(), json_data["vector"][1].asFloat() );
+
+    _theAction = action;
+    _theValue = value;
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Mouse Action Signal
 
-  InputMouseSignal::InputMouseSignal( InputAction action, Vector val, bool click ) :
-    _theAction( action ),
-    _position( val ),
-    _click( click )
+  InputMouseSignal::InputMouseSignal() :
+    _theAction(),
+    _position(),
+    _click()
   {
   }
 
@@ -97,11 +147,29 @@ namespace Regolith
   }
 
 
+  void InputMouseSignal::configure( Json::Value& json_data )
+  {
+    INFO_LOG( " Input Mouse Signal" );
+    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "click", Utilities::JSON_TYPE_BOOLEAN );
+    Utilities::validateJsonArray( json_data, 2, Utilities::JSON_TYPE_FLOAT );
+
+    InputAction action = getActionID( json_data["action"].asString() );
+    Vector position( json_data["vector"][0].asFloat(), json_data["vector"][1].asFloat() );
+    bool click = json_data["click"].asBool();
+
+    _theAction = action;
+    _position = position;
+    _click = click;
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Game Event Signal
 
-  GameEventSignal::GameEventSignal( RegolithEvent event ) :
-    _theEvent( event )
+  GameEventSignal::GameEventSignal() :
+    _theEvent()
   {
   }
 
@@ -109,6 +177,15 @@ namespace Regolith
   void GameEventSignal::trigger() const
   {
     Manager::getInstance()->raiseEvent( _theEvent );
+  }
+
+
+  void GameEventSignal::configure( Json::Value& json_data )
+  {
+    INFO_LOG( " Game Event Signal" );
+    Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
+
+    _theEvent = getRegolithEventID( json_data["event"].asString() );
   }
 
 
@@ -130,9 +207,9 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Change Signal
 
-  ChangeContextSignal::ChangeContextSignal( Engine::StackOperation::Operation op, Context* cont ) :
-    _theContext( cont ),
-    _operation( op )
+  ChangeContextSignal::ChangeContextSignal() :
+    _theContext(),
+    _operation()
   {
   }
 
@@ -160,120 +237,38 @@ namespace Regolith
   }
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Building functions
-
-  Signal* makeSignal( Json::Value& json_data, Context* /*context*/ )
+  void ChangeContextSignal::configure( Json::Value& json_data )
   {
-    Signal* newSignal = nullptr;
+    INFO_LOG( " Change Context Signal" );
+    Utilities::validateJson( json_data, "context_name", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "operation", Utilities::JSON_TYPE_STRING );
 
-    Utilities::validateJson( json_data, "type", Utilities::JSON_TYPE_STRING );
+    Engine::StackOperation::Operation op;
+    Context* context = nullptr;
 
-    std::string type = json_data["type"].asString();
-    INFO_LOG( "Building Signal" );
-
-    if ( type == "input_action" )
+    if ( json_data["operation"].asString() == "open" )
     {
-      INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-      newSignal = new InputActionSignal( getActionID( json_data["action"].asString() ) );
+      op = Engine::StackOperation::PUSH;
+      context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
     }
-    else if ( type == "input_boolean" )
+    if ( json_data["operation"].asString() == "close" )
     {
-      INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( json_data, "value", Utilities::JSON_TYPE_BOOLEAN );
-      InputAction action = getActionID( json_data["action"].asString() );
-      bool value = json_data["value"].asBool();
-
-      newSignal = new InputBooleanSignal( action, value );
+      op = Engine::StackOperation::POP;
+      // No context name needed.
     }
-    else if ( type == "input_float" )
+    if ( json_data["operation"].asString() == "transfer" )
     {
-      INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( json_data, "value", Utilities::JSON_TYPE_FLOAT );
-      InputAction action = getActionID( json_data["action"].asString() );
-      bool value = json_data["value"].asFloat();
-
-      newSignal = new InputFloatSignal( action, value );
+      op = Engine::StackOperation::TRANSFER;
+      context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
     }
-    else if ( type == "input_vector" )
+    if ( json_data["operation"].asString() == "reset" )
     {
-      INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( json_data, "vector", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJsonArray( json_data, 2, Utilities::JSON_TYPE_FLOAT );
-
-      InputAction action = getActionID( json_data["action"].asString() );
-      Vector value( json_data["vector"][0].asFloat(), json_data["vector"][1].asFloat() );
-
-      newSignal = new InputVectorSignal( action, value );
-    }
-    else if ( type == "input_mouse" )
-    {
-      INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( json_data, "click", Utilities::JSON_TYPE_BOOLEAN );
-      Utilities::validateJsonArray( json_data, 2, Utilities::JSON_TYPE_FLOAT );
-
-      InputAction action = getActionID( json_data["action"].asString() );
-      Vector position( json_data["vector"][0].asFloat(), json_data["vector"][1].asFloat() );
-      bool click = json_data["click"].asBool();
-
-      newSignal = new InputMouseSignal( action, position, click );
-    }
-    else if ( type == "game_event" )
-    {
-      INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
-      newSignal = new GameEventSignal( getRegolithEventID( json_data["event"].asString() ) );
-    }
-//    else if ( type == "context_event" )
-//    {
-//      INFO_STREAM << " Signal type: " << type;
-//      Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
-//      newSignal = new ContextEventSignal( context->getContextEventID( json_data["event"].asString() ) );
-//    }
-    else if ( type == "change_context" )
-    {
-      INFO_STREAM << " Signal type: " << type;
-      Utilities::validateJson( json_data, "context_name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( json_data, "operation", Utilities::JSON_TYPE_STRING );
-
-      Engine::StackOperation::Operation op;
-      Context* context = nullptr;
-
-      if ( json_data["operation"].asString() == "open" )
-      {
-        op = Engine::StackOperation::PUSH;
-        context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
-      }
-      if ( json_data["operation"].asString() == "close" )
-      {
-        op = Engine::StackOperation::POP;
-        // No context name needed.
-      }
-      if ( json_data["operation"].asString() == "transfer" )
-      {
-        op = Engine::StackOperation::TRANSFER;
-        context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
-      }
-      if ( json_data["operation"].asString() == "reset" )
-      {
-        op = Engine::StackOperation::RESET;
-        context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
-      }
-
-      newSignal = new ChangeContextSignal( op, context );
-    }
-    else
-    {
-      ERROR_STREAM << "Unknown type of signal requested: " << type;
+      op = Engine::StackOperation::RESET;
+      context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
     }
 
-    return newSignal;
+    _operation = op;
+    _theContext = context;
   }
 
 }

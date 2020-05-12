@@ -12,6 +12,7 @@
 #include "Regolith/Components/Window.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/GamePlay/Texture.h"
+#include "Regolith/GamePlay/Signal.h"
 #include "Regolith/Utilities/Singleton.h"
 
 #include <vector>
@@ -32,6 +33,7 @@ namespace Regolith
 
   typedef FactoryTemplate< GameObject > ObjectFactory;
   typedef FactoryTemplate< Context > ContextFactory;
+  typedef FactoryTemplate< Signal > SignalFactory;
 
 
   // Manager class
@@ -52,6 +54,7 @@ namespace Regolith
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
       ContextFactory _contextFactory;
+      SignalFactory _signalFactory;
 
       // Owned memory for objects, contexts, etc
       FontMap _fonts;
@@ -120,6 +123,9 @@ namespace Regolith
 
       // Return a pointer to the Scene builder
       ContextFactory& getContextFactory() { return _contextFactory; }
+
+      // Return a pointer to the Scene builder
+      SignalFactory& getSignalFactory() { return _signalFactory; }
 
       // Get the pointer to the window
       SDL_Renderer* getRendererPointer() { return _theRenderer; }

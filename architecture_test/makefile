@@ -78,7 +78,8 @@ LIB_LINK_FLAGS = -Wl,-rpath=$(realpath ${LIB_DIR}) -l${LIB_NAME} -L${LIB_DIR}
 EXE_FILES = ${shell ls $(EXE_SRC_DIR)}
 #SRC_FILES = ${shell ls $(SRC_DIR)}
 SRC_FILES = ${shell find $(SRC_DIR) -type f | cut -d '/' -f 2-}
-INC_FILES = ${shell ls $(INC_DIR)}
+#INC_FILES = ${shell ls $(INC_DIR)}
+INC_FILES = ${shell find $(INC_DIR) -type f | cut -d '/' -f 2-}
 
 # Executable Source Files
 EXE_SRC = $(filter %.cxx,${EXE_FILES})

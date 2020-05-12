@@ -3,6 +3,7 @@
 #define REOGLITH_GAMEPLAY_SIGNAL_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Components/Engine.h"
 
 
@@ -18,13 +19,13 @@ namespace Regolith
   class Signal;
   class Context;
 
-  // Function to interpret the json data and return a built signal pointer
-  Signal* makeSignal( Json::Value&, Context* );
+//  // Function to interpret the json data and return a built signal pointer
+//  Signal* makeSignal( Json::Value&, Context* );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Signal Base class
 
-  class Signal
+  class Signal : public MassProduceable
   {
     private:
 
@@ -34,6 +35,8 @@ namespace Regolith
       virtual ~Signal() {}
 
       virtual void trigger() const = 0;
+
+      virtual Signal* clone() const = 0;
   };
 
 
@@ -47,10 +50,14 @@ namespace Regolith
 
     public :
       // Con/Destruction
-      InputActionSignal( InputAction );
+      InputActionSignal();
       virtual ~InputActionSignal() {}
 
       void trigger() const;
+
+      virtual void configure( Json::Value& ) override;
+
+      virtual Signal* clone() const override { return new InputActionSignal( *this ); }
   };
 
 
@@ -65,10 +72,14 @@ namespace Regolith
 
     public :
       // Con/Destruction
-      InputBooleanSignal( InputAction, bool );
+      InputBooleanSignal();
       virtual ~InputBooleanSignal() {}
 
       void trigger() const;
+
+      virtual void configure( Json::Value& ) override;
+
+      virtual Signal* clone() const override { return new InputBooleanSignal( *this ); }
   };
 
 
@@ -83,10 +94,14 @@ namespace Regolith
 
     public :
       // Con/Destruction
-      InputFloatSignal( InputAction, float );
+      InputFloatSignal();
       virtual ~InputFloatSignal() {}
 
       void trigger() const;
+
+      virtual void configure( Json::Value& ) override;
+
+      virtual Signal* clone() const override { return new InputFloatSignal( *this ); }
   };
 
 
@@ -101,10 +116,14 @@ namespace Regolith
 
     public :
       // Con/Destruction
-      InputVectorSignal( InputAction, Vector );
+      InputVectorSignal();
       virtual ~InputVectorSignal() {}
 
       void trigger() const;
+
+      virtual void configure( Json::Value& ) override;
+
+      virtual Signal* clone() const override { return new InputVectorSignal( *this ); }
   };
 
 
@@ -120,10 +139,14 @@ namespace Regolith
 
     public :
       // Con/Destruction
-      InputMouseSignal( InputAction, Vector, bool );
+      InputMouseSignal();
       virtual ~InputMouseSignal() {}
 
       void trigger() const;
+
+      virtual void configure( Json::Value& ) override;
+
+      virtual Signal* clone() const override { return new InputMouseSignal( *this ); }
   };
 
 
@@ -137,10 +160,14 @@ namespace Regolith
 
     public :
       // Con/Destruction
-      GameEventSignal( RegolithEvent );
+      GameEventSignal();
       virtual ~GameEventSignal() {}
 
       void trigger() const;
+
+      virtual void configure( Json::Value& ) override;
+
+      virtual Signal* clone() const override { return new GameEventSignal( *this ); }
   };
 
 
@@ -172,10 +199,14 @@ namespace Regolith
 
     public :
       // Con/Destruction
-      ChangeContextSignal( Engine::StackOperation::Operation, Context* c = nullptr );
+      ChangeContextSignal();
       virtual ~ChangeContextSignal() {}
 
       void trigger() const;
+
+      virtual void configure( Json::Value& ) override;
+
+      virtual Signal* clone() const override { return new ChangeContextSignal( *this ); }
   };
 
 

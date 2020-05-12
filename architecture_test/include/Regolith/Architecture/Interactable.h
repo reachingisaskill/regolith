@@ -33,6 +33,9 @@ namespace Regolith
     public :
       Interactable();
 
+      // Copy the signal data
+      Interactable( const Interactable& );
+
       virtual ~Interactable() {}
 
 
@@ -50,7 +53,7 @@ namespace Regolith
 
 
       // Add an action to the object
-      void addAction( Signal* s ) { _actions.push_back( s ); }
+      void addSignal( Signal* s ) { _actions.push_back( s ); }
       
 
       // Activate all the signals

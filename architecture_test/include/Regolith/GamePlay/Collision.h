@@ -18,7 +18,7 @@ namespace Regolith
    */
 
   // Forward declarations
-  class Contact;
+//  class Contact;
   class Collision;
   class Collidable;
 
@@ -51,7 +51,7 @@ namespace Regolith
     public:
       Collision();
 
-      Collision( Vector, float, float );
+      void configure( Vector, float, float );
 
       virtual ~Collision();
 
@@ -62,30 +62,30 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Contact class
-  class Contact
-  {
-    private:
-      Vector _overlap1;
-      Vector _overlap2;
-
-      Collidable* _object1;
-      Collidable* _object2;
-
-    public:
-      Contact();
-
-      void set( Collidable*, Collidable*, Vector, float );
-
-      void applyContact();
-
-      const Vector& overlap1() { return _overlap1; }
-      const Vector& overlap2() { return _overlap2; }
-
-      const Collidable* object1() { return _object1; }
-      const Collidable* object2() { return _object2; }
-
-  };
+//  // Contact class
+//  class Contact
+//  {
+//    private:
+//      Vector _overlap1;
+//      Vector _overlap2;
+//
+//      Collidable* _object1;
+//      Collidable* _object2;
+//
+//    public:
+//      Contact();
+//
+//      void set( Collidable*, Collidable*, Vector, float );
+//
+//      void applyContact();
+//
+//      const Vector& overlap1() { return _overlap1; }
+//      const Vector& overlap2() { return _overlap2; }
+//
+//      const Collidable* object1() { return _object1; }
+//      const Collidable* object2() { return _object2; }
+//
+//  };
 
 
 }

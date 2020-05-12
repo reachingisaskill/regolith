@@ -48,11 +48,6 @@ namespace Regolith
   }
 
 
-  void Context::configure( Json::Value& )
-  {
-  }
-
-
   void Context::update( float time )
   {
     AnimatedList::iterator it = _animatedObjects.begin();
@@ -175,6 +170,13 @@ namespace Regolith
 
 
   void Context::cacheObject( GameObject* )
+  {
+  }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
+  // Context configuration
+
+  void Context::configure( Json::Value& )
   {
   }
 
