@@ -60,7 +60,6 @@ namespace Regolith
 
     if ( found == _builders.end() )
     {
-      FAILURE_STREAM << "Could not find requested builder for type: " << name;
       Exception ex( "FactoryTemplate<>::build()", "Could not find requested builder" );
       ex.addDetail( "Type name", name );
       throw ex;

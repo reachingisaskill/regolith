@@ -29,7 +29,7 @@ int main( int, char** )
 //    man->getObjectFactory()->addBuilder( new TestContextBuilder() );
 
     INFO_LOG( "Initialising the manager" );
-//    man->init( test_config );
+    man->init( test_config );
 
     INFO_LOG( "Starting Regolith" );
     man->run();

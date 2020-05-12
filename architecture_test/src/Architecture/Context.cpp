@@ -1,5 +1,12 @@
 
 #include "Regolith/Architecture/Context.h"
+#include "Regolith/Architecture/Noisy.h"
+#include "Regolith/Architecture/Interactable.h"
+#include "Regolith/Architecture/Controllable.h"
+#include "Regolith/Architecture/Drawable.h"
+#include "Regolith/Architecture/Moveable.h"
+#include "Regolith/Architecture/Collidable.h"
+#include "Regolith/Architecture/Animated.h"
 #include "Regolith/GamePlay/Camera.h"
 #include "Regolith/Managers/Manager.h"
 
@@ -20,7 +27,6 @@ namespace Regolith
     _height( 0.0 ),
     _paused( false ),
     _pauseable( false ),
-    _childContexts( "Child Contexts" ),
     _layers( "Context Layers" ),
     _spawnedObjects(),
     _animatedObjects()
@@ -42,9 +48,6 @@ namespace Regolith
 
     INFO_LOG( "Clearing layers" );
     _layers.clear();
-
-    INFO_LOG( "Clearing child contexts" );
-    _childContexts.clear();
   }
 
 
@@ -153,31 +156,154 @@ namespace Regolith
   }
 
 
-  void Context::openChildContext( unsigned int id )
+  void Context::spawn( unsigned int id, unsigned int layer_num, const Vector& position )
   {
-    Manager::getInstance()->openContext( _childContexts[ id ] );
+    PhysicalObject* object = Manager::getInstance()->spawn( id, position );
+    addSpawnedObject( object, layer_num );
+    _spawnedObjects.push_back( object );
   }
 
 
-  void Context::spawn( unsigned int id, unsigned int layer, const Vector& position )
+  void Context::addSpawnedObject( PhysicalObject* object, unsigned int layer_num )
   {
+    if ( object->hasInput() )
+    {
+      dynamic_cast<Controllable*>( object )->registerActions( _theInput );
+    }
+    if ( object->hasAudio() )
+    {
+      dynamic_cast<Noisy*>( object )->registerSounds( &_theAudio );
+    }
+    if ( object->hasAnimation() )
+    {
+      _animatedObjects.push_back( dynamic_cast<Animated*>( object ) );
+    }
+//    if ( object->hasInteraction() )
+//    {
+//       // Nothing to do for this one
+//    }
+
+
+    ContextLayer* layer = _layers[layer_num];
+
+    if ( object->hasTexture() )
+    {
+      layer->drawables.push_back( dynamic_cast<Drawable*>( object ) );
+    }
+    if ( object->hasMovement() )
+    {
+      layer->moveables.push_back( dynamic_cast<Moveable*>( object ) );
+    }
+    if ( object->hasCollision() )
+    {
+      Collidable* temp = dynamic_cast<Collidable*>( object );
+      layer->teams[ temp->getTeam() ].push_back( temp );
+    }
   }
 
 
-  void Context::addSpawnedObject( PhysicalObject*, unsigned int, const Vector& )
+  void Context::cacheObject( GameObject* object )
   {
-  }
-
-
-  void Context::cacheObject( GameObject* )
-  {
+    if ( object->hasInput() )
+    {
+      dynamic_cast<Controllable*>( object )->registerActions( _theInput );
+    }
+    if ( object->hasAudio() )
+    {
+      dynamic_cast<Noisy*>( object )->registerSounds( &_theAudio );
+    }
+    if ( object->hasAnimation() )
+    {
+      _animatedObjects.push_back( dynamic_cast<Animated*>( object ) );
+    }
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // Context configuration
 
-  void Context::configure( Json::Value& )
+  void Context::configure( Json::Value& json_data )
   {
+    Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_FLOAT );
+    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_FLOAT );
+    Utilities::validateJson( json_data, "pauseable", Utilities::JSON_TYPE_BOOLEAN );
+    Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
+
+    float x = json_data["position"][0].asFloat();
+    float y = json_data["position"][1].asFloat();
+    _position = Vector( x, y );
+    _width = json_data["width"].asFloat();
+    _height = json_data["height"].asFloat();
+    DEBUG_STREAM << "  Context position: " << _position << " width: " << _width << " height: " << _height;
+
+    _pauseable = json_data["pauseable"].asBool();
+    DEBUG_STREAM << "  Context " << ( _pauseable ? "is" : "is not" ) << " pauseable";
+
+    DEBUG_LOG( "  Building context layers" );
+    Json::Value& layer_data = json_data["layers"];
+    Json::ArrayIndex layer_data_size = layer_data.size();
+    for ( Json::ArrayIndex i = 0; i != layer_data_size; ++i )
+    {
+      Utilities::validateJson( layer_data[i], "name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( layer_data[i], "position", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJsonArray( layer_data[i]["position"], 2, Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( layer_data[i], "width", Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( layer_data[i], "height", Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( layer_data[i], "elements", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( layer_data[i], "camera", Utilities::JSON_TYPE_OBJECT );
+
+      float x = layer_data[i]["position"][0].asFloat();
+      float y = layer_data[i]["position"][1].asFloat();
+      float w = layer_data[i]["width"].asFloat();
+      float h = layer_data[i]["height"].asFloat();
+      _layers.addObject( new ContextLayer( Vector( x, y ), w, h ), layer_data[i]["name"].asString() );
+
+      unsigned int layer_number = _layers.getID( layer_data[i]["name"].asString() );
+
+      Json::Value& element_data = layer_data[i]["elements"];
+      Json::ArrayIndex element_data_size = element_data.size();
+      for ( Json::ArrayIndex j = 0; j != element_data_size; ++j )
+      {
+        Utilities::validateJson( element_data[j], "name", Utilities::JSON_TYPE_STRING );
+        Utilities::validateJson( element_data[j], "position", Utilities::JSON_TYPE_ARRAY );
+        Utilities::validateJsonArray( element_data[j]["position"], 2, Utilities::JSON_TYPE_FLOAT );
+
+        std::string name = element_data[j]["name"].asString();
+        float x = element_data[j]["position"][0].asFloat();
+        float y = element_data[j]["position"][1].asFloat();
+        Vector pos = Vector( x, y );
+
+        if ( Utilities::validateJson( element_data[j], "is_global", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["is_global"].asBool() )
+        {
+          GameObject* element = Manager::getInstance()->getGameObject( name );
+          if ( element->isPhysical() )
+          {
+            addSpawnedObject( dynamic_cast<PhysicalObject*>( element ), layer_number );
+          }
+          else
+          {
+            cacheObject( element );
+          }
+        }
+        else
+        {
+          PhysicalObject* element = Manager::getInstance()->spawn( name, pos );
+          addSpawnedObject( element, layer_number );
+          _spawnedObjects.push_back( element );
+        }
+      }
+    }
+
+
+    DEBUG_LOG( "Building child contexts" );
+    Json::Value& context_data = json_data["contexts"];
+    Json::ArrayIndex context_data_size = context_data.size();
+    for ( Json::ArrayIndex i = 0; i != context_data_size; ++i )
+    {
+      Manager::getInstance()->buildContext( context_data[i] );
+    }
   }
 
 }

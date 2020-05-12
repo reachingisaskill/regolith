@@ -55,9 +55,6 @@ namespace Regolith
       // Flag to indicate whether the context should be paused when it loses focus
       bool _pauseable;
 
-      // Named vector containing all the contexts that can be loaded from this one
-      NamedVector< Context, true > _childContexts;
-
       // Named vector of all the layers owned by the current context
       NamedVector< ContextLayer, true > _layers;
 
@@ -129,11 +126,6 @@ namespace Regolith
 
 
 
-      // Opens a new child context with the specified id
-      void openChildContext( unsigned int );
-      // Return the ID of a child context so that it may be opened later
-      unsigned int getContextID( std::string name ) const { return _childContexts.getID( name ); }
-
       // Return the ID of a layer so that it may be referenced when spawining objects
       unsigned int getLayerID( std::string name ) const { return _layers.getID( name ); }
       
@@ -143,7 +135,7 @@ namespace Regolith
       void spawn( unsigned int, unsigned int, const Vector& );
 
       // Insert a spawned object (memory owned by another, probably derived class) and cache it in the provided layer
-      void addSpawnedObject( PhysicalObject*, unsigned int, const Vector& );
+      void addSpawnedObject( PhysicalObject*, unsigned int );
 
       // Cache an object, this will NOT add objects to any layers, but will ensure any update functions are called.
       virtual void cacheObject( GameObject* );

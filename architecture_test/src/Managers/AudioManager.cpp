@@ -115,18 +115,19 @@ namespace Regolith
 
   void AudioManager::configure( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "frequency", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "format", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "channels", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "sample_frequency", Utilities::JSON_TYPE_INTEGER );
+//    Utilities::validateJson( json_data, "format", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "audio_channels", Utilities::JSON_TYPE_INTEGER );
     Utilities::validateJson( json_data, "chunk_size", Utilities::JSON_TYPE_INTEGER );
     Utilities::validateJson( json_data, "music_files", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "effect_files", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "music_volume", Utilities::JSON_TYPE_FLOAT );
     Utilities::validateJson( json_data, "effect_volume", Utilities::JSON_TYPE_FLOAT );
 
-    _frequency = json_data["frequency"].asInt();
-    _format = json_data["format"].asInt();
-    _channels = json_data["channels"].asInt();
+    _frequency = json_data["sample_frequency"].asInt();
+//    _format = json_data["format"].asInt();
+    _format = MIX_DEFAULT_FORMAT;
+    _channels = json_data["audio_channels"].asInt();
     _chunkSize = json_data["chunk_size"].asInt();
 
     if ( Utilities::validateJson( json_data, "chunk_size", Utilities::JSON_TYPE_INTEGER, false ) )

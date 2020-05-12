@@ -164,6 +164,7 @@ namespace Regolith
     return found->second;
   }
 
+//  Context* Manager::buildContext( Json::Value& ) // See Managers/ManagerBuild.cpp
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure user events

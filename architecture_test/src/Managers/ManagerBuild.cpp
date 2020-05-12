@@ -298,47 +298,52 @@ namespace Regolith
   void Manager::_loadContexts( Json::Value& context_data )
   {
     INFO_LOG( "Loading game objects" );
-    if ( ! context_data.isArray() )
-    {
-      Exception ex( "Manager::_loadContexts()", "Context configuration must be an array" );
-      throw ex;
-    }
 
     Json::ArrayIndex context_data_size = context_data.size();
     for ( Json::ArrayIndex i = 0; i != context_data_size; ++i )
     {
-      Utilities::validateJson( context_data[i], "name", Utilities::JSON_TYPE_STRING );
-      std::string name = context_data[i]["name"].asString();
-
-      if ( Utilities::validateJson( context_data[i], "file", Utilities::JSON_TYPE_STRING, false ) )
-      {
-        std::string context_file = context_data[i].asString();
-        INFO_STREAM << "Bulding context, " << name << " from file: " << context_file;
-
-        std::ifstream input( context_file );
-        Json::Value context_file_data;
-        Json::CharReaderBuilder reader_builder;
-        Json::CharReader* reader = reader_builder.newCharReader();
-        std::string errors;
-        bool result = Json::parseFromStream( reader_builder, input, &context_file_data, &errors );
-        if ( ! result )
-        {
-          ERROR_LOG( "Manager::_loadContexts() : Found errors parsing json" );
-          ERROR_STREAM << "\"" << errors << "\"";
-        }
-        delete reader;
-
-        Context* obj = _contextFactory.build( context_file_data );
-        _contexts.addObject( obj, name );
-      }
-      else
-      {
-        INFO_STREAM << "Building context : " << name;
-
-        Context* obj = _contextFactory.build( context_data[i] );
-        _contexts.addObject( obj, name );
-      }
+      buildContext( context_data[i] );
     }
+  }
+
+
+  Context* Manager::buildContext( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
+    std::string name = json_data["name"].asString();
+    INFO_STREAM << "Attempting to build context: " << name;
+
+    Context* obj = nullptr;
+
+    if ( Utilities::validateJson( json_data, "file", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      std::string context_file = json_data["file"].asString();
+      INFO_STREAM << "Bulding context from file: " << context_file;
+
+      std::ifstream input( context_file );
+      Json::Value context_file_data;
+      Json::CharReaderBuilder reader_builder;
+      Json::CharReader* reader = reader_builder.newCharReader();
+      std::string errors;
+      bool result = Json::parseFromStream( reader_builder, input, &context_file_data, &errors );
+      if ( ! result )
+      {
+        ERROR_LOG( "Manager::_loadContexts() : Found errors parsing json" );
+        ERROR_STREAM << "\"" << errors << "\"";
+      }
+      delete reader;
+
+      obj = _contextFactory.build( context_file_data );
+      _contexts.addObject( obj, name );
+    }
+    else
+    {
+      INFO_LOG( "Bulding context" );
+      obj = _contextFactory.build( json_data );
+      _contexts.addObject( obj, name );
+    }
+
+    return obj;
   }
 
 }

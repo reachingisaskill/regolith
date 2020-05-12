@@ -146,6 +146,9 @@ namespace Regolith
       ////////////////////////////////////////////////////////////////////////////////
       // Context Memory
 
+      // Asks the manager to build a context and store the memory. Returns a pointer to the new context
+      Context* buildContext( Json::Value& );
+
       // Return a pointer to a requested context
       Context* getContext( std::string name ) { return _contexts.get( name ); }
 
@@ -201,6 +204,7 @@ namespace Regolith
       // Spawn a cloned object - caller accepts ownership of memory
       // Spawn a new instance of a resource and return the memory to the caller
       PhysicalObject* spawn( unsigned int i, const Vector& pos ) { return _physicalObjects[i]->clone( pos ); }
+      PhysicalObject* spawn( std::string name, const Vector& pos ) { return _physicalObjects.get( name )->clone( pos ); }
 
 
       ////////////////////////////////////////////////////////////////////////////////
