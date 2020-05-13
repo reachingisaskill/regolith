@@ -3,6 +3,8 @@
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Components/Window.h"
 
+#include "Regolith/Contexts/TitleScene.h"
+
 #include "logtastic.h"
 
 
@@ -32,15 +34,15 @@ namespace Regolith
     _gravityConst( 0.0, 0.01 ),
     _dragConst( 0.005 )
   {
-//    // Set up the object factory
+    // Set up the object factory
 //    _objectFactory.addBuilder<Sprite>( "sprite" );
 //    _objectFactory.addBuilder<FPSString>( "fps_string" );
 //    _objectFactory.addBuilder<Button>( "button" );
-//
-//    // Set up the context factory
+
+    // Set up the context factory
+//    _contextFactory.addBuilder<Context>( "menu_dialog" );
 //    _contextFactory.addBuilder<Platformer>( "platformer" );
-//    _contextFactory.addBuilder<MenuDialog>( "menu_dialog" );
-//    _contextFactory.addBuilder<Title>( "title_scene" );
+    _contextFactory.addBuilder<TitleScene>( "title_scene" );
   }
 
 

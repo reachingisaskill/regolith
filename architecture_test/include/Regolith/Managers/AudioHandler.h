@@ -57,6 +57,9 @@ namespace Regolith
       // Set the scene-music using the manager
       void setSong( unsigned int n );
 
+      // Stop the music playing
+      void stopSong();
+
       // Play a sound effect in the local context
       void triggerEffect( unsigned int n );
 

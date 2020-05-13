@@ -7,9 +7,11 @@
 #include "Regolith/Architecture/Drawable.h"
 #include "Regolith/Architecture/Moveable.h"
 #include "Regolith/Architecture/Collidable.h"
+#include "Regolith/Architecture/Clickable.h"
 #include "Regolith/GamePlay/Camera.h"
 
 #include <list>
+#include <set>
 
 
 namespace Regolith
@@ -19,6 +21,7 @@ namespace Regolith
   typedef std::list< Moveable* > MoveableList;
   typedef std::list< Collidable* > CollidableList;
   typedef std::map< int, CollidableList > TeamMap;
+  typedef std::set< Clickable* > ClickableSet;
 
   class ContextLayer
   {
@@ -49,6 +52,9 @@ namespace Regolith
 
       // Map of all teams. Note a team cannot collide with it's own members!
       TeamMap teams;
+
+      // Set of all the objects that are "clickable"
+      ClickableSet clickables;
 
 
       // Return a const reference to the camera object to allow render to place objects

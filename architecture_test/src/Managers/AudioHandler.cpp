@@ -123,6 +123,12 @@ namespace Regolith
   }
 
 
+  void AudioHandler::stopSong()
+  {
+    _manager.stopMusic();
+  }
+
+
   void AudioHandler::triggerEffect( unsigned int num )
   {
     _manager.playChunk( num );

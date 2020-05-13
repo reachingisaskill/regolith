@@ -1,0 +1,108 @@
+{
+  "input_mapping" : "platformer",
+
+  "sounds" :
+  {
+    "default_music" : "the_beat"
+  },
+
+  "cameras" :
+  {
+    "type" : "following",
+    "width" : 1024,
+    "height" : 768,
+    "start_position" : [ 100, 100 ]
+  },
+
+  "options" :
+  {
+    "on_pause" : "pause_menu"
+  },
+
+  "elements" :
+  {
+    "background" : "background",
+    
+    "scene_elements" :
+    [
+      {
+        "resource_name" : "the_spritesheet",
+        "position" : [ 250, 150 ]
+      },
+      {
+        "resource_name" : "the_spritesheet",
+        "position" : [ 250, 550 ]
+      },
+      {
+        "resource_name" : "the_spritesheet",
+        "position" : [ 500, 500 ]
+      },
+      {
+        "resource_name" : "the_animated_spritesheet",
+        "position" : [ 250, 200 ]
+      },
+      {
+        "resource_name" : "the_animated_spritesheet",
+        "position" : [ 250, 300 ]
+      },
+      {
+        "resource_name" : "platform",
+        "position" : [ -100, 1000 ]
+      },
+      {
+        "resource_name" : "platform",
+        "position" : [ 1100, 1000 ]
+      }
+    ],
+
+    "hud_elements" :
+    [
+      {
+        "resource_name" : "fps_text",
+        "position" : [ 20, 20 ],
+        "alignment" : 
+        {
+          "horizontal" : "centre",
+          "vertical" : "bottom"
+        }
+      }
+    ]
+  },
+
+  "player" :
+  {
+    "resource_name" : "the_dot",
+    "position" : [ 380, 150 ]
+  },
+
+  "spawn_points" :
+  [
+    [ 380, 150 ]
+  ],
+
+  "dialog_windows" :
+  [
+    {
+      "input_mapping" : "title",
+      "name" : "pause_menu",
+      "dialog_type" : "menu",
+
+      "elements" :
+      [
+        {
+          "resource_name" : "pause_text",
+          "position" : [0, 0],
+          "alignment" :
+          {
+            "horizontal" : "centre",
+            "vertical" : "centre"
+          }
+        }
+      ],
+      "options" :
+      {
+        "can_cancel" : true
+      }
+    }
+  ]
+}

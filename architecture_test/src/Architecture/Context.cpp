@@ -199,6 +199,10 @@ namespace Regolith
       Collidable* temp = dynamic_cast<Collidable*>( object );
       layer->teams[ temp->getTeam() ].push_back( temp );
     }
+    if ( object->hasClick() )
+    {
+      layer->clickables.insert( dynamic_cast<Clickable*>( object ) );
+    }
   }
 
 

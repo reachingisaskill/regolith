@@ -254,6 +254,14 @@ namespace Regolith
   }
 
 
+  void AudioManager::stopMusic()
+  {
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      Mix_FadeOutMusic( _fadeTime );
+    }
+  }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // "Asynchronous" play next function
   void playNextTrack()

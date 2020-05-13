@@ -88,6 +88,10 @@ namespace Regolith
       void playChunk( std::string n ) { playChunk( _effects.getID( n ) ); }
 
 
+      // Stop the noises
+      void stopMusic();
+
+
       // Get/Set the fade time for music
       int getFadeTime() const { return _fadeTime; }
       void setFadeTime( int t ) { _fadeTime = t; }
