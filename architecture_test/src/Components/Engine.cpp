@@ -65,6 +65,7 @@ namespace Regolith
         DEBUG_STREAM << " CONTEXT STACK SIZE : " << _contextStack.size();
         for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
         {
+          DEBUG_LOG( "   Processing Context" );
           (*context_it)->update( time );
           (*context_it)->step( time );
           (*context_it)->resolveCollisions();
@@ -132,6 +133,7 @@ namespace Regolith
   {
     while ( ! _stackOperationQueue.empty() )
     {
+      DEBUG_STREAM << _stackOperationQueue.size() << "Operations Remaining";
       StackOperation& sop = _stackOperationQueue.front();
 
       switch ( sop.operation )
@@ -184,23 +186,26 @@ namespace Regolith
           _contextStack.front()->startContext();
           break;
       }
+
+      _stackOperationQueue.pop();
+    }
+
+    if ( _contextStack.empty() )
+    {
+      quit();
+      return;
     }
 
     // Set the visiblility start pointer. 
     // Start at the end and work backwards until either:
     //  - We hit the beginning of the stack, OR
     //  - One of the contexts overrides all the previous ones.
-    _visibleStackStart = _contextStack.rend();
+    _visibleStackStart = --_contextStack.rend();
     while ( ( _visibleStackStart != _contextStack.rbegin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
       --_visibleStackStart;
 
     // Set the end iterator
     _visibleStackEnd = _contextStack.rend();
-
-    if ( _contextStack.empty() )
-    {
-      quit();
-    }
   }
 
 }

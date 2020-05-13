@@ -33,6 +33,7 @@ namespace Regolith
     _volumeMusic( 1.0 ), // Defaults to full volume
     _volumeChunk( 1.0 ) // Defaults to full volume
   {
+    _musics.addObject( nullptr, "null" ); // Set the zeroth element to be null
   }
 
 
@@ -45,7 +46,8 @@ namespace Regolith
     // Free all the memory used by the music files
     for ( unsigned int i = 0; i < _musics.vectorSize(); ++i )
     {
-      Mix_FreeMusic( _musics[i] );
+      if ( _musics[i] != nullptr )
+        Mix_FreeMusic( _musics[i] );
     }
     _musics.clear();
 

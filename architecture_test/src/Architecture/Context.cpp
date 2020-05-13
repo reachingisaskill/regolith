@@ -22,6 +22,7 @@ namespace Regolith
     Component(),
     _theInput(),
     _theAudio(),
+    _theFocus(),
     _position( 0.0 ),
     _width( 0.0 ),
     _height( 0.0 ),
@@ -53,6 +54,7 @@ namespace Regolith
 
   void Context::update( float time )
   {
+    DEBUG_LOG( "Context Update" );
     AnimatedList::iterator it = _animatedObjects.begin();
     AnimatedList::iterator end =  _animatedObjects.end();
     while ( it != end )
@@ -71,6 +73,7 @@ namespace Regolith
 
   void Context::step( float time )
   {
+    DEBUG_LOG( "Context Step" );
     NamedVector< ContextLayer, true >::iterator layers_end = _layers.end();
     for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
     {
@@ -95,6 +98,7 @@ namespace Regolith
 
   void Context::render()
   {
+    DEBUG_LOG( "Context Render" );
     NamedVector< ContextLayer, true >::iterator layers_end = _layers.end();
     for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
     {
@@ -121,16 +125,21 @@ namespace Regolith
 
   void Context::resolveCollisions()
   {
+    DEBUG_LOG( "Context Collisions" );
     NamedVector< ContextLayer, true >::iterator layers_end = _layers.end();
     for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
     {
+      DEBUG_STREAM << " Starting Layer Collision: " << (*layer_it)->teams.size();
       TeamMap& teams = (*layer_it)->teams;
+      if ( teams.empty() ) continue;
+
       TeamMap::iterator team_it = teams.begin();
       TeamMap::iterator opponent_start = ++teams.begin(); // Change this line to allow team self-collisions
       TeamMap::iterator opponents_end = teams.end();
 
       while ( opponent_start != opponents_end )
       {
+        DEBUG_LOG( " Looping Teams" );
         for ( TeamMap::iterator opponent_it = opponent_start; opponent_it != opponents_end; ++opponent_it )
         {
 
@@ -152,7 +161,9 @@ namespace Regolith
         ++team_it;
         ++opponent_start;
       }
+
     }
+    DEBUG_LOG( "Context Collisions Resolved" );
   }
 
 
@@ -178,6 +189,10 @@ namespace Regolith
     {
       _animatedObjects.push_back( dynamic_cast<Animated*>( object ) );
     }
+    if ( object->hasClick() )
+    {
+      _theFocus.addObject( dynamic_cast<Clickable*>( object ) );
+    }
 //    if ( object->hasInteraction() )
 //    {
 //       // Nothing to do for this one
@@ -199,10 +214,6 @@ namespace Regolith
       Collidable* temp = dynamic_cast<Collidable*>( object );
       layer->teams[ temp->getTeam() ].push_back( temp );
     }
-    if ( object->hasClick() )
-    {
-      layer->clickables.insert( dynamic_cast<Clickable*>( object ) );
-    }
   }
 
 
@@ -220,7 +231,16 @@ namespace Regolith
     {
       _animatedObjects.push_back( dynamic_cast<Animated*>( object ) );
     }
+    if ( object->hasClick() )
+    {
+      _theFocus.addObject( dynamic_cast<Clickable*>( object ) );
+    }
+//    if ( object->hasInteraction() )
+//    {
+//       // Nothing to do for this one
+//    }
   }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // Context configuration
@@ -229,21 +249,26 @@ namespace Regolith
   {
     Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
-    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_FLOAT );
-    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_FLOAT );
-    Utilities::validateJson( json_data, "pauseable", Utilities::JSON_TYPE_BOOLEAN );
+    Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING );
+//    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_FLOAT );
+//    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_FLOAT );
     Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
 
     float x = json_data["position"][0].asFloat();
     float y = json_data["position"][1].asFloat();
     _position = Vector( x, y );
-    _width = json_data["width"].asFloat();
-    _height = json_data["height"].asFloat();
+//    _width = json_data["width"].asFloat();
+//    _height = json_data["height"].asFloat();
     DEBUG_STREAM << "  Context position: " << _position << " width: " << _width << " height: " << _height;
 
-    _pauseable = json_data["pauseable"].asBool();
-    DEBUG_STREAM << "  Context " << ( _pauseable ? "is" : "is not" ) << " pauseable";
+    _theInput.configure( json_data["input_mapping"].asString() );
+
+    if ( Utilities::validateJson( json_data, "pauseable", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    {
+      _pauseable = json_data["pauseable"].asBool();
+      DEBUG_STREAM << "  Context " << ( _pauseable ? "is" : "is not" ) << " pauseable";
+    }
 
     DEBUG_LOG( "  Building context layers" );
     Json::Value& layer_data = json_data["layers"];
@@ -308,6 +333,8 @@ namespace Regolith
     {
       Manager::getInstance()->buildContext( context_data[i] );
     }
+
+    _theFocus.registerActions( _theInput );
   }
 
 }

@@ -18,6 +18,8 @@ namespace Regolith
 
   InputManager::~InputManager()
   {
+    INFO_LOG( "Clearing the input mappings" );
+    _inputMappers.clear();
   }
 
 
@@ -39,6 +41,17 @@ namespace Regolith
       {
         //////////////////////////////////////////////////
         // Input-type events
+        case SDL_QUIT :
+          event = REGOLITH_EVENT_QUIT;
+          DEBUG_STREAM << "  Regolith Quit Event";
+          components_end = this->getRegisteredComponents( event ).end();
+          for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
+          {
+            DEBUG_STREAM << "  Propagating event : " << event;
+            (*it)->eventAction( event, _theEvent );
+          }
+          break;
+
         case SDL_KEYDOWN :
         case SDL_KEYUP :
           if ( handler == nullptr ) break;

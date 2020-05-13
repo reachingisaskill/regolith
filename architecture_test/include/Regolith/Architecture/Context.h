@@ -11,6 +11,7 @@
 #include "Regolith/Architecture/ContextLayer.h"
 #include "Regolith/Managers/InputHandler.h"
 #include "Regolith/Managers/AudioHandler.h"
+#include "Regolith/Managers/FocusHandler.h"
 #include "Regolith/Utilities/NamedVector.h"
 
 #include <list>
@@ -43,6 +44,7 @@ namespace Regolith
       // Context-local audio and input handlers
       InputHandler _theInput;
       AudioHandler _theAudio;
+      FocusHandler _theFocus;
 
       // Location and size with respect to the window
       Vector _position;

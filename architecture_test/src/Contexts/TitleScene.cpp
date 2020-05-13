@@ -23,7 +23,8 @@ namespace Regolith
 
   void TitleScene::onStart()
   {
-    audioHandler()->setSong( _defaultMusic );
+    if ( _defaultMusic != 0 )
+      audioHandler()->setSong( _defaultMusic );
   }
 
 

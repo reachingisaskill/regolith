@@ -108,6 +108,10 @@
   {
     "texture_files" :
     [
+      {
+        "name" : "title_background",
+        "path" : "test_data/test_wallpaper.jpg"
+      }
     ],
     "texture_strings" :
     [

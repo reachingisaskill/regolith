@@ -28,9 +28,9 @@ namespace Regolith
       State _state;
 
     protected:
-      // For derived classes to handle state changes passes the new state, before updating the memebr variable
+      // For derived classes to handle state changes passes the new state, before updating the member variable
       // Therefore both the old and new states are available
-      virtual void onStateChange( State ) = 0;
+      virtual void onStateChange( State ) {}
 
     public:
       Clickable() : _state( NORMAL ) {}
@@ -67,6 +67,9 @@ namespace Regolith
 
       // Deactivates the button
       void deactivate();
+
+      // The trigger function
+      virtual void trigger() = 0;
 
   };
 

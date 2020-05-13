@@ -67,8 +67,13 @@ namespace Regolith
   {
     switch ( _state )
     {
+      case DOWN : // Only trigger when moveing from down->up
+        this->trigger();
+        this->onStateChange( NORMAL );
+        _state = NORMAL;
+        break;
+
       case FOCUSSED :
-      case DOWN :
         this->onStateChange( NORMAL );
         _state = NORMAL;
         break;

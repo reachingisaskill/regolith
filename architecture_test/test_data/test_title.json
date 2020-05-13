@@ -1,6 +1,26 @@
 {
   "type" : "title_scene",
 
-  "input_mapping" : "title"
+  "input_mapping" : "title",
+
+  "default_music" : "null",
+
+  "position" : [ 0.0, 0.0 ],
+
+  "layers" : 
+  [
+    {
+      "name" : "background_layer",
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024,
+      "height" : 768,
+      "camera" : {},
+      "elements" :
+      [
+      ]
+    }
+  ],
+
+  "contexts" : []
 
 }
