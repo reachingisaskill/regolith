@@ -104,6 +104,8 @@ namespace Regolith
     {
       const Camera& layerCamera = (*layer_it)->getCamera();
 
+      DEBUG_STREAM << " Rendering layer. " << (*layer_it)->drawables.size() << " Elements";
+
       DrawableList& drawables = (*layer_it)->drawables;
       DrawableList::iterator draw_it = drawables.begin();
       DrawableList::iterator draw_end = drawables.end();
@@ -281,17 +283,32 @@ namespace Regolith
       Utilities::validateJson( layer_data[i], "width", Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( layer_data[i], "height", Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( layer_data[i], "elements", Utilities::JSON_TYPE_ARRAY );
+      Json::Value& element_data = layer_data[i]["elements"];
+
       Utilities::validateJson( layer_data[i], "camera", Utilities::JSON_TYPE_OBJECT );
+      Json::Value camera_data = layer_data[i]["camera"];
+      Utilities::validateJson( camera_data, "movement_scale", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJsonArray( camera_data["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
+
 
       float x = layer_data[i]["position"][0].asFloat();
       float y = layer_data[i]["position"][1].asFloat();
       float w = layer_data[i]["width"].asFloat();
       float h = layer_data[i]["height"].asFloat();
-      _layers.addObject( new ContextLayer( Vector( x, y ), w, h ), layer_data[i]["name"].asString() );
+
+      Vector cam_move_scale( camera_data["movement_scale"][0].asFloat(), camera_data["movement_scale"][1].asFloat() );
+
+      ContextLayer* newLayer = new ContextLayer( Vector( x, y ), w, h, cam_move_scale );
+      _layers.addObject( newLayer, layer_data[i]["name"].asString() );
 
       unsigned int layer_number = _layers.getID( layer_data[i]["name"].asString() );
 
-      Json::Value& element_data = layer_data[i]["elements"];
+      if ( ! camera_data["follow"].isNull() )
+      {
+        Utilities::validateJson( camera_data, "follow", Utilities::JSON_TYPE_STRING );
+      }
+
+
       Json::ArrayIndex element_data_size = element_data.size();
       for ( Json::ArrayIndex j = 0; j != element_data_size; ++j )
       {

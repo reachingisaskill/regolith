@@ -15,19 +15,19 @@ namespace Regolith
   class Camera : public AnimatedInterface
   {
     private:
+      Vector _position;
       float _layerWidth;
       float _layerHeight;
-      float _limitX;
-      float _limitY;
-      float _x;
-      float _y;
+      Vector _limit;
       // TBD
-      float _zoom;
+//      float _zoom;
 
       // Details when following
       PhysicalObject* _theObject;
-      float _offsetX;
-      float _offsetY;
+      Vector _offset;
+
+      // Scale the movement rate
+      Vector _velocityScale;
 
       // References to the global window scaling ratios
       const float& _scaleX;
@@ -45,8 +45,8 @@ namespace Regolith
       virtual ~Camera() {}
 
 
-      // Configure the camera using layer width/height
-      void configure( int, int );
+      // Configure the camera using layer width/height and movement scale
+      void configure( int, int, Vector );
 
 
       // Set the position of the camera
@@ -57,8 +57,7 @@ namespace Regolith
       // Function to update the camera's behaviour on every frame
       virtual void update( float ) override;
 
-      float getX() const { return _x; }
-      float getY() const { return _y; }
+      Vector getPosition() const { return _position; }
 
 
       float getWidth() { return _layerWidth; }

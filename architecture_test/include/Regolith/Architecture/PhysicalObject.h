@@ -22,10 +22,6 @@ namespace Regolith
       float _rotation;
 
     protected :
-      void setPosition( Vector p ) { _position = p; }
-      void setWidth( float w ) { _width = w; }
-      void setHeight( float h ) { _height = h; }
-      void setRotation( float r ) { _rotation = r; }
 
     public:
       PhysicalObject();
@@ -60,6 +56,11 @@ namespace Regolith
       float getWidth() const { return _width; }
       float getHeight() const { return _height; }
       float getRotation() const { return _rotation; }
+
+      void setPosition( Vector p ) { _position = p; }
+      void setWidth( float w ) { _width = w; }
+      void setHeight( float h ) { _height = h; }
+      void setRotation( float r ) { _rotation = r; }
   };
 
 }

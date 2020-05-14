@@ -83,7 +83,7 @@ namespace Regolith
           performStackOperations();
         }
 
-       }
+      }
 
       // Impossible to continue if there are not contexts
       if ( _contextStack.empty() )
@@ -133,7 +133,7 @@ namespace Regolith
   {
     while ( ! _stackOperationQueue.empty() )
     {
-      DEBUG_STREAM << _stackOperationQueue.size() << "Operations Remaining";
+      DEBUG_STREAM << _stackOperationQueue.size() << " Operations Remaining";
       StackOperation& sop = _stackOperationQueue.front();
 
       switch ( sop.operation )
@@ -163,9 +163,9 @@ namespace Regolith
           break;
 
         case StackOperation::RESET :
-          DEBUG_LOG( "Closing All Contexts" );
           while ( ! _contextStack.empty() )
           {
+            DEBUG_LOG( "Closing All Contexts" );
             _contextStack.front()->resumeContext();
             _contextStack.front()->stopContext();
             _contextStack.pop_front();

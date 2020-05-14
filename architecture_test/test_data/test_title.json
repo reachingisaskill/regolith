@@ -14,9 +14,17 @@
       "position" : [ 0.0, 0.0 ],
       "width" : 1024,
       "height" : 768,
-      "camera" : {},
+      "camera" :
+      {
+        "follow:" : null,
+        "movement_scale" : [ 1.0, 1.0 ]
+      },
       "elements" :
       [
+        {
+          "name" : "title_background",
+          "position" : [ 0.0, 0.0 ]
+        }
       ]
     }
   ],

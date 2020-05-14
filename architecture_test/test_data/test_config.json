@@ -120,6 +120,11 @@
 
   "game_objects" :
   [
+    {
+      "name" : "title_background",
+      "type" : "simple_sprite",
+      "texture_name" : "title_background"
+    }
   ],
 
   "contexts" :

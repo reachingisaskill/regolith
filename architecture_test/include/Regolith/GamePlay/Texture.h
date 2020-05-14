@@ -53,8 +53,8 @@ namespace Regolith
       int _numSprites;
 
       // If its animated
-      Uint32 _updatePeriod;
-      Uint32 _count;
+      float _updatePeriod;
+      float _count;
 
     protected:
       SDL_Rect& clip() { return _clip; }
@@ -69,7 +69,7 @@ namespace Regolith
 
       // Configures as a sprite sheet with optional animation. No. rows, No. Columns, and No. of used cells and update period
       // This function is optinal. Without it this acts as a single flat texture
-      void configure( int, int, int number = 0, Uint32 period = 0 );
+      void configure( Json::Value& );
 
       // Returns true if the spritesheeet is to be updated every frame
       bool isAnimated() const { return _updatePeriod > 0u; }
@@ -107,10 +107,10 @@ namespace Regolith
 
 
       // Animation update period
-      void setUpdatePeriod( Uint32 );
+      void setUpdatePeriod( float );
 
       // Update with time in ms
-      virtual void update( Uint32 );
+      virtual void update( float );
 
 
       // Sprite details

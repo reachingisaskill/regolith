@@ -32,7 +32,7 @@ namespace Regolith
 
     public:
       // Constuct with position, width and height
-      ContextLayer( Vector, float, float );
+      ContextLayer( Vector, float, float, Vector );
       // Clear all the caches
       ~ContextLayer();
 

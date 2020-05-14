@@ -11,58 +11,55 @@ namespace Regolith
 {
 
   Camera::Camera() :
+    _position( 0.0 ),
     _layerWidth( 0 ),
     _layerHeight( 0 ),
-    _limitX( 0 ),
-    _limitY( 0 ),
-    _x( 0 ),
-    _y( 0 ),
-    _zoom( 1.0 ),
+    _limit( 0.0 ),
     _theObject( nullptr ),
-    _offsetX( 0 ),
-    _offsetY( 0 ),
+    _offset( 0.0 ),
+    _velocityScale( 0.0 ),
     _scaleX( Manager::getInstance()->getWindow().renderScaleX() ),
     _scaleY( Manager::getInstance()->getWindow().renderScaleY() )
   {
   }
 
 
-  void Camera::configure( int scene_width, int scene_height )
+  void Camera::configure( int scene_width, int scene_height, Vector move_scale )
   {
     _layerWidth = scene_width;
     _layerHeight = scene_height;
 
-    _limitX = scene_width - Manager::getInstance()->getWindow().getResolutionWidth();
-    _limitY = scene_height - Manager::getInstance()->getWindow().getResolutionHeight();
+    _limit = Vector( scene_width - Manager::getInstance()->getWindow().getResolutionWidth(),
+                     scene_height - Manager::getInstance()->getWindow().getResolutionHeight() );
 
-    INFO_STREAM << "Camera configured. Dims: " << _layerWidth << ", " << _layerHeight << ", Limits: " << _limitX << ", " << _limitY << ", Pos: " << _x << ", " << _y;
+    _velocityScale = move_scale;
+
+    INFO_STREAM << "Camera configured. Dims: " << _layerWidth << ", " << _layerHeight << ", Limits: " << _limit  << ", Pos: " << _position << "Scaled movement by " << _velocityScale;
   }
 
 
   void Camera::setPosition( Vector pos )
   {
-    _x = pos.x();
-    _y = pos.y();
-
+    _position = pos;
     checkPosition();
   }
 
 
   void Camera::checkPosition()
   {
-    if ( _x > _limitX ) _x = _limitX;
-    else if ( _x < 0 ) _x = 0;
+    if ( _position.x() > _limit.x() ) _position.x() = _limit.x();
+    else if ( _position.x() < 0 ) _position.x() = 0;
 
-    if ( _y > _limitY ) _y = _limitY;
-    else if ( _y < 0 ) _y = 0;
+    if ( _position.y() > _limit.y() ) _position.y() = _limit.y();
+    else if ( _position.y() < 0 ) _position.y() = 0;
   }
 
 
   SDL_Rect Camera::place( const SDL_Rect& rect ) const
   {
     SDL_Rect newRect;
-    newRect.x = (rect.x - _x) * _scaleX;
-    newRect.y = (rect.y - _y) * _scaleY;
+    newRect.x = (rect.x - _position.x()) * _scaleX;
+    newRect.y = (rect.y - _position.y()) * _scaleY;
     newRect.w = rect.w * _scaleX;
     newRect.h = rect.h * _scaleY;
     return newRect;
@@ -75,8 +72,7 @@ namespace Regolith
     if ( _theObject == nullptr ) return;
 
     // Update the current position
-    _x = _theObject->getPosition().x() - _offsetX;
-    _y = _theObject->getPosition().y() - _offsetY;
+    _position = _velocityScale % ( _theObject->getPosition() - _offset );
 
     // Validate
     this->checkPosition();
@@ -86,8 +82,8 @@ namespace Regolith
   void Camera::followMe( PhysicalObject* object )
   {
     _theObject = object;
-    _offsetX = 0.5*object->getWidth() + 0.5*getWidth();
-    _offsetY = 0.5*object->getHeight() + 0.5*getHeight();
+    _offset.x() = 0.5*object->getWidth() + 0.5*getWidth();
+    _offset.y() = 0.5*object->getHeight() + 0.5*getHeight();
   }
 
 }

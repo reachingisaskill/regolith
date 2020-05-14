@@ -1,10 +1,12 @@
-#define LOGTASTIC_DEBUG_OFF
+//#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Texture.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 #include "logtastic.h"
+
+#include <cmath>
 
 
 namespace Regolith
@@ -49,32 +51,11 @@ namespace Regolith
   }
 
 
-  void Texture::configure( int rows, int cols, int number, Uint32 period )
-  {
-    _rows = rows;
-    _columns = cols;
-    _updatePeriod = period;
-
-    if ( number == 0 )
-    {
-      _numSprites = _rows * _columns;
-    }
-    else
-    {
-      _numSprites = number;
-    }
-
-    _spriteWidth = Texture::getWidth() / _columns;
-    _spriteHeight = Texture::getHeight() / _rows;
-
-    this->setSpriteNumber( 0 );
-  }
-
-
   void Texture::draw( SDL_Rect* destination )
   {
-    static SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
+    SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
     // Render it to the window
+    DEBUG_STREAM << "Texture::Draw : " << renderer << ", " << _theTexture.texture << ", " << destination->w << ", " << destination->h;
     SDL_RenderCopyEx( renderer, _theTexture.texture, &_clip, destination, _angle, nullptr, _flipFlag );
   }
 
@@ -130,7 +111,7 @@ namespace Regolith
   }
 
 
-  void Texture::update( Uint32 timestep )
+  void Texture::update( float timestep )
   {
     _count += timestep;
 
@@ -139,9 +120,80 @@ namespace Regolith
     frame_number += _count / _updatePeriod;
     frame_number = frame_number % _numSprites;
     this->setSpriteNumber( frame_number );
-    _count = _count % _updatePeriod;
+    _count = std::fmod( _count, _updatePeriod );
 
     DEBUG_STREAM << "Sprite Animation : _count : " << _count << ", frame No. : " << frame_number << ", update rate : " << _updatePeriod;
+  }
+
+
+  void Texture::configure( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
+
+    std::string texture_name = json_data["texture_name"].asString();
+    _theTexture = Manager::getInstance()->findRawTexture( texture_name );
+    INFO_STREAM << "Found texture: " << texture_name;
+
+    // If its a spritesheet
+    if ( Utilities::validateJson( json_data, "number_rows", Utilities::JSON_TYPE_INTEGER, false ) &&
+          Utilities::validateJson( json_data, "number_columns", Utilities::JSON_TYPE_INTEGER, false ) )
+    {
+      _rows = json_data["number_rows"].asInt();
+      _columns = json_data["number_columns"].asInt();
+      if ( json_data.isMember( "number_used_cells" ) )
+      {
+        _numSprites = json_data["number_used_cells"].asInt();
+      }
+      else
+      {
+        _numSprites = _rows * _columns;
+      }
+
+      if ( json_data.isMember( "update_period" ) )
+      {
+        _updatePeriod = json_data["update_period"].asFloat();
+      }
+
+      if ( json_data.isMember( "start_number" ) )
+      {
+        setSpriteNumber( json_data["start_number"].asInt() );
+      }
+      else
+      {
+        setSpriteNumber( 0 );
+      }
+    }
+    else
+    {
+      _columns = 1;
+      _rows = 1;
+      _numSprites = 1;
+    }
+
+    _spriteWidth = _theTexture.width / _columns;
+    _spriteHeight = _theTexture.height / _rows;
+
+    if ( Utilities::validateJson( json_data, "clip", Utilities::JSON_TYPE_ARRAY, false ) )
+    {
+      Utilities::validateJsonArray( json_data["clip"], Utilities::JSON_TYPE_INTEGER );
+      int x = json_data["clip"][0].asInt();
+      int y = json_data["clip"][1].asInt();
+      int w = json_data["clip"][2].asInt();
+      int h = json_data["clip"][3].asInt();
+      _clip.x = x;
+      _clip.y = y;
+      _clip.w = w;
+      _clip.h = h;
+    }
+    else
+    {
+      _clip.x = 0;
+      _clip.y = 0;
+      _clip.w = _spriteWidth;
+      _clip.h = _spriteHeight;
+    }
+
+    INFO_STREAM << "Configuring texture: " << _rows << "x" << _columns << " -> " << _numSprites << " T = " << _updatePeriod << " start: " << _currentSprite;
   }
 
 
