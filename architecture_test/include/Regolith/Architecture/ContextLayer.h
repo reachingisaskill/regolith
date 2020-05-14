@@ -59,6 +59,9 @@ namespace Regolith
 
       // Return a const reference to the camera object to allow render to place objects
       const Camera& getCamera() const { return _camera; }
+
+      // Return the position of the layer
+      const Vector& getPosition() const { return _position; }
   };
 
 }

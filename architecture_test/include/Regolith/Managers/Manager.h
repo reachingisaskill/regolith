@@ -64,7 +64,7 @@ namespace Regolith
       // All objects that aren't spawnable - two containers removes type casting and validating
       NamedVector<GameObject, true > _gameObjects;
       // Spawnable objects
-      NamedVector<PhysicalObject, true> _physicalObjects;
+      NamedVector<PhysicalObject, false> _physicalObjects;
       // Loadable contexts
       NamedVector<Context, true> _contexts;
 
@@ -196,7 +196,7 @@ namespace Regolith
       GameObject* getGameObject( std::string name ) { return _gameObjects.get( name ); }
 
       // Return a pointer to a given object. (Please don't delete it!)
-      GameObject* getPhysicalObject( std::string name ) { return _physicalObjects.get( name ); }
+      PhysicalObject* getPhysicalObject( std::string name ) { return _physicalObjects.get( name ); }
 
 //      // Return a pointer to a given resource
 //      GameObject* getObject( unsigned int i ) { return _objects[i]; }

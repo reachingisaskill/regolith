@@ -16,6 +16,12 @@
 namespace Regolith
 {
 
+  // Local function declarations
+
+  Vector placeInLayer( ContextLayer*, PhysicalObject*, Json::Value& );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
   Context::Context() :
     MassProduceable(),
     ControllableInterface(),
@@ -313,20 +319,23 @@ namespace Regolith
       for ( Json::ArrayIndex j = 0; j != element_data_size; ++j )
       {
         Utilities::validateJson( element_data[j], "name", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( element_data[j], "position", Utilities::JSON_TYPE_ARRAY );
-        Utilities::validateJsonArray( element_data[j]["position"], 2, Utilities::JSON_TYPE_FLOAT );
 
         std::string name = element_data[j]["name"].asString();
-        float x = element_data[j]["position"][0].asFloat();
-        float y = element_data[j]["position"][1].asFloat();
-        Vector pos = Vector( x, y );
+        INFO_STREAM << "Loading element into context layer: " << name;
 
         if ( Utilities::validateJson( element_data[j], "is_global", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["is_global"].asBool() )
         {
           GameObject* element = Manager::getInstance()->getGameObject( name );
           if ( element->isPhysical() )
           {
-            addSpawnedObject( dynamic_cast<PhysicalObject*>( element ), layer_number );
+            PhysicalObject* phys_element = dynamic_cast<PhysicalObject*>( element );
+            addSpawnedObject( phys_element, layer_number );
+
+            if ( Utilities::validateJson( layer_data[i], "position", Utilities::JSON_TYPE_ARRAY, false ) ) // Position values are optional for global elements
+            {
+              Vector pos = placeInLayer( newLayer, phys_element, element_data[j] );
+              phys_element->setPosition( pos );
+            }
           }
           else
           {
@@ -335,6 +344,8 @@ namespace Regolith
         }
         else
         {
+          Vector pos = placeInLayer( newLayer, Manager::getInstance()->getPhysicalObject( name ), element_data[j] );
+
           PhysicalObject* element = Manager::getInstance()->spawn( name, pos );
           addSpawnedObject( element, layer_number );
           _spawnedObjects.push_back( element );
@@ -354,5 +365,44 @@ namespace Regolith
     _theFocus.registerActions( _theInput );
   }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  Vector placeInLayer( ContextLayer* layer, PhysicalObject* object, Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+    DEBUG_LOG( "Place in layer - 2" );
+
+    float x = json_data["position"][0].asFloat();
+    float y = json_data["position"][1].asFloat();
+    Vector pos( x, y );
+    Vector offset( 0.0, 0.0 );
+
+    if ( Utilities::validateJson( json_data, "alignment", Utilities::JSON_TYPE_ARRAY, false ) )
+    {
+      Utilities::validateJsonArray( json_data["alignment"], 2, Utilities::JSON_TYPE_STRING );
+
+      if ( json_data["alignment"][0].asString() == "center" )
+      {
+        offset.x() = layer->getPosition().x() + 0.5*( layer->getCamera().getWidth() - object->getWidth() );
+      }
+      else if ( json_data["alignment"][0].asString() == "right" )
+      {
+        offset.x() = layer->getPosition().x() + ( layer->getCamera().getWidth() - object->getWidth() );
+      }
+
+      if ( json_data["alignment"][1].asString() == "center" )
+      {
+        offset.y() = layer->getPosition().y() + 0.5*( layer->getCamera().getHeight() - object->getHeight() );
+      }
+      else if ( json_data["alignment"][1].asString() == "bottom" )
+      {
+        offset.y() = layer->getPosition().y() + ( layer->getCamera().getHeight() - object->getHeight() );
+      }
+    }
+
+    return pos+offset;
+  }
 }
 

@@ -1,6 +1,6 @@
 //#define LOGTASTIC_DEBUG_OFF
 
-#include "Regolith/GameObjects/SimpleSprite.h"
+#include "Regolith/GameObjects/AnimatedSprite.h"
 #include "Regolith/GamePlay/Camera.h"
 
 #include "logtastic.h"
@@ -9,7 +9,7 @@
 namespace Regolith
 {
 
-  SimpleSprite::SimpleSprite() :
+  AnimatedSprite::AnimatedSprite() :
     Drawable(),
     _texture(),
     _destination()
@@ -17,12 +17,12 @@ namespace Regolith
   }
 
 
-  SimpleSprite::~SimpleSprite()
+  AnimatedSprite::~AnimatedSprite()
   {
   }
 
 
-  void SimpleSprite::render( const Camera& camera )
+  void AnimatedSprite::render( const Camera& camera )
   {
     // Place the object
     _destination.x = position().x();
@@ -30,25 +30,33 @@ namespace Regolith
     
     // Move into the camera reference frame
     SDL_Rect destination = camera.place( _destination );
-    DEBUG_STREAM << "RENDER: Original: " << _destination.w << ", " << _destination.h << ", NEW: " << destination.x << ", " << destination.y << ", " << destination.w << ", " << destination.h;
+    DEBUG_STREAM << "AN-SP RENDER: Original: " << _destination.w << ", " << _destination.h << ", NEW: " << destination.x << ", " << destination.y << ", " << destination.w << ", " << destination.h;
 
     _texture.draw( &destination );
   }
 
 
-  PhysicalObject* SimpleSprite::clone( const Vector& pos ) const
+  void AnimatedSprite::update( float time )
   {
-    PhysicalObject* temp = new SimpleSprite( *this );
+    _texture.update( time );
+  }
+
+
+  PhysicalObject* AnimatedSprite::clone( const Vector& pos ) const
+  {
+    PhysicalObject* temp = new AnimatedSprite( *this );
     temp->setPosition( pos );
     return temp;
   }
 
 
-  void SimpleSprite::configure( Json::Value& json_data )
+  void AnimatedSprite::configure( Json::Value& json_data )
   {
     _texture.configure( json_data );
 
     // Set the current sprite position
+    _destination.x = position().x();
+    _destination.y = position().y();
     _destination.w = _texture.getWidth();
     _destination.h = _texture.getHeight();
 

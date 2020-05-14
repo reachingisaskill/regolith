@@ -57,11 +57,11 @@ namespace Regolith
       // Function to update the camera's behaviour on every frame
       virtual void update( float ) override;
 
-      Vector getPosition() const { return _position; }
+      const Vector& getPosition() const { return _position; }
 
 
-      float getWidth() { return _layerWidth; }
-      float getHeight() { return _layerHeight; }
+      float getWidth() const { return _layerWidth; }
+      float getHeight() const { return _layerHeight; }
 
 
 

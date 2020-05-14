@@ -111,10 +111,21 @@
       {
         "name" : "title_background",
         "path" : "test_data/test_wallpaper.jpg"
+      },
+      {
+        "name" : "test_animated_sprite",
+        "path" : "test_data/test_spritesheet.png",
+        "colour_key" : [ 255, 255, 255 ]
       }
     ],
     "texture_strings" :
     [
+      {
+        "name" : "title_welcome1",
+        "text" : "Welcome to the Regolith Integration Test",
+        "font" : "default_big",
+        "colour" : [ 255, 255, 255, 255]
+      }
     ]
   },
 
@@ -124,6 +135,19 @@
       "name" : "title_background",
       "type" : "simple_sprite",
       "texture_name" : "title_background"
+    },
+    {
+      "name" : "test_animated_sprite",
+      "type" : "animated_sprite",
+      "texture_name" : "test_animated_sprite",
+      "number_rows" : 2,
+      "number_columns" : 2,
+      "update_period" : 1000
+    },
+    {
+      "name" : "title_welcome1",
+      "type" : "simple_sprite",
+      "texture_name" : "title_welcome1"
     }
   ],
 

@@ -23,7 +23,40 @@
       [
         {
           "name" : "title_background",
-          "position" : [ 0.0, 0.0 ]
+          "position" : [ 0.0, 0.0 ],
+          "is_global" : true
+        }
+      ]
+    },
+    {
+      "name" : "foreground_layer",
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024,
+      "height" : 768,
+      "camera" :
+      {
+        "follow:" : null,
+        "movement_scale" : [ 1.0, 1.0 ]
+      },
+      "elements" :
+      [
+        {
+          "name" : "title_welcome1",
+          "position" : [ 0.0, 100.0 ],
+          "alignment" : [ "center", "top" ],
+          "is_global" : true
+        },
+        {
+          "name" : "test_animated_sprite",
+          "position" : [ -100.0, 200 ],
+          "alignment" : [ "right", "top" ],
+          "is_global" : false
+        },
+        {
+          "name" : "test_animated_sprite",
+          "position" : [ 100.0, 200 ],
+          "alignment" : [ "left", "top" ],
+          "is_global" : false
         }
       ]
     }

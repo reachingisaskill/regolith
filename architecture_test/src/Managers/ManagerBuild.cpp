@@ -287,10 +287,7 @@ namespace Regolith
 
         _physicalObjects.addObject( new_obj, name );
       }
-      else
-      {
-        _gameObjects.addObject( obj, name );
-      }
+      _gameObjects.addObject( obj, name );
     }
   }
 
