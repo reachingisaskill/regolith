@@ -5,7 +5,9 @@
 
 #include "Regolith/GameObjects/SimpleSprite.h"
 #include "Regolith/GameObjects/AnimatedSprite.h"
+#include "Regolith/GameObjects/SimpleButton.h"
 #include "Regolith/Contexts/TitleScene.h"
+#include "Regolith/GamePlay/Signal.h"
 
 #include "logtastic.h"
 
@@ -17,6 +19,7 @@ namespace Regolith
     _theWindow(),
     _theInput(),
     _theAudio(),
+    _theHardware(),
     _theEngine( _theInput, _defaultColor ),
     _theRenderer( nullptr ),
     _objectFactory(),
@@ -41,10 +44,19 @@ namespace Regolith
 //    _objectFactory.addBuilder<Button>( "button" );
     _objectFactory.addBuilder<SimpleSprite>( "simple_sprite" );
     _objectFactory.addBuilder<AnimatedSprite>( "animated_sprite" );
+    _objectFactory.addBuilder<SimpleButton>( "simple_button" );
 
     // Set up the context factory
 //    _contextFactory.addBuilder<Platformer>( "platformer" );
     _contextFactory.addBuilder<TitleScene>( "title_scene" );
+
+    // Set up the signal factory
+    _signalFactory.addBuilder<InputActionSignal>( "input_action" );
+    _signalFactory.addBuilder<InputBooleanSignal>( "input_boolean" );
+    _signalFactory.addBuilder<InputFloatSignal>( "input_float" );
+    _signalFactory.addBuilder<InputVectorSignal>( "input_vector" );
+    _signalFactory.addBuilder<GameEventSignal>( "game_event" );
+    _signalFactory.addBuilder<ChangeContextSignal>( "context_change" );
   }
 
 
@@ -82,6 +94,9 @@ namespace Regolith
     INFO_LOG( "Destroying the renderer" );
     SDL_DestroyRenderer( _theRenderer );
     _theRenderer = nullptr;
+
+    INFO_LOG( "Clearing hardware manager" );
+    _theHardware.clear();
 
     INFO_LOG( "Closing the SDL subsystems" );
     TTF_Quit();

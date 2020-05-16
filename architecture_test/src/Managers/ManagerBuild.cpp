@@ -71,6 +71,7 @@ namespace Regolith
       this->_loadInput( json_data["input_device"] );
       // Engine gets to register its events first
       _theEngine.registerEvents( _theInput );
+      _theHardware.registerEvents( _theInput );
 
 
       // Load the audio device configuration

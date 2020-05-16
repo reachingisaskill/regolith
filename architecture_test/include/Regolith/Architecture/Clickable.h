@@ -21,7 +21,8 @@ namespace Regolith
         NORMAL,
         FOCUSSED,
         DOWN,
-        INACTIVE
+        INACTIVE,
+        STATE_MAX
       };
 
     private:
@@ -69,7 +70,7 @@ namespace Regolith
       void deactivate();
 
       // The trigger function
-      virtual void trigger() = 0;
+      virtual void click() = 0;
 
   };
 

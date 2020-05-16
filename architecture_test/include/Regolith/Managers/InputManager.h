@@ -53,8 +53,7 @@ namespace Regolith
     InputManager& operator=( const InputManager& ) = delete;
 
     private:
-      // Named vector of input handlers. Manager owns their memory
-//      NamedVector<InputHandler, true> _inputHandlers;
+      // Named vector of individual mappings. Manager owns their memory
       NamedVector<InputMappingSet, true> _inputMappers;
 
       // Map the input actions to the list of drawable objects that request callbacks

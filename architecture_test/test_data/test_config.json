@@ -27,7 +27,7 @@
 
   "input_device" :
   {
-    "require" : [ "keyboard", "mouse" ],
+    "require" : [ "keyboard", "mouse", "controller" ],
     "keymappings" :
     [
       {
@@ -60,7 +60,7 @@
             {
               "escape" : "quit",
               "return" : "select",
-              "tab" : "focus_next"
+              "tab" : "next"
             }
           },
           {
@@ -68,6 +68,16 @@
             "mapping" :
             {
               "left" : "click"
+            }
+          },
+          {
+            "type" : "controller_buttons",
+            "mapping" :
+            {
+              "A" : "select",
+              "B" : "back",
+              "dpad_up" : "prev",
+              "dpad_down" : "next"
             }
           }
         ]
@@ -125,6 +135,60 @@
         "text" : "Welcome to the Regolith Integration Test",
         "font" : "default_big",
         "colour" : [ 255, 255, 255, 255]
+      },
+      {
+        "name" : "title_start_button_up",
+        "text" : "Click here to start",
+        "font" : "default",
+        "colour" : [ 160, 160, 160, 255]
+      },
+      {
+        "name" : "title_start_button_down",
+        "text" : "Click here to start",
+        "font" : "default",
+        "colour" : [ 255, 160, 160, 255]
+      },
+      {
+        "name" : "title_start_button_focus",
+        "text" : "Click here to start",
+        "font" : "default",
+        "colour" : [ 255, 255, 255, 255]
+      },
+      {
+        "name" : "title_test_button_up",
+        "text" : "Test button",
+        "font" : "default",
+        "colour" : [ 160, 160, 160, 255]
+      },
+      {
+        "name" : "title_test_button_down",
+        "text" : "Test button",
+        "font" : "default",
+        "colour" : [ 255, 160, 160, 255]
+      },
+      {
+        "name" : "title_test_button_focus",
+        "text" : "Test button",
+        "font" : "default",
+        "colour" : [ 255, 255, 255, 255]
+      },
+      {
+        "name" : "title_quit_button_up",
+        "text" : "Exit",
+        "font" : "default",
+        "colour" : [ 160, 160, 160, 255]
+      },
+      {
+        "name" : "title_quit_button_down",
+        "text" : "Exit",
+        "font" : "default",
+        "colour" : [ 255, 160, 160, 255]
+      },
+      {
+        "name" : "title_quit_button_focus",
+        "text" : "Exit",
+        "font" : "default",
+        "colour" : [ 255, 255, 255, 255]
       }
     ]
   },
@@ -148,6 +212,72 @@
       "name" : "title_welcome1",
       "type" : "simple_sprite",
       "texture_name" : "title_welcome1"
+    },
+    {
+      "name" : "title_start_button",
+      "type" : "simple_button",
+      "textures" :
+      {
+        "normal" : 
+        {
+          "texture_name" : "title_start_button_up"
+        },
+        "focus" : 
+        {
+          "texture_name" : "title_start_button_focus"
+        },
+        "down" : 
+        {
+          "texture_name" : "title_start_button_down"
+        }
+      },
+      "signals" : []
+    },
+    {
+      "name" : "title_test_button",
+      "type" : "simple_button",
+      "textures" :
+      {
+        "normal" : 
+        {
+          "texture_name" : "title_test_button_up"
+        },
+        "focus" : 
+        {
+          "texture_name" : "title_test_button_focus"
+        },
+        "down" : 
+        {
+          "texture_name" : "title_test_button_down"
+        }
+      },
+      "signals" : []
+    },
+    {
+      "name" : "title_quit_button",
+      "type" : "simple_button",
+      "textures" :
+      {
+        "normal" : 
+        {
+          "texture_name" : "title_quit_button_up"
+        },
+        "focus" : 
+        {
+          "texture_name" : "title_quit_button_focus"
+        },
+        "down" : 
+        {
+          "texture_name" : "title_quit_button_down"
+        }
+      },
+      "signals" :
+      [
+        {
+          "type" : "game_event",
+          "event" : "quit"
+        }
+      ]
     }
   ],
 

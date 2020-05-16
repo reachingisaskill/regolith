@@ -132,6 +132,8 @@ namespace Regolith
 
       InputAction getAction( SDL_Event& );
 
+      InputAction getRegisteredAction( unsigned int ) const;
+
       void propagate( ControllableInterface* ) const;
   };
 
@@ -152,6 +154,8 @@ namespace Regolith
       void registerAction( unsigned int, InputAction );
 
       InputAction getAction( SDL_Event& );
+
+      InputAction getRegisteredAction( unsigned int ) const;
 
       void propagate( ControllableInterface* ) const;
   };

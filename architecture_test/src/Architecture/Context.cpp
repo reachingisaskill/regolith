@@ -328,6 +328,8 @@ namespace Regolith
           GameObject* element = Manager::getInstance()->getGameObject( name );
           if ( element->isPhysical() )
           {
+            INFO_LOG( "Element is physical. Placing global object within layer." );
+
             PhysicalObject* phys_element = dynamic_cast<PhysicalObject*>( element );
             addSpawnedObject( phys_element, layer_number );
 
@@ -339,11 +341,13 @@ namespace Regolith
           }
           else
           {
+            INFO_LOG( "Element is not physical. Caching object." );
             cacheObject( element );
           }
         }
         else
         {
+          INFO_LOG( "Spawning object in layer" );
           Vector pos = placeInLayer( newLayer, Manager::getInstance()->getPhysicalObject( name ), element_data[j] );
 
           PhysicalObject* element = Manager::getInstance()->spawn( name, pos );

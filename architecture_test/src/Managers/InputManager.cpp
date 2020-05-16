@@ -184,12 +184,45 @@ namespace Regolith
 
         case SDL_SYSWMEVENT :
 
+        case SDL_JOYDEVICEADDED :
+        case SDL_JOYDEVICEREMOVED :
+          event = REGOLITH_EVENT_JOYSTICK_HARDWARE;
+          DEBUG_STREAM << "  Regolith joystick hardware Event " << event;
+
+          components_end = this->getRegisteredComponents( event ).end();
+          for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
+          {
+            DEBUG_STREAM << "  Propagating event : " << event;
+            (*it)->eventAction( event, _theEvent );
+          }
+          break;
+
         case SDL_CONTROLLERDEVICEADDED :
         case SDL_CONTROLLERDEVICEREMOVED :
         case SDL_CONTROLLERDEVICEREMAPPED :
+          event = REGOLITH_EVENT_CONTROLLER_HARDWARE;
+          DEBUG_STREAM << "  Regolith controller hardware Event " << event;
 
-        case SDL_JOYDEVICEADDED :
-        case SDL_JOYDEVICEREMOVED :
+          components_end = this->getRegisteredComponents( event ).end();
+          for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
+          {
+            DEBUG_STREAM << "  Propagating event : " << event;
+            (*it)->eventAction( event, _theEvent );
+          }
+          break;
+
+        case SDL_AUDIODEVICEADDED :
+        case SDL_AUDIODEVICEREMOVED :
+          event = REGOLITH_EVENT_AUDIO_HARDWARE;
+          DEBUG_STREAM << "  Regolith audio hardware Event " << event;
+
+          components_end = this->getRegisteredComponents( event ).end();
+          for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
+          {
+            DEBUG_STREAM << "  Propagating event : " << event;
+            (*it)->eventAction( event, _theEvent );
+          }
+          break;
 
         case SDL_TEXTEDITING :
         case SDL_TEXTINPUT :
@@ -206,8 +239,6 @@ namespace Regolith
         case SDL_DROPTEXT :
         case SDL_DROPBEGIN :
         case SDL_DROPCOMPLETE :
-        case SDL_AUDIODEVICEADDED :
-        case SDL_AUDIODEVICEREMOVED :
         case SDL_SENSORUPDATE :
         case SDL_RENDER_TARGETS_RESET :
         case SDL_RENDER_DEVICE_RESET :
@@ -340,6 +371,8 @@ namespace Regolith
     mapping[ INPUT_TYPE_KEYBOARD ] = new KeyboardMapping();
     mapping[ INPUT_TYPE_MOUSE_BUTTON ] = new MouseMapping();
     mapping[ INPUT_TYPE_MOUSE_MOVE ] = new MotionMapping();
+    mapping[ INPUT_TYPE_BUTTON ] = new ControllerButtonMapping();
+    mapping[ INPUT_TYPE_CONTROLLER_AXIS ] = new ControllerAxisMapping();
   }
 
 
@@ -373,18 +406,14 @@ namespace Regolith
     Json::ArrayIndex required_size = required.size();
     for ( Json::ArrayIndex i = 0; i != required_size; ++i )
     {
-      if ( required[i].asString() == "controller" )
-      {
-        WARN_LOG( "Controllers are not yet supported!" );
-      }
-      else if ( required[i].asString() == "joystick" )
+      if ( required[i].asString() == "joystick" )
       {
         WARN_LOG( "Joystick is not yet supported!" );
       }
     }
 
 
-    Json::ArrayIndex keymaps_size = required.size();
+    Json::ArrayIndex keymaps_size = keymaps.size();
     for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
     {
       Utilities::validateJson( keymaps[i], "name", Utilities::JSON_TYPE_STRING );
@@ -392,6 +421,8 @@ namespace Regolith
 
       std::string mapping_name = keymaps[i]["name"].asString();
       Json::Value keymapping = keymaps[i]["keymapping"];
+
+      INFO_STREAM << "Bulding key mapping: " << mapping_name;
 
       // Create the an empty mapping object
       requestMapping( mapping_name );
@@ -418,6 +449,7 @@ namespace Regolith
             registerInputAction( mapping_name, INPUT_TYPE_KEYBOARD, code, action );
             INFO_STREAM << "Key Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
+          INFO_LOG( "Loaded keyboard" );
         }
 
         else if ( type == "mouse_buttons" )
@@ -432,6 +464,7 @@ namespace Regolith
             registerInputAction( mapping_name, INPUT_TYPE_MOUSE_BUTTON, code, action );
             INFO_STREAM << "Mouse Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
+          INFO_LOG( "Loaded mouse buttons" );
         }
 
         else if ( type == "mouse_movement" )
@@ -445,6 +478,22 @@ namespace Regolith
           InputAction action = getActionID( keys["movement"].asString() );
           registerInputAction( mapping_name, INPUT_TYPE_MOUSE_MOVE, code, action );
           INFO_STREAM << "Registered : mouse movement as action to map: " << mapping_name << " -- " << keys["movement"].asString() << "(" << action << ")";
+          INFO_LOG( "Loaded mouse movement" );
+        }
+
+        else if ( type == "controller_buttons" )
+        {
+          INFO_LOG( "Loading controller button mapping" );
+
+          Json::Value::const_iterator keys_end = keys.end();
+          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
+          {
+            SDL_GameControllerButton code = getButtonID( it.key().asString() );
+            InputAction action = getActionID( it->asString() );
+            registerInputAction( mapping_name, INPUT_TYPE_BUTTON, code, action );
+            INFO_STREAM << "Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+          }
+          INFO_LOG( "Loaded controller buttons" );
         }
         else
         {
@@ -453,6 +502,7 @@ namespace Regolith
         }
       }
     }
+    INFO_LOG( "Input Manager Configured" );
   }
 }
 

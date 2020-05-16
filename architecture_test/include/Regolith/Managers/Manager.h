@@ -9,6 +9,7 @@
 #include "Regolith/Architecture/FactoryTemplate.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Managers/AudioManager.h"
+#include "Regolith/Managers/HardwareManager.h"
 #include "Regolith/Components/Window.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/GamePlay/Texture.h"
@@ -48,6 +49,7 @@ namespace Regolith
       Window _theWindow;
       InputManager _theInput;
       AudioManager _theAudio;
+      HardwareManager _theHardware;
       Engine _theEngine;
       SDL_Renderer* _theRenderer;
 

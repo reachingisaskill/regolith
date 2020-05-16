@@ -51,17 +51,15 @@ namespace Regolith
 
   void Interactable::configure( Json::Value& json_data )
   {
-    if ( ! json_data.isArray() )
-    {
-      Exception ex( "Interactable::configure()", "Interaction data must be an array of signals" );
-      throw ex;
-    }
+    Utilities::validateJson( json_data, "signals", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data["signals"], 0, Utilities::JSON_TYPE_OBJECT );
 
     SignalFactory& factory = Manager::getInstance()->getSignalFactory();
+    Json::Value& signals = json_data["signals"];
 
-    for ( Json::ArrayIndex i = 0; i < json_data.size(); ++i )
+    for ( Json::ArrayIndex i = 0; i < signals.size(); ++i )
     {
-      addSignal( factory.build( json_data[i] ) );
+      addSignal( factory.build( signals[i] ) );
     }
 
   }

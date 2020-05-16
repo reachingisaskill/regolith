@@ -66,5 +66,17 @@ namespace Regolith
 
     return MOUSE_BUTTON_NULL;
   }
+
+  SDL_GameControllerButton getButtonID( std::string name )
+  {
+    for ( unsigned int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; ++i )
+    {
+      if ( name == ControllerButtonStrings[i] )
+        return (SDL_GameControllerButton) i;
+    }
+
+    return SDL_CONTROLLER_BUTTON_INVALID;
+  }
+
 }
 

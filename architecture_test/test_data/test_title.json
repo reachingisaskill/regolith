@@ -57,6 +57,22 @@
           "position" : [ 100.0, 200 ],
           "alignment" : [ "left", "top" ],
           "is_global" : false
+        },
+        {
+          "name" : "title_start_button",
+          "position" : [ 0.0, 0.0 ],
+          "alignment" : [ "center", "center" ],
+          "is_global" : false
+        },
+        {
+          "name" : "title_test_button",
+          "position" : [ 0.0, 50.0 ],
+          "alignment" : [ "center", "center" ]
+        },
+        {
+          "name" : "title_quit_button",
+          "position" : [ 0.0, 100.0 ],
+          "alignment" : [ "center", "center" ]
         }
       ]
     }

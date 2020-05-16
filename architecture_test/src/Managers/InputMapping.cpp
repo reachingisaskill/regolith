@@ -210,6 +210,12 @@ namespace Regolith
   }
 
 
+  InputAction ControllerAxisMapping::getRegisteredAction( unsigned int code ) const
+  {
+    return _theMap[code];
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////
   // Controller Button Mapping class
 
@@ -252,6 +258,11 @@ namespace Regolith
     object->booleanAction( _lastAction, _lastValue );
   }
 
+
+  InputAction ControllerButtonMapping::getRegisteredAction( unsigned int code ) const
+  {
+    return _theMap[code];
+  }
 
 }
 

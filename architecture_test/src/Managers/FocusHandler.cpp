@@ -94,7 +94,7 @@ namespace Regolith
 
       case INPUT_ACTION_SELECT :
 //        (*_currentFocus)->down();
-        (*_currentFocus)->trigger();
+        (*_currentFocus)->click();
 //        (*_currentFocus)->up();
         break;
 

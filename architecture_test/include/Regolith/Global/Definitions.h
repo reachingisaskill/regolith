@@ -118,6 +118,9 @@ namespace Regolith
 
     REGOLITH_EVENT_WINDOW,
     REGOLITH_EVENT_DISPLAY,
+    REGOLITH_EVENT_JOYSTICK_HARDWARE,
+    REGOLITH_EVENT_CONTROLLER_HARDWARE,
+    REGOLITH_EVENT_AUDIO_HARDWARE,
 
     REGOLITH_EVENT_CAMERA_RESIZE,
 
@@ -224,6 +227,7 @@ namespace Regolith
     INPUT_TYPE_MOUSE_WHEEL,
     INPUT_TYPE_JOYSTICK_MOVE,
     INPUT_TYPE_JOYHAT_MOVE,
+    INPUT_TYPE_HARDWARE_EVENT,
 
     INPUT_TYPE_TOTAL
   };
@@ -610,6 +614,27 @@ namespace Regolith
     "y2"
   };
 
+
+  const char* const ControllerButtonStrings[] =
+  {
+    "A",
+    "B",
+    "X",
+    "Y",
+    "back",
+    "guide",
+    "start",
+    "left_stick",
+    "right_stick",
+    "left_shoulder",
+    "right_shoulder",
+    "dpad_up",
+    "dpad_down",
+    "dpad_left",
+    "dpad_right",
+    "null"
+  };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Enumeration lookup functions
   InputAction getActionID( std::string );
@@ -621,6 +646,8 @@ namespace Regolith
   ContextEvent getContextEventID( std::string );
 
   MouseButton getMouseButtonID( std::string );
+
+  SDL_GameControllerButton getButtonID( std::string );
 }
 
 #endif // REGOLITH_DEFINITIONS_H_
