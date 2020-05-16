@@ -109,10 +109,38 @@ namespace Regolith
 
 
         case SDL_CONTROLLERAXISMOTION :
+          if ( handler == nullptr ) break;
+
+          DEBUG_LOG( " Controller Axis Motion Event" );
+          event_type = INPUT_TYPE_CONTROLLER_AXIS;
+          mapper = handler->_inputMaps->mapping[ event_type ];
+          action = mapper->getAction( _theEvent );
+          if ( action == INPUT_ACTION_NULL ) break;
+
+          end = handler->getRegisteredObjects( action ).end();
+          for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+          {
+            DEBUG_STREAM << "  Propagating action : " << action;
+            mapper->propagate( (*it) );
+          }
           break;
 
         case SDL_CONTROLLERBUTTONDOWN :
         case SDL_CONTROLLERBUTTONUP :
+          if ( handler == nullptr ) break;
+
+          DEBUG_LOG( " Controller Button Event" );
+          event_type = INPUT_TYPE_BUTTON;
+          mapper = handler->_inputMaps->mapping[ event_type ];
+          action = mapper->getAction( _theEvent );
+          if ( action == INPUT_ACTION_NULL ) break;
+
+          end = handler->getRegisteredObjects( action ).end();
+          for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
+          {
+            DEBUG_STREAM << "  Propagating action : " << action;
+            mapper->propagate( (*it) );
+          }
           break;
 
         case SDL_JOYAXISMOTION :

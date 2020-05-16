@@ -10,6 +10,12 @@
 namespace Regolith
 {
 
+  // Constant to scale the axis inputs by
+  const float AXIS_MAX_VALUE = 32767.0;
+
+////////////////////////////////////////////////////////////////////////////////
+
+
   class ControllableInterface;
 
   /*
@@ -84,27 +90,6 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
-  // Controller Axis Mapping class
-
-//  class ControllerAxisMapping : public InputMapping
-//  {
-//    private:
-//      InputAction* _theMap; // Map for all controller joysticks!
-//      InputAction _lastAction;
-//      float _lastPosition;
-//
-//    public:
-//      ControllerAxisMapping( unsigned int num = SDL_CONTROLLER_AXIS_MAX );
-//
-//      void registerAction( unsigned int, InputAction );
-//
-//      InputAction getAction( SDL_Event& );
-//
-//      void propagate( ControllableInterface* ) const;
-//  };
-  
-
-////////////////////////////////////////////////////////////////////////////////
   // Mouse button Mapping class
 
   class MouseMapping : public InputMapping
@@ -125,6 +110,48 @@ namespace Regolith
       InputAction getAction( SDL_Event& );
 
       InputAction getRegisteredAction( unsigned int ) const;
+
+      void propagate( ControllableInterface* ) const;
+  };
+
+
+////////////////////////////////////////////////////////////////////////////////
+  // Controller Axis Mapping class
+
+  class ControllerAxisMapping : public InputMapping
+  {
+    private:
+      InputAction _theMap[SDL_CONTROLLER_AXIS_MAX]; // Map for all controller joysticks!
+      InputAction _lastAction;
+      float _lastPosition;
+
+    public:
+      ControllerAxisMapping();
+
+      void registerAction( unsigned int, InputAction );
+
+      InputAction getAction( SDL_Event& );
+
+      void propagate( ControllableInterface* ) const;
+  };
+
+
+////////////////////////////////////////////////////////////////////////////////
+  // Controller Button Mapping class
+
+  class ControllerButtonMapping : public InputMapping
+  {
+    private:
+      InputAction _theMap[SDL_CONTROLLER_BUTTON_MAX];
+      InputAction _lastAction;
+      bool _lastValue;
+
+    public:
+      ControllerButtonMapping();
+
+      void registerAction( unsigned int, InputAction );
+
+      InputAction getAction( SDL_Event& );
 
       void propagate( ControllableInterface* ) const;
   };

@@ -116,37 +116,6 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
-  // Controller Axis Mapping class
-
-//  ControllerAxisMapping::ControllerAxisMapping( unsigned int size ) :
-//    _theMap( new InputAction[size] ),
-//    _lastAction( INPUT_ACTION_NULL ),
-//    _lastPosition()
-//  {
-//  }
-//
-//
-//  void ControllerAxisMapping::registerAction( unsigned int controller, InputAction action )
-//  {
-//    _theMap[ controller ] = action;
-//  }
-//
-//
-//  InputAction& ControllerAxisMapping::getAction( SDL_Event& event )
-//  {
-//    _lastPosition = event.jaxis.value;
-//    _lastAction = _theMap[ event.jaxis.axis ];
-//    return _lastAction;
-//  }
-//
-//
-//  void ControllerAxisMapping::propagate( ControllableInterface* object ) const
-//  {
-//    object->floatAction( _lastAction, _lastPosition );
-//  }
-
-
-////////////////////////////////////////////////////////////////////////////////
   // Mouse Mapping class
 
   MouseMapping::MouseMapping() :
@@ -204,6 +173,85 @@ namespace Regolith
   {
     return _theMap[code];
   }
+
+
+////////////////////////////////////////////////////////////////////////////////
+  // Controller Axis Mapping class
+
+  ControllerAxisMapping::ControllerAxisMapping() :
+    _theMap(),
+    _lastAction( INPUT_ACTION_NULL ),
+    _lastPosition()
+  {
+    for ( unsigned int i = 0; i < SDL_CONTROLLER_AXIS_MAX; ++i )
+    {
+      _theMap[ i ] = INPUT_ACTION_NULL;
+    }
+  }
+
+
+  void ControllerAxisMapping::registerAction( unsigned int axis, InputAction action )
+  {
+    _theMap[ axis ] = action;
+  }
+
+
+  InputAction ControllerAxisMapping::getAction( SDL_Event& event )
+  {
+    _lastPosition = (float)event.jaxis.value / AXIS_MAX_VALUE;
+    _lastAction = _theMap[ event.jaxis.axis ];
+    return _lastAction;
+  }
+
+
+  void ControllerAxisMapping::propagate( ControllableInterface* object ) const
+  {
+    object->floatAction( _lastAction, _lastPosition );
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////
+  // Controller Button Mapping class
+
+  ControllerButtonMapping::ControllerButtonMapping() :
+    _theMap(),
+    _lastAction( INPUT_ACTION_NULL ),
+    _lastValue( false )
+  {
+    for ( unsigned int i = 0; i < SDL_CONTROLLER_BUTTON_MAX; ++i )
+    {
+      _theMap[ i ] = INPUT_ACTION_NULL;
+    }
+  }
+
+
+  void ControllerButtonMapping::registerAction( unsigned int button, InputAction action )
+  {
+    _theMap[ button ] = action;
+  }
+
+
+  InputAction ControllerButtonMapping::getAction( SDL_Event& event )
+  {
+    if ( event.type == SDL_CONTROLLERBUTTONDOWN )
+    {
+      _lastValue = true;
+    }
+    else
+    {
+      _lastValue = false;
+    }
+    _lastAction = _theMap[event.cbutton.button];
+
+    return _lastAction;
+  }
+
+
+  void ControllerButtonMapping::propagate( ControllableInterface* object ) const
+  {
+    object->booleanAction( _lastAction, _lastValue );
+  }
+
 
 }
 
