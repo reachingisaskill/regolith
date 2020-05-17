@@ -23,7 +23,7 @@ namespace Regolith
       // Configuration
       virtual void configure( Json::Value& ) override;
 
-
+      // Replace the character at the specified position
       virtual void respawn( const Vector& ) = 0;
 
   };

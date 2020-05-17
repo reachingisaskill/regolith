@@ -29,9 +29,6 @@ namespace Regolith
     _theInput(),
     _theAudio(),
     _theFocus(),
-    _position( 0.0 ),
-    _width( 0.0 ),
-    _height( 0.0 ),
     _paused( false ),
     _pauseable( false ),
     _layers( "Context Layers" ),
@@ -255,20 +252,10 @@ namespace Regolith
 
   void Context::configure( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
     Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING );
-//    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_FLOAT );
-//    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_FLOAT );
     Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
 
-    float x = json_data["position"][0].asFloat();
-    float y = json_data["position"][1].asFloat();
-    _position = Vector( x, y );
-//    _width = json_data["width"].asFloat();
-//    _height = json_data["height"].asFloat();
-    DEBUG_STREAM << "  Context position: " << _position << " width: " << _width << " height: " << _height;
 
     _theInput.configure( json_data["input_mapping"].asString() );
 

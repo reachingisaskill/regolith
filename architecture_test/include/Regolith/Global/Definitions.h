@@ -572,16 +572,18 @@ namespace Regolith
     "quit",
     "engine_pause",
     "engine_resume",
-    "scene_end",
-    "scene_pause",
-    "scene_resume",
     "context_end",
+    "context_pause",
+    "context_resume",
     "fullscreen",
     "win_condition",
     "lose_condition",
     "gameover",
     "window",
     "display",
+    "joystick_hardware",
+    "controller_hardware",
+    "audio_hardware",
     "camera_resize"
   };
 

@@ -4,7 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Context.h"
-#include "Regolith/GameObjects/CharacterBase.h"
+#include "Regolith/GameObjects/ControllableCharacter.h"
 #include "Regolith/Utilities/NamedReferenceVector.h"
 
 
@@ -21,7 +21,7 @@ namespace Regolith
       Context* _pauseMenu;
 
       // Memory is owned by the Manager
-      CharacterBase* _player;
+      ControllableCharacter* _player;
 
       // Data for player spawning
       NamedReferenceVector< Vector > _spawnPoints;

@@ -46,11 +46,6 @@ namespace Regolith
       AudioHandler _theAudio;
       FocusHandler _theFocus;
 
-      // Location and size with respect to the window
-      Vector _position;
-      float _width;
-      float _height;
-
       // Flag to indicate whether the context is advancing
       bool _paused;
 
@@ -79,12 +74,11 @@ namespace Regolith
 
 
     public:
-      // Basic Constructor: position, width, height
+      // Con/De-structor
       Context();
-
-      // Destroctor
       virtual ~Context();
 
+      // Configure the context
       void configure( Json::Value& ) override;
 
 

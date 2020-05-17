@@ -189,6 +189,30 @@
         "text" : "Exit",
         "font" : "default",
         "colour" : [ 255, 255, 255, 255]
+      },
+      {
+        "name" : "pause_text",
+        "text" : "Game Paused",
+        "font" : "default_big",
+        "colour" : [ 160, 160, 160, 255 ]
+      },
+      {
+        "name" : "pause_quit_normal",
+        "text" : "Quit",
+        "font" : "default_big",
+        "colour" : [ 160, 160, 160, 255 ]
+      },
+      {
+        "name" : "pause_quit_down",
+        "text" : "Quit",
+        "font" : "default_big",
+        "colour" : [ 255, 255, 255, 255 ]
+      },
+      {
+        "name" : "pause_quit_focus",
+        "text" : "Quit",
+        "font" : "default_big",
+        "colour" : [ 255, 255, 255, 255 ]
       }
     ]
   },
@@ -276,6 +300,38 @@
         {
           "type" : "game_event",
           "event" : "quit"
+        }
+      ]
+    },
+    {
+      "name" : "pause_text",
+      "type" : "simple_sprite",
+      "texture_name" : "pause_text"
+    },
+    {
+      "name" : "pause_quit_button",
+      "type" : "simple_button",
+      "textures" :
+      {
+        "normal" : 
+        {
+          "texture_name" : "pause_quit_normal"
+        },
+        "focus" : 
+        {
+          "texture_name" : "pause_quit_focus"
+        },
+        "down" : 
+        {
+          "texture_name" : "pause_quit_down"
+        }
+      },
+      "signals" :
+      [
+        {
+          "type" : "context_change",
+          "context_name" : "title_context",
+          "operation" : "reset"
         }
       ]
     }
