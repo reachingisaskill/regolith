@@ -443,7 +443,6 @@ namespace Regolith
     else return true;
   }
 
-
 }
 
 #endif // REGOLITH_UTILITIES_NAMED_VECTOR_H_
