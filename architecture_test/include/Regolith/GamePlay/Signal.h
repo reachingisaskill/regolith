@@ -194,7 +194,7 @@ namespace Regolith
   class ChangeContextSignal : public Signal
   {
     private:
-      Context* _theContext;
+      unsigned int _theContext;
       Engine::StackOperation::Operation _operation;
 
     public :
@@ -205,6 +205,8 @@ namespace Regolith
       void trigger() const;
 
       virtual void configure( Json::Value& ) override;
+
+      virtual void validate() const override;
 
       virtual Signal* clone() const override { return new ChangeContextSignal( *this ); }
   };

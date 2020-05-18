@@ -65,6 +65,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "textures", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "game_objects", Utilities::JSON_TYPE_ARRAY );
       Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
 
 
       // Load the input device configuration first so objects can register game-wide behaviours
@@ -99,6 +100,9 @@ namespace Regolith
       // Load all the contexts
       this->_loadContexts( json_data["contexts"] );
 
+      // Find the first context to load
+      std::string entry = json_data["entry_point"].asString();
+      _entryPoint = requestContext( entry );
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream
     {
@@ -114,6 +118,23 @@ namespace Regolith
     }
 
     this->configureEvents();
+
+    // Last configuration operation - validating the mass produced objects
+    // Validate all the game objects
+    NamedVector<GameObject, true>::iterator obj_end = _gameObjects.end();
+    for ( NamedVector<GameObject, true>::iterator it = _gameObjects.begin(); it != obj_end; ++it )
+    {
+      if ( (*it) != nullptr )
+        (*it)->validate();
+    }
+
+    // Validate all the contexts
+    NamedVector<Context, true>::iterator context_end = _contexts.end();
+    for ( NamedVector<Context, true>::iterator it = _contexts.begin(); it != context_end; ++it )
+    {
+      if ( (*it) != nullptr )
+        (*it)->validate();
+    }
   }
 
 

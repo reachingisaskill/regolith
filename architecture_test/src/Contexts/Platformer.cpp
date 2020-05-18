@@ -12,7 +12,7 @@ namespace Regolith
   Platformer::Platformer() :
     Context(),
     _defaultMusic( 0 ),
-    _pauseMenu( nullptr ),
+    _pauseMenu( 0 ),
     _player( nullptr ),
     _spawnPoints( "spawn_points" ),
     _currentPlayerSpawn( 0 )
@@ -99,7 +99,7 @@ namespace Regolith
     {
       std::string pause = json_data["pause_context"].asString();
 
-      _pauseMenu = Manager::getInstance()->getContext( pause );
+      _pauseMenu = Manager::getInstance()->requestContext( pause );
 
       INFO_STREAM << "Registered pause context: " << pause;
     }
@@ -130,7 +130,7 @@ namespace Regolith
       case INPUT_ACTION_PAUSE :
         if ( ! isPaused() )
         {
-          if ( _pauseMenu != nullptr )
+          if ( _pauseMenu != 0 )
           {
             Manager::getInstance()->openContext( _pauseMenu );
           }

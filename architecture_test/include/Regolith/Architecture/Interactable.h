@@ -39,7 +39,11 @@ namespace Regolith
       virtual ~Interactable() {}
 
 
+      // Set up the actions
       virtual void configure( Json::Value& ) override;
+
+      // Validate the signals
+      virtual void validate() const override;
 
 
       // Signify that this class is Interactable

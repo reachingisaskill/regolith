@@ -22,6 +22,7 @@ namespace Regolith
     _theHardware(),
     _theEngine( _theInput, _defaultColor ),
     _theRenderer( nullptr ),
+    _entryPoint( 0 ),
     _objectFactory(),
     _contextFactory(),
     _signalFactory(),
@@ -57,6 +58,11 @@ namespace Regolith
     _signalFactory.addBuilder<InputVectorSignal>( "input_vector" );
     _signalFactory.addBuilder<GameEventSignal>( "game_event" );
     _signalFactory.addBuilder<ChangeContextSignal>( "context_change" );
+
+    // Set up a null value
+    _gameObjects.addObject( nullptr, "null" );
+    _physicalObjects.addObject( nullptr, "null" );
+    _contexts.addObject( nullptr, "null" );
   }
 
 
@@ -109,17 +115,17 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Stack manipulation
 
-  void Manager::openContext( Context* c )
+  void Manager::openContext( unsigned int c )
   {
     DEBUG_LOG( "Opening Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, c ) );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, getContext( c ) ) );
   }
 
 
-  void Manager::transferContext( Context* c )
+  void Manager::transferContext( unsigned int c )
   {
     DEBUG_LOG( "Transferring Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, c ) );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, getContext( c ) ) );
   }
 
 
@@ -130,10 +136,10 @@ namespace Regolith
   }
 
 
-  void Manager::setContextStack( Context* c )
+  void Manager::setContextStack( unsigned int c )
   {
     DEBUG_LOG( "Closing All Contexts" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, c ) );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, getContext( c ) ) );
   }
 
 
@@ -150,7 +156,7 @@ namespace Regolith
     }
 
     // Reset the stack to the first context
-    setContextStack( _contexts[0] );
+    setContextStack( _entryPoint );
 
     // Start the engine!
     _theEngine.run();

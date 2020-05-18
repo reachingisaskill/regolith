@@ -44,6 +44,8 @@ namespace Regolith
 
       size_t getID( std::string ) const;
 
+      std::string getName( size_t ) const;
+
       DATA& get( std::string );
 
       DATA& get( size_t );
@@ -117,7 +119,6 @@ namespace Regolith
 
     if ( found != _names.end() )
     {
-      INFO_STREAM << "Named Vector: " << _storageType << ". Name already exists in map. Nothing to do.";
       return found->second;
     }
 
@@ -136,13 +137,29 @@ namespace Regolith
 
     if ( found == _names.end() )
     {
-      ERROR_STREAM << "Named Vector: " << _storageType << ". Could not find \"" << objName << "\" in name map.";
       Exception ex( "NamedReferenceVector::getID()", "Could not find name in map", true );
+      ex.addDetail( "Storage Type", _storageType );
       ex.addDetail( "Name", objName );
       throw ex;
     }
 
     return found->second;
+  }
+
+
+  template < class DATA >
+  std::string NamedReferenceVector<DATA>::getName( size_t id ) const
+  {
+    for ( NameMap::const_iterator it = _names.begin(); it != _names.end(); ++it )
+    {
+      if ( it->second == id )
+        return it->first;
+    }
+
+    Exception ex( "NamedReferenceVector::getName()", "Could not find id in map" );
+    ex.addDetail( "Storage Type", _storageType );
+    ex.addDetail( "ID", id );
+    throw ex;
   }
 
 
@@ -159,8 +176,8 @@ namespace Regolith
   {
     if ( i >= _names.size() )
     {
-      ERROR_STREAM << "Named Vector: " << _storageType << ". Could not find index, " << i << ", outside of map size, " << _names.size();
       Exception ex( "NamedReferenceVector::get()", "Index outside of map size", true );
+      ex.addDetail( "Storage Type", _storageType );
       ex.addDetail( "Index", i );
       ex.addDetail( "Size", _names.size() );
       throw ex;
@@ -175,8 +192,8 @@ namespace Regolith
   {
     if ( i >= _names.size() )
     {
-      ERROR_STREAM << "Named Vector: " << _storageType << ". Could not find index, " << i << ", outside of map size, " << _names.size();
       Exception ex( "NamedReferenceVector::get()", "Index outside of map size", true );
+      ex.addDetail( "Storage Type", _storageType );
       ex.addDetail( "Index", i );
       ex.addDetail( "Size", _names.size() );
       throw ex;
@@ -191,8 +208,8 @@ namespace Regolith
   {
     if ( ! exists( name ) )
     {
-      ERROR_STREAM << "Named Vector: " << _storageType << ". Does not contain element with name: " << name;
       Exception ex( "NamedReferenceVector::get()", "Index outside of map size", true );
+      ex.addDetail( "Storage Type", _storageType );
       ex.addDetail( "Name", name );
       ex.addDetail( "Size", _names.size() );
       throw ex;

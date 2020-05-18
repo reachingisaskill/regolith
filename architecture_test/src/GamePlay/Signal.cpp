@@ -244,12 +244,12 @@ namespace Regolith
     Utilities::validateJson( json_data, "operation", Utilities::JSON_TYPE_STRING );
 
     Engine::StackOperation::Operation op;
-    Context* context = nullptr;
+    unsigned int context = 0;
 
     if ( json_data["operation"].asString() == "open" )
     {
       op = Engine::StackOperation::PUSH;
-      context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
+      context = Manager::getInstance()->requestContext( json_data["context_name"].asString() );
     }
     if ( json_data["operation"].asString() == "close" )
     {
@@ -259,16 +259,30 @@ namespace Regolith
     if ( json_data["operation"].asString() == "transfer" )
     {
       op = Engine::StackOperation::TRANSFER;
-      context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
+      context = Manager::getInstance()->requestContext( json_data["context_name"].asString() );
     }
     if ( json_data["operation"].asString() == "reset" )
     {
       op = Engine::StackOperation::RESET;
-      context = Manager::getInstance()->getContext( json_data["context_name"].asString() );
+      context = Manager::getInstance()->requestContext( json_data["context_name"].asString() );
     }
 
     _operation = op;
     _theContext = context;
+  }
+
+
+  void ChangeContextSignal::validate() const
+  {
+    Context* temp = Manager::getInstance()->getContext( _theContext );
+    
+    if ( temp == nullptr )
+    {
+      Exception ex( "ChangeContextSignal::validate()", "Specified context was not configured." );
+      ex.addDetail( "Context ID", _theContext );
+      ex.addDetail( "Name", Manager::getInstance()->getContextName( _theContext ) );
+      throw ex;
+    }
   }
 
 }

@@ -18,7 +18,7 @@ namespace Regolith
       unsigned int _defaultMusic;
 
       // Pointer to the pause menu context
-      Context* _pauseMenu;
+      unsigned int _pauseMenu;
 
       // Memory is owned by the Manager
       ControllableCharacter* _player;

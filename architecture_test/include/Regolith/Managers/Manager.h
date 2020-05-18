@@ -52,6 +52,7 @@ namespace Regolith
       HardwareManager _theHardware;
       Engine _theEngine;
       SDL_Renderer* _theRenderer;
+      unsigned int _entryPoint;
 
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
@@ -151,14 +152,14 @@ namespace Regolith
       // Asks the manager to build a context and store the memory. Returns a pointer to the new context
       Context* buildContext( Json::Value& );
 
-      // Return a pointer to a requested context
-      Context* getContext( std::string name ) { return _contexts.get( name ); }
+      // Return a pointer to a requested context - creating an entry if one doesn't exist
+      unsigned int requestContext( std::string name ) { return _contexts.addName( name ); }
+
+      // Return the name of a given context. Mostly useful for debugging!
+      std::string getContextName( unsigned int id ) { return _contexts.getName( id ); }
 
       // Return a pointer to a requested context
       Context* getContext( unsigned int id ) { return _contexts[ id ]; }
-
-      // Return the ID number for a given scene
-      unsigned int getContextID( std::string name ) const { return _contexts.getID( name ); }
 
       // Return a pointer to the current active context - may become invalid after rendering!
       Context* getCurrentContext() { return _theEngine.currentContext(); }
@@ -224,16 +225,16 @@ namespace Regolith
       // Pushed context stack operations to the engine
 
       // Open a new context on top of the stack
-      void openContext( Context* );
+      void openContext( unsigned int );
 
       // Open a new context in place of the current one
-      void transferContext( Context* );
+      void transferContext( unsigned int );
 
       // Closes and then pops the context on the top of the stack
       void closeContext();
 
       // Resets the context stack to the provided context
-      void setContextStack( Context* );
+      void setContextStack( unsigned int );
 
 
       ////////////////////////////////////////////////////////////////////////////////
