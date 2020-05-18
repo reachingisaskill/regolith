@@ -78,5 +78,17 @@ namespace Regolith
     return SDL_CONTROLLER_BUTTON_INVALID;
   }
 
+  SDL_GameControllerAxis getAxisID( std::string name )
+  {
+    for ( unsigned int i = 0; i < SDL_CONTROLLER_AXIS_MAX; ++i )
+    {
+      if ( name == ControllerAxisStrings[i] )
+        return (SDL_GameControllerAxis) i;
+    }
+
+    return SDL_CONTROLLER_AXIS_INVALID;
+  }
+
+
 }
 

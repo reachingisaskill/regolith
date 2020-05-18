@@ -27,6 +27,9 @@ namespace Regolith
       void setVelocity( Vector v ) { _velocity = v; } 
       void setInputForce( Vector f ) { _inputForce = f; }
 
+      Vector& velocity() { return _velocity; }
+      Vector& inputForce() { return _inputForce; }
+
     public:
       Moveable();
 
@@ -46,7 +49,6 @@ namespace Regolith
 
       // Add a force to the object
       void addForce( Vector f ) { _forces += f; }
-
 
       // Return the current state information
       float getMass() const { return _mass; }

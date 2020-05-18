@@ -297,7 +297,7 @@ namespace Regolith
 
       GameObject* obj = _objectFactory.build( game_objects[i] );
 
-      if ( obj->isPhysical() )
+      if ( obj->isPhysical() ) // Check that it's really physical!
       {
         PhysicalObject* new_obj = dynamic_cast<PhysicalObject*>( obj );
         if ( new_obj == nullptr )
@@ -306,8 +306,6 @@ namespace Regolith
           ex.addDetail( "Name", name );
           throw ex;
         }
-
-        _physicalObjects.addObject( new_obj, name );
       }
       _gameObjects.addObject( obj, name );
     }

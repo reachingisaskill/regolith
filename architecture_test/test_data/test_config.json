@@ -38,14 +38,34 @@
             "type" : "keyboard",
             "mapping" :
             {
-              "escape" : "quit",
-              "p"      : "pause",
+              "escape" : "pause",
               "space"  : "jump",
               "w"      : "move_up",
               "s"      : "move_down",
               "a"      : "move_left",
               "d"      : "move_right",
               "return" : "attack"
+            }
+          },
+          {
+            "type" : "controller_buttons",
+            "mapping" :
+            {
+              "start"        : "pause",
+              "A"            : "jump",
+              "dpad_up"      : "move_up",
+              "dpad_down"    : "move_down",
+              "dpad_left"    : "move_left",
+              "dpad_right"   : "move_right",
+              "X"            : "attack"
+            }
+          },
+          {
+            "type" : "controller_axes",
+            "mapping" :
+            {
+              "leftx" : "move_horizontal",
+              "lefty" : "move_vertical"
             }
           }
         ]
@@ -126,6 +146,15 @@
         "name" : "test_animated_sprite",
         "path" : "test_data/test_spritesheet.png",
         "colour_key" : [ 255, 255, 255 ]
+      },
+      {
+        "name" : "test_platform",
+        "path" : "test_data/test_ground.png"
+      },
+      {
+        "name" : "the_ball",
+        "path" : "test_data/test_ball.png",
+        "colour_key" : [ 0, 255, 255 ]
       }
     ],
     "texture_strings" :
@@ -255,7 +284,14 @@
           "texture_name" : "title_start_button_down"
         }
       },
-      "signals" : []
+      "signals" :
+      [
+        {
+          "type" : "context_change",
+          "context_name" : "platformer",
+          "operation" : "reset"
+        }
+      ]
     },
     {
       "name" : "title_test_button",
@@ -334,6 +370,16 @@
           "operation" : "reset"
         }
       ]
+    },
+    {
+      "name" : "test_platform",
+      "type" : "simple_sprite",
+      "texture_name" : "test_platform"
+    },
+    {
+      "name" : "test_character",
+      "type" : "test_character",
+      "texture_name" : "the_ball"
     }
   ],
 
@@ -342,8 +388,14 @@
     {
       "name" : "title_context",
       "file" : "test_data/test_title.json"
+    },
+    {
+      "name" : "platformer",
+      "file" : "test_data/test_platformer.json"
     }
-  ]
+  ],
+
+  "entry_point" : "title_context"
 
 }
 

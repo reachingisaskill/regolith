@@ -13,6 +13,7 @@ namespace Regolith
     Context(),
     _defaultMusic( 0 ),
     _pauseMenu( 0 ),
+    _playerID( 0 ),
     _player( nullptr ),
     _spawnPoints( "spawn_points" ),
     _currentPlayerSpawn( 0 )
@@ -66,6 +67,7 @@ namespace Regolith
   {
     INFO_LOG( "Configuring Platformer Context" );
     Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "character", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "spawn_points", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["spawn_points"], 1, Utilities::JSON_TYPE_OBJECT );
 
@@ -74,15 +76,19 @@ namespace Regolith
     INFO_STREAM << "Setting default music: " << default_music;
     _defaultMusic = audioHandler()->getMusicID( default_music );
 
+    // Set the character id
+    std::string character_name = json_data["character"].asString();
+    _playerID = Manager::getInstance()->requestGameObject( character_name );
+    INFO_STREAM << "Register platformer character as:" << character_name;
 
     // Spawn Points
     Json::Value& spawn_points = json_data["spawn_points"];
     Json::ArrayIndex spawn_points_size = spawn_points.size();
     for ( Json::ArrayIndex i = 0; i < spawn_points_size; ++i )
     {
-      Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( spawn_points[i], "name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( spawn_points[i], "position", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJsonArray( spawn_points[i]["position"], 2, Utilities::JSON_TYPE_FLOAT );
 
       std::string name = spawn_points[i]["name"].asString();
       float x = spawn_points[i]["position"][0].asFloat();
@@ -108,6 +114,24 @@ namespace Regolith
     Context::configure( json_data );
   }
 
+
+  void Platformer::validate() const
+  {
+    GameObject* temp = Manager::getInstance()->getGameObject( _playerID );
+    if ( temp == nullptr )
+    {
+      Exception ex( "Platformer::validate()", "Character not configured" );
+      ex.addDetail( "Name", Manager::getInstance()->getContextName( _playerID ) );
+      throw ex;
+    }
+    ControllableCharacter* temp_character = dynamic_cast< ControllableCharacter* >( temp );
+    if ( temp_character == nullptr )
+    {
+      Exception ex( "Platformer::validate()", "Character is not a ControllableCharacter type" );
+      ex.addDetail( "Name", Manager::getInstance()->getContextName( _playerID ) );
+      throw ex;
+    }
+  }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Action Handling
@@ -177,7 +201,7 @@ namespace Regolith
 
   void Platformer::registerEvents( InputManager& manager )
   {
-    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
+//    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
     manager.registerEventRequest( this, REGOLITH_EVENT_CONTEXT_END );
   }
 
@@ -186,7 +210,7 @@ namespace Regolith
   {
     switch ( regolith_event )
     {
-      case REGOLITH_EVENT_QUIT :
+//      case REGOLITH_EVENT_QUIT :
       case REGOLITH_EVENT_CONTEXT_END :
         Manager::getInstance()->closeContext();
         break;

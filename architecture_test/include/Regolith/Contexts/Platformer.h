@@ -21,6 +21,7 @@ namespace Regolith
       unsigned int _pauseMenu;
 
       // Memory is owned by the Manager
+      unsigned int _playerID;
       ControllableCharacter* _player;
 
       // Data for player spawning
@@ -42,7 +43,10 @@ namespace Regolith
       virtual ~Platformer();
 
       // Configure the Scene
-      void configure( Json::Value& ) override;
+      virtual void configure( Json::Value& ) override;
+
+      // Validate the Scene
+      virtual void validate() const override;
 
 
       // Returns true to pause and ignore the parent context. This prevents it from being rendered, updated, stepped, anything!

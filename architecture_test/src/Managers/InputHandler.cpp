@@ -21,6 +21,7 @@ namespace Regolith
   void InputHandler::configure( std::string mappingName )
   {
     _inputMaps = Manager::getInstance()->getInputManager().requestMapping( mappingName );
+    DEBUG_STREAM << "Requested Input Map Pointer: " << _inputMaps;
   }
 
 

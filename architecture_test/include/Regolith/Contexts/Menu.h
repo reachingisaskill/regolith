@@ -1,17 +1,15 @@
 
-#ifndef REGOLITH_CONTEXTS_TITLE_SCENE_H_
-#define REGOLITH_CONTEXTS_TITLE_SCENE_H_
+#ifndef REGOLITH_CONTEXTS_MENU_H_
+#define REGOLITH_CONTEXTS_MENU_H_
 
 #include "Regolith/Architecture/Context.h"
 
 namespace Regolith
 {
 
-  class TitleScene : public Context
+  class MenuContext : public Context
   {
     private:
-      unsigned int _defaultMusic;
-      unsigned int _firstContext;
       
     protected:
       // Hooks for context state changes
@@ -22,19 +20,17 @@ namespace Regolith
 
     public:
       // Trivial Constructor
-      TitleScene();
+      MenuContext();
 
       // Trivial Destructor
-      virtual ~TitleScene();
+      virtual ~MenuContext();
 
       // Trivial configure - call the base-class variant
       virtual void configure( Json::Value& ) override;
 
-      virtual void validate() const override;
-
 
       // Title Scenes take ownership of the display.
-      virtual bool overridesPreviousContext() const override { return true; }
+      virtual bool overridesPreviousContext() const override { return false; }
 
 
 //////////////////////////////////////////////////
@@ -64,5 +60,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_CONTEXTS_TITLE_SCENE_H_
+#endif // REGOLITH_CONTEXTS_MENU_H_
 

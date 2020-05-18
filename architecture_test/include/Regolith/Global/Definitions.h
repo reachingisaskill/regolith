@@ -637,6 +637,18 @@ namespace Regolith
     "null"
   };
 
+
+  const char* const ControllerAxisStrings[] =
+  {
+    "leftx",
+    "lefty",
+    "rightx",
+    "righty",
+    "triggerleft",
+    "triggerright",
+    "null"
+  };
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Enumeration lookup functions
   InputAction getActionID( std::string );
@@ -650,6 +662,8 @@ namespace Regolith
   MouseButton getMouseButtonID( std::string );
 
   SDL_GameControllerButton getButtonID( std::string );
+
+  SDL_GameControllerAxis getAxisID( std::string );
 }
 
 #endif // REGOLITH_DEFINITIONS_H_

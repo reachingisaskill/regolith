@@ -5,6 +5,8 @@
 
   "default_music" : "null",
 
+  "menu" : "title_menu",
+
   "layers" : 
   [
     {
@@ -25,57 +27,69 @@
           "is_global" : true
         }
       ]
-    },
-    {
-      "name" : "foreground_layer",
-      "position" : [ 0.0, 0.0 ],
-      "width" : 1024,
-      "height" : 768,
-      "camera" :
-      {
-        "follow:" : null,
-        "movement_scale" : [ 1.0, 1.0 ]
-      },
-      "elements" :
-      [
-        {
-          "name" : "title_welcome1",
-          "position" : [ 0.0, 100.0 ],
-          "alignment" : [ "center", "top" ],
-          "is_global" : true
-        },
-        {
-          "name" : "test_animated_sprite",
-          "position" : [ -100.0, 200 ],
-          "alignment" : [ "right", "top" ],
-          "is_global" : false
-        },
-        {
-          "name" : "test_animated_sprite",
-          "position" : [ 100.0, 200 ],
-          "alignment" : [ "left", "top" ],
-          "is_global" : false
-        },
-        {
-          "name" : "title_start_button",
-          "position" : [ 0.0, 0.0 ],
-          "alignment" : [ "center", "center" ],
-          "is_global" : false
-        },
-        {
-          "name" : "title_test_button",
-          "position" : [ 0.0, 50.0 ],
-          "alignment" : [ "center", "center" ]
-        },
-        {
-          "name" : "title_quit_button",
-          "position" : [ 0.0, 100.0 ],
-          "alignment" : [ "center", "center" ]
-        }
-      ]
     }
   ],
 
-  "contexts" : []
+  "contexts" :
+  [
+    {
+      "name" : "title_menu",
+      "type" : "menu",
+      "input_mapping" : "title",
+
+      "layers" :
+      [
+        {
+          "name" : "foreground_layer",
+          "position" : [ 0.0, 0.0 ],
+          "width" : 1024,
+          "height" : 768,
+          "camera" :
+          {
+            "follow:" : null,
+            "movement_scale" : [ 1.0, 1.0 ]
+          },
+          "elements" :
+          [
+            {
+              "name" : "title_welcome1",
+              "position" : [ 0.0, 100.0 ],
+              "alignment" : [ "center", "top" ],
+              "is_global" : true
+            },
+            {
+              "name" : "test_animated_sprite",
+              "position" : [ -100.0, 200 ],
+              "alignment" : [ "right", "top" ],
+              "is_global" : false
+            },
+            {
+              "name" : "test_animated_sprite",
+              "position" : [ 100.0, 200 ],
+              "alignment" : [ "left", "top" ],
+              "is_global" : false
+            },
+            {
+              "name" : "title_start_button",
+              "position" : [ 0.0, 0.0 ],
+              "alignment" : [ "center", "center" ],
+              "is_global" : false
+            },
+            {
+              "name" : "title_test_button",
+              "position" : [ 0.0, 50.0 ],
+              "alignment" : [ "center", "center" ]
+            },
+            {
+              "name" : "title_quit_button",
+              "position" : [ 0.0, 100.0 ],
+              "alignment" : [ "center", "center" ]
+            }
+          ]
+        }
+      ],
+      "contexts" : []
+    }
+  ]
 
 }

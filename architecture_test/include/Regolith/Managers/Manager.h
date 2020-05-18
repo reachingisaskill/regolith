@@ -64,10 +64,8 @@ namespace Regolith
       RawTextureMap _rawTextures;
       TeamNameMap _teamNames;
 
-      // All objects that aren't spawnable - two containers removes type casting and validating
+      // All objects. The user must ensure that the object isPhysical() before requesting a spaw/physical object
       NamedVector<GameObject, true > _gameObjects;
-      // Spawnable objects
-      NamedVector<PhysicalObject, false> _physicalObjects;
       // Loadable contexts
       NamedVector<Context, true> _contexts;
 
@@ -188,26 +186,25 @@ namespace Regolith
       unsigned int getTeamID( std::string name ) { return _teamNames[name]; }
 
       // Return the ID for a given object name
-      unsigned int getGameObjectID( std::string name ) { return _gameObjects.getID( name ); }
+      unsigned int requestGameObject( std::string name ) { return _gameObjects.addName( name ); }
 
-      // Return the ID for a given object name
-      unsigned int getPhysicalObjectID( std::string name ) { return _physicalObjects.getID( name ); }
+      // Return the name for a given object ID
+      std::string getGameObjectName( unsigned int id ) { return _gameObjects.getName( id ); }
 
 
       // Get a global object pointer
       // Return a pointer to a given object. (Please don't delete it!)
       GameObject* getGameObject( std::string name ) { return _gameObjects.get( name ); }
+      GameObject* getGameObject( unsigned int id ) { return _gameObjects[ id ]; }
 
       // Return a pointer to a given object. (Please don't delete it!)
-      PhysicalObject* getPhysicalObject( std::string name ) { return _physicalObjects.get( name ); }
-
-//      // Return a pointer to a given resource
-//      GameObject* getObject( unsigned int i ) { return _objects[i]; }
+      PhysicalObject* getPhysicalObject( std::string name ) { return dynamic_cast<PhysicalObject*>( _gameObjects.get( name ) ); }
+      PhysicalObject* getPhysicalObject( unsigned int id ) { return dynamic_cast<PhysicalObject*>( _gameObjects[id] ); }
 
       // Spawn a cloned object - caller accepts ownership of memory
       // Spawn a new instance of a resource and return the memory to the caller
-      PhysicalObject* spawn( unsigned int i, const Vector& pos ) { return _physicalObjects[i]->clone( pos ); }
-      PhysicalObject* spawn( std::string name, const Vector& pos ) { return _physicalObjects.get( name )->clone( pos ); }
+      PhysicalObject* spawn( unsigned int i, const Vector& pos ) { return dynamic_cast<PhysicalObject*>( _gameObjects[i] )->clone( pos ); }
+      PhysicalObject* spawn( std::string name, const Vector& pos ) { return dynamic_cast<PhysicalObject*>( _gameObjects.get(name) )->clone( pos ); }
 
 
       ////////////////////////////////////////////////////////////////////////////////

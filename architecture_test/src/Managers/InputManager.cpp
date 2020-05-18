@@ -73,6 +73,8 @@ namespace Regolith
         case SDL_MOUSEMOTION :
           if ( handler == nullptr ) break;
 
+          DEBUG_STREAM << "MOUSE MOTION : " << handler << ", " << handler->_inputMaps;
+
           event_type = INPUT_TYPE_MOUSE_MOVE;
           mapper = handler->_inputMaps->mapping[ event_type ];
           action = mapper->getAction( _theEvent );
@@ -494,6 +496,21 @@ namespace Regolith
             INFO_STREAM << "Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
           INFO_LOG( "Loaded controller buttons" );
+        }
+
+        else if ( type == "controller_axes" )
+        {
+          INFO_LOG( "Loading controller axis mapping" );
+
+          Json::Value::const_iterator keys_end = keys.end();
+          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
+          {
+            SDL_GameControllerAxis code = getAxisID( it.key().asString() );
+            InputAction action = getActionID( it->asString() );
+            registerInputAction( mapping_name, INPUT_TYPE_CONTROLLER_AXIS, code, action );
+            INFO_STREAM << "Axis Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+          }
+          INFO_LOG( "Loaded controller axes" );
         }
         else
         {

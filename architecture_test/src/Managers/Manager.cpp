@@ -7,6 +7,8 @@
 #include "Regolith/GameObjects/AnimatedSprite.h"
 #include "Regolith/GameObjects/SimpleButton.h"
 #include "Regolith/Contexts/TitleScene.h"
+#include "Regolith/Contexts/Platformer.h"
+#include "Regolith/Contexts/Menu.h"
 #include "Regolith/GamePlay/Signal.h"
 
 #include "logtastic.h"
@@ -30,7 +32,6 @@ namespace Regolith
     _rawTextures(),
     _teamNames(),
     _gameObjects( "manager_game_object_list" ),
-    _physicalObjects( "manager_physical_object_list" ),
     _contexts( "manager_context_list" ),
     _title(),
     _defaultFont( nullptr ),
@@ -48,8 +49,9 @@ namespace Regolith
     _objectFactory.addBuilder<SimpleButton>( "simple_button" );
 
     // Set up the context factory
-//    _contextFactory.addBuilder<Platformer>( "platformer" );
     _contextFactory.addBuilder<TitleScene>( "title_scene" );
+    _contextFactory.addBuilder<MenuContext>( "menu" );
+    _contextFactory.addBuilder<Platformer>( "platformer" );
 
     // Set up the signal factory
     _signalFactory.addBuilder<InputActionSignal>( "input_action" );
@@ -61,7 +63,6 @@ namespace Regolith
 
     // Set up a null value
     _gameObjects.addObject( nullptr, "null" );
-    _physicalObjects.addObject( nullptr, "null" );
     _contexts.addObject( nullptr, "null" );
   }
 
@@ -73,9 +74,6 @@ namespace Regolith
     // Remove each of scenes and clear the vector
     INFO_LOG( "Deleteing Scenes" );
     _contexts.clear();
-
-    INFO_LOG( "Deleting Physical Objects" );
-    _physicalObjects.clear();
 
     INFO_LOG( "Deleting GameObjects" );
     _gameObjects.clear();

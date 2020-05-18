@@ -1,6 +1,6 @@
 
 #include "Regolith.h"
-//#include "Regolith/Test/TestPlayer.h"
+#include "Regolith/Test/TestCharacter.h"
 
 #include "logtastic.h"
 
@@ -23,7 +23,7 @@ int main( int, char** )
   try
   {
     INFO_LOG( "Creating custom object builders" );
-//    man->getObjectFactory()->addBuilder( new TestPlayerBuilder() );
+    man->getObjectFactory().addBuilder< Regolith::TestCharacter >( "test_character" );
 
     INFO_LOG( "Creating custom context builders" );
 //    man->getObjectFactory()->addBuilder( new TestContextBuilder() );

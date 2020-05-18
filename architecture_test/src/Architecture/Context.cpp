@@ -361,9 +361,9 @@ namespace Regolith
 
   Vector placeInLayer( ContextLayer* layer, PhysicalObject* object, Json::Value& json_data )
   {
+    DEBUG_LOG( "Placing in Layer" );
     Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
-    DEBUG_LOG( "Place in layer - 2" );
 
     float x = json_data["position"][0].asFloat();
     float y = json_data["position"][1].asFloat();
