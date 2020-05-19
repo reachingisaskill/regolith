@@ -78,9 +78,17 @@
             "type" : "keyboard",
             "mapping" :
             {
-              "escape" : "quit",
+              "escape" : "cancel",
               "return" : "select",
-              "tab" : "next"
+              "tab" : "next",
+              "w"      : "prev",
+              "s"      : "next",
+              "a"      : "prev",
+              "d"      : "next",
+              "up"     : "prev",
+              "down"   : "next",
+              "left"   : "prev",
+              "right"  : "next"
             }
           },
           {
@@ -97,7 +105,10 @@
               "A" : "select",
               "B" : "back",
               "dpad_up" : "prev",
-              "dpad_down" : "next"
+              "dpad_down" : "next",
+              "dpad_left" : "prev",
+              "dpad_right" : "next",
+              "start" : "cancel"
             }
           }
         ]
@@ -141,6 +152,10 @@
       {
         "name" : "title_background",
         "path" : "test_data/test_wallpaper.jpg"
+      },
+      {
+        "name" : "platformer_background",
+        "path" : "test_data/test_background.png"
       },
       {
         "name" : "test_animated_sprite",
@@ -370,6 +385,11 @@
           "operation" : "reset"
         }
       ]
+    },
+    {
+      "name" : "platformer_background",
+      "type" : "simple_sprite",
+      "texture_name" : "platformer_background"
     },
     {
       "name" : "test_platform",

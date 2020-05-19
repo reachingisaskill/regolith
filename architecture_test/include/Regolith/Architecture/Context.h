@@ -72,6 +72,7 @@ namespace Regolith
       virtual void onPause() = 0;
       virtual void onResume() = 0;
 
+      ContextLayer* getLayer( unsigned int num ) { return _layers[num]; }
 
     public:
       // Con/De-structor
@@ -123,8 +124,8 @@ namespace Regolith
 
 
       // Return the ID of a layer so that it may be referenced when spawining objects
-      unsigned int getLayerID( std::string name ) const { return _layers.getID( name ); }
-      
+      unsigned int getLayerID( std::string name ) { return _layers.getID( name ); }
+
 
 
       // Spawn an object with a given ID and place it in the provided layer, at the provided position

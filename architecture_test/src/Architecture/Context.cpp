@@ -354,6 +354,9 @@ namespace Regolith
     }
 
     _theFocus.registerActions( _theInput );
+
+    // Finall call the overriden function for the context
+    this->registerActions( _theInput );
   }
 
 

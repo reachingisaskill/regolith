@@ -21,7 +21,6 @@ namespace Regolith
       unsigned int _pauseMenu;
 
       // Memory is owned by the Manager
-      unsigned int _playerID;
       ControllableCharacter* _player;
 
       // Data for player spawning

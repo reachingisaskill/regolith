@@ -37,12 +37,12 @@ namespace Regolith
       // Requirements for the ControllableInterface - input action handling
 
       // Register context-wide actions with the handler
-      virtual void registerActions( InputHandler& ) override {}
+      virtual void registerActions( InputHandler& ) override;
 
       // Interfaces for input
       // Handled and mapped actions
-      virtual void inputAction( const InputAction& ) override {}
-      virtual void booleanAction( const InputAction&, bool ) override {}
+      virtual void inputAction( const InputAction& ) override;
+      virtual void booleanAction( const InputAction&, bool ) override;
       virtual void floatAction( const InputAction&, float ) override {}
       virtual void vectorAction( const InputAction&, const Vector& ) override {}
       virtual void mouseAction( const InputAction&, bool, const Vector& ) override {}

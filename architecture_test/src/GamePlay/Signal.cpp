@@ -278,7 +278,7 @@ namespace Regolith
     
     if ( temp == nullptr )
     {
-      Exception ex( "ChangeContextSignal::validate()", "Specified context was not configured." );
+      Exception ex( "ChangeContextSignal::validate() const", "Specified context was not configured." );
       ex.addDetail( "Context ID", _theContext );
       ex.addDetail( "Name", Manager::getInstance()->getContextName( _theContext ) );
       throw ex;

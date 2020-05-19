@@ -40,6 +40,38 @@ namespace Regolith
   }
 
 
+  void MenuContext::registerActions( InputHandler& handler )
+  {
+    handler.registerInputRequest( this, INPUT_ACTION_BACK );
+    handler.registerInputRequest( this, INPUT_ACTION_RETURN );
+    handler.registerInputRequest( this, INPUT_ACTION_CANCEL );
+  }
+
+
+  void MenuContext::inputAction( const InputAction& action )
+  {
+    switch ( action )
+    {
+      case INPUT_ACTION_BACK :
+      case INPUT_ACTION_RETURN :
+      case INPUT_ACTION_CANCEL :
+        Manager::getInstance()->closeContext();
+        break;
+
+      default :
+        break;
+    }
+  }
+
+
+  void MenuContext::booleanAction( const InputAction& action, bool value )
+  {
+    // Immediately call the input action function if a key is released.
+    // I think this is the simplest implementation
+    if ( ! value ) inputAction( action );
+  }
+
+
   void MenuContext::registerEvents( InputManager& manager )
   {
 //    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );

@@ -61,7 +61,7 @@ namespace Regolith
   {
     if ( Manager::getInstance()->getContext( _firstContext ) == nullptr )
     {
-      Exception ex( "TitleScene::validate()", "Menu context not configured" );
+      Exception ex( "TitleScene::validate() const", "Menu context not configured" );
       ex.addDetail( "Name", Manager::getInstance()->getContextName( _firstContext ) );
       throw ex;
     }

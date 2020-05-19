@@ -63,6 +63,9 @@ namespace Regolith
     handler.registerInputRequest( this, INPUT_ACTION_SELECT );
     handler.registerInputRequest( this, INPUT_ACTION_MOUSE_MOVE );
     handler.registerInputRequest( this, INPUT_ACTION_CLICK );
+    handler.registerInputRequest( this, INPUT_ACTION_BACK );
+    handler.registerInputRequest( this, INPUT_ACTION_RETURN );
+    handler.registerInputRequest( this, INPUT_ACTION_CANCEL );
   }
 
 

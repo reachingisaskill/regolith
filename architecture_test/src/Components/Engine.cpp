@@ -82,15 +82,6 @@ namespace Regolith
         {
           performStackOperations();
         }
-
-      }
-
-      // Impossible to continue if there are not contexts
-      if ( _contextStack.empty() )
-      {
-        INFO_LOG( "Context stack is empty. Quitting." );
-        _pause = true;
-        _quit = true;
       }
     }
   }
@@ -200,9 +191,13 @@ namespace Regolith
     // Start at the end and work backwards until either:
     //  - We hit the beginning of the stack, OR
     //  - One of the contexts overrides all the previous ones.
+    DEBUG_LOG( "CONTEXT STACK pointer reset" );
     _visibleStackStart = --_contextStack.rend();
     while ( ( _visibleStackStart != _contextStack.rbegin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
+    {
+      DEBUG_LOG( "Decrementing" );
       --_visibleStackStart;
+    }
 
     // Set the end iterator
     _visibleStackEnd = _contextStack.rend();
