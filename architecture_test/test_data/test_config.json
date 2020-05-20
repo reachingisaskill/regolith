@@ -393,13 +393,30 @@
     },
     {
       "name" : "test_platform",
-      "type" : "simple_sprite",
-      "texture_name" : "test_platform"
+      "type" : "collidable_sprite",
+      "texture_name" : "test_platform",
+      "collision_team" : "environment",
+      "collision_type" : "environment",
+      "collision" :
+      {
+        "position" : [ 0.0, 0.0 ],
+        "width" : 1000.0,
+        "height" : 200.0
+      }
     },
     {
       "name" : "test_character",
       "type" : "test_character",
-      "texture_name" : "the_ball"
+      "texture_name" : "the_ball",
+      "mass" : 1.0,
+      "collision_team" : "player",
+      "collision_type" : "character",
+      "collision" :
+      {
+        "position" : [ 0.0, 0.0 ],
+        "width" : 50.0,
+        "height" : 50.0
+      }
     }
   ],
 

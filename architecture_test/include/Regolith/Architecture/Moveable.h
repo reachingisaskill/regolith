@@ -16,14 +16,11 @@ namespace Regolith
   class Moveable : virtual public PhysicalObject
   {
     private:
-      float _mass;
-      float _inverseMass;
       Vector _forces;
       Vector _inputForce;
       Vector _velocity;
 
     protected:
-      void setMass( float );
       void setVelocity( Vector v ) { _velocity = v; } 
       void setInputForce( Vector f ) { _inputForce = f; }
 
@@ -50,8 +47,9 @@ namespace Regolith
       // Add a force to the object
       void addForce( Vector f ) { _forces += f; }
 
+      void addVelocity( Vector v ) { _velocity += v; }
+
       // Return the current state information
-      float getMass() const { return _mass; }
       Vector getVelocity() const { return _velocity; }
       Vector getForces() const { return _forces; }
       Vector getInputForce() const { return _inputForce; }

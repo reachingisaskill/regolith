@@ -9,8 +9,6 @@ namespace Regolith
 
   Moveable::Moveable() :
     PhysicalObject(),
-    _mass( 0.0 ),
-    _inverseMass( 0.0 ),
     _forces( 0.0 ),
     _inputForce( 0.0 ),
     _velocity( 0.0 )
@@ -22,33 +20,22 @@ namespace Regolith
   {
     // Starting with Euler Step algorithm.
     // Might move to leap-frog/Runge-Kutta later
-    
-    Vector accel = _inverseMass * ( _forces + _inputForce );
+    Vector accel = getInverseMass() * ( _forces + _inputForce );
+
+    DEBUG_STREAM << "Position : " << position() << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << getInverseMass() << ", Delta T : " << timestep;
 
     _velocity += accel * timestep;
 
     move( _velocity * timestep );
 
-    DEBUG_STREAM << "Position : " << position();
     // Update complete - reset forces
-    _forces = _mass*Manager::getInstance()->getGravity() - _velocity*Manager::getInstance()->getDrag();
-  }
-
-
-  void Moveable::setMass( float m )
-  {
-    _mass = m;
-    if ( _mass < epsilon )
-      _inverseMass = 0.0;
-    else
-      _inverseMass = 1.0/_mass;
+    _forces = getMass()*Manager::getInstance()->getGravity() - _velocity*Manager::getInstance()->getDrag();
   }
 
 
   void Moveable::configure( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "mass", Utilities::JSON_TYPE_FLOAT );
-    setMass( json_data["mass"].asFloat() );
+    PhysicalObject::configure( json_data );
 
     if ( Utilities::validateJson( json_data, "velocity", Utilities::JSON_TYPE_FLOAT, false ) )
     {

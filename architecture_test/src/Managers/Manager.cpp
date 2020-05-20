@@ -4,6 +4,7 @@
 #include "Regolith/Components/Window.h"
 
 #include "Regolith/GameObjects/SimpleSprite.h"
+#include "Regolith/GameObjects/CollidableSprite.h"
 #include "Regolith/GameObjects/AnimatedSprite.h"
 #include "Regolith/GameObjects/SimpleButton.h"
 #include "Regolith/Contexts/TitleScene.h"
@@ -45,6 +46,7 @@ namespace Regolith
 //    _objectFactory.addBuilder<FPSString>( "fps_string" );
 //    _objectFactory.addBuilder<Button>( "button" );
     _objectFactory.addBuilder<SimpleSprite>( "simple_sprite" );
+    _objectFactory.addBuilder<CollidableSprite>( "collidable_sprite" );
     _objectFactory.addBuilder<AnimatedSprite>( "animated_sprite" );
     _objectFactory.addBuilder<SimpleButton>( "simple_button" );
 

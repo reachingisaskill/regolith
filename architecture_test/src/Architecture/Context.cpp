@@ -81,6 +81,7 @@ namespace Regolith
     for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
     {
       MoveableList& moveables = (*layer_it)->moveables;
+      DEBUG_STREAM << " Stepping : " << moveables.size();
       MoveableList::iterator move_it = moveables.begin();
       MoveableList::iterator move_end = moveables.end();
       while ( move_it != move_end )
@@ -136,7 +137,7 @@ namespace Regolith
     {
       DEBUG_STREAM << " Starting Layer Collision: " << (*layer_it)->teams.size();
       TeamMap& teams = (*layer_it)->teams;
-      if ( teams.empty() ) continue;
+      if ( teams.size() < 2 ) continue;
 
       TeamMap::iterator team_it = teams.begin();
       TeamMap::iterator opponent_start = ++teams.begin(); // Change this line to allow team self-collisions
@@ -296,9 +297,13 @@ namespace Regolith
 
       unsigned int layer_number = _layers.getID( layer_data[i]["name"].asString() );
 
-      if ( ! camera_data["follow"].isNull() )
+      if ( ( ! camera_data["follow"].isNull() ) && Utilities::validateJson( camera_data, "follow", Utilities::JSON_TYPE_STRING, false ) )
       {
-        Utilities::validateJson( camera_data, "follow", Utilities::JSON_TYPE_STRING );
+        std::string camera_follow = camera_data["follow"].asString();
+
+        PhysicalObject* followee =  Manager::getInstance()->getPhysicalObject( camera_follow );
+        INFO_STREAM << "Setting camera to follow : " << camera_follow << " @ " << followee;
+        newLayer->setCameraFollow( followee );
       }
 
 

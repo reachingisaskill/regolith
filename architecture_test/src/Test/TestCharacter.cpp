@@ -14,8 +14,8 @@ namespace Regolith
     ControllableCharacter(),
     _theTexture(),
     _destination( { 0, 0, 0, 0 } ),
-    _movementForce( 0 ),
-    _jumpSpeed( 0 ),
+    _movementForce( 0.005 ),
+    _jumpSpeed( 3 ),
     _jumpSound( 0 ),
     _hardLandingSound( 0 ),
     _fallTimer()
@@ -53,8 +53,8 @@ namespace Regolith
   {
     static Manager* man = Manager::getInstance();
 
-    DEBUG_STREAM << " TestCharacter : " << (int)action << " : " << value;
     float speed = _movementForce / man->getDrag();
+    DEBUG_STREAM << " TestCharacter : " << (int)action << " : " << value << ", " << speed;
 
     switch ( action )
     {
@@ -126,14 +126,14 @@ namespace Regolith
   }
 
 
-  void TestCharacter::onCollision( const Vector& overlap, const Collidable* object )
+  void TestCharacter::onCollision( const Vector& normal, float overlap, const Collidable* object )
   {
     DEBUG_STREAM << "On Collision Player :" << object->getTeam() << ", " << overlap;
 
     switch ( object->getTeam() )
     {
       case DEFAULT_TEAM_ENVIRONMENT :
-        if ( overlap.y() < 0 )
+        if ( normal.y() < 0 )
         {
           Uint32 falltime = _fallTimer.lap();
           if ( falltime > 500 || velocity().y() < -3.0 )
@@ -146,11 +146,16 @@ namespace Regolith
       default :
         break;
     }
+
+    this->move( overlap*normal );
+    this->addVelocity( getVelocity()%normal );
   }
 
 
   void TestCharacter::configure( Json::Value& json_data )
   {
+    ControllableCharacter::configure( json_data );
+
     _theTexture.configure( json_data );
 
     // Set the current sprite position
@@ -161,8 +166,6 @@ namespace Regolith
 
     setWidth( _theTexture.getWidth() );
     setHeight( _theTexture.getHeight() );
-
-    ControllableCharacter::configure( json_data );
   }
 
   void TestCharacter::validate() const

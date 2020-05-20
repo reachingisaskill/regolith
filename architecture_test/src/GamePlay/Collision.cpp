@@ -11,10 +11,20 @@ namespace Regolith
 
   void callback( Collidable* obj1, Collidable* obj2, const Vector& normal, const float overlap )
   {
-    Vector overlap1 = (-overlap)*normal;
-    Vector overlap2 =   overlap *normal;
-    obj1->onCollision( overlap1, obj2 );
-    obj2->onCollision( overlap2, obj1 );
+    float invM1 = obj1->getInverseMass();
+    float invM2 = obj2->getInverseMass();
+    float totalInvM = invM1 + invM2;
+
+    if ( totalInvM < epsilon )
+    {
+      obj1->onCollision( -normal, 0.0, obj2 );
+      obj2->onCollision(  normal, 0.0, obj1 );
+    }
+    else 
+    {
+      obj1->onCollision( -normal, (invM1*overlap/totalInvM), obj2 );
+      obj2->onCollision(  normal, (invM2*overlap/totalInvM), obj1 );
+    }
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

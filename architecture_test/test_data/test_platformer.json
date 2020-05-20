@@ -22,7 +22,7 @@
       "height" : 1080,
       "camera" :
       {
-        "follow:" : "test_character",
+        "follow" : "test_character",
         "movement_scale" : [ 0.7, 0.7 ]
       },
       "elements" :
@@ -40,7 +40,7 @@
       "height" : 1080,
       "camera" :
       {
-        "follow:" : "test_character",
+        "follow" : "test_character",
         "movement_scale" : [ 1.0, 1.0 ]
       },
       "elements" :
@@ -62,7 +62,7 @@
       "height" : 768,
       "camera" :
       {
-        "follow:" : null,
+        "follow" : null,
         "movement_scale" : [ 1.0, 1.0 ]
       },
       "elements" :

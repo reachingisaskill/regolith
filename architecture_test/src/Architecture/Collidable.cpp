@@ -1,5 +1,6 @@
 
 #include "Regolith/Architecture/Collidable.h"
+#include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -28,6 +29,8 @@ namespace Regolith
 
     INFO_STREAM << "Configuring collidable object with type: " << collision_type << " and team: " << collision_team;
 
+    _teamID = Manager::getInstance()->getTeamID( collision_team );
+
     Utilities::validateJson( collision_data, "position", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( collision_data, "width", Utilities::JSON_TYPE_FLOAT );
     Utilities::validateJson( collision_data, "height", Utilities::JSON_TYPE_FLOAT );
@@ -40,6 +43,10 @@ namespace Regolith
     if ( Utilities::validateJson( json_data, "collision_active", Utilities::JSON_TYPE_BOOLEAN, false ) )
     {
       _collisionActive = json_data["collision_active"].asBool();
+    }
+    else
+    {
+      _collisionActive = true;
     }
   }
 

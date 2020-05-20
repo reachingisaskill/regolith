@@ -17,19 +17,22 @@ namespace Regolith
     private:
       bool _destroyMe;
       Vector _position;
+      float _mass;
+      float _inverseMass;
       float _width;
       float _height;
       float _rotation;
 
     protected :
+      void setMass( float );
 
     public:
       PhysicalObject();
 
-      PhysicalObject( Vector, float, float, float r = 0 );
-
       virtual ~PhysicalObject() {}
 
+
+      void configure( Json::Value& ) override;
 
 
       // Tells the user that derived classes come from a physical object.
@@ -47,6 +50,9 @@ namespace Regolith
       // set the flag to remove the object
       void destroy() { _destroyMe = true; }
 
+
+      const float& getMass() const { return _mass; }
+      const float& getInverseMass() const { return _inverseMass; }
 
       const Vector& position() { return _position; }
       Vector getPosition() const { return _position; }

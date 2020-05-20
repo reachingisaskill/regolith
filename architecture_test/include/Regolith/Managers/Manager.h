@@ -185,6 +185,9 @@ namespace Regolith
       // Return the team ID for a given name
       unsigned int getTeamID( std::string name ) { return _teamNames[name]; }
 
+      // Add a team to the map
+      void addTeam( std::string name, unsigned int id ) { _teamNames[name] = id; }
+
       // Return the ID for a given object name
       unsigned int requestGameObject( std::string name ) { return _gameObjects.addName( name ); }
 

@@ -68,9 +68,11 @@ namespace Regolith
 
   void Camera::update( float )
   {
+    DEBUG_LOG( "Updating Camera" );
     // If there's nothing to follow, don't move
     if ( _theObject == nullptr ) return;
 
+    DEBUG_STREAM << _velocityScale << ", " << _theObject->getPosition();
     // Update the current position
     _position = _velocityScale % ( _theObject->getPosition() - _offset );
 

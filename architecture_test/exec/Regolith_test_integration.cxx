@@ -28,6 +28,10 @@ int main( int, char** )
     INFO_LOG( "Creating custom context builders" );
 //    man->getObjectFactory()->addBuilder( new TestContextBuilder() );
 
+    INFO_LOG( "Adding teams" );
+    man->addTeam( "environment", 0 );
+    man->addTeam( "player", 1 );
+
     INFO_LOG( "Initialising the manager" );
     man->init( test_config );
 

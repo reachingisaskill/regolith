@@ -40,6 +40,9 @@ namespace Regolith
       // Return the team id - determines collision interactions
       int getTeam() const { return _teamID; }
 
+      // Get the damage factor
+      virtual float getDamage() const { return 0.0; }
+
 
       // Signifies that the object has the collidable interface
       virtual bool hasCollision() const override { return true; }
@@ -59,7 +62,7 @@ namespace Regolith
 
       // Function called when a collision is found with another object
       // Overlap vector, other object pointer
-      virtual void onCollision( const Vector&, const Collidable* ) = 0;
+      virtual void onCollision( const Vector&, float, const Collidable* ) = 0;
 
   };
 

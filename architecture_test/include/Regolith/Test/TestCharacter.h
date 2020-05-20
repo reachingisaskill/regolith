@@ -61,7 +61,7 @@ namespace Regolith
 
 
       // Required to be collidable
-      virtual void onCollision( const Vector&, const Collidable* ) override;
+      virtual void onCollision( const Vector&, float, const Collidable* ) override;
 
 
 ////////////////////////////////////////////////////////////////////////////////

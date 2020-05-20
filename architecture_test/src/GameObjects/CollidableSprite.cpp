@@ -1,6 +1,6 @@
 //#define LOGTASTIC_DEBUG_OFF
 
-#include "Regolith/GameObjects/SimpleSprite.h"
+#include "Regolith/GameObjects/CollidableSprite.h"
 #include "Regolith/GamePlay/Camera.h"
 
 #include "logtastic.h"
@@ -9,20 +9,21 @@
 namespace Regolith
 {
 
-  SimpleSprite::SimpleSprite() :
+  CollidableSprite::CollidableSprite() :
     Drawable(),
+    Collidable(),
     _texture(),
     _destination()
   {
   }
 
 
-  SimpleSprite::~SimpleSprite()
+  CollidableSprite::~CollidableSprite()
   {
   }
 
 
-  void SimpleSprite::render( const Camera& camera )
+  void CollidableSprite::render( const Camera& camera )
   {
     // Place the object
     _destination.x = position().x();
@@ -36,17 +37,18 @@ namespace Regolith
   }
 
 
-  PhysicalObject* SimpleSprite::clone( const Vector& pos ) const
+  PhysicalObject* CollidableSprite::clone( const Vector& pos ) const
   {
-    PhysicalObject* temp = new SimpleSprite( *this );
+    PhysicalObject* temp = new CollidableSprite( *this );
     temp->setPosition( pos );
     return temp;
   }
 
 
-  void SimpleSprite::configure( Json::Value& json_data )
+  void CollidableSprite::configure( Json::Value& json_data )
   {
     Drawable::configure( json_data );
+    Collidable::configure( json_data );
 
     _texture.configure( json_data );
 
@@ -56,6 +58,11 @@ namespace Regolith
 
     setWidth( _texture.getWidth() );
     setHeight( _texture.getHeight() );
+  }
+
+
+  void CollidableSprite::onCollision( const Vector&, float, const Collidable* )
+  {
   }
 
 }
