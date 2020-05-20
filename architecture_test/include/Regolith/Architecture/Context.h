@@ -13,6 +13,7 @@
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/FocusHandler.h"
 #include "Regolith/Utilities/NamedVector.h"
+#include "Regolith/GamePlay/Camera.h"
 
 #include <list>
 
@@ -45,6 +46,9 @@ namespace Regolith
       InputHandler _theInput;
       AudioHandler _theAudio;
       FocusHandler _theFocus;
+
+      // Camera for the context
+      Camera _theCamera;
 
       // Flag to indicate whether the context is advancing
       bool _paused;

@@ -7,7 +7,6 @@
 #include "Regolith/Architecture/Moveable.h"
 #include "Regolith/Architecture/Collidable.h"
 #include "Regolith/Architecture/Animated.h"
-#include "Regolith/GamePlay/Camera.h"
 #include "Regolith/Managers/Manager.h"
 
 #include "logtastic.h"
@@ -29,6 +28,7 @@ namespace Regolith
     _theInput(),
     _theAudio(),
     _theFocus(),
+    _theCamera(),
     _paused( false ),
     _pauseable( false ),
     _layers( "Context Layers" ),
@@ -58,18 +58,17 @@ namespace Regolith
   void Context::update( float time )
   {
     DEBUG_LOG( "Context Update" );
+
+    // Update the camera first
+    _theCamera.update( time );
+
+    // Update all the animated objects
     AnimatedList::iterator it = _animatedObjects.begin();
     AnimatedList::iterator end =  _animatedObjects.end();
     while ( it != end )
     {
       (*it)->update( time );
       ++it;
-    }
-
-    NamedVector< ContextLayer, true >::iterator layers_end = _layers.end();
-    for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
-    {
-      (*layer_it)->update( time );
     }
   }
 
@@ -106,7 +105,7 @@ namespace Regolith
     NamedVector< ContextLayer, true >::iterator layers_end = _layers.end();
     for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
     {
-      const Camera& layerCamera = (*layer_it)->getCamera();
+      _theCamera.setLayer( *layer_it );
 
       DEBUG_STREAM << " Rendering layer. " << (*layer_it)->drawables.size() << " Elements";
 
@@ -121,7 +120,7 @@ namespace Regolith
         }
         else
         {
-          (*draw_it)->render( layerCamera );
+          (*draw_it)->render( _theCamera );
           ++draw_it;
         }
       }
@@ -256,6 +255,7 @@ namespace Regolith
     Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "camera", Utilities::JSON_TYPE_OBJECT );
 
 
     _theInput.configure( json_data["input_mapping"].asString() );
@@ -277,36 +277,22 @@ namespace Regolith
       Utilities::validateJson( layer_data[i], "width", Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( layer_data[i], "height", Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( layer_data[i], "elements", Utilities::JSON_TYPE_ARRAY );
-      Json::Value& element_data = layer_data[i]["elements"];
-
-      Utilities::validateJson( layer_data[i], "camera", Utilities::JSON_TYPE_OBJECT );
-      Json::Value camera_data = layer_data[i]["camera"];
-      Utilities::validateJson( camera_data, "movement_scale", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJsonArray( camera_data["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( layer_data[i], "movement_scale", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJsonArray( layer_data[i]["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
 
 
       float x = layer_data[i]["position"][0].asFloat();
       float y = layer_data[i]["position"][1].asFloat();
+      float dx = layer_data[i]["movement_scale"][0].asFloat();
+      float dy = layer_data[i]["movement_scale"][1].asFloat();
       float w = layer_data[i]["width"].asFloat();
       float h = layer_data[i]["height"].asFloat();
 
-      Vector cam_move_scale( camera_data["movement_scale"][0].asFloat(), camera_data["movement_scale"][1].asFloat() );
-
-      ContextLayer* newLayer = new ContextLayer( Vector( x, y ), w, h, cam_move_scale );
-      _layers.addObject( newLayer, layer_data[i]["name"].asString() );
-
-      unsigned int layer_number = _layers.getID( layer_data[i]["name"].asString() );
-
-      if ( ( ! camera_data["follow"].isNull() ) && Utilities::validateJson( camera_data, "follow", Utilities::JSON_TYPE_STRING, false ) )
-      {
-        std::string camera_follow = camera_data["follow"].asString();
-
-        PhysicalObject* followee =  Manager::getInstance()->getPhysicalObject( camera_follow );
-        INFO_STREAM << "Setting camera to follow : " << camera_follow << " @ " << followee;
-        newLayer->setCameraFollow( followee );
-      }
+      ContextLayer* newLayer = new ContextLayer( Vector( x, y ), Vector( dx, dy ), w, h );
+      unsigned int layer_number = _layers.addObject( newLayer, layer_data[i]["name"].asString() );
 
 
+      Json::Value& element_data = layer_data[i]["elements"];
       Json::ArrayIndex element_data_size = element_data.size();
       for ( Json::ArrayIndex j = 0; j != element_data_size; ++j )
       {
@@ -358,6 +344,27 @@ namespace Regolith
       Manager::getInstance()->buildContext( context_data[i] );
     }
 
+
+    Json::Value camera_data = json_data["camera"];
+    Utilities::validateJson( camera_data, "lower_limit", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( camera_data, "upper_limit", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( camera_data["lower_limit"], 2, Utilities::JSON_TYPE_FLOAT );
+    Utilities::validateJsonArray( camera_data["upper_limit"], 2, Utilities::JSON_TYPE_FLOAT );
+
+    _theCamera.configure( Vector( camera_data["lower_limit"][0].asFloat(), camera_data["lower_limit"][1].asFloat() ),
+                          Vector( camera_data["upper_limit"][0].asFloat(), camera_data["upper_limit"][1].asFloat() ) );
+
+    // Set the camera follow if provided
+    if ( ( ! camera_data["follow"].isNull() ) && Utilities::validateJson( camera_data, "follow", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      std::string camera_follow = camera_data["follow"].asString();
+
+      PhysicalObject* followee =  Manager::getInstance()->getPhysicalObject( camera_follow );
+      INFO_STREAM << "Setting camera to follow : " << camera_follow << " @ " << followee;
+      _theCamera.followMe( followee );
+    }
+
+
     _theFocus.registerActions( _theInput );
 
     // Finall call the overriden function for the context
@@ -384,20 +391,20 @@ namespace Regolith
 
       if ( json_data["alignment"][0].asString() == "center" )
       {
-        offset.x() = layer->getPosition().x() + 0.5*( layer->getCamera().getWidth() - object->getWidth() );
+        offset.x() = layer->getPosition().x() + 0.5*( layer->getWidth() - object->getWidth() );
       }
       else if ( json_data["alignment"][0].asString() == "right" )
       {
-        offset.x() = layer->getPosition().x() + ( layer->getCamera().getWidth() - object->getWidth() );
+        offset.x() = layer->getPosition().x() + ( layer->getWidth() - object->getWidth() );
       }
 
       if ( json_data["alignment"][1].asString() == "center" )
       {
-        offset.y() = layer->getPosition().y() + 0.5*( layer->getCamera().getHeight() - object->getHeight() );
+        offset.y() = layer->getPosition().y() + 0.5*( layer->getHeight() - object->getHeight() );
       }
       else if ( json_data["alignment"][1].asString() == "bottom" )
       {
-        offset.y() = layer->getPosition().y() + ( layer->getCamera().getHeight() - object->getHeight() );
+        offset.y() = layer->getPosition().y() + ( layer->getHeight() - object->getHeight() );
       }
     }
 

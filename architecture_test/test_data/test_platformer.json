@@ -13,6 +13,13 @@
     "layer" : "foreground_layer"
   },
 
+  "camera" :
+  {
+    "follow" : "test_character",
+    "lower_limit" : [ 0.0, 0.0 ],
+    "upper_limit" : [ 1920.0, 1080.0 ]
+  },
+
   "layers" : 
   [
     {
@@ -20,11 +27,8 @@
       "position" : [ 0.0, 0.0 ],
       "width" : 1920,
       "height" : 1080,
-      "camera" :
-      {
-        "follow" : "test_character",
-        "movement_scale" : [ 0.7, 0.7 ]
-      },
+      "movement_scale" : [ 0.3, 0.3 ],
+
       "elements" :
       [
         {
@@ -38,11 +42,8 @@
       "position" : [ 0.0, 0.0 ],
       "width" : 1920,
       "height" : 1080,
-      "camera" :
-      {
-        "follow" : "test_character",
-        "movement_scale" : [ 1.0, 1.0 ]
-      },
+      "movement_scale" : [ 1.0, 1.0 ],
+
       "elements" :
       [
         {
@@ -60,11 +61,8 @@
       "position" : [ 0.0, 0.0 ],
       "width" : 1024,
       "height" : 768,
-      "camera" :
-      {
-        "follow" : null,
-        "movement_scale" : [ 1.0, 1.0 ]
-      },
+      "movement_scale" : [ 0.0, 0.0 ],
+
       "elements" :
       [
       ]
@@ -77,6 +75,12 @@
       "name" : "pause_menu",
       "type" : "menu",
       "input_mapping" : "title",
+      "camera" :
+      {
+        "follow" : null,
+        "lower_limit" : [ 0.0, 0.0 ],
+        "upper_limit" : [ 1920.0, 1080.0 ]
+      },
       
       "layers" :
       [
@@ -85,25 +89,16 @@
           "position" : [ 0.0, 0.0 ],
           "width" : 1024,
           "height" : 768,
-          "camera" :
-          {
-            "follow" : null,
-            "movement_scale" : [ 1.0, 1.0 ]
-          },
+          "movement_scale" : [ 0.0, 0.0 ],
 
           "elements" : []
-
         },
         {
           "name" : "menu_layer",
           "position" : [ 100.0, 100.0 ],
           "width" : 824,
           "height" : 568,
-          "camera" :
-          {
-            "follow" : null,
-            "movement_scale" : [ 1.0, 1.0 ]
-          },
+          "movement_scale" : [ 0.0, 0.0 ],
 
           "elements" : 
           [

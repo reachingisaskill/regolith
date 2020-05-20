@@ -10,15 +10,15 @@
 namespace Regolith
 {
   class PhysicalObject;
+  class ContextLayer;
 
 
   class Camera : public AnimatedInterface
   {
     private:
       Vector _position;
-      float _layerWidth;
-      float _layerHeight;
-      Vector _limit;
+      Vector _lowerLimit;
+      Vector _upperLimit;
       // TBD
 //      float _zoom;
 
@@ -26,16 +26,15 @@ namespace Regolith
       PhysicalObject* _theObject;
       Vector _offset;
 
-      // Scale the movement rate
-      Vector _velocityScale;
-
       // References to the global window scaling ratios
       const float& _scaleX;
       const float& _scaleY;
 
+      // Position within the current layer
+      Vector _layerPosition;
 
     protected:
-      void checkPosition();
+      inline void checkPosition();
 
     public:
       // Create invalid instance
@@ -46,7 +45,7 @@ namespace Regolith
 
 
       // Configure the camera using layer width/height and movement scale
-      void configure( int, int, Vector );
+      void configure( Vector, Vector );
 
 
       // Set the position of the camera
@@ -60,10 +59,9 @@ namespace Regolith
       const Vector& getPosition() const { return _position; }
 
 
-      float getWidth() const { return _layerWidth; }
-      float getHeight() const { return _layerHeight; }
 
-
+      // Set the current layer
+      void setLayer( ContextLayer* layer );
 
       // Places the object's rectang inside the window
       SDL_Rect place( const SDL_Rect& ) const;

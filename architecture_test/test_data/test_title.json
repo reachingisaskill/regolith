@@ -7,6 +7,13 @@
 
   "menu" : "title_menu",
 
+  "camera" :
+  {
+    "follow:" : null,
+    "lower_limit" : [ 0.0, 0.0 ],
+    "upper_limit" : [ 1024.0, 768.0 ]
+  },
+
   "layers" : 
   [
     {
@@ -14,11 +21,8 @@
       "position" : [ 0.0, 0.0 ],
       "width" : 1024,
       "height" : 768,
-      "camera" :
-      {
-        "follow:" : null,
-        "movement_scale" : [ 1.0, 1.0 ]
-      },
+      "movement_scale" : [ 0.0, 0.0 ],
+
       "elements" :
       [
         {
@@ -36,6 +40,12 @@
       "name" : "title_menu",
       "type" : "menu",
       "input_mapping" : "title",
+      "camera" :
+      {
+        "follow:" : null,
+        "lower_limit" : [ 0.0, 0.0 ],
+        "upper_limit" : [ 1024.0, 768.0 ]
+      },
 
       "layers" :
       [
@@ -44,11 +54,7 @@
           "position" : [ 0.0, 0.0 ],
           "width" : 1024,
           "height" : 768,
-          "camera" :
-          {
-            "follow:" : null,
-            "movement_scale" : [ 1.0, 1.0 ]
-          },
+          "movement_scale" : [ 0.0, 0.0 ],
           "elements" :
           [
             {

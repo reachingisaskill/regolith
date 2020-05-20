@@ -5,14 +5,15 @@
 namespace Regolith
 {
 
-  ContextLayer::ContextLayer( Vector pos, float w, float h, Vector move_scale ) :
-    _camera(),
+  ContextLayer::ContextLayer( Vector pos, Vector move_scale, float width, float height ) :
     _position( pos ),
+    _movementScale( move_scale ),
+    _width( width ),
+    _height( height ),
     drawables(),
     moveables(),
     teams()
   {
-    _camera.configure( w, h, move_scale );
   }
 
 

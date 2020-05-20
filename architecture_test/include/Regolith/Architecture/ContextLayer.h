@@ -8,7 +8,6 @@
 #include "Regolith/Architecture/Moveable.h"
 #include "Regolith/Architecture/Collidable.h"
 #include "Regolith/Architecture/Clickable.h"
-#include "Regolith/GamePlay/Camera.h"
 
 #include <list>
 #include <set>
@@ -25,23 +24,20 @@ namespace Regolith
 
   class ContextLayer
   {
+    friend class Camera;
 
     private:
-      Camera _camera;
-      Vector _position;
+      Vector _position; // Can be considered as the offset wrt to the camera
+      Vector _movementScale; // Movement wrt the camera position
+      float _width;
+      float _height;
 
     public:
-      // Constuct with position, width and height
-      ContextLayer( Vector, float, float, Vector );
+      // Constuct with position, movement scale, width and height
+      ContextLayer( Vector, Vector, float, float );
       // Clear all the caches
       ~ContextLayer();
 
-
-      // Set the object that the camera should follow
-      void setCameraFollow( PhysicalObject* obj ) { _camera.followMe( obj ); }
-
-      // Update the camera's current position
-      void update( float time ) { _camera.update( time ); }
 
 
       // List of all drawable objects
@@ -57,11 +53,17 @@ namespace Regolith
       ClickableSet clickables;
 
 
-      // Return a const reference to the camera object to allow render to place objects
-      const Camera& getCamera() const { return _camera; }
-
       // Return the position of the layer
       const Vector& getPosition() const { return _position; }
+
+      // Return movement speed wrt camera
+      const Vector& getMovementScale() const { return _movementScale; }
+
+      // Return width & height
+      const float& getWidth() const { return _width; }
+      const float& getHeight() const { return _height; }
+
+
   };
 
 }
