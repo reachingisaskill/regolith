@@ -160,6 +160,7 @@ namespace Regolith
         }
       }
 
+      DEBUG_LOG( " Starting Layer Containment" );
       // Containing Objects
       end = _theCollision.containerEnd();
       for ( CollisionHandler::iterator it = _theCollision.containerBegin(); it != end; ++it )

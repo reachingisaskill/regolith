@@ -7,6 +7,8 @@
 #include "Regolith/GameObjects/CollidableSprite.h"
 #include "Regolith/GameObjects/AnimatedSprite.h"
 #include "Regolith/GameObjects/SimpleButton.h"
+#include "Regolith/GameObjects/Trigger.h"
+#include "Regolith/GameObjects/Region.h"
 #include "Regolith/Contexts/TitleScene.h"
 #include "Regolith/Contexts/Platformer.h"
 #include "Regolith/Contexts/Menu.h"
@@ -49,6 +51,8 @@ namespace Regolith
     _objectFactory.addBuilder<CollidableSprite>( "collidable_sprite" );
     _objectFactory.addBuilder<AnimatedSprite>( "animated_sprite" );
     _objectFactory.addBuilder<SimpleButton>( "simple_button" );
+    _objectFactory.addBuilder<Trigger>( "event_trigger" );
+    _objectFactory.addBuilder<Region>( "region" );
 
     // Set up the context factory
     _contextFactory.addBuilder<TitleScene>( "title_scene" );

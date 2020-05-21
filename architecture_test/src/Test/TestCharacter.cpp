@@ -128,8 +128,6 @@ namespace Regolith
 
   void TestCharacter::onCollision( const Vector& normal, float overlap, const Collidable* object )
   {
-    DEBUG_STREAM << "On Collision Player :" << object->getTeam() << ", " << overlap;
-
     switch ( object->getTeam() )
     {
       case DEFAULT_TEAM_ENVIRONMENT :
@@ -147,8 +145,11 @@ namespace Regolith
         break;
     }
 
+    DEBUG_STREAM << getVelocity()%normal << normal;
     this->move( overlap*normal );
-    this->addVelocity( getVelocity()%normal );
+    this->addVelocity( getVelocity().fabs()%normal );
+
+    DEBUG_STREAM << "On Collision Player :" << object->getTeam() << ", " << overlap << " , " << normal << " -- Pos " << getPosition() << ", Vel " << getVelocity();
   }
 
 

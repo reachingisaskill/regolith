@@ -387,6 +387,18 @@
       ]
     },
     {
+      "name" : "platformer_edge",
+      "type" : "region",
+      "collision_team" : "level_boundaries",
+      "collision_type" : "environment",
+      "collision" :
+      {
+        "position" : [ 0.0, 0.0 ],
+        "width" : 1900.0,
+        "height" : 1060.0
+      }
+    },
+    {
       "name" : "platformer_background",
       "type" : "simple_sprite",
       "texture_name" : "platformer_background"
@@ -425,7 +437,8 @@
     "environment" : 0,
     "player" : 1,
     "enemy" : 2,
-    "triggers" : 3
+    "triggers" : 3,
+    "level_boundaries" : 10
   },
 
   "contexts" :

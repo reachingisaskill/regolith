@@ -46,6 +46,33 @@ namespace Regolith
   }
 
 
+  void CollisionHandler::addContainerPair( TeamID team1, TeamID team2 )
+  {
+    CollisionPairList::iterator end = _pairings.end();
+    for ( CollisionPairList::iterator it = _pairings.begin(); it != end; ++it )
+    {
+      if ( it->first == team1 )
+      {
+        if ( it->second == team2 )
+        {
+          WARN_LOG( "Attempting to add existing team collision pairing twice" );
+          return;
+        }
+      }
+      else if ( it->first == team2 )
+      {
+        if ( it->second == team1 )
+        {
+          ERROR_LOG( "Cannot add an inverse contaimment rule." );
+          return;
+        }
+      }
+    }
+
+    _containers.push_back( std::make_pair( team1, team2 ) );
+  }
+
+
   void CollisionHandler::configure( Json::Value& json_data )
   {
     INFO_LOG( "Configuring Collision Handler" );
@@ -66,6 +93,7 @@ namespace Regolith
       TeamID team2 = Manager::getInstance()->getTeamID( team_name2 );
 
       addCollisionPair( team1, team2 );
+      INFO_STREAM << "Added Collision Rule: " << team_name1 << " vs " << team_name2;
     }
 
 
@@ -85,7 +113,8 @@ namespace Regolith
       TeamID team1 = Manager::getInstance()->getTeamID( team_name1 );
       TeamID team2 = Manager::getInstance()->getTeamID( team_name2 );
 
-      addCollisionPair( team1, team2 );
+      addContainerPair( team1, team2 );
+      INFO_STREAM << "Added Container Rule: " << team_name1 << " <- " << team_name2;
     }
   }
 

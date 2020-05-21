@@ -37,6 +37,9 @@ namespace Regolith
       // Manually add a pairing
       void addCollisionPair( TeamID, TeamID );
 
+      // Manually add a containment pairing
+      void addContainerPair( TeamID, TeamID );
+
       // Basic iterator interface
       iterator collisionBegin() const { return _pairings.begin(); }
       iterator collisionEnd() const { return _pairings.end(); }

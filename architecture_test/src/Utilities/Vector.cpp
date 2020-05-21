@@ -50,6 +50,12 @@ namespace Regolith
   }
 
 
+  Vector Vector::fabs() const
+  {
+    return Vector( std::fabs(_x), std::fabs(_y) );
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Rotations
 
@@ -110,6 +116,12 @@ namespace Regolith
   Vector Vector::operator*( float f ) const // Multiply by constant
   {
     return Vector( _x*f, _y*f );
+  }
+
+
+  Vector Vector::operator/( float f ) const // Divide by constant
+  {
+    return Vector( _x/f, _y/f );
   }
 
 

@@ -1,4 +1,4 @@
-#define LOGTASTIC_DEBUG_OFF
+//#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Collision.h"
 #include "Regolith/Architecture/Collidable.h"
@@ -213,72 +213,36 @@ namespace Regolith
     DEBUG_STREAM << " Global Pos1 : " << parent_pos << " W = " << parent_coll.width() << " H = " << parent_coll.height();
 
     child_pos = child->position() + child_coll.position(); // Move into global coordinate system
-    DEBUG_STREAM << "   Global Pos2 : " << child_pos << " W = " << child_coll.width() << " H = " << child_coll.height();
+    DEBUG_STREAM << " Global Pos2 : " << child_pos << " W = " << child_coll.width() << " H = " << child_coll.height();
 
 
     // X Axis
     float diff_x = child_pos.x() - parent_pos.x();
+    float diff_y = child_pos.y() - parent_pos.y();
 
-    if ( diff_x < 0.0 )
+    if ( ( diff_x >= 0.0 ) && ( ( diff_x + child_coll.width()) <= parent_coll.width() ) )
+      if ( ( diff_y >= 0.0 ) && ( ( diff_y + child_coll.height()) <= parent_coll.height() ) )
+        return; // Contained
+
+    if ( diff_x > 0.0 )
     {
-      diff_x = -diff_x; // This now the overlap size
-
-      float diff_y = child_pos.y() - parent_pos.y();
-      if ( diff_y < 0.0 )
-      {
-        diff_y = -diff_y; // This is the y-overlap
-
-        if ( diff_x >= diff_y )
-        {
-          callback( parent, child, -unitVector_y, diff_y );
-        }
-        else
-        {
-          callback( parent, child, -unitVector_x, diff_x );
-        }
-      }
-      else if ( ( diff_y += ( child_coll.height() - parent_coll.height() ), diff_y > 0.0 ) )
-      {
-        if ( diff_x >= diff_y )
-        {
-          callback( parent, child, -unitVector_y, diff_y );
-        }
-        else
-        {
-          callback( parent, child, -unitVector_x, diff_x );
-        }
-      }
+      diff_x += child_coll.width() - parent_coll.width();
+      if ( diff_x < 0.0 ) diff_x = 0.0;
     }
-    else if ( ( diff_x += ( child_coll.width() - parent_coll.width() ), diff_x > 0.0 ) )
+
+    if ( diff_y > 0.0 )
     {
-      // This now the overlap size
-
-      float diff_y = child_pos.y() - parent_pos.y();
-      if ( diff_y < 0.0 )
-      {
-        diff_y = -diff_y; // This is the y-overlap
-
-        if ( diff_x >= diff_y )
-        {
-          callback( parent, child, -unitVector_y, diff_y );
-        }
-        else
-        {
-          callback( parent, child, -unitVector_x, diff_x );
-        }
-      }
-      else if ( ( diff_y += ( child_coll.height() - parent_coll.height() ), diff_y > 0.0 ) )
-      {
-        if ( diff_x >= diff_y )
-        {
-          callback( parent, child, -unitVector_y, diff_y );
-        }
-        else
-        {
-          callback( parent, child, -unitVector_x, diff_x );
-        }
-      }
+      diff_y += child_coll.height() - parent_coll.height();
+      if ( diff_y < 0.0 ) diff_y = 0.0;
     }
+
+    Vector normal( diff_x, diff_y );
+    float length = normal.mod();
+
+    DEBUG_STREAM << "DIFF_X = " << diff_x << " ,  DIFF_Y = " << diff_y << " L = " << length;
+
+
+    callback( child, parent, (normal /= length), length );
   }
 
 

@@ -40,6 +40,7 @@ namespace Regolith
       double square() const;
       double mod() const;
       Vector norm() const;
+      Vector fabs() const;
 
 
       Vector& rotate( float ); // Rotate about the origin
@@ -50,6 +51,7 @@ namespace Regolith
 
       // Standard operator overloads
       Vector operator*( float ) const; // Multiply by constant
+      Vector operator/( float ) const; // Divide by constant
       float operator*( const Vector& ) const; // Dot Product
       float operator^( const Vector& ) const; // Cross Product
       Vector operator%( const Vector& ) const; // Directional Dot Product
