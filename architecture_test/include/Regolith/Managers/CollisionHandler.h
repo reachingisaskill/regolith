@@ -21,6 +21,7 @@ namespace Regolith
 
     private:
       CollisionPairList _pairings;
+      CollisionPairList _containers;
 
     public:
       // No changing!
@@ -37,8 +38,12 @@ namespace Regolith
       void addCollisionPair( TeamID, TeamID );
 
       // Basic iterator interface
-      iterator begin() const { return _pairings.begin(); }
-      iterator end() const { return _pairings.end(); }
+      iterator collisionBegin() const { return _pairings.begin(); }
+      iterator collisionEnd() const { return _pairings.end(); }
+
+      // Basic iterator interface
+      iterator containerBegin() const { return _containers.begin(); }
+      iterator containerEnd() const { return _containers.end(); }
   };
 
 }

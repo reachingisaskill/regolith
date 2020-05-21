@@ -48,11 +48,13 @@ namespace Regolith
 
   void Platformer::onPause()
   {
+    DEBUG_LOG( "PLATFORMER PAUSE" );
   }
 
 
   void Platformer::onResume()
   {
+    DEBUG_LOG( "PLATFORMER RESUME" );
   }
 
 

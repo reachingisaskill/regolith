@@ -21,12 +21,17 @@ namespace Regolith
 //  class Contact;
   class Collision;
   class Collidable;
+  class ContextLayer;
 
   // Function that produces the contact class
   void collides( Collidable*, Collidable* );
 
   // Function that returns true if the first object contains the second object
-  bool contains( Collidable*, Collidable* );
+//  bool contains( Collidable*, Collidable* );
+  void contains( Collidable*, Collidable* );
+
+  // Function that returns true if the layer contains the object
+  bool contains( ContextLayer&, Collidable* );
 
   // Function that returns true if the object contains point
   bool contains( Collidable*, const Vector& );
@@ -37,8 +42,8 @@ namespace Regolith
   class Collision
   {
     friend void collides( Collidable*, Collidable* );
-    friend bool contains( Collidable*, Collidable* );
-    friend bool contains( Collidable*, const Vector& );
+//    friend bool contains( Collidable*, Collidable* );
+//    friend bool contains( Collidable*, const Vector& );
 
     private:
       // Position with respect to the owning drawable object

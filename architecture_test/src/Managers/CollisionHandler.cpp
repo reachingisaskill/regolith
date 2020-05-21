@@ -67,6 +67,26 @@ namespace Regolith
 
       addCollisionPair( team1, team2 );
     }
+
+
+
+    Utilities::validateJson( json_data, "container_rules", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data["container_rules"], 0, Utilities::JSON_TYPE_ARRAY );
+
+    Json::Value& container_rules = json_data["container_rules"];
+
+    for ( Json::ArrayIndex i = 0; i < container_rules.size(); ++i )
+    {
+      Utilities::validateJsonArray( container_rules[i], 2, Utilities::JSON_TYPE_STRING );
+
+      std::string team_name1 = container_rules[i][0].asString();
+      std::string team_name2 = container_rules[i][1].asString();
+
+      TeamID team1 = Manager::getInstance()->getTeamID( team_name1 );
+      TeamID team2 = Manager::getInstance()->getTeamID( team_name2 );
+
+      addCollisionPair( team1, team2 );
+    }
   }
 
 }

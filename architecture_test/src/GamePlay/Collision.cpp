@@ -2,6 +2,7 @@
 
 #include "Regolith/GamePlay/Collision.h"
 #include "Regolith/Architecture/Collidable.h"
+#include "Regolith/Architecture/ContextLayer.h"
 
 #include "logtastic.h"
 
@@ -161,6 +162,8 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Contains function
 
+
+  /*
   bool contains( Collidable* parent, Collidable* child )
   {
     DEBUG_LOG( "Checking Containment" );
@@ -185,6 +188,120 @@ namespace Regolith
       // Y Axis
       float diff_y = child_pos.y() - parent_pos.y();
       if ( ( diff_y > child_coll.height() ) && ( diff_y < parent_coll.height() ) )
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+  */
+
+
+
+  void contains( Collidable* parent, Collidable* child )
+  {
+    DEBUG_LOG( "Checking Containment" );
+
+    const Collision& parent_coll = parent->getCollision();
+    const Collision& child_coll = child->getCollision();
+
+    Vector parent_pos;
+    Vector child_pos;
+
+    parent_pos = parent->position() + parent_coll.position(); // Move into global coordinate system
+    DEBUG_STREAM << " Global Pos1 : " << parent_pos << " W = " << parent_coll.width() << " H = " << parent_coll.height();
+
+    child_pos = child->position() + child_coll.position(); // Move into global coordinate system
+    DEBUG_STREAM << "   Global Pos2 : " << child_pos << " W = " << child_coll.width() << " H = " << child_coll.height();
+
+
+    // X Axis
+    float diff_x = child_pos.x() - parent_pos.x();
+
+    if ( diff_x < 0.0 )
+    {
+      diff_x = -diff_x; // This now the overlap size
+
+      float diff_y = child_pos.y() - parent_pos.y();
+      if ( diff_y < 0.0 )
+      {
+        diff_y = -diff_y; // This is the y-overlap
+
+        if ( diff_x >= diff_y )
+        {
+          callback( parent, child, -unitVector_y, diff_y );
+        }
+        else
+        {
+          callback( parent, child, -unitVector_x, diff_x );
+        }
+      }
+      else if ( ( diff_y += ( child_coll.height() - parent_coll.height() ), diff_y > 0.0 ) )
+      {
+        if ( diff_x >= diff_y )
+        {
+          callback( parent, child, -unitVector_y, diff_y );
+        }
+        else
+        {
+          callback( parent, child, -unitVector_x, diff_x );
+        }
+      }
+    }
+    else if ( ( diff_x += ( child_coll.width() - parent_coll.width() ), diff_x > 0.0 ) )
+    {
+      // This now the overlap size
+
+      float diff_y = child_pos.y() - parent_pos.y();
+      if ( diff_y < 0.0 )
+      {
+        diff_y = -diff_y; // This is the y-overlap
+
+        if ( diff_x >= diff_y )
+        {
+          callback( parent, child, -unitVector_y, diff_y );
+        }
+        else
+        {
+          callback( parent, child, -unitVector_x, diff_x );
+        }
+      }
+      else if ( ( diff_y += ( child_coll.height() - parent_coll.height() ), diff_y > 0.0 ) )
+      {
+        if ( diff_x >= diff_y )
+        {
+          callback( parent, child, -unitVector_y, diff_y );
+        }
+        else
+        {
+          callback( parent, child, -unitVector_x, diff_x );
+        }
+      }
+    }
+  }
+
+
+  bool contains( ContextLayer& layer, Collidable* object )
+  {
+    DEBUG_LOG( "Checking Layer Containement" );
+
+    const Collision& object_coll = object->getCollision();
+
+    const Vector& layer_pos = layer.getPosition();
+    Vector object_pos;
+
+    object_pos = object->position() + object_coll.position(); // Move into global coordinate system
+    DEBUG_STREAM << "   Global Pos2 : " << object_pos << " W = " << object_coll.width() << " H = " << object_coll.height();
+
+
+    // X Axis
+    float diff_x = object_pos.x() - layer_pos.x();
+    if ( ( diff_x > -object_coll.width() ) && ( diff_x < layer.getWidth() ) ) 
+    {
+      // Y Axis
+      float diff_y = object_pos.y() - layer_pos.y();
+      if ( ( diff_y > object_coll.height() ) && ( diff_y < layer.getHeight() ) )
       {
         return true;
       }

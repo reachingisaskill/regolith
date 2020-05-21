@@ -7,13 +7,19 @@
 
   "pause_context" : "pause_menu",
 
-  "collision_rules" :
-  [
-    [ "environment", "player" ],
-    [ "environment", "enemy" ],
-    [ "player", "enemy" ],
-    [ "triggers", "player" ]
-  ],
+  "collision_handling" :
+  {
+    "collision_rules" :
+    [
+      [ "environment", "player" ],
+      [ "environment", "enemy" ],
+      [ "player", "enemy" ],
+      [ "triggers", "player" ]
+    ],
+    "container_rules" :
+    [
+    ]
+  },
 
   "character" : 
   {
@@ -83,7 +89,12 @@
       "name" : "pause_menu",
       "type" : "menu",
       "input_mapping" : "title",
-      "collision_rules" : [],
+      "collision_handling" :
+      {
+        "collision_rules" : [],
+        "container_rules" : []
+      },
+
       "camera" :
       {
         "follow" : null,

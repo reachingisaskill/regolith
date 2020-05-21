@@ -24,7 +24,7 @@ namespace Regolith
       virtual void configure( Json::Value& ) override;
 
       // Replace the character at the specified position
-      virtual void respawn( const Vector& vec ) override { setPosition( vec ); }
+      virtual void respawn( const Vector& vec ) override { setPosition( vec ); setVelocity( Vector( 0.0, 0.0 ) ); }
 
 
 ////////////////////////////////////////////////////////////////////////////////

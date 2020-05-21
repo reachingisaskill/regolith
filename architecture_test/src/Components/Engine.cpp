@@ -66,10 +66,14 @@ namespace Regolith
         for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
         {
           DEBUG_LOG( "   Processing Context" );
-          (*context_it)->update( time );
-          (*context_it)->step( time );
-          (*context_it)->resolveCollisions();
-          (*context_it)->render();
+          Context* this_context = (*context_it);
+          if ( ! this_context->isPaused() )
+          {
+            this_context->update( time );
+            this_context->step( time );
+            this_context->resolveCollisions();
+          }
+          this_context->render();
         }
 
 
