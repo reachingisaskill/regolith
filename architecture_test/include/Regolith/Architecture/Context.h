@@ -12,6 +12,7 @@
 #include "Regolith/Managers/InputHandler.h"
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/FocusHandler.h"
+#include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/GamePlay/Camera.h"
 
@@ -46,6 +47,7 @@ namespace Regolith
       InputHandler _theInput;
       AudioHandler _theAudio;
       FocusHandler _theFocus;
+      CollisionHandler _theCollision;
 
       // Camera for the context
       Camera _theCamera;
@@ -100,7 +102,7 @@ namespace Regolith
       // Public interface to context states
       void startContext() { _theAudio.play(); this->onStart(); }
       void stopContext() { _theAudio.stop(); this->onStop(); }
-      void pauseContext() { if ( ! _paused && _pauseable ) { _paused = true; _theAudio.pause(); this->onPause(); } }
+      void pauseContext() { if ( (! _paused) && _pauseable ) { _paused = true; _theAudio.pause(); this->onPause(); } }
       void resumeContext() { if ( _paused ) { _paused = false; _theAudio.play(); this->onResume(); } }
 
 

@@ -4,8 +4,11 @@
 
 #include "Regolith/Global/Json.h"
 
+#include <list>
+#include <set>
 #include <map>
 #include <limits>
+#include <string>
 
 
 namespace Regolith
@@ -18,6 +21,22 @@ namespace Regolith
   const float epsilon = 1.0E-6;
 
   const unsigned NUMBER_MOUSE_BUTTONS = 7;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Useful Typedefs
+  class Drawable;
+  class Moveable;
+  class Collidable;
+  class Clickable;
+
+  typedef unsigned int TeamID;
+
+  typedef std::list< Drawable* > DrawableList;
+  typedef std::list< Moveable* > MoveableList;
+  typedef std::list< Collidable* > CollidableList;
+  typedef std::map< TeamID, CollidableList > TeamMap;
+  typedef std::set< Clickable* > ClickableSet;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -17,6 +17,7 @@ namespace Regolith
     _spawnPoints( "spawn_points" ),
     _currentPlayerSpawn( 0 )
   {
+    setPauseable( true );
   }
 
 

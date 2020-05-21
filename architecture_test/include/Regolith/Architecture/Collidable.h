@@ -20,13 +20,13 @@ namespace Regolith
       Collision _collision;
       bool _collisionActive;
       unsigned int _collisionType;
-      int _teamID;
+      TeamID _teamID;
 
     protected:
       void setCollision( Collision c ) { _collision = c; }
       void setCollisionActive( bool c ) { _collisionActive = c; }
       void setCollisionType( unsigned int t ) { _collisionType = t; }
-      void setTeam( int t ) { _teamID = t; }
+      void setTeam( TeamID t ) { _teamID = t; }
 
     public:
       Collidable();
@@ -38,7 +38,7 @@ namespace Regolith
 
 
       // Return the team id - determines collision interactions
-      int getTeam() const { return _teamID; }
+      TeamID getTeam() const { return _teamID; }
 
       // Get the damage factor
       virtual float getDamage() const { return 0.0; }

@@ -189,6 +189,18 @@ namespace Regolith
     return found->second;
   }
 
+  TeamID Manager::getTeamID( std::string name )
+  {
+    TeamNameMap::iterator found = _teamNames.find( name );
+    if ( found == _teamNames.end() )
+    {
+      Exception ex( "Manager::getTeamID()", "Could not find requested team name. Cannot load object." );
+      ex.addDetail( "Team Name", name );
+      throw ex;
+    }
+    return found->second;
+  }
+
 //  Context* Manager::buildContext( Json::Value& ) // See Managers/ManagerBuild.cpp
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

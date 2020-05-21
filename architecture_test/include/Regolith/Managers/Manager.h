@@ -27,15 +27,15 @@ namespace Regolith
   // Forward declarations
   class Context;
 
-  // Useful typedefs
+  // Container typedefs
   typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::map< std::string, TTF_Font* > FontMap;
-  typedef std::map< std::string, unsigned int > TeamNameMap;
+  typedef std::map< std::string, TeamID > TeamNameMap;
 
+  // Factory typedefs
   typedef FactoryTemplate< GameObject > ObjectFactory;
   typedef FactoryTemplate< Context > ContextFactory;
   typedef FactoryTemplate< Signal > SignalFactory;
-
 
   // Manager class
   // Global storage for all scenes, renderers and windows.
@@ -97,6 +97,8 @@ namespace Regolith
       void _loadFonts( Json::Value& );
       // Configure the window
       void _loadWindow( Json::Value& );
+      // Load all the collision teams
+      void _loadTeams( Json::Value& );
       // Load all the texture files
       void _loadTextures( Json::Value& );
       // Load all the resources
@@ -183,7 +185,7 @@ namespace Regolith
       size_t getNumberTeams() const { return _teamNames.size(); }
 
       // Return the team ID for a given name
-      unsigned int getTeamID( std::string name ) { return _teamNames[name]; }
+      TeamID getTeamID( std::string name );
 
       // Add a team to the map
       void addTeam( std::string name, unsigned int id ) { _teamNames[name] = id; }

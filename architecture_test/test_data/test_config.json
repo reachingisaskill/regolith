@@ -420,6 +420,14 @@
     }
   ],
 
+  "collision_teams" :
+  {
+    "environment" : 0,
+    "player" : 1,
+    "enemy" : 2,
+    "triggers" : 3
+  },
+
   "contexts" :
   [
     {

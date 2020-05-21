@@ -16,12 +16,6 @@
 namespace Regolith
 {
 
-  typedef std::list< Drawable* > DrawableList;
-  typedef std::list< Moveable* > MoveableList;
-  typedef std::list< Collidable* > CollidableList;
-  typedef std::map< int, CollidableList > TeamMap;
-  typedef std::set< Clickable* > ClickableSet;
-
   class ContextLayer
   {
     friend class Camera;

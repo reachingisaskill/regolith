@@ -28,6 +28,7 @@ namespace Regolith
     _theInput(),
     _theAudio(),
     _theFocus(),
+    _theCollision(),
     _theCamera(),
     _paused( false ),
     _pauseable( false ),
@@ -131,44 +132,73 @@ namespace Regolith
   void Context::resolveCollisions()
   {
     DEBUG_LOG( "Context Collisions" );
+
     NamedVector< ContextLayer, true >::iterator layers_end = _layers.end();
     for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
     {
       DEBUG_STREAM << " Starting Layer Collision: " << (*layer_it)->teams.size();
-      TeamMap& teams = (*layer_it)->teams;
-      if ( teams.size() < 2 ) continue;
 
-      TeamMap::iterator team_it = teams.begin();
-      TeamMap::iterator opponent_start = ++teams.begin(); // Change this line to allow team self-collisions
-      TeamMap::iterator opponents_end = teams.end();
-
-      while ( opponent_start != opponents_end )
+      CollisionHandler::iterator end = _theCollision.end();
+      for ( CollisionHandler::iterator it = _theCollision.begin(); it != end; ++it )
       {
-        DEBUG_LOG( " Looping Teams" );
-        for ( TeamMap::iterator opponent_it = opponent_start; opponent_it != opponents_end; ++opponent_it )
+        CollidableList& team1 = (*layer_it)->teams[ it->first ];
+        CollidableList& team2 = (*layer_it)->teams[ it->second ];
+
+        CollidableList::iterator end1 = team1.end();
+        CollidableList::iterator end2 = team2.end();
+
+        for ( CollidableList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
         {
-
-          CollidableList::iterator collidable_end = team_it->second.end();
-          for ( CollidableList::iterator collidable_it = team_it->second.begin(); collidable_it != collidable_end; ++collidable_it )
+          if ( ! (*it1)->collisionActive() ) continue;
+          for ( CollidableList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
           {
-            if ( ! (*collidable_it)->collisionActive() ) continue;
+            if ( ! (*it2)->collisionActive() ) continue;
 
-            CollidableList::iterator enemy_end = opponent_it->second.end();
-            for ( CollidableList::iterator enemy_it = opponent_it->second.begin(); enemy_it != enemy_end; ++enemy_it )
-            {
-              if ( ! (*enemy_it)->collisionActive() ) continue;
-
-              collides( (*collidable_it), (*enemy_it) );
-            }
+            collides( (*it1), (*it2) );
           }
-
         }
-        ++team_it;
-        ++opponent_start;
       }
-
     }
+
     DEBUG_LOG( "Context Collisions Resolved" );
+
+//    NamedVector< ContextLayer, true >::iterator layers_end = _layers.end();
+//    for ( NamedVector<ContextLayer, true>::iterator layer_it = _layers.begin(); layer_it != layers_end; ++layer_it )
+//    {
+//      DEBUG_STREAM << " Starting Layer Collision: " << (*layer_it)->teams.size();
+//      TeamMap& teams = (*layer_it)->teams;
+//      if ( teams.size() < 2 ) continue;
+//
+//      TeamMap::iterator team_it = teams.begin();
+//      TeamMap::iterator opponent_start = ++teams.begin(); // Change this line to allow team self-collisions
+//      TeamMap::iterator opponents_end = teams.end();
+//
+//      while ( opponent_start != opponents_end )
+//      {
+//        DEBUG_LOG( " Looping Teams" );
+//        for ( TeamMap::iterator opponent_it = opponent_start; opponent_it != opponents_end; ++opponent_it )
+//        {
+//
+//          CollidableList::iterator collidable_end = team_it->second.end();
+//          for ( CollidableList::iterator collidable_it = team_it->second.begin(); collidable_it != collidable_end; ++collidable_it )
+//          {
+//            if ( ! (*collidable_it)->collisionActive() ) continue;
+//
+//            CollidableList::iterator enemy_end = opponent_it->second.end();
+//            for ( CollidableList::iterator enemy_it = opponent_it->second.begin(); enemy_it != enemy_end; ++enemy_it )
+//            {
+//              if ( ! (*enemy_it)->collisionActive() ) continue;
+//
+//              collides( (*collidable_it), (*enemy_it) );
+//            }
+//          }
+//
+//        }
+//        ++team_it;
+//        ++opponent_start;
+//      }
+//
+//    }
   }
 
 
@@ -252,12 +282,16 @@ namespace Regolith
 
   void Context::configure( Json::Value& json_data )
   {
+    INFO_LOG( "Configuring Context" );
+
     Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "camera", Utilities::JSON_TYPE_OBJECT );
 
-
+    // Configure the collision rules
+    _theCollision.configure( json_data );
+    // Configure the input mapping
     _theInput.configure( json_data["input_mapping"].asString() );
 
     if ( Utilities::validateJson( json_data, "pauseable", Utilities::JSON_TYPE_BOOLEAN, false ) )

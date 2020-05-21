@@ -62,6 +62,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "fonts", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "input_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "textures", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "game_objects", Utilities::JSON_TYPE_ARRAY );
       Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
@@ -87,6 +88,10 @@ namespace Regolith
       this->_loadWindow( json_data["window"] );
       _theWindow.registerEvents( _theInput );
       _theEngine.setRenderer( _theRenderer );
+
+
+      //Load all the collision teams
+      this->_loadTeams( json_data["collision_teams"] );
 
 
       // Load all the texture files
@@ -253,6 +258,18 @@ namespace Regolith
     _defaultColor.b = color[2].asInt();
     _defaultColor.a = color[3].asInt();
 
+  }
+
+
+  void Manager::_loadTeams( Json::Value& json_data )
+  {
+    Json::Value::const_iterator data_end = json_data.end();
+    for ( Json::Value::const_iterator it = json_data.begin(); it != data_end; ++it )
+    {
+      std::string team_name = it.key().asString();
+      TeamID id = (TeamID) it->asInt();
+      addTeam( team_name, id );
+    }
   }
 
 

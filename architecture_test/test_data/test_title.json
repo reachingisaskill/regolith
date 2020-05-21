@@ -7,6 +7,8 @@
 
   "menu" : "title_menu",
 
+  "collision_rules" : [],
+
   "camera" :
   {
     "follow:" : null,
@@ -40,6 +42,7 @@
       "name" : "title_menu",
       "type" : "menu",
       "input_mapping" : "title",
+      "collision_rules" : [],
       "camera" :
       {
         "follow:" : null,

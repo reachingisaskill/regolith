@@ -4,13 +4,14 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
-#include "Regolith/Architecture/Context.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/GamePlay/Timer.h"
 
 
 namespace Regolith
 {
+
+  class Context;
 
   typedef std::deque< Context* > ContextStack;
 

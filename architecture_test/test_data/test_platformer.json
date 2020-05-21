@@ -7,6 +7,14 @@
 
   "pause_context" : "pause_menu",
 
+  "collision_rules" :
+  [
+    [ "environment", "player" ],
+    [ "environment", "enemy" ],
+    [ "player", "enemy" ],
+    [ "triggers", "player" ]
+  ],
+
   "character" : 
   {
     "name" : "test_character",
@@ -75,11 +83,12 @@
       "name" : "pause_menu",
       "type" : "menu",
       "input_mapping" : "title",
+      "collision_rules" : [],
       "camera" :
       {
         "follow" : null,
         "lower_limit" : [ 0.0, 0.0 ],
-        "upper_limit" : [ 1920.0, 1080.0 ]
+        "upper_limit" : [ 1024.0, 768.0 ]
       },
       
       "layers" :
@@ -96,8 +105,8 @@
         {
           "name" : "menu_layer",
           "position" : [ 100.0, 100.0 ],
-          "width" : 824,
-          "height" : 568,
+          "width" : 1024,
+          "height" : 768,
           "movement_scale" : [ 0.0, 0.0 ],
 
           "elements" : 
