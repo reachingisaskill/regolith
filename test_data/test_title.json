@@ -1,93 +1,112 @@
 {
+  "type" : "title_scene",
+
   "input_mapping" : "title",
 
-  "sounds" :
+  "default_music" : "null",
+
+  "menu" : "title_menu",
+
+  "collision_handling" :
   {
-    "default_music" : "the_beat"
+    "collision_rules" : [],
+    "container_rules" : []
   },
 
-  "cameras" :
+  "camera" :
   {
-    "type" : "fixed",
-    "width" : 1024,
-    "height" : 768,
-    "start_position" : [ 0, 0 ]
+    "follow:" : null,
+    "lower_limit" : [ 0.0, 0.0 ],
+    "upper_limit" : [ 1024.0, 768.0 ]
   },
 
-  "options" :
-  {
-    "starting_dialog" : "title_menu"
-  },
-
-  "elements" :
-  {
-    "background" : "title_background",
-    
-    "scene_elements" :
-    [
-      {
-        "resource_name" : "the_animated_spritesheet",
-        "position" : [ 250, 200 ]
-      },
-      {
-        "resource_name" : "the_animated_spritesheet",
-        "position" : [ 800, 200 ]
-      }
-    ],
-
-    "hud_elements" :
-    [
-      {
-        "resource_name" : "fps_text",
-        "position" : [ 20, 20 ],
-        "alignment" : 
-        {
-          "horizontal" : "centre",
-          "vertical" : "bottom"
-        }
-      }
-    ]
-  },
-
-  "dialog_windows" :
+  "layers" : 
   [
     {
-      "input_mapping" : "title",
-      "name" : "title_menu",
-      "dialog_type" : "menu",
+      "name" : "background_layer",
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024,
+      "height" : 768,
+      "movement_scale" : [ 0.0, 0.0 ],
 
       "elements" :
       [
         {
-          "resource_name" : "welcome_text1",
-          "position" : [0, -200],
-          "alignment" :
-          {
-            "horizontal" : "centre",
-            "vertical" : "centre"
-          }
-        },
+          "name" : "title_background",
+          "position" : [ 0.0, 0.0 ],
+          "is_global" : true
+        }
+      ]
+    }
+  ],
+
+  "contexts" :
+  [
+    {
+      "name" : "title_menu",
+      "type" : "menu",
+      "input_mapping" : "title",
+      "collision_handling" :
+      {
+        "collision_rules" : [],
+        "container_rules" : []
+      },
+      "camera" :
+      {
+        "follow:" : null,
+        "lower_limit" : [ 0.0, 0.0 ],
+        "upper_limit" : [ 1024.0, 768.0 ]
+      },
+
+      "layers" :
+      [
         {
-          "resource_name" : "welcome_play_button",
-          "position" : [0, +200],
-          "alignment" :
-          {
-            "horizontal" : "centre",
-            "vertical" : "centre"
-          },
-          "actions" :
+          "name" : "foreground_layer",
+          "position" : [ 0.0, 0.0 ],
+          "width" : 1024,
+          "height" : 768,
+          "movement_scale" : [ 0.0, 0.0 ],
+          "elements" :
           [
             {
-              "type" : "scene_change",
-              "scene_name" : "test_scene"
+              "name" : "title_welcome1",
+              "position" : [ 0.0, 100.0 ],
+              "alignment" : [ "center", "top" ],
+              "is_global" : true
+            },
+            {
+              "name" : "test_animated_sprite",
+              "position" : [ -100.0, 200 ],
+              "alignment" : [ "right", "top" ],
+              "is_global" : false
+            },
+            {
+              "name" : "test_animated_sprite",
+              "position" : [ 100.0, 200 ],
+              "alignment" : [ "left", "top" ],
+              "is_global" : false
+            },
+            {
+              "name" : "title_start_button",
+              "position" : [ 0.0, 0.0 ],
+              "alignment" : [ "center", "center" ],
+              "is_global" : false
+            },
+            {
+              "name" : "title_test_button",
+              "position" : [ 0.0, 50.0 ],
+              "alignment" : [ "center", "center" ]
+            },
+            {
+              "name" : "title_quit_button",
+              "position" : [ 0.0, 100.0 ],
+              "alignment" : [ "center", "center" ]
             }
           ]
         }
       ],
-      "options" :
-      {
-        "can_cancel" : true
-      }
+      "contexts" : []
     }
   ]
+
 }

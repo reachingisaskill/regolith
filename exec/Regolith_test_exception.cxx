@@ -1,5 +1,6 @@
 
-#include "regolith.h"
+#include "Regolith.h"
+#include "Regolith/Utilities/Exception.h"
 
 #include "testass.h"
 #include "logtastic.h"
@@ -19,6 +20,7 @@ int main( int, char** )
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_exception.log" );
+  logtastic::setPrintToScreenLimit( logtastic::off );
   logtastic::start( "Regolith - Exception Tests", REGOLITH_VERSION_NUMBER );
 
   testass::control::init( "Regolith", "Exceptions" );

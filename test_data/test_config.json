@@ -27,7 +27,7 @@
 
   "input_device" :
   {
-    "require" : [ "keyboard", "mouse" ],
+    "require" : [ "keyboard", "mouse", "controller" ],
     "keymappings" :
     [
       {
@@ -38,14 +38,34 @@
             "type" : "keyboard",
             "mapping" :
             {
-              "escape" : "quit",
-              "p"      : "pause",
+              "escape" : "pause",
               "space"  : "jump",
               "w"      : "move_up",
               "s"      : "move_down",
               "a"      : "move_left",
               "d"      : "move_right",
               "return" : "attack"
+            }
+          },
+          {
+            "type" : "controller_buttons",
+            "mapping" :
+            {
+              "start"        : "pause",
+              "A"            : "jump",
+              "dpad_up"      : "move_up",
+              "dpad_down"    : "move_down",
+              "dpad_left"    : "move_left",
+              "dpad_right"   : "move_right",
+              "X"            : "attack"
+            }
+          },
+          {
+            "type" : "controller_axes",
+            "mapping" :
+            {
+              "leftx" : "move_horizontal",
+              "lefty" : "move_vertical"
             }
           }
         ]
@@ -58,9 +78,17 @@
             "type" : "keyboard",
             "mapping" :
             {
-              "escape" : "quit",
+              "escape" : "cancel",
               "return" : "select",
-              "tab" : "focus_next"
+              "tab" : "next",
+              "w"      : "prev",
+              "s"      : "next",
+              "a"      : "prev",
+              "d"      : "next",
+              "up"     : "prev",
+              "down"   : "next",
+              "left"   : "prev",
+              "right"  : "next"
             }
           },
           {
@@ -68,6 +96,19 @@
             "mapping" :
             {
               "left" : "click"
+            }
+          },
+          {
+            "type" : "controller_buttons",
+            "mapping" :
+            {
+              "A" : "select",
+              "B" : "back",
+              "dpad_up" : "prev",
+              "dpad_down" : "next",
+              "dpad_left" : "prev",
+              "dpad_right" : "next",
+              "start" : "cancel"
             }
           }
         ]
@@ -109,181 +150,310 @@
     "texture_files" :
     [
       {
-        "name" : "background_texture",
-        "path" : "test_data/test_background.png"
-      },
-      {
         "name" : "title_background",
         "path" : "test_data/test_wallpaper.jpg"
       },
       {
-        "name" : "dot_texture",
-        "path" : "test_data/test_ball.png",
-        "colour_key" : [ 0, 255, 255 ]
+        "name" : "platformer_background",
+        "path" : "test_data/test_background.png"
       },
       {
-        "name" : "ground_texture",
+        "name" : "test_animated_sprite",
+        "path" : "test_data/test_spritesheet.png",
+        "colour_key" : [ 255, 255, 255 ]
+      },
+      {
+        "name" : "test_platform",
         "path" : "test_data/test_ground.png"
       },
       {
-        "name" : "spritesheet_test",
-        "path" : "test_data/test_spritesheet.png",
-        "colour_key" : [ 255, 255, 255 ]
+        "name" : "the_ball",
+        "path" : "test_data/test_ball.png",
+        "colour_key" : [ 0, 255, 255 ]
       }
     ],
     "texture_strings" :
     [
       {
-        "name" : "header_text",
-        "text" : "Press Return to toggle fullscreen",
-        "colour" : [ 0, 0, 0, 255 ],
-        "font" : "default"
+        "name" : "title_welcome1",
+        "text" : "Welcome to the Regolith Integration Test",
+        "font" : "default_big",
+        "colour" : [ 255, 255, 255, 255]
+      },
+      {
+        "name" : "title_start_button_up",
+        "text" : "Click here to start",
+        "font" : "default",
+        "colour" : [ 160, 160, 160, 255]
+      },
+      {
+        "name" : "title_start_button_down",
+        "text" : "Click here to start",
+        "font" : "default",
+        "colour" : [ 255, 160, 160, 255]
+      },
+      {
+        "name" : "title_start_button_focus",
+        "text" : "Click here to start",
+        "font" : "default",
+        "colour" : [ 255, 255, 255, 255]
+      },
+      {
+        "name" : "title_test_button_up",
+        "text" : "Test button",
+        "font" : "default",
+        "colour" : [ 160, 160, 160, 255]
+      },
+      {
+        "name" : "title_test_button_down",
+        "text" : "Test button",
+        "font" : "default",
+        "colour" : [ 255, 160, 160, 255]
+      },
+      {
+        "name" : "title_test_button_focus",
+        "text" : "Test button",
+        "font" : "default",
+        "colour" : [ 255, 255, 255, 255]
+      },
+      {
+        "name" : "title_quit_button_up",
+        "text" : "Exit",
+        "font" : "default",
+        "colour" : [ 160, 160, 160, 255]
+      },
+      {
+        "name" : "title_quit_button_down",
+        "text" : "Exit",
+        "font" : "default",
+        "colour" : [ 255, 160, 160, 255]
+      },
+      {
+        "name" : "title_quit_button_focus",
+        "text" : "Exit",
+        "font" : "default",
+        "colour" : [ 255, 255, 255, 255]
       },
       {
         "name" : "pause_text",
-        "text" : "Press \"p\" to unpause",
-        "colour" : [ 0, 0, 0, 255 ],
-        "font" : "default"
+        "text" : "Game Paused",
+        "font" : "default_big",
+        "colour" : [ 160, 160, 160, 255 ]
       },
       {
-        "name" : "welcome1",
-        "text" : "Welcome to the test title page",
-        "colour" : [ 255, 255, 255, 255 ],
-        "font" : "default_big"
+        "name" : "pause_quit_normal",
+        "text" : "Quit",
+        "font" : "default_big",
+        "colour" : [ 160, 160, 160, 255 ]
       },
       {
-        "name" : "welcome_button_text1",
-        "text" : "Click here to play",
-        "colour" : [ 150, 150, 150, 255 ],
-        "font" : "default"
+        "name" : "pause_quit_down",
+        "text" : "Quit",
+        "font" : "default_big",
+        "colour" : [ 255, 255, 255, 255 ]
       },
       {
-        "name" : "welcome_button_text_hover",
-        "text" : "Click here to play",
-        "colour" : [ 255, 255, 255, 255 ],
-        "font" : "default"
-      },
-      {
-        "name" : "welcome_button_text_down",
-        "text" : "Click here to play",
-        "colour" : [ 255, 0, 0, 255 ],
-        "font" : "default"
+        "name" : "pause_quit_focus",
+        "text" : "Quit",
+        "font" : "default_big",
+        "colour" : [ 255, 255, 255, 255 ]
       }
     ]
   },
 
-  "resources" :
+  "game_objects" :
   [
     {
-      "resource_name" : "title_background",
-      "resource_type" : "sprite",
-      "texture_name" : "title_background",
-      "team_name" : "environment",
-      "collision" : "default"
+      "name" : "title_background",
+      "type" : "simple_sprite",
+      "texture_name" : "title_background"
     },
     {
-      "resource_name" : "background",
-      "resource_type" : "sprite",
-      "texture_name" : "background_texture",
-      "team_name" : "environment",
-      "collision" : "default"
-    },
-    {
-      "resource_name" : "platform",
-      "resource_type" : "sprite",
-      "team_name" : "environment",
-      "texture_name" : "ground_texture",
-      "collision" : "default",
-      "mass" : 0.0
-    },
-    {
-      "resource_name" : "the_dot",
-      "resource_type" : "test_player",
-      "texture_name" : "dot_texture",
-      "collision" : "default",
-      "mass" : 1.0,
-      "team_name" : "player",
-      "jump_speed" : 3.0,
-      "movement_force" : 0.002,
-      "jump_sound" : "thud",
-      "hard_landing_sound" : "landing"
-    },
-    {
-      "resource_name" : "the_spritesheet",
-      "resource_type" : "sprite",
-      "team_name" : "environment",
-      "texture_name" : "spritesheet_test",
+      "name" : "test_animated_sprite",
+      "type" : "animated_sprite",
+      "texture_name" : "test_animated_sprite",
       "number_rows" : 2,
       "number_columns" : 2,
-      "number_used" : 4,
-      "start_number" : 2
+      "update_period" : 1000
     },
     {
-      "resource_name" : "the_animated_spritesheet",
-      "resource_type" : "sprite",
-      "team_name" : "environment",
-      "texture_name" : "spritesheet_test",
-      "update_period" : 1000,
-      "number_rows" : 2,
-      "number_columns" : 2,
-      "number_used" : 4,
-      "start_number" : 1
+      "name" : "title_welcome1",
+      "type" : "simple_sprite",
+      "texture_name" : "title_welcome1"
     },
     {
-      "resource_name" : "fps_text",
-      "resource_type" : "fps_string",
-      "team_name" : "hud",
-      "font" : "default",
-      "frame_count" : 100
+      "name" : "title_start_button",
+      "type" : "simple_button",
+      "textures" :
+      {
+        "normal" : 
+        {
+          "texture_name" : "title_start_button_up"
+        },
+        "focus" : 
+        {
+          "texture_name" : "title_start_button_focus"
+        },
+        "down" : 
+        {
+          "texture_name" : "title_start_button_down"
+        }
+      },
+      "signals" :
+      [
+        {
+          "type" : "context_change",
+          "context_name" : "platformer",
+          "operation" : "reset"
+        }
+      ]
     },
     {
-      "resource_name" : "pause_text",
-      "team_name" : "hud",
-      "resource_type" : "sprite",
+      "name" : "title_test_button",
+      "type" : "simple_button",
+      "textures" :
+      {
+        "normal" : 
+        {
+          "texture_name" : "title_test_button_up"
+        },
+        "focus" : 
+        {
+          "texture_name" : "title_test_button_focus"
+        },
+        "down" : 
+        {
+          "texture_name" : "title_test_button_down"
+        }
+      },
+      "signals" : []
+    },
+    {
+      "name" : "title_quit_button",
+      "type" : "simple_button",
+      "textures" :
+      {
+        "normal" : 
+        {
+          "texture_name" : "title_quit_button_up"
+        },
+        "focus" : 
+        {
+          "texture_name" : "title_quit_button_focus"
+        },
+        "down" : 
+        {
+          "texture_name" : "title_quit_button_down"
+        }
+      },
+      "signals" :
+      [
+        {
+          "type" : "game_event",
+          "event" : "quit"
+        }
+      ]
+    },
+    {
+      "name" : "pause_text",
+      "type" : "simple_sprite",
       "texture_name" : "pause_text"
     },
     {
-      "resource_name" : "welcome_text1",
-      "team_name" : "hud",
-      "resource_type" : "sprite",
-      "texture_name" : "welcome1"
+      "name" : "pause_quit_button",
+      "type" : "simple_button",
+      "textures" :
+      {
+        "normal" : 
+        {
+          "texture_name" : "pause_quit_normal"
+        },
+        "focus" : 
+        {
+          "texture_name" : "pause_quit_focus"
+        },
+        "down" : 
+        {
+          "texture_name" : "pause_quit_down"
+        }
+      },
+      "signals" :
+      [
+        {
+          "type" : "context_change",
+          "context_name" : "title_context",
+          "operation" : "reset"
+        }
+      ]
     },
     {
-      "resource_name" : "welcome_play_button",
-      "team_name" : "hud",
-      "resource_type" : "button",
-      "collision" : "default",
-      "state_normal" :
-      { 
-        "texture_name" : "welcome_button_text1"
-      },
-      "state_focussed" :
-      { 
-        "texture_name" : "welcome_button_text_hover"
-      },
-      "state_down" :
-      { 
-        "texture_name" : "welcome_button_text_down"
+      "name" : "platformer_edge",
+      "type" : "region",
+      "collision_team" : "level_boundaries",
+      "collision_type" : "environment",
+      "collision" :
+      {
+        "position" : [ 0.0, 0.0 ],
+        "width" : 1900.0,
+        "height" : 1060.0
+      }
+    },
+    {
+      "name" : "platformer_background",
+      "type" : "simple_sprite",
+      "texture_name" : "platformer_background"
+    },
+    {
+      "name" : "test_platform",
+      "type" : "collidable_sprite",
+      "texture_name" : "test_platform",
+      "collision_team" : "environment",
+      "collision_type" : "environment",
+      "collision" :
+      {
+        "position" : [ 0.0, 0.0 ],
+        "width" : 1000.0,
+        "height" : 200.0
+      }
+    },
+    {
+      "name" : "test_character",
+      "type" : "test_character",
+      "texture_name" : "the_ball",
+      "mass" : 1.0,
+      "collision_team" : "player",
+      "collision_type" : "character",
+      "collision" :
+      {
+        "position" : [ 0.0, 0.0 ],
+        "width" : 50.0,
+        "height" : 50.0
       }
     }
   ],
 
-  "story" :
+  "collision_teams" :
   {
-    "scenes" :
-    [
-      {
-        "name" : "title_page",
-        "file_name" : "test_data/test_title.json",
-        "type" : "title"
-      },
-      {
-        "name" : "test_scene",
-        "file_name" : "test_data/test_scene.json",
-        "type" : "platformer"
-      }
-    ]
-  }
+    "environment" : 0,
+    "player" : 1,
+    "enemy" : 2,
+    "triggers" : 3,
+    "level_boundaries" : 10
+  },
+
+  "contexts" :
+  [
+    {
+      "name" : "title_context",
+      "file" : "test_data/test_title.json"
+    },
+    {
+      "name" : "platformer",
+      "file" : "test_data/test_platformer.json"
+    }
+  ],
+
+  "entry_point" : "title_context"
 
 }
 

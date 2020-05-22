@@ -1,5 +1,6 @@
 
-#include "regolith.h"
+#include "Regolith.h"
+#include "Regolith/Utilities/NamedVector.h"
 
 #include "logtastic.h"
 #include "testass.h"
@@ -12,6 +13,7 @@ int main( int, char** )
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_named_vector.log" );
+  logtastic::setPrintToScreenLimit( logtastic::error );
   logtastic::start( "Regolith - Named Vector Tests", REGOLITH_VERSION_NUMBER );
 
   testass::control::init( "Regolith", "Named Vector" );

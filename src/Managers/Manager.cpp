@@ -1,9 +1,18 @@
 
-#include "Managers/Manager.h"
-#include "Managers/Engine.h"
-#include "Components/Exception.h"
-#include "Scenes/ScenePlatformer.h"
-#include "Scenes/SceneTitle.h"
+#include "Regolith/Managers/Manager.h"
+#include "Regolith/Components/Engine.h"
+#include "Regolith/Components/Window.h"
+
+#include "Regolith/GameObjects/SimpleSprite.h"
+#include "Regolith/GameObjects/CollidableSprite.h"
+#include "Regolith/GameObjects/AnimatedSprite.h"
+#include "Regolith/GameObjects/SimpleButton.h"
+#include "Regolith/GameObjects/Trigger.h"
+#include "Regolith/GameObjects/Region.h"
+#include "Regolith/Contexts/TitleScene.h"
+#include "Regolith/Contexts/Platformer.h"
+#include "Regolith/Contexts/Menu.h"
+#include "Regolith/GamePlay/Signal.h"
 
 #include "logtastic.h"
 
@@ -12,20 +21,21 @@ namespace Regolith
 {
 
   Manager::Manager() :
-    _theEngine( nullptr ),
-    _theWindow( nullptr ),
+    _theWindow(),
+    _theInput(),
+    _theAudio(),
+    _theHardware(),
+    _theEngine( _theInput, _defaultColor ),
     _theRenderer( nullptr ),
-    _theInput( nullptr ),
-    _theAudio( nullptr ),
-    _contexts(),
+    _entryPoint( 0 ),
+    _objectFactory(),
+    _contextFactory(),
+    _signalFactory(),
     _fonts(),
-    _theBuilder( new ObjectBuilder() ),
-    _theSceneBuilder( new SceneBuilder() ),
-    _theDialogBuilder( new DialogBuilder() ),
     _rawTextures(),
     _teamNames(),
-    _resources( "global_resource_list" ),
-    _scenes( "gloabl_scene_list" ),
+    _gameObjects( "manager_game_object_list" ),
+    _contexts( "manager_context_list" ),
     _title(),
     _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
@@ -34,96 +44,48 @@ namespace Regolith
     _gravityConst( 0.0, 0.01 ),
     _dragConst( 0.005 )
   {
-    // Set up the provided factories
-    _theBuilder->addFactory( new SpriteFactory() );
-    _theBuilder->addFactory( new FPSStringFactory() );
-    _theBuilder->addFactory( new ButtonFactory() );
+    // Set up the object factory
+//    _objectFactory.addBuilder<FPSString>( "fps_string" );
+//    _objectFactory.addBuilder<Button>( "button" );
+    _objectFactory.addBuilder<SimpleSprite>( "simple_sprite" );
+    _objectFactory.addBuilder<CollidableSprite>( "collidable_sprite" );
+    _objectFactory.addBuilder<AnimatedSprite>( "animated_sprite" );
+    _objectFactory.addBuilder<SimpleButton>( "simple_button" );
+    _objectFactory.addBuilder<Trigger>( "event_trigger" );
+    _objectFactory.addBuilder<Region>( "region" );
 
-    // Set up the scene factories
-    _theSceneBuilder->addFactory( new TitleSceneFactory() );
-    _theSceneBuilder->addFactory( new PlatformerSceneFactory() );
+    // Set up the context factory
+    _contextFactory.addBuilder<TitleScene>( "title_scene" );
+    _contextFactory.addBuilder<MenuContext>( "menu" );
+    _contextFactory.addBuilder<Platformer>( "platformer" );
 
-    // Set up the dialog factories
-    _theDialogBuilder->addFactory( new MenuDialogFactory() );
+    // Set up the signal factory
+    _signalFactory.addBuilder<InputActionSignal>( "input_action" );
+    _signalFactory.addBuilder<InputBooleanSignal>( "input_boolean" );
+    _signalFactory.addBuilder<InputFloatSignal>( "input_float" );
+    _signalFactory.addBuilder<InputVectorSignal>( "input_vector" );
+    _signalFactory.addBuilder<GameEventSignal>( "game_event" );
+    _signalFactory.addBuilder<ChangeContextSignal>( "context_change" );
 
-    // Create the default teams
-    _teamNames[ "hud" ] = DEFAULT_TEAM_HUD;
-    _teamNames[ "environment" ] = DEFAULT_TEAM_ENVIRONMENT;
-    _teamNames[ "npc" ] = DEFAULT_TEAM_NPC;
-    _teamNames[ "player" ] = DEFAULT_TEAM_PLAYER;
+    // Set up a null value
+    _gameObjects.addObject( nullptr, "null" );
+    _contexts.addObject( nullptr, "null" );
   }
-
-
-
-  void Manager::openContext( Context* c )
-  {
-    DEBUG_LOG( "Opening Context" );
-    
-    _contexts.push_front( c );
-    c->giveFocus();
-  }
-
-
-  void Manager::transferContext( Context* c )
-  {
-    DEBUG_LOG( "Transferring Context" );
-
-    _contexts.front()->takeFocus();
-    _contexts.pop_front();
-    
-    _contexts.push_front( c );
-    c->giveFocus();
-  }
-
-
-  void Manager::closeContext()
-  {
-    DEBUG_LOG( "Closing Current Context" );
-    
-    _contexts.front()->takeFocus();
-    _contexts.pop_front();
-    
-    if ( ! _contexts.empty() )
-    {
-      DEBUG_LOG( "Returning focus" );
-      _contexts.front()->returnFocus();
-    }
-  }
-
-
-//  void Manager::popContext()
-//  {
-//    DEBUG_LOG( "Popping Context" );
-//    // Remove the top element
-//    _contexts.pop_front();
-//
-//    // If there's any left, tell them focus has returned
-//    if ( ! _contexts.empty() )
-//    {
-//      DEBUG_LOG( "Returning focus" );
-//      _contexts.front()->returnFocus();
-//    }
-//  }
 
 
   Manager::~Manager()
   {
-
-//    _defaultColor = nullptr;
     _defaultFont = nullptr;
-
 
     // Remove each of scenes and clear the vector
     INFO_LOG( "Deleteing Scenes" );
-    _scenes.clear();
+    _contexts.clear();
 
-
-    INFO_LOG( "Deleting Resources" );
-    _resources.clear();
+    INFO_LOG( "Deleting GameObjects" );
+    _gameObjects.clear();
 
     INFO_LOG( "Clearing team list" );
     _teamNames.clear();
-
 
     INFO_LOG( "Deleting raw texture data" );
     for ( RawTextureMap::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
@@ -132,48 +94,21 @@ namespace Regolith
     }
     _rawTextures.clear();
 
-
-    // Destroy the builder
-    delete _theBuilder;
-    _theBuilder = nullptr;
-
-    // Destroy the scene builder
-    delete _theSceneBuilder;
-    _theSceneBuilder = nullptr;
-
-
-    // Remove each of the fonts and clear the map
+    INFO_LOG( "Removing each of the fonts and clearing the map" );
     for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )
     {
       TTF_CloseFont( it->second );
     }
     _fonts.clear();
 
-
-    // Delete the Audio Manager
-    delete _theAudio;
-    _theAudio = nullptr;
-
-    // Delete the input manager
-    delete _theInput;
-    _theInput = nullptr;
-
-
-    // Remove the renderer object
+    INFO_LOG( "Destroying the renderer" );
     SDL_DestroyRenderer( _theRenderer );
     _theRenderer = nullptr;
 
-    // Remove the window
-    delete _theWindow;
-    _theWindow = nullptr;
+    INFO_LOG( "Clearing hardware manager" );
+    _theHardware.clear();
 
-
-    // Remove the engine
-    Engine::killInstance();
-    _theEngine = nullptr;
-
-
-    // Close the SDL subsystems
+    INFO_LOG( "Closing the SDL subsystems" );
     TTF_Quit();
     Mix_Quit();
     IMG_Quit();
@@ -181,15 +116,54 @@ namespace Regolith
   }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Context Stack manipulation
+
+  void Manager::openContext( unsigned int c )
+  {
+    DEBUG_LOG( "Opening Context" );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, getContext( c ) ) );
+  }
+
+
+  void Manager::transferContext( unsigned int c )
+  {
+    DEBUG_LOG( "Transferring Context" );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, getContext( c ) ) );
+  }
+
+
+  void Manager::closeContext()
+  {
+    DEBUG_LOG( "Closing Current Context" );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::POP ) );
+  }
+
+
+  void Manager::setContextStack( unsigned int c )
+  {
+    DEBUG_LOG( "Closing All Contexts" );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, getContext( c ) ) );
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Utility functions
+
   void Manager::run()
   {
-    if ( getNumberScenes() <= 0 )
+    if ( _contexts.size() == 0 )
     {
-      FAILURE_LOG( "Scene list is empty - there are no scenes to render!" );
-      Exception ex( "Manager::run()", "No scenes to render", false );
+      FAILURE_LOG( "Context list is empty - there is nothing to render!" );
+      Exception ex( "Manager::run()", "No contexts to load", false );
       throw ex;
     }
-    // This function should be used to start the "story" class running
+
+    // Reset the stack to the first context
+    setContextStack( _entryPoint );
+
+    // Start the engine!
+    _theEngine.run();
   }
 
 
@@ -205,32 +179,6 @@ namespace Regolith
   }
 
 
-  Scene* Manager::getScene( size_t scene_num )
-  {
-    return _scenes[ scene_num ];
-  }
-
-
-  void Manager::loadScene( size_t scene_num )
-  {
-    DEBUG_STREAM << "Load Scene: " << scene_num;
-
-    DEBUG_STREAM << "Closing " << _contexts.size() << " open contexts";
-    while ( ! _contexts.empty() )
-    {
-      closeContext();
-    }
-
-    DEBUG_LOG( "Loading new scene" );
-    Scene* theScene = _scenes[ scene_num ];
-    _contexts.push_front( theScene );
-    _theEngine->setScene( theScene );
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Return existing texture pointer
-
   RawTexture Manager::findRawTexture( std::string name ) const
   {
     RawTextureMap::const_iterator found = _rawTextures.find( name );
@@ -245,6 +193,19 @@ namespace Regolith
     return found->second;
   }
 
+  TeamID Manager::getTeamID( std::string name )
+  {
+    TeamNameMap::iterator found = _teamNames.find( name );
+    if ( found == _teamNames.end() )
+    {
+      Exception ex( "Manager::getTeamID()", "Could not find requested team name. Cannot load object." );
+      ex.addDetail( "Team Name", name );
+      throw ex;
+    }
+    return found->second;
+  }
+
+//  Context* Manager::buildContext( Json::Value& ) // See Managers/ManagerBuild.cpp
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure user events

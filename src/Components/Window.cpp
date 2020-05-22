@@ -1,8 +1,7 @@
 
-#include "Components/Window.h"
-#include "Components/Exception.h"
-#include "Managers/Manager.h"
-#include "Managers/InputManager.h"
+#include "Regolith/Components/Window.h"
+#include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/InputManager.h"
 
 #include <iostream>
 #include <sstream>
@@ -12,72 +11,50 @@
 namespace Regolith
 {
 
-  Window::Window( std::string title ) :
+  Window::Window() :
     _theWindow( nullptr ),
-    _title( title ),
+    _title(),
     _width( 0 ),
     _height( 0 ),
+    _resolutionWidth( 0 ),
+    _resolutionHeight( 0 ),
     _mouseFocus( false ),
     _keyboardFocus( false ),
     _minimized( false ),
     _fullscreen( false ),
-    _theRenderer( nullptr )
-  {
-  }
-
-  Window::Window( Window&& win ) :
-    _theWindow( std::exchange( win._theWindow, nullptr ) ),
-    _title( std::move( win._title ) ),
-    _width( std::move( win._width ) ),
-    _height( std::move( win._height ) ),
-    _mouseFocus( std::move( win._mouseFocus ) ),
-    _keyboardFocus( std::move( win._keyboardFocus ) ),
-    _minimized( std::move( win._minimized ) ),
-    _fullscreen( std::move( win._fullscreen ) ),
-    _theRenderer( std::move( win._theRenderer ) )
+    _scaleX( 1.0 ),
+    _scaleY( 1.0 )
   {
   }
 
 
-  Window& Window::operator=( Window&& win )
+  Window::~Window()
   {
-    _theWindow = std::exchange( win._theWindow, nullptr );
-    _title = std::move( win._title );
-    _width = std::move( win._width );
-    _height = std::move( win._height );
-    _mouseFocus = std::move( win._mouseFocus );
-    _keyboardFocus = std::move( win._keyboardFocus );
-    _minimized = std::move( win._minimized );
-    _fullscreen = std::move( win._fullscreen );
-    _theRenderer = std::move( win._theRenderer );
-
-    return *this;
+    SDL_DestroyWindow( _theWindow );
+    _theWindow = nullptr;
   }
 
 
-  SDL_Renderer* Window::init( int width, int height )
+  SDL_Renderer* Window::init( std::string title, int width, int height )
   {
+    _title = title;
+
     _theWindow = SDL_CreateWindow( _title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
     if ( _theWindow == nullptr )
     {
       Exception ex( "Window::init()", "Could not create window", false );
       ex.addDetail( "Window title", _title );
+      ex.addDetail( "Window width", width );
+      ex.addDetail( "Window height", height );
       throw ex;
     }
 
     _width = width;
     _height = height;
+    _resolutionWidth = width;
+    _resolutionHeight = height;
 
     return SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
-  }
-
-
-
-
-  void Window::free()
-  {
-    SDL_DestroyWindow( _theWindow );
-    _theWindow = nullptr;
   }
 
 
@@ -90,6 +67,9 @@ namespace Regolith
     }
     else
     {
+      _width = _resolutionWidth;
+      _height = _resolutionHeight;
+      SDL_SetWindowSize( _theWindow, _width, _height );
       SDL_SetWindowFullscreen( _theWindow, SDL_TRUE );
       _fullscreen = true;
       _minimized = false;
@@ -97,9 +77,9 @@ namespace Regolith
   }
 
 
-  void Window::registerEvents( InputManager* manager )
+  void Window::registerEvents( InputManager& manager )
   {
-    manager->registerEventRequest( this, REGOLITH_EVENT_WINDOW );
+    manager.registerEventRequest( this, REGOLITH_EVENT_WINDOW );
   }
 
 
@@ -112,12 +92,14 @@ namespace Regolith
       case SDL_WINDOWEVENT_SIZE_CHANGED :
         _width = e.window.data1;
         _height = e.window.data2;
+        _scaleX = (float)_width / (float)_resolutionWidth;
+        _scaleY = (float)_height / (float)_resolutionHeight;
         updateCaption = true;
-        SDL_RenderPresent( _theRenderer );
+//        SDL_RenderPresent( _theRenderer );
         break;
 
       case SDL_WINDOWEVENT_EXPOSED :
-        SDL_RenderPresent( _theRenderer );
+//        SDL_RenderPresent( _theRenderer );
         break;
 
       case SDL_WINDOWEVENT_ENTER :
@@ -133,18 +115,19 @@ namespace Regolith
       case SDL_WINDOWEVENT_FOCUS_GAINED :
         _keyboardFocus = true;
         updateCaption = true;
+        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CONTEXT_RESUME );
         break;
 
       case SDL_WINDOWEVENT_FOCUS_LOST :
         _keyboardFocus = false;
         updateCaption = true;
-        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_SCENE_PAUSE );
+        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CONTEXT_PAUSE );
         break;
 
       case SDL_WINDOWEVENT_MINIMIZED :
         _minimized = true;
         updateCaption = true;
-        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_SCENE_PAUSE );
+        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CONTEXT_PAUSE );
         Manager::getInstance()->raiseEvent( REGOLITH_EVENT_ENGINE_PAUSE );
         break;
 
@@ -157,6 +140,7 @@ namespace Regolith
         _minimized = false;
         updateCaption = true;
         Manager::getInstance()->raiseEvent( REGOLITH_EVENT_ENGINE_RESUME );
+        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CONTEXT_RESUME );
         break;
     }
 

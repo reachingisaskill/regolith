@@ -1,7 +1,7 @@
 
-#include "Managers/Manager.h"
-#include "Managers/Engine.h"
-#include "Components/Utilities.h"
+#include "Regolith/Managers/Manager.h"
+#include "Regolith/Components/Engine.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 
 namespace Regolith
@@ -40,9 +40,6 @@ namespace Regolith
       throw ex;
     }
 
-    // Setup an engine object
-    _theEngine = Engine::createInstance();
-
 
     try
     {
@@ -65,14 +62,18 @@ namespace Regolith
       Utilities::validateJson( json_data, "fonts", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "input_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "textures", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "story", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( json_data, "game_objects", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
 
 
       // Load the input device configuration first so objects can register game-wide behaviours
       this->_loadInput( json_data["input_device"] );
       // Engine gets to register its events first
-      _theEngine->registerEvents( _theInput );
+      _theEngine.registerEvents( _theInput );
+      _theHardware.registerEvents( _theInput );
 
 
       // Load the audio device configuration
@@ -85,173 +86,85 @@ namespace Regolith
 
       // Configure the window
       this->_loadWindow( json_data["window"] );
+      _theWindow.registerEvents( _theInput );
+      _theEngine.setRenderer( _theRenderer );
+
+
+      //Load all the collision teams
+      this->_loadTeams( json_data["collision_teams"] );
 
 
       // Load all the texture files
       this->_loadTextures( json_data["textures"] );
 
 
-      // Load all the texture files
-      this->_loadResources( json_data["resources"] );
+      // Load all the game objects files
+      this->_loadGameObjects( json_data["game_objects"] );
 
 
-      // Load all the texture files
-      this->_loadStory( json_data["story"] );
+      // Load all the contexts
+      this->_loadContexts( json_data["contexts"] );
 
+      // Find the first context to load
+      std::string entry = json_data["entry_point"].asString();
+      _entryPoint = requestContext( entry );
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream
     {
-      FAILURE_LOG( "Manager::init() : IFStream error occured" );
-      FAILURE_STREAM << f.what();
       Exception ex( "Manager::init()", "Default font not found", false );
       ex.addDetail( "What", f.what() );
       throw ex;
     }
     catch ( std::runtime_error& rt ) // Thrown by jsoncpp
     {
-      FAILURE_LOG( "Manager::init() : Parsing/exploring error in json files" );
-      FAILURE_STREAM << rt.what();
       Exception ex( "Manager::init()", "Json parsing error", false );
       ex.addDetail( "What", rt.what() );
       throw ex;
     }
 
     this->configureEvents();
-    _theEngine->configure( _theRenderer, _theWindow, _theInput );
+
+    // Last configuration operation - validating the mass produced objects
+    // Validate all the game objects
+    NamedVector<GameObject, true>::iterator obj_end = _gameObjects.end();
+    for ( NamedVector<GameObject, true>::iterator it = _gameObjects.begin(); it != obj_end; ++it )
+    {
+      if ( (*it) != nullptr )
+        (*it)->validate();
+    }
+
+    // Validate all the contexts
+    NamedVector<Context, true>::iterator context_end = _contexts.end();
+    for ( NamedVector<Context, true>::iterator it = _contexts.begin(); it != context_end; ++it )
+    {
+      if ( (*it) != nullptr )
+        (*it)->validate();
+    }
   }
 
 
   void Manager::_loadInput( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "keymappings", Utilities::JSON_TYPE_ARRAY );
-
-    _theInput = new InputManager();
-
-    // Configure the input objects
-    Json::Value required = json_data["require"];
-    Json::Value keymaps = json_data["keymappings"];
-
-    // Quick vallidation - TODO: add a hardware check function to makesure hardware actually exists
-    Json::ArrayIndex required_size = required.size();
-    for ( Json::ArrayIndex i = 0; i != required_size; ++i )
+    try
     {
-      if ( required[i].asString() == "controller" )
-      {
-        WARN_LOG( "Controllers are not yet supported!" );
-      }
-      else if ( required[i].asString() == "joystick" )
-      {
-        WARN_LOG( "Joystick is not yet supported!" );
-      }
+      INFO_LOG( "Configuring the input manager" );
+      _theInput.configure( json_data );
     }
-
-
-    Json::ArrayIndex keymaps_size = required.size();
-    for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
+    catch ( std::runtime_error& rt )
     {
-      Utilities::validateJson( keymaps[i], "name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( keymaps[i], "keymapping", Utilities::JSON_TYPE_ARRAY );
-
-      std::string mapping_name = keymaps[i]["name"].asString();
-      Json::Value keymapping = keymaps[i]["keymapping"];
-
-      _theInput->requestMapping( mapping_name );
-
-      // Loop over the key mapping hardware
-      Json::ArrayIndex keymapping_size = keymapping.size();
-      for ( Json::ArrayIndex j = 0; j != keymapping_size; ++j )
-      {
-        Utilities::validateJson( keymapping[j], "type", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( keymapping[j], "mapping", Utilities::JSON_TYPE_OBJECT );
-
-        std::string type = keymapping[j]["type"].asString();
-        Json::Value keys = keymapping[j]["mapping"];
-
-        if ( type == "keyboard" )
-        {
-          INFO_LOG( "Loading Keyboard Mapping." );
-
-          Json::Value::const_iterator keys_end = keys.end();
-          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
-          {
-            SDL_Scancode code = getScancodeID( it.key().asString() );
-            InputAction action = getActionID( it->asString() );
-            _theInput->registerInputAction( mapping_name, INPUT_TYPE_KEYBOARD, code, action );
-            INFO_STREAM << "Key Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
-          }
-        }
-
-        else if ( type == "mouse_buttons" )
-        {
-          INFO_LOG( "Loading Mouse Button Mapping." );
-
-          Json::Value::const_iterator keys_end = keys.end();
-          for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
-          {
-            MouseButton code = getMouseButtonID( it.key().asString() );
-            InputAction action = getActionID( it->asString() );
-            _theInput->registerInputAction( mapping_name, INPUT_TYPE_MOUSE_BUTTON, code, action );
-            INFO_STREAM << "Mouse Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
-          }
-        }
-
-        else if ( type == "mouse_movement" )
-        {
-          INFO_LOG( "Loading Mouse Movement." );
-
-          // Only require the movement input - it must be present if a mouse movement mapping is provided
-          Utilities::validateJson( keys, "movement", Utilities::JSON_TYPE_STRING );
-
-          unsigned code = 0; // Dummy variable - only one thing to map with mouse movement!
-          InputAction action = getActionID( keys["movement"].asString() );
-          _theInput->registerInputAction( mapping_name, INPUT_TYPE_MOUSE_MOVE, code, action );
-          INFO_STREAM << "Registered : mouse movement as action to map: " << mapping_name << " -- " << keys["movement"].asString() << "(" << action << ")";
-        }
-        else
-        {
-          WARN_LOG( "Key mapping specified for an unsupported interface." );
-          WARN_LOG( "Please try again with a future version." );
-        }
-      }
+      Exception ex( "Manager::_loadInput()", "Json reading failure" );
+      ex.addDetail( "What", rt.what() );
+      throw ex;
     }
   }
 
 
   void Manager::_loadAudio( Json::Value& json_data )
   {
-//    Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
-
     try
     {
       INFO_LOG( "Configuring the audio manager" );
-      Utilities::validateJson( json_data, "sample_frequency", Utilities::JSON_TYPE_INTEGER );
-      Utilities::validateJson( json_data, "audio_channels", Utilities::JSON_TYPE_INTEGER );
-      Utilities::validateJson( json_data, "chunk_size", Utilities::JSON_TYPE_INTEGER );
-      Utilities::validateJson( json_data, "music_volume", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( json_data, "effect_volume", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( json_data, "music_files", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( json_data, "effect_files", Utilities::JSON_TYPE_ARRAY );
-
-      int sample_freq = json_data["sample_frequency"].asInt();
-      int audio_channels = json_data["audio_channels"].asInt();
-      int chunk_size = json_data["chunk_size"].asInt();
-      float music_volume = json_data["music_volume"].asFloat();
-      float effect_volume = json_data["effect_volume"].asFloat();
-
-      // Create the audio handler
-      _theAudio = new AudioManager( sample_freq, audio_channels, chunk_size );
-
-      // Set the volumes
-      _theAudio->setVolumeMusic( music_volume );
-      _theAudio->setVolumeEffects( effect_volume );
-
-      // Load the music & effect files
-      INFO_LOG( "Loading sound files" );
-      Json::Value music_files = json_data["music_files"];
-      Json::Value effect_files = json_data["effect_files"];
-
-      _theAudio->configure( music_files, effect_files );
+      _theAudio.configure( json_data );
     }
     catch ( std::runtime_error& rt )
     {
@@ -334,11 +247,9 @@ namespace Regolith
     int screen_height = json_data["screen_height"].asInt();
     std::string title = json_data["title"].asString();
 
-    // Create the window
-    _theWindow = new Window( title );
-    _theRenderer = _theWindow->init( screen_width, screen_height );
-    _theBuilder->setRenderer( _theRenderer );
-    _theWindow->registerEvents( _theInput );
+    // Initialise the window
+    _theRenderer = _theWindow.init( title, screen_width, screen_height );
+    _theWindow.registerEvents( _theInput );
 
     // Set the default colour
     Json::Value color = json_data["default_color"];
@@ -346,6 +257,19 @@ namespace Regolith
     _defaultColor.g = color[1].asInt();
     _defaultColor.b = color[2].asInt();
     _defaultColor.a = color[3].asInt();
+
+  }
+
+
+  void Manager::_loadTeams( Json::Value& json_data )
+  {
+    Json::Value::const_iterator data_end = json_data.end();
+    for ( Json::Value::const_iterator it = json_data.begin(); it != data_end; ++it )
+    {
+      std::string team_name = it.key().asString();
+      TeamID id = (TeamID) it->asInt();
+      addTeam( team_name, id );
+    }
   }
 
 
@@ -376,63 +300,84 @@ namespace Regolith
   }
 
 
-  void Manager::_loadResources( Json::Value& resources )
+  void Manager::_loadGameObjects( Json::Value& game_objects )
   {
-    INFO_LOG( "Loading resource objects" );
-    Json::ArrayIndex resources_size = resources.size();
-    for ( Json::ArrayIndex i = 0; i != resources_size; ++i )
+    INFO_LOG( "Loading game objects" );
+
+    Json::ArrayIndex game_objects_size = game_objects.size();
+    for ( Json::ArrayIndex i = 0; i != game_objects_size; ++i )
     {
-      Utilities::validateJson( resources[i], "resource_name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( resources[i], "resource_type", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( resources[i], "team_name", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( game_objects[i], "name", Utilities::JSON_TYPE_STRING );
+      std::string name = game_objects[i]["name"].asString();
 
-      std::string resource_name = resources[i]["resource_name"].asString();
-      std::string resource_type = resources[i]["resource_type"].asString();
-      std::string team_name = resources[i]["team_name"].asString();
+      INFO_STREAM << "Building game object : " << name;
 
-      DEBUG_STREAM << "  Building resource: " << resource_name << " as " << resource_type << " for team: " << team_name;
+      GameObject* obj = _objectFactory.build( game_objects[i] );
 
-      Drawable* newResource =  _theBuilder->build( resources[i] );
-      _resources.addObject( newResource, resource_name );
-
-      // See if its already been used.
-      if ( _teamNames.find( team_name ) == _teamNames.end() )
+      if ( obj->isPhysical() ) // Check that it's really physical!
       {
-        // Create it otherwise
-        _teamNames[ team_name ] = _teamNames.size();
+        PhysicalObject* new_obj = dynamic_cast<PhysicalObject*>( obj );
+        if ( new_obj == nullptr )
+        {
+          Exception ex( "Manager::_loadGameObjects()", "Could not cast game object to a physical object");
+          ex.addDetail( "Name", name );
+          throw ex;
+        }
       }
-
-      DEBUG_LOG( "Setting team name" );
-      int team_id = _teamNames[ team_name ];
-      newResource->setTeam( team_id );
+      _gameObjects.addObject( obj, name );
     }
   }
 
 
-  void Manager::_loadStory( Json::Value& json_data )
+  void Manager::_loadContexts( Json::Value& context_data )
   {
-    Utilities::validateJson( json_data, "scenes", Utilities::JSON_TYPE_ARRAY );
+    INFO_LOG( "Loading game objects" );
 
-    // Load all the scenes into memory
-    Json::Value scene_data = json_data["scenes"];
-    Json::ArrayIndex scenes_size = scene_data.size();
-    for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
+    Json::ArrayIndex context_data_size = context_data.size();
+    for ( Json::ArrayIndex i = 0; i != context_data_size; ++i )
     {
-      Utilities::validateJson( scene_data[i], "name", Utilities::JSON_TYPE_STRING );
-      std::string name = scene_data[i]["name"].asString();
+      buildContext( context_data[i] );
+    }
+  }
 
-      _scenes.addName( name );
+
+  Context* Manager::buildContext( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
+    std::string name = json_data["name"].asString();
+    INFO_STREAM << "Attempting to build context: " << name;
+
+    Context* obj = nullptr;
+
+    if ( Utilities::validateJson( json_data, "file", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      std::string context_file = json_data["file"].asString();
+      INFO_STREAM << "Bulding context from file: " << context_file;
+
+      std::ifstream input( context_file );
+      Json::Value context_file_data;
+      Json::CharReaderBuilder reader_builder;
+      Json::CharReader* reader = reader_builder.newCharReader();
+      std::string errors;
+      bool result = Json::parseFromStream( reader_builder, input, &context_file_data, &errors );
+      if ( ! result )
+      {
+        ERROR_LOG( "Manager::_loadContexts() : Found errors parsing json" );
+        ERROR_STREAM << "\"" << errors << "\"";
+      }
+      delete reader;
+
+      obj = _contextFactory.build( context_file_data );
+      _contexts.addObject( obj, name );
+    }
+    else
+    {
+      INFO_LOG( "Bulding context" );
+      obj = _contextFactory.build( json_data );
+      _contexts.addObject( obj, name );
     }
 
-    for ( Json::ArrayIndex i = 0; i < scenes_size; ++i )
-    {
-      Utilities::validateJson( scene_data[i], "name", Utilities::JSON_TYPE_STRING );
-      std::string name = scene_data[i]["name"].asString();
-
-      Scene* new_scene = _theSceneBuilder->build( scene_data[i] );
-      _scenes.set( name, new_scene );
-      INFO_STREAM << "Configured Scene: " << name << " @ " << new_scene;
-    }
+    return obj;
   }
 
 }

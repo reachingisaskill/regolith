@@ -1,6 +1,6 @@
 
-#include "regolith.h"
-#include "Test/TestData.h"
+#include "Regolith.h"
+#include "Regolith/Test/TestData.h"
 
 #include "logtastic.h"
 #include "testass.h"

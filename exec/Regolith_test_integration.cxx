@@ -1,6 +1,6 @@
 
-#include "regolith.h"
-#include "Test/TestPlayer.h"
+#include "Regolith.h"
+#include "Regolith/Test/TestCharacter.h"
 
 #include "logtastic.h"
 
@@ -22,13 +22,21 @@ int main( int, char** )
 
   try
   {
-    man->getObjectBuilder()->addFactory( new TestPlayerFactory() );
+    INFO_LOG( "Creating custom object builders" );
+    man->getObjectFactory().addBuilder< Regolith::TestCharacter >( "test_character" );
+
+    INFO_LOG( "Creating custom context builders" );
+//    man->getObjectFactory()->addBuilder( new TestContextBuilder() );
+
+//    INFO_LOG( "Adding teams" );
+//    man->addTeam( "environment", 0 );
+//    man->addTeam( "player", 1 );
+
+    INFO_LOG( "Initialising the manager" );
     man->init( test_config );
 
-    INFO_LOG( "Starting rendering loop" );
-    man->loadScene( 0 );
-
-    man->getEnginePointer()->run();
+    INFO_LOG( "Starting Regolith" );
+    man->run();
 
   }
   catch ( Exception& ex )

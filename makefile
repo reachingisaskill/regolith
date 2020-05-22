@@ -64,13 +64,15 @@ INSTALL_DIR =
 # The Compiler
 CCC = g++ -g  -Wall -Wextra -pedantic ${DEFINES}
 # CCC = g++ -O3 -Wall -Wextra -pedantic ${DEFINES} # Optimized Compilation
+ARCHIVE = ar rcs
 
 
 ##############################################################################################
 
 
 # Extra Compile Flags to Create Library
-LIB_COMP_FLAGS = -fPIC -shared
+#LIB_COMP_FLAGS = -fPIC -shared
+LIB_COMP_FLAGS = -static
 LIB_LINK_FLAGS = -Wl,-rpath=$(realpath ${LIB_DIR}) -l${LIB_NAME} -L${LIB_DIR}
 
 
@@ -78,7 +80,8 @@ LIB_LINK_FLAGS = -Wl,-rpath=$(realpath ${LIB_DIR}) -l${LIB_NAME} -L${LIB_DIR}
 EXE_FILES = ${shell ls $(EXE_SRC_DIR)}
 #SRC_FILES = ${shell ls $(SRC_DIR)}
 SRC_FILES = ${shell find $(SRC_DIR) -type f | cut -d '/' -f 2-}
-INC_FILES = ${shell ls $(INC_DIR)}
+#INC_FILES = ${shell ls $(INC_DIR)}
+INC_FILES = ${shell find $(INC_DIR) -type f | cut -d '/' -f 2-}
 
 # Executable Source Files
 EXE_SRC = $(filter %.cxx,${EXE_FILES})
@@ -94,7 +97,8 @@ SOURCES = $(filter %.cpp,$(SRC_FILES))
 OBJECTS = $(patsubst %.cpp,$(TMP_DIR)/%.o,$(SRC_FILES))
 EXE_OBJ = $(patsubst %.cxx,$(TMP_DIR)/%.o,${EXE_SRC})
 
-LIBRARY   = ${LIB_DIR}/lib${LIB_NAME}.so
+#LIBRARY   = ${LIB_DIR}/lib${LIB_NAME}.so
+LIBRARY   = ${LIB_DIR}/lib${LIB_NAME}.a
 PROGRAMS  = $(patsubst %.cxx,${BIN_DIR}/%,${EXE_SRC})
 PROGNAMES = $(notdir ${PROGRAMS})
 
@@ -126,15 +130,28 @@ single_intro :
 	@echo
 
 
+#${PROGRAMS} : ${BIN_DIR}/% : ${TMP_DIR}/%.o
+#	@echo " - Building Target  : " $(notdir $(basename $@))
+#	@${CCC} ${LIB_LINK_FLAGS} -o $@ $^ ${INC_FLAGS} ${LIB_FLAGS} ${EXEC_LIB_FLAGS}
+#	@echo "Target : "$(notdir $(basename $@))" Successfully Built"
+#	@echo
+#
+#${LIBRARY} : ${OBJECTS}
+#	@echo " - Building Library : " ${LIB_NAME}
+#	@${CCC} ${LIB_COMP_FLAGS} -o $@ $^ ${INC_FLAGS} ${LIB_FLAGS}
+#	@echo "Library : "${LIB_NAME}" Successfully Built"
+#	@echo
+
+
 ${PROGRAMS} : ${BIN_DIR}/% : ${TMP_DIR}/%.o
 	@echo " - Building Target  : " $(notdir $(basename $@))
-	@${CCC} ${LIB_LINK_FLAGS} -o $@ $^ ${INC_FLAGS} ${LIB_FLAGS} ${EXEC_LIB_FLAGS}
+	@${CCC} ${LIB_LINK_FLAGS} -o $@ $^ ${LIBRARY} ${INC_FLAGS} ${LIB_FLAGS} ${EXEC_LIB_FLAGS}
 	@echo "Target : "$(notdir $(basename $@))" Successfully Built"
 	@echo
 
 ${LIBRARY} : ${OBJECTS}
-	@echo " - Building Library : " ${LIB_NAME}
-	@${CCC} ${LIB_COMP_FLAGS} -o $@ $^ ${INC_FLAGS} ${LIB_FLAGS}
+	@echo " - Building Static Library : " ${LIB_NAME}
+	@${ARCHIVE} $@ $^
 	@echo "Library : "${LIB_NAME}" Successfully Built"
 	@echo
 
@@ -174,6 +191,7 @@ ${TMP_DIR} :
 clean :
 	rm -rf ${TMP_DIR}/*
 	rm -f ${PROGRAMS}
+	rm -f ${LIBRARY}
 
 purge :	
 	@echo "Purge will remove all files from temporary, library and binary directories."

@@ -1,6 +1,7 @@
 #define TESTASS_APPROX_LIMIT 1.0E-6
 
-#include "regolith.h"
+#include "Regolith.h"
+#include "Regolith/Utilities/Vector.h"
 
 #include "testass.h"
 #include "logtastic.h"
