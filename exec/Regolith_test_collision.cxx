@@ -63,30 +63,30 @@ int main( int, char** )
     object2->reset();
 
 
-    object2->setPosition( Vector( 0.0, 0.0 ) );
+    object2->setPosition( Vector( 0.0, -1.0 ) );
     collides( object1, object2 );
     ASSERT_TRUE( object1->collided() );
     ASSERT_TRUE( object2->collided() );
     ASSERT_EQUAL( object1->lastNormal(), unitVector_y ); // Default to y direction.
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 1.0 );
     ASSERT_EQUAL( object2->lastNormal(), -unitVector_y ); // Default to y direction.
+    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 1.0 );
     ASSERT_APPROX_EQUAL( object2->lastOverlap(), 1.0 );
     object1->reset();
     object2->reset();
 
 
-    object2->setPosition( Vector( 0.99999, 0.0 ) );
+    object2->setPosition( Vector( -1.9999, 0.0 ) );
     collides( object1, object2 );
     ASSERT_TRUE( object1->collided() );
     ASSERT_TRUE( object2->collided() );
     ASSERT_EQUAL( object1->lastNormal(), unitVector_x );
     ASSERT_EQUAL( object2->lastNormal(), -unitVector_x );
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 1.0E-5 );
+    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 5.0E-5 );
+    ASSERT_APPROX_EQUAL( object2->lastOverlap(), 5.0E-5 );
     object1->reset();
     object2->reset();
 
-
-    object2->setPosition( Vector( 0.0, 2.0 ) );
+    object2->setPosition( Vector( 0.0, 3.0 ) );
     collides( object1, object2 );
     ASSERT_FALSE( object1->collided() );
     ASSERT_FALSE( object2->collided() );
@@ -94,27 +94,31 @@ int main( int, char** )
     object2->reset();
 
 
-    object2->setPosition( Vector( 0.99999, 0.0 ) );
-    collides( object1, object2 );
-    ASSERT_TRUE( object1->collided() );
-    ASSERT_TRUE( object2->collided() );
-    ASSERT_EQUAL( object1->lastNormal(), unitVector_y );
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 0.2 );
-    object1->reset();
-    object2->reset();
-
-
-    object2->setPosition( Vector( -0.99999, 0.0 ) );
+    object2->setPosition( Vector( 1.9999, 0.0 ) );
     collides( object1, object2 );
     ASSERT_TRUE( object1->collided() );
     ASSERT_TRUE( object2->collided() );
     ASSERT_EQUAL( object1->lastNormal(), -unitVector_x );
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 1.0E-5 );
+    ASSERT_EQUAL( object2->lastNormal(), unitVector_x );
+    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 5.0E-5 );
+    ASSERT_APPROX_EQUAL( object2->lastOverlap(), 5.0E-5 );
     object1->reset();
     object2->reset();
 
 
-    object2->setPosition( Vector( 0.0, -2.0 ) );
+    object2->setPosition( Vector( 0.0, -2.9999 ) );
+    collides( object1, object2 );
+    ASSERT_TRUE( object1->collided() );
+    ASSERT_TRUE( object2->collided() );
+    ASSERT_EQUAL( object1->lastNormal(), unitVector_y );
+    ASSERT_EQUAL( object2->lastNormal(), -unitVector_y );
+    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 5.0E-5 );
+    ASSERT_APPROX_EQUAL( object2->lastOverlap(), 5.0E-5 );
+    object1->reset();
+    object2->reset();
+
+
+    object2->setPosition( Vector( 0.0, -3.0 ) );
     collides( object1, object2 );
     ASSERT_FALSE( object1->collided() );
     ASSERT_FALSE( object2->collided() );
@@ -122,11 +126,12 @@ int main( int, char** )
     object2->reset();
 
 
-    object2->setPosition( Vector( 0.0, -1.8 ) );
+    object2->setPosition( Vector( 0.2, -2.6 ) );
     collides( object1, object2 );
     ASSERT_TRUE( object1->collided() );
     ASSERT_TRUE( object2->collided() );
-    ASSERT_EQUAL( object1->lastNormal(), -unitVector_y );
+    ASSERT_EQUAL( object1->lastNormal(), unitVector_y );
+    ASSERT_EQUAL( object2->lastNormal(), -unitVector_y );
     ASSERT_APPROX_EQUAL( object1->lastOverlap(), 0.2 );
     object1->reset();
     object2->reset();

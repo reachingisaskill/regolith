@@ -21,6 +21,7 @@ namespace Regolith
     setCollisionActive( true );
     setCollisionType( 5 );
     setTeam( 1 );
+    setMass( 1.0 );
   }
 
 
