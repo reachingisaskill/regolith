@@ -32,9 +32,9 @@ namespace Regolith
     _contextFactory(),
     _signalFactory(),
     _fonts(),
-    _rawTextures(),
     _teamNames(),
-    _gameObjects( "manager_game_object_list" ),
+    _globalData(),
+    _data( "manager_data_handlers_list" ),
     _contexts( "manager_context_list" ),
     _title(),
     _defaultFont( nullptr ),
@@ -46,7 +46,6 @@ namespace Regolith
   {
     // Set up the object factory
 //    _objectFactory.addBuilder<FPSString>( "fps_string" );
-//    _objectFactory.addBuilder<Button>( "button" );
     _objectFactory.addBuilder<SimpleSprite>( "simple_sprite" );
     _objectFactory.addBuilder<CollidableSprite>( "collidable_sprite" );
     _objectFactory.addBuilder<AnimatedSprite>( "animated_sprite" );
@@ -68,7 +67,6 @@ namespace Regolith
     _signalFactory.addBuilder<ChangeContextSignal>( "context_change" );
 
     // Set up a null value
-    _gameObjects.addObject( nullptr, "null" );
     _contexts.addObject( nullptr, "null" );
   }
 
@@ -81,18 +79,8 @@ namespace Regolith
     INFO_LOG( "Deleteing Scenes" );
     _contexts.clear();
 
-    INFO_LOG( "Deleting GameObjects" );
-    _gameObjects.clear();
-
     INFO_LOG( "Clearing team list" );
     _teamNames.clear();
-
-    INFO_LOG( "Deleting raw texture data" );
-    for ( RawTextureMap::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
-    {
-      SDL_DestroyTexture( it->second.texture );
-    }
-    _rawTextures.clear();
 
     INFO_LOG( "Removing each of the fonts and clearing the map" );
     for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )

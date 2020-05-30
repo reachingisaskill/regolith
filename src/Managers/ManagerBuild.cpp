@@ -44,18 +44,8 @@ namespace Regolith
     try
     {
       // Load and parse the json config
-      std::ifstream input( json_file );
       Json::Value json_data;
-      Json::CharReaderBuilder reader_builder;
-      Json::CharReader* reader = reader_builder.newCharReader();
-      std::string errors;
-      bool result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
-      if ( ! result )
-      {
-        ERROR_LOG( "Manager::init() : Found errors parsing json" );
-        ERROR_STREAM << "\"" << errors << "\"";
-      }
-      delete reader;
+      loadJsonData( json_data, json_file );
 
       // Validate the required keys
       Utilities::validateJson( json_data, "window", Utilities::JSON_TYPE_OBJECT );
@@ -99,7 +89,7 @@ namespace Regolith
 
 
       // Load all the game objects files
-      this->_loadGameObjects( json_data["game_objects"] );
+      this->_loadData( json_data["game_data"] );
 
 
       // Load all the contexts
@@ -300,38 +290,17 @@ namespace Regolith
   }
 
 
-  void Manager::_loadGameObjects( Json::Value& game_objects )
+  void Manager::_loadData( Json::Value& game_data )
   {
-    INFO_LOG( "Loading game objects" );
+    INFO_LOG( "Loading game data" );
 
-    Json::ArrayIndex game_objects_size = game_objects.size();
-    for ( Json::ArrayIndex i = 0; i != game_objects_size; ++i )
-    {
-      Utilities::validateJson( game_objects[i], "name", Utilities::JSON_TYPE_STRING );
-      std::string name = game_objects[i]["name"].asString();
-
-      INFO_STREAM << "Building game object : " << name;
-
-      GameObject* obj = _objectFactory.build( game_objects[i] );
-
-      if ( obj->isPhysical() ) // Check that it's really physical!
-      {
-        PhysicalObject* new_obj = dynamic_cast<PhysicalObject*>( obj );
-        if ( new_obj == nullptr )
-        {
-          Exception ex( "Manager::_loadGameObjects()", "Could not cast game object to a physical object");
-          ex.addDetail( "Name", name );
-          throw ex;
-        }
-      }
-      _gameObjects.addObject( obj, name );
-    }
+    _theData.configure( game_data );
   }
 
 
   void Manager::_loadContexts( Json::Value& context_data )
   {
-    INFO_LOG( "Loading game objects" );
+    INFO_LOG( "Loading contexts" );
 
     Json::ArrayIndex context_data_size = context_data.size();
     for ( Json::ArrayIndex i = 0; i != context_data_size; ++i )
@@ -354,18 +323,8 @@ namespace Regolith
       std::string context_file = json_data["file"].asString();
       INFO_STREAM << "Bulding context from file: " << context_file;
 
-      std::ifstream input( context_file );
       Json::Value context_file_data;
-      Json::CharReaderBuilder reader_builder;
-      Json::CharReader* reader = reader_builder.newCharReader();
-      std::string errors;
-      bool result = Json::parseFromStream( reader_builder, input, &context_file_data, &errors );
-      if ( ! result )
-      {
-        ERROR_LOG( "Manager::_loadContexts() : Found errors parsing json" );
-        ERROR_STREAM << "\"" << errors << "\"";
-      }
-      delete reader;
+      loadJsonData( context_file_data, context_file );
 
       obj = _contextFactory.build( context_file_data );
       _contexts.addObject( obj, name );

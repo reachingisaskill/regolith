@@ -189,6 +189,23 @@ namespace Regolith
       object->setPosition( vec );
     }
     */
+
+
+    void loadJsonData( Json::Value& json_data, std::string filename )
+    {
+      std::ifstream input( filename );
+      Json::CharReaderBuilder reader_builder;
+      Json::CharReader* reader = reader_builder.newCharReader();
+      std::string errors;
+      bool result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
+      if ( ! result )
+      {
+        ERROR_LOG( "loadJsonData() : Found errors parsing json" );
+        ERROR_STREAM << errors;
+      }
+      delete reader;
+    }
+
   }
 }
 

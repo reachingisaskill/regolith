@@ -10,9 +10,10 @@
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Managers/AudioManager.h"
 #include "Regolith/Managers/HardwareManager.h"
+#include "Regolith/Managers/DataManager.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Components/Window.h"
 #include "Regolith/Components/Engine.h"
-#include "Regolith/GamePlay/Texture.h"
 #include "Regolith/GamePlay/Signal.h"
 #include "Regolith/Utilities/Singleton.h"
 
@@ -28,12 +29,11 @@ namespace Regolith
   class Context;
 
   // Container typedefs
-  typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::map< std::string, TTF_Font* > FontMap;
   typedef std::map< std::string, TeamID > TeamNameMap;
 
   // Factory typedefs
-  typedef FactoryTemplate< GameObject > ObjectFactory;
+  typedef FactoryTemplate< GameObject, DataHandler& > ObjectFactory;
   typedef FactoryTemplate< Context > ContextFactory;
   typedef FactoryTemplate< Signal > SignalFactory;
 
@@ -50,6 +50,7 @@ namespace Regolith
       InputManager _theInput;
       AudioManager _theAudio;
       HardwareManager _theHardware;
+      DataManager _theData;
       Engine _theEngine;
       SDL_Renderer* _theRenderer;
       unsigned int _entryPoint;
@@ -61,15 +62,10 @@ namespace Regolith
 
       // Owned memory for objects, contexts, etc
       FontMap _fonts;
-      RawTextureMap _rawTextures;
       TeamNameMap _teamNames;
 
-      // All objects. The user must ensure that the object isPhysical() before requesting a spaw/physical object
-      NamedVector<GameObject, true > _gameObjects;
-      // Loadable contexts
-      NamedVector<Context, true> _contexts;
-
-
+      // Containers of all the data loaded/to be loaded into memory
+      NamedVector< Context, true > _contexts;
 
       // Useful global constants
       std::string _title;
@@ -99,10 +95,8 @@ namespace Regolith
       void _loadWindow( Json::Value& );
       // Load all the collision teams
       void _loadTeams( Json::Value& );
-      // Load all the texture files
-      void _loadTextures( Json::Value& );
       // Load all the resources
-      void _loadGameObjects( Json::Value& );
+      void _loadGlobalGameObjects( Json::Value& );
       // Load all the resources
       void _loadContexts( Json::Value& );
 
@@ -121,13 +115,13 @@ namespace Regolith
       ////////////////////////////////////////////////////////////////////////////////
       // Get the pointers to various managers and builders
 
-      // Return a pointer to the texture builder
+      // Return a reference to the texture builder
       ObjectFactory& getObjectFactory() { return _objectFactory; }
 
-      // Return a pointer to the Scene builder
+      // Return a reference to the Scene builder
       ContextFactory& getContextFactory() { return _contextFactory; }
 
-      // Return a pointer to the Scene builder
+      // Return a reference to the Scene builder
       SignalFactory& getSignalFactory() { return _signalFactory; }
 
       // Get the pointer to the window
@@ -139,11 +133,17 @@ namespace Regolith
       // Return a pointer to the required font data
       TTF_Font* getFontPointer( std::string );
 
-      // Return a pointer to the input manager
+      // Return a reference to the input manager
       InputManager& getInputManager() { return _theInput; }
 
-      // Return a pointer to the input manager
+      // Return a reference to the input manager
       AudioManager& getAudioManager() { return _theAudio; }
+
+      // Return a reference to the data manager
+      DataManager& getDataManager() { return _theData; }
+
+      // Return a reference to the global data handler manager
+      const DataHandler& getGlobalData() { return _theData.globalData(); }
 
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -176,10 +176,7 @@ namespace Regolith
 
 
       ////////////////////////////////////////////////////////////////////////////////
-      // Texture and object access functionality
-
-      // Return a raw texture container with the given name
-      RawTexture findRawTexture( std::string ) const;
+      // Team Configuration
 
       // Return the number of teams
       size_t getNumberTeams() const { return _teamNames.size(); }
@@ -189,27 +186,6 @@ namespace Regolith
 
       // Add a team to the map
       void addTeam( std::string name, unsigned int id ) { _teamNames[name] = id; }
-
-      // Return the ID for a given object name
-      unsigned int requestGameObject( std::string name ) { return _gameObjects.addName( name ); }
-
-      // Return the name for a given object ID
-      std::string getGameObjectName( unsigned int id ) { return _gameObjects.getName( id ); }
-
-
-      // Get a global object pointer
-      // Return a pointer to a given object. (Please don't delete it!)
-      GameObject* getGameObject( std::string name ) { return _gameObjects.get( name ); }
-      GameObject* getGameObject( unsigned int id ) { return _gameObjects[ id ]; }
-
-      // Return a pointer to a given object. (Please don't delete it!)
-      PhysicalObject* getPhysicalObject( std::string name ) { return dynamic_cast<PhysicalObject*>( _gameObjects.get( name ) ); }
-      PhysicalObject* getPhysicalObject( unsigned int id ) { return dynamic_cast<PhysicalObject*>( _gameObjects[id] ); }
-
-      // Spawn a cloned object - caller accepts ownership of memory
-      // Spawn a new instance of a resource and return the memory to the caller
-      PhysicalObject* spawn( unsigned int i, const Vector& pos ) { return dynamic_cast<PhysicalObject*>( _gameObjects[i] )->clone( pos ); }
-      PhysicalObject* spawn( std::string name, const Vector& pos ) { return dynamic_cast<PhysicalObject*>( _gameObjects.get(name) )->clone( pos ); }
 
 
       ////////////////////////////////////////////////////////////////////////////////

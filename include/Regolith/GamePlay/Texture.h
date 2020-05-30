@@ -27,8 +27,9 @@ namespace Regolith
   // Useful functions
 
   RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );
-  RawTexture makeTextureFromText( Json::Value& );
-  RawTexture makeTextureFromFile( Json::Value& );
+  RawTexture makeTextureFromFile( std::string );
+  RawTexture makeTextureFromFile( std::string, SDL_Color );
+  RawTexture makeTexture( Json::Value& );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Texture class. The simplest object of renderable data.
@@ -37,7 +38,7 @@ namespace Regolith
   {
     private:
       // Pointer to the raw sdl texture
-      RawTexture _theTexture;
+      RawTexture* _theTexture;
       float _angle;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;

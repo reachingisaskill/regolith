@@ -31,6 +31,8 @@ namespace Regolith
 
     void jsonProcessPosition( Json::Value&, Drawable*, Camera* );
 
+    void loadJsonData( Json::Value&, std::string );
+
   }
 }
 

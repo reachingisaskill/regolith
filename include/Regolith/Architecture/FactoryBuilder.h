@@ -25,26 +25,26 @@ namespace Regolith
   // Derived implemented type wrappers
 
 
-  template < class BASE, class DERIVED >
+  template < class BASE, class DERIVED, class ... ARGS >
   class FactoryBuilder : public FactoryBuilderBase<BASE>
   {
     private:
     public:
       virtual ~FactoryBuilder() {}
 
-      virtual BASE* create( Json::Value& ) const override;
+      virtual BASE* create( Json::Value&, ARGS... ) const override;
   };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Template member function definitions
 
-  template < class BASE, class DERIVED >
-  BASE* FactoryBuilder<BASE, DERIVED>::create( Json::Value& data ) const
+  template < class BASE, class DERIVED, class ... ARGS >
+  BASE* FactoryBuilder<BASE, DERIVED, ARGS...>::create( Json::Value& data, ARGS... args ) const
   {
     MassProduceable* new_object = (MassProduceable*) new DERIVED();
 
-    new_object->configure( data );
+    new_object->configure( data, args... );
 
     return dynamic_cast<BASE*>( new_object );
   }

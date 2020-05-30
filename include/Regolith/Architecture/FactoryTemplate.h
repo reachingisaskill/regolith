@@ -14,7 +14,7 @@
 namespace Regolith
 {
 
-  template< class TYPE >
+  template< class TYPE, class ... ARGS >
   class FactoryTemplate
   {
     typedef std::map< std::string, FactoryBuilderBase< TYPE >* > BuilderMap;
@@ -30,7 +30,7 @@ namespace Regolith
       template < class DERIVED >
       void addBuilder( std::string );
 
-      virtual TYPE* build( Json::Value& ) const;
+      virtual TYPE* build( Json::Value&, ARGS... ) const;
   };
 
 
@@ -38,8 +38,8 @@ namespace Regolith
   // Template Member Functions
 
 
-  template < class TYPE >
-  FactoryTemplate<TYPE>::~FactoryTemplate()
+  template < class TYPE, class ... ARGS >
+  FactoryTemplate<TYPE, ARGS...>::~FactoryTemplate()
   {
     for ( typename BuilderMap::iterator it = _builders.begin(); it != _builders.end(); ++it )
     {
@@ -49,8 +49,8 @@ namespace Regolith
   }
 
 
-  template< class TYPE >
-  TYPE* FactoryTemplate<TYPE>::build( Json::Value& data ) const
+  template< class TYPE, class ... ARGS >
+  TYPE* FactoryTemplate<TYPE, ARGS...>::build( Json::Value& data, ARGS... args ) const
   {
     Utilities::validateJson( data, "type", Utilities::JSON_TYPE_STRING, true );
 
@@ -65,12 +65,12 @@ namespace Regolith
       throw ex;
     }
 
-    return found->second->create( data );
+    return found->second->create( data, args... );
   }
 
 
-  template < class TYPE > template < class DERIVED >
-  void FactoryTemplate<TYPE>::addBuilder( std::string type_name )
+  template < class TYPE, class ... ARGS > template < class DERIVED >
+  void FactoryTemplate<TYPE, ARGS...>::addBuilder( std::string type_name )
   {
     typename BuilderMap::iterator found = _builders.find( type_name );
     if ( found != _builders.end() )
@@ -79,7 +79,7 @@ namespace Regolith
       _builders.erase( found );
     }
     
-    _builders[ type_name ] = new FactoryBuilder< TYPE, DERIVED >();
+    _builders[ type_name ] = new FactoryBuilder< TYPE, DERIVED, ARGS... >();
   }
 
 }
