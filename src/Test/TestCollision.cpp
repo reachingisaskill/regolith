@@ -1,6 +1,7 @@
 
 #include "Regolith/Test/TestCollision.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 #include "logtastic.h"
@@ -38,8 +39,9 @@ namespace Regolith
   }
 
 
-  void TestCollision::configure( Json::Value& )
+  void TestCollision::configure( Json::Value&, DataHandler& )
   {
+//    Collidable::configure( json_data, handler );
   }
 
   void TestCollision::validate() const

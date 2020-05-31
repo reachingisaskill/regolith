@@ -12,6 +12,7 @@ namespace Regolith
    * This class defines the mass-producedable interface.
    * Forces classes to define a configure function to enable the templated factory pattern.
    */
+  template < class ... ARGS >
   class MassProduceable
   {
     public:
@@ -20,7 +21,7 @@ namespace Regolith
 
 
       // Implemented by every derived class to configure the objects based on the json configuration data
-      virtual void configure( Json::Value& ) = 0;
+      virtual void configure( Json::Value&, ARGS... ) = 0;
 
 
       // Guaranteed to be called after all objects have been created and stored by the manager.

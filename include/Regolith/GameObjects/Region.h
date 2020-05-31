@@ -8,6 +8,7 @@
 
 namespace Regolith
 {
+  class DataHandler;
 
   class Region : public Collidable
   {
@@ -22,7 +23,7 @@ namespace Regolith
 
 
       // Configure the object
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, DataHandler& ) override;
 
 
 

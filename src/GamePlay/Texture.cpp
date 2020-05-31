@@ -2,6 +2,7 @@
 
 #include "Regolith/GamePlay/Texture.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 #include "logtastic.h"
@@ -126,12 +127,12 @@ namespace Regolith
   }
 
 
-  void Texture::configure( Json::Value& json_data )
+  void Texture::configure( Json::Value& json_data, DataHandler& handler )
   {
     Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
 
     std::string texture_name = json_data["texture_name"].asString();
-    _theTexture = Manager::getInstance()->getDataManager()->requestRawTexture( texture_name );
+    _theTexture = handler.findTexture( texture_name );
     INFO_STREAM << "Found texture: " << texture_name;
 
     // If its a spritesheet

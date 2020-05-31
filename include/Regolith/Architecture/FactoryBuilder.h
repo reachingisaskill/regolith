@@ -10,14 +10,14 @@ namespace Regolith
 {
 
   // Base Type class
-  template < class BASE_TYPE >
+  template < class BASE_TYPE, class ... ARGS >
   class FactoryBuilderBase
   {
     private:
     public:
       virtual ~FactoryBuilderBase() {}
 
-      virtual BASE_TYPE* create( Json::Value& ) const = 0;
+      virtual BASE_TYPE* create( Json::Value&, ARGS... ) const = 0;
   };
 
 
@@ -26,7 +26,7 @@ namespace Regolith
 
 
   template < class BASE, class DERIVED, class ... ARGS >
-  class FactoryBuilder : public FactoryBuilderBase<BASE>
+  class FactoryBuilder : public FactoryBuilderBase<BASE, ARGS...>
   {
     private:
     public:
@@ -42,7 +42,7 @@ namespace Regolith
   template < class BASE, class DERIVED, class ... ARGS >
   BASE* FactoryBuilder<BASE, DERIVED, ARGS...>::create( Json::Value& data, ARGS... args ) const
   {
-    MassProduceable* new_object = (MassProduceable*) new DERIVED();
+    MassProduceable<ARGS...>* new_object = (MassProduceable<ARGS...>*) new DERIVED();
 
     new_object->configure( data, args... );
 

@@ -11,6 +11,7 @@
 namespace Regolith
 {
   class Camera;
+  class DataHandler;
 
   class SimpleSprite : public Drawable
   {
@@ -27,7 +28,7 @@ namespace Regolith
 
 
       // Configure the object
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, DataHandler& ) override;
 
 
       // Render with the current renderer object

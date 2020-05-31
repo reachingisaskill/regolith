@@ -1,5 +1,6 @@
 
 #include "Regolith/GameObjects/Region.h"
+#include "Regolith/Managers/DataHandler.h"
 
 namespace Regolith
 {
@@ -14,9 +15,9 @@ namespace Regolith
   }
 
 
-  void Region::configure( Json::Value& json_data )
+  void Region::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Collidable::configure( json_data );
+    Collidable::configure( json_data, handler );
   }
 
 

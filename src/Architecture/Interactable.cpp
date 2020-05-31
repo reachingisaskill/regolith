@@ -2,6 +2,7 @@
 #include "Regolith/Architecture/Interactable.h"
 #include "Regolith/GamePlay/Signal.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 namespace Regolith
@@ -49,7 +50,7 @@ namespace Regolith
   }
 
 
-  void Interactable::configure( Json::Value& json_data )
+  void Interactable::configure( Json::Value& json_data, DataHandler& )
   {
     Utilities::validateJson( json_data, "signals", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["signals"], 0, Utilities::JSON_TYPE_OBJECT );

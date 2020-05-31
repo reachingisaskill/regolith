@@ -10,6 +10,7 @@
 
 namespace Regolith
 {
+  class DataHandler;
 
   class CharacterBase : public Drawable, public Animated, public Moveable, public Noisy, public Collidable
   {
@@ -21,7 +22,7 @@ namespace Regolith
       virtual ~CharacterBase();
 
       // Configuration
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, DataHandler& ) override;
 
       // Replace the character at the specified position
       virtual void respawn( const Vector& ) = 0;

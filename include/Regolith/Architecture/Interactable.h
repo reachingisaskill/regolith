@@ -40,7 +40,7 @@ namespace Regolith
 
 
       // Set up the actions
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, DataHandler& ) override;
 
       // Validate the signals
       virtual void validate() const override;

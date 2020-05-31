@@ -59,46 +59,46 @@ namespace Regolith
   }
 
 
-  void SimpleButton::configure( Json::Value& json_data )
+  void SimpleButton::configure( Json::Value& json_data, DataHandler& handler )
   {
+    Drawable::configure( json_data, handler );
+    Interactable::configure( json_data, handler );
+    Clickable::configure( json_data, handler );
+
+
     Utilities::validateJson( json_data, "textures", Utilities::JSON_TYPE_OBJECT );
     Json::Value& textures = json_data["textures"];
 
     // Require the normal texture - this is the default
     Utilities::validateJson( textures, "normal", Utilities::JSON_TYPE_OBJECT );
-    _textures[Clickable::NORMAL].configure( textures["normal"] );
+    _textures[Clickable::NORMAL].configure( textures["normal"], handler );
 
     if ( Utilities::validateJson( textures, "down", Utilities::JSON_TYPE_OBJECT, false ) )
     {
-      _textures[Clickable::DOWN].configure( textures["down"] );
+      _textures[Clickable::DOWN].configure( textures["down"], handler );
     }
     else
     {
-      _textures[Clickable::DOWN].configure( textures["normal"] );
+      _textures[Clickable::DOWN].configure( textures["normal"], handler );
     }
 
     if ( Utilities::validateJson( textures, "focus", Utilities::JSON_TYPE_OBJECT, false ) )
     {
-      _textures[Clickable::FOCUSSED].configure( textures["focus"] );
+      _textures[Clickable::FOCUSSED].configure( textures["focus"], handler );
     }
     else
     {
-      _textures[Clickable::FOCUSSED].configure( textures["normal"] );
+      _textures[Clickable::FOCUSSED].configure( textures["normal"], handler );
     }
 
     if ( Utilities::validateJson( textures, "inactive", Utilities::JSON_TYPE_OBJECT, false ) )
     {
-      _textures[Clickable::INACTIVE].configure( textures["inactive"] );
+      _textures[Clickable::INACTIVE].configure( textures["inactive"], handler );
     }
     else
     {
-      _textures[Clickable::INACTIVE].configure( textures["normal"] );
+      _textures[Clickable::INACTIVE].configure( textures["normal"], handler );
     }
-
-    // Finally configure the base classes
-    Drawable::configure( json_data );
-    Interactable::configure( json_data );
-    Clickable::configure( json_data );
 
     onStateChange( Clickable::NORMAL );
   }

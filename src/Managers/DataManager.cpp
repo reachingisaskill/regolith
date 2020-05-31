@@ -1,5 +1,6 @@
 
 #include "Regolith/Managers/DataManager.h"
+#include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 #include "logtastic.h"
@@ -11,9 +12,9 @@ namespace Regolith
   DataManager::DataManager() :
     _textureFile(),
     _rawTextures( "raw_textures" ),
+    _rawTextureLookup( "raw_texture_lookup" ),
     _gameObjects( "game_objects" ),
-    _globalData(),
-    _dataHandlers( "data_handlers" )
+    _globalData()
   {
   }
 
@@ -22,11 +23,11 @@ namespace Regolith
   {
     INFO_LOG( "Deleting Data Manager." );
 
-    INFO_LOG( "Clearing data handlers." )
-    _dataHandlers.clear();
+    INFO_LOG( "Clearing texture caches." );
+    _rawTextureLookup.clear();
 
     INFO_LOG( "Clearing raw texture data" );
-    for ( NamedVector< RawTexture, false >::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
+    for ( NamedReferenceVector< RawTexture >::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
     {
       if ( it->texture != nullptr )
         SDL_DestroyTexture( it->texture );
@@ -37,77 +38,62 @@ namespace Regolith
   }
 
 
-  unsigned int DataManager::requestHandler( std::string name )
+  void DataManager::configureHandler( DataHandler* handler, std::string name )
   {
-    if ( ! _dataHandlers.exists( name ) )
+    if ( ! _rawTextureLookup.exists( name ) )
     {
-      _dataHandlers.addObject( new DataHandler( _gameObjects ), name );
+      _rawTextureLookup.addObject( std::vector< unsigned int >(), name );
     }
-    return _dataHandlers.get( name );
+    handler->_requiredTextures = &_rawTextureLookup.get( name );
+    handler->_handlerID = _rawTextureLookup.getID( name );
   }
 
 
   void DataManager::load( unsigned int i )
   {
-    DataBuilder builder( *this, _textureFile );
+    Json::Value temp_data;
+    Utilities::loadJsonData( temp_data, _textureFile );
+    Utilities::validateJson( temp_data, "textures", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( temp_data["textures"], 0, Utilities::JSON_TYPE_ARRAY );
+    Json::Value& texture_data = temp_data["textures"];
 
-    _dataHandlers[i].load( builder );
+    std::vector< unsigned int >& textureVector = _rawTextureLookup[i];
+    std::vector< unsigned int >::iterator end = textureVector.end();
+    for ( std::vector< unsigned int >::iterator it = textureVector.begin(); it != end; ++it )
+    {
+      std::string name = _rawTextures.getName( (*it) );
+
+      Json::ArrayIndex i;
+      for ( i = 0; i < texture_data.size(); ++i )
+      {
+        Json::Value& datum = texture_data[i];
+        Utilities::validateJson( datum, "name", Utilities::JSON_TYPE_STRING );
+        if ( datum["name"] == name )
+        {
+          _rawTextures[(*it)] = makeTexture( datum );
+          break;
+        }
+      }
+
+      if ( i == texture_data.size() ) // Texture wasn't found
+      {
+        Exception ex( "DataManager::load()", "Could not find texture resource to load" );
+        ex.addDetail( "Name", name );
+        ex.addDetail( "ID", (*it) );
+        throw ex;
+      }
+    }
   }
 
 
   void DataManager::unload( unsigned int i )
   {
-    DataBuilder builder( *this, _textureFile );
-
-    _dataHandlers[i].unload( builder );
-  }
-
-
-  RawTexture* DataManager::getRawTexture( unsigned int i )
-  {
-    return _rawTextures[i];
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Data Builder member functions
-
-  DataManager::DataBuilder::DataBuilder( DataManager& manager, std::string data_file ) :
-    _manager( manager ),
-    _data()
-  {
-    Json::Value temp_data;
-    Utilities::loadJsonData( temp_data, data_file );
-    Utilities::validateJson( temp_data, "textures", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( temp_data["textures"], 0, Utilities::JSON_TYPE_ARRAY );
-    _data = temp_data["textures"];
-  }
-
-
-  DataManager::DataBuilder::loadTexture( unsigned int id )
-  {
-    std::string name = _manager._rawTextures.getName( id );
-
-    for ( Json::ArrayIndex i = 0; i < _data.size(); ++i )
+    std::vector< unsigned int >& textureVector = _rawTextureLookup[i];
+    std::vector< unsigned int >::iterator end = textureVector.end();
+    for ( std::vector< unsigned int >::iterator it = textureVector.begin(); it != end; ++it )
     {
-      Json::Value& datum = _data[i];
-      Utilities::validateJson( datum, "name", Utilities::JSON_TYPE_STRING );
-      if ( datum["name"] == name )
-      {
-        _rawTextures.set( id, temp = makeTexture( datum ) );
-        return;
-      }
+      SDL_DestroyTexture( _rawTextures[ (*it) ].texture );
     }
-    Exception ex( "DataManager::DataBuilder::loadTexture()", "Could not find texture resource to load" );
-    ex.addDetail( "Name", name );
-    ex.addDetail( "ID", id );
-    throw ex;
-  }
-
-
-  DataManager::DataBuilder::unloadTexture( unsigned int id )
-  {
-    SDL_DestroyTexture( _manager._rawTextures[id] );
   }
 
 
@@ -116,13 +102,20 @@ namespace Regolith
 
   void DataManager::configure( Json::Value& json_data )
   {
+    // Configure the global handler
+    _globalData.configure( "global" );
+
+    // Load the json data
     Utilities::validateJson( json_data, "global_objects", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "texture_data_file", Utilities::JSON_TYPE_STRING );
 
+    // Find the texture index file
     _textureFile = json_data["texture_data_file"].asString();
 
+    // Find the global object list
     Json::Value& game_objects = json_data["global_objects"];
 
+    // Iterate the global objects list
     Json::ArrayIndex game_objects_size = game_objects.size();
     for ( Json::ArrayIndex i = 0; i != game_objects_size; ++i )
     {
@@ -131,7 +124,7 @@ namespace Regolith
 
       INFO_STREAM << "Building global object : " << name;
 
-      GameObject* obj = Manager::getInstance()->getObjectFactory().build( game_objects[i] );
+      GameObject* obj = Manager::getInstance()->getObjectFactory().build( game_objects[i], _globalData );
 
       if ( obj->isPhysical() ) // If the object claims to be physical
       {
@@ -147,8 +140,7 @@ namespace Regolith
     }
 
     // Load the global data textures into memory
-    DataBuilder builder( *this, _textureFile );
-    _globalData.load( builder );
+    load( _rawTextureLookup.getID( "global" ) );
 
   }
 

@@ -26,7 +26,7 @@ namespace Regolith
       virtual ~Drawable() {}
 
 
-      virtual void configure( Json::Value& ) override {}
+      virtual void configure( Json::Value&, DataHandler& ) override {}
 
 
       // Get the Renderer pointer

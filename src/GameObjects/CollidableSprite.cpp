@@ -1,6 +1,7 @@
 //#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GameObjects/CollidableSprite.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/GamePlay/Camera.h"
 
 #include "logtastic.h"
@@ -45,12 +46,12 @@ namespace Regolith
   }
 
 
-  void CollidableSprite::configure( Json::Value& json_data )
+  void CollidableSprite::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Drawable::configure( json_data );
-    Collidable::configure( json_data );
+    Drawable::configure( json_data, handler );
+    Collidable::configure( json_data, handler );
 
-    _texture.configure( json_data );
+    _texture.configure( json_data, handler );
 
     // Set the current sprite position
     _destination.w = _texture.getWidth();

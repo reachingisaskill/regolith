@@ -10,6 +10,7 @@
 
 namespace Regolith
 {
+  class DataHandler;
 
   class TestCharacter : public ControllableCharacter
   {
@@ -40,7 +41,7 @@ namespace Regolith
 
 
       // Configure the class
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, DataHandler& ) override;
 
       // Validate the configuration
       virtual void validate() const override;

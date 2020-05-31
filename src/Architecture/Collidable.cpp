@@ -1,6 +1,7 @@
 
 #include "Regolith/Architecture/Collidable.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -17,7 +18,7 @@ namespace Regolith
   }
 
 
-  void Collidable::configure( Json::Value& json_data )
+  void Collidable::configure( Json::Value& json_data, DataHandler& )
   {
     Utilities::validateJson( json_data, "collision", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "collision_type", Utilities::JSON_TYPE_STRING );

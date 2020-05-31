@@ -25,7 +25,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Signal Base class
 
-  class Signal : public MassProduceable
+  class Signal : public MassProduceable<>
   {
     private:
 

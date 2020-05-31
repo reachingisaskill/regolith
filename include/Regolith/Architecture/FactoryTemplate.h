@@ -3,7 +3,6 @@
 #define REGOLITH_ARCHITECTURE_FACTORY_TEMPLATE_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Architecture/FactoryBuilder.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -17,7 +16,7 @@ namespace Regolith
   template< class TYPE, class ... ARGS >
   class FactoryTemplate
   {
-    typedef std::map< std::string, FactoryBuilderBase< TYPE >* > BuilderMap;
+    typedef std::map< std::string, FactoryBuilderBase< TYPE, ARGS... >* > BuilderMap;
 
     private:
       BuilderMap _builders;

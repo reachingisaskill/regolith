@@ -1,6 +1,7 @@
 //#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GameObjects/AnimatedSprite.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/GamePlay/Camera.h"
 
 #include "logtastic.h"
@@ -50,9 +51,10 @@ namespace Regolith
   }
 
 
-  void AnimatedSprite::configure( Json::Value& json_data )
+  void AnimatedSprite::configure( Json::Value& json_data, DataHandler& handler )
   {
-    _texture.configure( json_data );
+    Drawable::configure( json_data, handler );
+    _texture.configure( json_data, handler );
 
     // Set the current sprite position
     _destination.x = position().x();

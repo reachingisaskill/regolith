@@ -12,6 +12,7 @@ namespace Regolith
 {
   // Forward declaration
   class Camera;
+  class DataHandler;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Raw Texture Structure (Because SDL_Texture's don't store their dimensions).
@@ -70,7 +71,7 @@ namespace Regolith
 
       // Configures as a sprite sheet with optional animation. No. rows, No. Columns, and No. of used cells and update period
       // This function is optinal. Without it this acts as a single flat texture
-      void configure( Json::Value& );
+      void configure( Json::Value&, DataHandler& );
 
       // Returns true if the spritesheeet is to be updated every frame
       bool isAnimated() const { return _updatePeriod > 0u; }

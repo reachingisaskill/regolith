@@ -1,6 +1,7 @@
 
 #include "Regolith/Test/TestCharacter.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -153,11 +154,11 @@ namespace Regolith
   }
 
 
-  void TestCharacter::configure( Json::Value& json_data )
+  void TestCharacter::configure( Json::Value& json_data, DataHandler& handler )
   {
-    ControllableCharacter::configure( json_data );
+    ControllableCharacter::configure( json_data, handler );
 
-    _theTexture.configure( json_data );
+    _theTexture.configure( json_data, handler );
 
     // Set the current sprite position
     _destination.x = position().x();

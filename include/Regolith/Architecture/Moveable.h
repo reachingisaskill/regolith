@@ -33,7 +33,7 @@ namespace Regolith
       virtual ~Moveable() {}
 
 
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, DataHandler& ) override;
 
 
       // Signifies that this object is movable

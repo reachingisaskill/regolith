@@ -29,6 +29,7 @@ namespace Regolith
     _theAudio(),
     _theFocus(),
     _theCollision(),
+    _theData(),
     _theCamera(),
     _paused( false ),
     _pauseable( false ),
@@ -190,7 +191,7 @@ namespace Regolith
 
   void Context::spawn( unsigned int id, unsigned int layer_num, const Vector& position )
   {
-    PhysicalObject* object = Manager::getInstance()->spawn( id, position );
+    PhysicalObject* object = _theData.spawn( id, position );
     addSpawnedObject( object, layer_num );
     _spawnedObjects.push_back( object );
   }
@@ -324,7 +325,7 @@ namespace Regolith
 
         if ( Utilities::validateJson( element_data[j], "is_global", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["is_global"].asBool() )
         {
-          GameObject* element = Manager::getInstance()->getGameObject( name );
+          GameObject* element = _theData.getGameObject( name );
           if ( element->isPhysical() )
           {
             INFO_LOG( "Element is physical. Placing global object within layer." );
@@ -347,9 +348,9 @@ namespace Regolith
         else
         {
           INFO_LOG( "Spawning object in layer" );
-          Vector pos = placeInLayer( newLayer, Manager::getInstance()->getPhysicalObject( name ), element_data[j] );
+          Vector pos = placeInLayer( newLayer, _theData.getPhysicalObject( name ), element_data[j] );
 
-          PhysicalObject* element = Manager::getInstance()->spawn( name, pos );
+          PhysicalObject* element = _theData.spawn( name, pos );
           addSpawnedObject( element, layer_number );
           _spawnedObjects.push_back( element );
         }
@@ -380,7 +381,7 @@ namespace Regolith
     {
       std::string camera_follow = camera_data["follow"].asString();
 
-      PhysicalObject* followee =  Manager::getInstance()->getPhysicalObject( camera_follow );
+      PhysicalObject* followee =  _theData.getPhysicalObject( camera_follow );
       INFO_STREAM << "Setting camera to follow : " << camera_follow << " @ " << followee;
       _theCamera.followMe( followee );
     }

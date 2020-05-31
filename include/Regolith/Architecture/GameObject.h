@@ -6,6 +6,7 @@
 
 namespace Regolith
 {
+  class DataHandler;
 
   /*
    * The base class for all objects that can appear (event without a drawable interface) within the game)
@@ -20,7 +21,7 @@ namespace Regolith
    * Movement => Movable
    * Click => Clickable
    */
-  class GameObject : public MassProduceable
+  class GameObject : public MassProduceable< DataHandler& >
   {
     public:
       virtual ~GameObject() {}

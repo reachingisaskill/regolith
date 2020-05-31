@@ -20,7 +20,7 @@ namespace Regolith
       virtual ~Controllable() {}
 
 
-      virtual void configure( Json::Value& ) override {}
+      virtual void configure( Json::Value&, DataHandler& ) override {}
 
 
       bool hasInput() const { return true; }

@@ -3,42 +3,35 @@
 #define REGOLITH_MANAGERS_DATA_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Managers/DataManager.h"
+#include "Regolith/Managers/DataHandler.h"
+#include "Regolith/GamePlay/Texture.h"
+#include "Regolith/Utilities/NamedVector.h"
+#include "Regolith/Utilities/NamedReferenceVector.h"
+
+#include <vector>
+#include <map>
 
 
 namespace Regolith
 {
+  // Forward Declarations
+  class DataBuilder;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Data Manager
 
   class DataManager
   {
-    typedef std::vector< std::string, RawTexture > RawTextureMap;
-    friend class DataManager::DataBuilder;
-
-    public:
-      class DataBuilder
-      {
-        private:
-          // Quick reference to the manager - makesure one exists!
-          DataManager& _manager;
-
-          // All the texture data
-          Json::Value _data;
-
-        protected:
-          DataBuilder( DataManager&, std::string );
-
-        public:
-          void loadTexture( unsigned int );
-
-          void unloadTexture( unsigned int );
-      };
-
     private:
       // Path to the list of all texture files and their modifiers
       std::string _textureFile;
 
       // Map of all the raw texture pointers
-      NamedVector< RawTexture, false > _rawTextures;
+      NamedReferenceVector< RawTexture > _rawTextures;
+      
+      // List of all the raw texture vectors for the handlers
+      NamedReferenceVector< std::vector< unsigned int > > _rawTextureLookup;
 
       // All objects used by the contexts using this handler.
       NamedVector<GameObject, true > _gameObjects;
@@ -46,17 +39,18 @@ namespace Regolith
       // Handler for data in global space
       DataHandler _globalData;
 
-      // Context specific data handlers
-      NamedVector< DataHandler, true > _dataHandlers;
-
     public:
+      // Con/de-struction
       DataManager();
-
       ~DataManager();
-
 
       // Basic configuration of object and build the global objects
       void configure( Json::Value& );
+
+
+      // Request a handler. Returns the ID
+      void configureHandler( DataHandler*, std::string );
+
 
 ////////////////////////////////////////////////////////////////////////////////
       // Handler access
@@ -64,11 +58,11 @@ namespace Regolith
       // Return the global data handler
       const DataHandler& globalData() const { return _globalData; }
 
-      // Request a handler. Returns the ID
-      DataHandler* requestHandler( std::string );
+      // Return the global data handler
+      DataHandler* globalDataPointer() { return &_globalData; }
 
-      // Return a pointer to a specific data handler
-      DataHandler* getHandler( unsigned int i ) { return _dataHandlers[i]; }
+      // Return a reference to the game objects list
+      NamedVector<GameObject, true>& gameObjects() { return _gameObjects; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +80,8 @@ namespace Regolith
 
       // Request a texture with a given name
       unsigned int requestRawTexture( std::string name ) { return _rawTextures.addName( name ); }
-      RawTexture* getRawTexture( unsigned int );
+      RawTexture* getRawTexture( unsigned int id ) { return &_rawTextures[ id ]; }
+      RawTexture* getRawTexture( std::string name ) { return &_rawTextures.get( name ); }
 
       // Returns true if the texture file is owned by the global handler
       bool isGlobal( unsigned int i ) { return _globalData.isCached( i ); }

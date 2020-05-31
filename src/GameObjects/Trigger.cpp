@@ -1,5 +1,6 @@
 
 #include "Regolith/GameObjects/Trigger.h"
+#include "Regolith/Managers/DataHandler.h"
 
 
 namespace Regolith
@@ -14,10 +15,10 @@ namespace Regolith
   }
 
 
-  void Trigger::configure( Json::Value& json_data )
+  void Trigger::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Collidable::configure( json_data );
-    Interactable::configure( json_data );
+    Collidable::configure( json_data, handler );
+    Interactable::configure( json_data, handler );
   }
 
 

@@ -1,12 +1,17 @@
 
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/DataManager.h"
+#include "Regolith/Utilities/NamedVector.h"
+#include "Regolith/Architecture/GameObject.h"
 
 
 namespace Regolith
 {
-  DataHandler::DataHandler( NamedVector<GameObject, true >& objects ) :
+  DataHandler::DataHandler() :
+    _handlerID( 0 ),
     _requiredTextures(),
-    _gameObjects( objects ),
+    _gameObjects( Manager::getInstance()->getDataManager().gameObjects() ),
     _loadScreen( 0 )
   {
   }
@@ -15,45 +20,28 @@ namespace Regolith
   DataHandler::~DataHandler()
   {
     INFO_LOG( "Destroying Data Handler" );
-
-    INFO_LOG( "Deleting GameObjects" );
-    _gameObjects.clear();
   }
 
 
-  void DataHandler::load( DataManager::DataBuilder& builder )
+  void DataHandler::configure( std::string name )
   {
-    std::vector<std::string>::iterator end = _requiredTextures.end();
-    for ( std::vector<std::string>::iterator it = _requiredTextures.begin(); it != end; ++it )
-    {
-      builder.loadTexture( (*it) );
-    }
+    Manager::getInstance()->getDataManager().configureHandler( this, name );
   }
 
 
-  void DataHandler::unload( DataManager::DataBuilder& builder )
-  {
-    std::vector<std::string>::iterator end = _requiredTextures.end();
-    for ( std::vector<std::string>::iterator it = _requiredTextures.begin(); it != end; ++it )
-    {
-      builder.unloadTexture( (*it) );
-    }
-  }
-
-
-  RawTexture* findTexture( std::string name )
+  RawTexture* DataHandler::findTexture( std::string name )
   {
     // Find the id number
-    unsigned int id = Manager::getInstance()->DataManager().requestTexture( name );
+    unsigned int id = Manager::getInstance()->getDataManager().requestRawTexture( name );
     
-    if ( ! Manager::getInstance()->DataManager().isGlobal( id ) )
+    if ( ! Manager::getInstance()->getDataManager().isGlobal( id ) )
     {
       // Add it to the current handler ONLY if the global handler doesnt already own it
-      _requiredTextures.push_back( id );
+      _requiredTextures->push_back( id );
     }
 
     // Return the requested texture pointer
-    return Manager::getInstance()->DataManager().getRawTexture( id );
+    return Manager::getInstance()->getDataManager().getRawTexture( id );
   }
 
 }

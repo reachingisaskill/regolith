@@ -4,21 +4,31 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/GamePlay/Texture.h"
+#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Utilities/NamedVector.h"
 
-#include <map>
+#include <string>
+#include <vector>
 
 
 namespace Regolith
 {
   // Forward Declaration
-  class DataManager::DataBuilder;
+  class DataManager;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Data Handler
 
   class DataHandler
   {
+    friend class DataManager;
     private:
-      // List of all the textures required for this data handler
-      std::vector< unsigned int > _requiredTextures;
+      // Identification of handler - set by the manager
+      unsigned int _handlerID;
+
+      // List of all the textures required for this data handler - owned by the manager
+      std::vector< unsigned int >* _requiredTextures;
 
       // Reference to all th game objects - owned by the manager
       NamedVector<GameObject, true >& _gameObjects;
@@ -27,15 +37,13 @@ namespace Regolith
       unsigned int _loadScreen;
 
     public:
-      DataHandler( NamedVector<GameObject, true >& );
+      DataHandler();
 
       ~DataHandler();
 
-      // Load all the textures into memory
-      void load( DataManager::DataBuilder& );
+      void configure( std::string );
 
-      // Unload all the textures from memory
-      void unload( DataManager::DataBuilder& );
+      unsigned int getID() const { return _handlerID; }
 
 
 ////////////////////////////////////////////////////////////////////////////////

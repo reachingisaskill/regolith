@@ -9,6 +9,7 @@
 
 namespace Regolith
 {
+  class DataHandler;
 
   class Trigger : public Collidable, public Interactable
   {
@@ -23,7 +24,7 @@ namespace Regolith
 
 
       // Configure the object
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, DataHandler& ) override;
 
 
 

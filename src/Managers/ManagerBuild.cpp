@@ -45,7 +45,7 @@ namespace Regolith
     {
       // Load and parse the json config
       Json::Value json_data;
-      loadJsonData( json_data, json_file );
+      Utilities::loadJsonData( json_data, json_file );
 
       // Validate the required keys
       Utilities::validateJson( json_data, "window", Utilities::JSON_TYPE_OBJECT );
@@ -324,7 +324,7 @@ namespace Regolith
       INFO_STREAM << "Bulding context from file: " << context_file;
 
       Json::Value context_file_data;
-      loadJsonData( context_file_data, context_file );
+      Utilities::loadJsonData( context_file_data, context_file );
 
       obj = _contextFactory.build( context_file_data );
       _contexts.addObject( obj, name );

@@ -25,6 +25,7 @@ namespace Regolith
     _theInput(),
     _theAudio(),
     _theHardware(),
+    _theData(),
     _theEngine( _theInput, _defaultColor ),
     _theRenderer( nullptr ),
     _entryPoint( 0 ),
@@ -33,8 +34,6 @@ namespace Regolith
     _signalFactory(),
     _fonts(),
     _teamNames(),
-    _globalData(),
-    _data( "manager_data_handlers_list" ),
     _contexts( "manager_context_list" ),
     _title(),
     _defaultFont( nullptr ),
@@ -166,20 +165,6 @@ namespace Regolith
     return find->second;
   }
 
-
-  RawTexture Manager::findRawTexture( std::string name ) const
-  {
-    RawTextureMap::const_iterator found = _rawTextures.find( name );
-    if ( found == _rawTextures.end() )
-    {
-      ERROR_STREAM << "Failed to find raw texture with name: " << name;
-      Exception ex( "ID::findRawTexture()", "Could not find raw texture", true );
-      ex.addDetail( "Texture name", name );
-      throw ex;
-    }
-
-    return found->second;
-  }
 
   TeamID Manager::getTeamID( std::string name )
   {

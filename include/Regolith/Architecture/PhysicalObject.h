@@ -32,7 +32,7 @@ namespace Regolith
       virtual ~PhysicalObject() {}
 
 
-      void configure( Json::Value& ) override;
+      void configure( Json::Value&, DataHandler& ) override;
 
 
       // Tells the user that derived classes come from a physical object.

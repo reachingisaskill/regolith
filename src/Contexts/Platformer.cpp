@@ -90,8 +90,8 @@ namespace Regolith
     // Set the character id
     std::string character_name = json_data["character"]["name"].asString();
     std::string character_layer = json_data["character"]["layer"].asString();
-    unsigned int playerID = Manager::getInstance()->requestGameObject( character_name );
-    GameObject* temp = Manager::getInstance()->getGameObject( playerID );
+    unsigned int playerID = dataHandler()->requestGameObject( character_name );
+    GameObject* temp = dataHandler()->getGameObject( playerID );
     _player = dynamic_cast< ControllableCharacter* >( temp );
     addSpawnedObject( _player, getLayerID( character_layer ) );
     INFO_STREAM << "Register platformer character as:" << character_name;
