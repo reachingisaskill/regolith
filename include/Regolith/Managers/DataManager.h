@@ -31,7 +31,10 @@ namespace Regolith
       NamedReferenceVector< RawTexture > _rawTextures;
       
       // List of all the raw texture vectors for the handlers
-      NamedReferenceVector< std::vector< unsigned int > > _rawTextureLookup;
+      NamedReferenceVector< IDNumberSet > _rawTextureLookup;
+
+      // Map of the status of all IDNumberSets
+      std::map<IDNumber, bool> _loadedCaches;
 
       // All objects used by the contexts using this handler.
       NamedVector<GameObject, true > _gameObjects;
@@ -47,6 +50,8 @@ namespace Regolith
       // Basic configuration of object and build the global objects
       void configure( Json::Value& );
 
+      // Validate the game objects
+      void validate() const;
 
       // Request a handler. Returns the ID
       void configureHandler( DataHandler*, std::string );
@@ -69,23 +74,27 @@ namespace Regolith
       // Dynamic loading/unloading
 
       // Load all the data in a specific handler
-      void load( unsigned int );
+      void load( IDNumber );
 
       // Unload all the data in a specific handler
-      void unload( unsigned int );
+      void unload( IDNumber );
 
+      // Load all handlers - mostly useful for testing
+      void loadAll();
 
 ////////////////////////////////////////////////////////////////////////////////
       // Raw Textures
 
       // Request a texture with a given name
-      unsigned int requestRawTexture( std::string name ) { return _rawTextures.addName( name ); }
-      RawTexture* getRawTexture( unsigned int id ) { return &_rawTextures[ id ]; }
+      IDNumber requestRawTexture( std::string name ) { return _rawTextures.addName( name ); }
+      RawTexture* getRawTexture( IDNumber id ) { return &_rawTextures[ id ]; }
       RawTexture* getRawTexture( std::string name ) { return &_rawTextures.get( name ); }
 
       // Returns true if the texture file is owned by the global handler
-      bool isGlobal( unsigned int i ) { return _globalData.isCached( i ); }
+      bool isGlobal( IDNumber i ) { return _globalData.isCached( i ); }
 
+
+      void print();
   };
 
 }

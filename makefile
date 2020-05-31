@@ -154,9 +154,9 @@ single_intro :
 #	@echo
 
 
-${PROGRAMS} : ${BIN_DIR}/% : ${TMP_DIR}/%.o
+${PROGRAMS} : ${BIN_DIR}/% : ${TMP_DIR}/%.o ${LIBRARY}
 	@echo " - Building Target  : " $(notdir $(basename $@))
-	@${CCC} ${LIB_LINK_FLAGS} -o $@ $^ ${LIBRARY} ${INC_FLAGS} ${LIB_FLAGS} ${EXEC_LIB_FLAGS}
+	@${CCC} ${LIB_LINK_FLAGS} -o $@ $^ ${INC_FLAGS} ${LIB_FLAGS} ${EXEC_LIB_FLAGS}
 	@echo "Target : "$(notdir $(basename $@))" Successfully Built"
 	@echo
 

@@ -272,11 +272,15 @@ namespace Regolith
     INFO_LOG( "Configuring Context" );
 
     Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "data_handler", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJson( json_data, "camera", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "collision_handling", Utilities::JSON_TYPE_OBJECT );
 
+
+    // Configure the data handler
+    _theData.configure( json_data["data_handler"].asString() );
     // Configure the collision rules
     _theCollision.configure( json_data["collision_handling"] );
     // Configure the input mapping
@@ -301,7 +305,6 @@ namespace Regolith
       Utilities::validateJson( layer_data[i], "elements", Utilities::JSON_TYPE_ARRAY );
       Utilities::validateJson( layer_data[i], "movement_scale", Utilities::JSON_TYPE_ARRAY );
       Utilities::validateJsonArray( layer_data[i]["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
-
 
       float x = layer_data[i]["position"][0].asFloat();
       float y = layer_data[i]["position"][1].asFloat();

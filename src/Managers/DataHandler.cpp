@@ -32,16 +32,28 @@ namespace Regolith
   RawTexture* DataHandler::findTexture( std::string name )
   {
     // Find the id number
-    unsigned int id = Manager::getInstance()->getDataManager().requestRawTexture( name );
+    IDNumber id = Manager::getInstance()->getDataManager().requestRawTexture( name );
+    DEBUG_STREAM << "Finding texture: " << name << " @ ID " << id << (Manager::getInstance()->getDataManager().isGlobal( id )? " is " : " is not " ) << "global";
     
     if ( ! Manager::getInstance()->getDataManager().isGlobal( id ) )
     {
       // Add it to the current handler ONLY if the global handler doesnt already own it
-      _requiredTextures->push_back( id );
+      _requiredTextures->insert( id );
     }
 
     // Return the requested texture pointer
-    return Manager::getInstance()->getDataManager().getRawTexture( id );
+    RawTexture* temp = Manager::getInstance()->getDataManager().getRawTexture( id );
+    DEBUG_STREAM << "Found : " << temp;
+    return temp;
+  }
+
+
+  bool DataHandler::isCached( IDNumber id ) const
+  {
+    if ( _requiredTextures->find( id ) == _requiredTextures->end() )
+      return false;
+    else
+      return true;
   }
 
 }

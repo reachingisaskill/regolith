@@ -5,6 +5,8 @@
 
   "default_music" : "null",
 
+  "data_handler" : "global",
+
   "menu" : "title_menu",
 
   "collision_handling" :
@@ -46,6 +48,7 @@
       "name" : "title_menu",
       "type" : "menu",
       "input_mapping" : "title",
+      "data_handler" : "global",
       "collision_handling" :
       {
         "collision_rules" : [],

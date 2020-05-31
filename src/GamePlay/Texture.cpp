@@ -30,23 +30,6 @@ namespace Regolith
   }
 
 
-  Texture::Texture( RawTexture tex) :
-    _theTexture( tex ),
-    _angle( 0.0 ),
-    _flipFlag( SDL_FLIP_NONE ),
-    _clip( { 0, 0, tex.width, tex.height } ),
-    _spriteWidth( tex.width ),
-    _spriteHeight( tex.height ),
-    _currentSprite( 0 ),
-    _rows( 0 ),
-    _columns( 0 ),
-    _numSprites( 0 ),
-    _updatePeriod( 0 ),
-    _count( 0 )
-  {
-  }
-
-
   Texture::~Texture()
   {
   }
@@ -56,7 +39,7 @@ namespace Regolith
   {
     SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
     // Render it to the window
-    DEBUG_STREAM << "Texture::Draw : " << renderer << ", " << _theTexture->texture << ", " << destination->w << ", " << destination->h;
+    DEBUG_STREAM << "Texture::Draw : " << renderer << ", " << _theTexture << ", " << _theTexture->texture << ", " << destination->w << ", " << destination->h;
     SDL_RenderCopyEx( renderer, _theTexture->texture, &_clip, destination, _angle, nullptr, _flipFlag );
   }
 
@@ -133,7 +116,7 @@ namespace Regolith
 
     std::string texture_name = json_data["texture_name"].asString();
     _theTexture = handler.findTexture( texture_name );
-    INFO_STREAM << "Found texture: " << texture_name;
+    INFO_STREAM << "Found texture: " << texture_name << " : " << _theTexture;
 
     // If its a spritesheet
     if ( Utilities::validateJson( json_data, "number_rows", Utilities::JSON_TYPE_INTEGER, false ) &&
@@ -265,7 +248,7 @@ namespace Regolith
       throw ex;
     }
 
-    RawTexture theTexture = { loadedTexture, loadedSurface->w, loadedSurface->h };
+    RawTexture theTexture( loadedTexture, loadedSurface->w, loadedSurface->h );
     SDL_FreeSurface( loadedSurface );
 
     return theTexture;
@@ -299,7 +282,7 @@ namespace Regolith
       throw ex;
     }
 
-    RawTexture theTexture = { loadedTexture, loadedSurface->w, loadedSurface->h };
+    RawTexture theTexture( loadedTexture, loadedSurface->w, loadedSurface->h );
     SDL_FreeSurface( loadedSurface );
 
     return theTexture;
@@ -325,9 +308,9 @@ namespace Regolith
       {
         Utilities::validateJsonArray( json_data["colour_key"], 3, Utilities::JSON_TYPE_INTEGER );
 
-        int key_red = json_data["colour_key"][0].asInt();
-        int key_green = json_data["colour_key"][1].asInt();
-        int key_blue = json_data["colour_key"][2].asInt();
+        Uint8 key_red = json_data["colour_key"][0].asInt();
+        Uint8 key_green = json_data["colour_key"][1].asInt();
+        Uint8 key_blue = json_data["colour_key"][2].asInt();
         SDL_Color key = { key_red, key_green, key_blue, 0 };
 
         return makeTextureFromFile( path, key );
@@ -375,6 +358,9 @@ namespace Regolith
       return makeTextureFromText( font, text_string, color );
     }
 
+    Exception ex( "makeTexture()", "Unknown texture type. Must be either \"file\" or \"text\"" );
+    ex.addDetail( "Type", json_data["type"].asString() );
+    throw ex;
   }
 
 

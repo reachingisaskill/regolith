@@ -53,7 +53,7 @@ namespace Regolith
       DataManager _theData;
       Engine _theEngine;
       SDL_Renderer* _theRenderer;
-      unsigned int _entryPoint;
+      IDNumber _entryPoint;
 
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
@@ -95,6 +95,8 @@ namespace Regolith
       void _loadWindow( Json::Value& );
       // Load all the collision teams
       void _loadTeams( Json::Value& );
+      // Load all the data manager
+      void _loadData( Json::Value& );
       // Load all the resources
       void _loadGlobalGameObjects( Json::Value& );
       // Load all the resources
@@ -153,13 +155,13 @@ namespace Regolith
       Context* buildContext( Json::Value& );
 
       // Return a pointer to a requested context - creating an entry if one doesn't exist
-      unsigned int requestContext( std::string name ) { return _contexts.addName( name ); }
+      IDNumber requestContext( std::string name ) { return _contexts.addName( name ); }
 
       // Return the name of a given context. Mostly useful for debugging!
-      std::string getContextName( unsigned int id ) { return _contexts.getName( id ); }
+      std::string getContextName( IDNumber id ) { return _contexts.getName( id ); }
 
       // Return a pointer to a requested context
-      Context* getContext( unsigned int id ) { return _contexts[ id ]; }
+      Context* getContext( IDNumber id ) { return _contexts[ id ]; }
 
       // Return a pointer to the current active context - may become invalid after rendering!
       Context* getCurrentContext() { return _theEngine.currentContext(); }
@@ -185,7 +187,7 @@ namespace Regolith
       TeamID getTeamID( std::string name );
 
       // Add a team to the map
-      void addTeam( std::string name, unsigned int id ) { _teamNames[name] = id; }
+      void addTeam( std::string name, IDNumber id ) { _teamNames[name] = id; }
 
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -203,16 +205,16 @@ namespace Regolith
       // Pushed context stack operations to the engine
 
       // Open a new context on top of the stack
-      void openContext( unsigned int );
+      void openContext( IDNumber );
 
       // Open a new context in place of the current one
-      void transferContext( unsigned int );
+      void transferContext( IDNumber );
 
       // Closes and then pops the context on the top of the stack
       void closeContext();
 
       // Resets the context stack to the provided context
-      void setContextStack( unsigned int );
+      void setContextStack( IDNumber );
 
 
       ////////////////////////////////////////////////////////////////////////////////

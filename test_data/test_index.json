@@ -1,0 +1,133 @@
+{
+  "textures" :
+  [
+    {
+      "name" : "title_background",
+      "type" : "file",
+      "path" : "test_data/test_wallpaper.jpg"
+    },
+    {
+      "name" : "platformer_background",
+      "type" : "file",
+      "path" : "test_data/test_background.png"
+    },
+    {
+      "name" : "test_animated_sprite",
+      "type" : "file",
+      "path" : "test_data/test_spritesheet.png",
+      "colour_key" : [ 255, 255, 255 ]
+    },
+    {
+      "name" : "test_platform",
+      "type" : "file",
+      "path" : "test_data/test_ground.png"
+    },
+    {
+      "name" : "the_ball",
+      "type" : "file",
+      "path" : "test_data/test_ball.png",
+      "colour_key" : [ 0, 255, 255 ]
+    },
+
+
+    {
+      "name" : "title_welcome1",
+      "type" : "text",
+      "text" : "Welcome to the Regolith Integration Test",
+      "font" : "default_big",
+      "colour" : [ 255, 255, 255, 255]
+    },
+    {
+      "name" : "title_start_button_up",
+      "type" : "text",
+      "text" : "Click here to start",
+      "font" : "default",
+      "colour" : [ 160, 160, 160, 255]
+    },
+    {
+      "name" : "title_start_button_down",
+      "type" : "text",
+      "text" : "Click here to start",
+      "font" : "default",
+      "colour" : [ 255, 160, 160, 255]
+    },
+    {
+      "name" : "title_start_button_focus",
+      "type" : "text",
+      "text" : "Click here to start",
+      "font" : "default",
+      "colour" : [ 255, 255, 255, 255]
+    },
+    {
+      "name" : "title_test_button_up",
+      "type" : "text",
+      "text" : "Test button",
+      "font" : "default",
+      "colour" : [ 160, 160, 160, 255]
+    },
+    {
+      "name" : "title_test_button_down",
+      "type" : "text",
+      "text" : "Test button",
+      "font" : "default",
+      "colour" : [ 255, 160, 160, 255]
+    },
+    {
+      "name" : "title_test_button_focus",
+      "type" : "text",
+      "text" : "Test button",
+      "font" : "default",
+      "colour" : [ 255, 255, 255, 255]
+    },
+    {
+      "name" : "title_quit_button_up",
+      "type" : "text",
+      "text" : "Exit",
+      "font" : "default",
+      "colour" : [ 160, 160, 160, 255]
+    },
+    {
+      "name" : "title_quit_button_down",
+      "type" : "text",
+      "text" : "Exit",
+      "font" : "default",
+      "colour" : [ 255, 160, 160, 255]
+    },
+    {
+      "name" : "title_quit_button_focus",
+      "type" : "text",
+      "text" : "Exit",
+      "font" : "default",
+      "colour" : [ 255, 255, 255, 255]
+    },
+    {
+      "name" : "pause_text",
+      "type" : "text",
+      "text" : "Game Paused",
+      "font" : "default_big",
+      "colour" : [ 160, 160, 160, 255 ]
+    },
+    {
+      "name" : "pause_quit_normal",
+      "type" : "text",
+      "text" : "Quit",
+      "font" : "default_big",
+      "colour" : [ 160, 160, 160, 255 ]
+    },
+    {
+      "name" : "pause_quit_down",
+      "type" : "text",
+      "text" : "Quit",
+      "font" : "default_big",
+      "colour" : [ 255, 255, 255, 255 ]
+    },
+    {
+      "name" : "pause_quit_focus",
+      "type" : "text",
+      "text" : "Quit",
+      "font" : "default_big",
+      "colour" : [ 255, 255, 255, 255 ]
+    }
+  ]
+}
+

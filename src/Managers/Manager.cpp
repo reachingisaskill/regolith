@@ -106,14 +106,14 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Stack manipulation
 
-  void Manager::openContext( unsigned int c )
+  void Manager::openContext( IDNumber c )
   {
     DEBUG_LOG( "Opening Context" );
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, getContext( c ) ) );
   }
 
 
-  void Manager::transferContext( unsigned int c )
+  void Manager::transferContext( IDNumber c )
   {
     DEBUG_LOG( "Transferring Context" );
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, getContext( c ) ) );
@@ -127,7 +127,7 @@ namespace Regolith
   }
 
 
-  void Manager::setContextStack( unsigned int c )
+  void Manager::setContextStack( IDNumber c )
   {
     DEBUG_LOG( "Closing All Contexts" );
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, getContext( c ) ) );

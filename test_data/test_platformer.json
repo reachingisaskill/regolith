@@ -5,6 +5,8 @@
 
   "default_music" : "null",
 
+  "data_handler" : "global",
+
   "pause_context" : "pause_menu",
 
   "collision_handling" :
@@ -93,6 +95,7 @@
     {
       "name" : "pause_menu",
       "type" : "menu",
+      "data_handler" : "global",
       "input_mapping" : "title",
       "collision_handling" :
       {

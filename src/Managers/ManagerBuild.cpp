@@ -53,8 +53,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "input_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "textures", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "game_objects", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "game_data", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
       Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
 
@@ -82,10 +81,6 @@ namespace Regolith
 
       //Load all the collision teams
       this->_loadTeams( json_data["collision_teams"] );
-
-
-      // Load all the texture files
-      this->_loadTextures( json_data["textures"] );
 
 
       // Load all the game objects files
@@ -116,12 +111,7 @@ namespace Regolith
 
     // Last configuration operation - validating the mass produced objects
     // Validate all the game objects
-    NamedVector<GameObject, true>::iterator obj_end = _gameObjects.end();
-    for ( NamedVector<GameObject, true>::iterator it = _gameObjects.begin(); it != obj_end; ++it )
-    {
-      if ( (*it) != nullptr )
-        (*it)->validate();
-    }
+    _theData.validate();
 
     // Validate all the contexts
     NamedVector<Context, true>::iterator context_end = _contexts.end();
@@ -130,6 +120,11 @@ namespace Regolith
       if ( (*it) != nullptr )
         (*it)->validate();
     }
+
+    _theData.print();
+    std::cout << "\n\n\n LOADING ALL DATA\n\n\n";
+    _theData.loadAll();
+    _theData.print();
   }
 
 
@@ -259,33 +254,6 @@ namespace Regolith
       std::string team_name = it.key().asString();
       TeamID id = (TeamID) it->asInt();
       addTeam( team_name, id );
-    }
-  }
-
-
-  void Manager::_loadTextures( Json::Value& json_data )
-  {
-    Utilities::validateJson( json_data, "texture_files", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "texture_strings", Utilities::JSON_TYPE_ARRAY );
-
-    // Load and cache the individual texture files
-    Json::Value texture_files = json_data["texture_files"];
-    Json::ArrayIndex texture_files_size = texture_files.size();
-    for ( Json::ArrayIndex i = 0; i != texture_files_size; ++i )
-    {
-      RawTexture texture = makeTextureFromFile( texture_files[i] );
-      std::string name = texture_files[i]["name"].asString();
-      _rawTextures[name] = texture;
-    }
-
-    // Load and cache the individual text textures
-    Json::Value texture_strings = json_data["texture_strings"];
-    Json::ArrayIndex texture_strings_size = texture_strings.size();
-    for ( Json::ArrayIndex i = 0; i != texture_strings_size; ++i )
-    {
-      RawTexture texture = makeTextureFromText( texture_strings[i] );
-      std::string name = texture_strings[i]["name"].asString();
-      _rawTextures[name] = texture;
     }
   }
 

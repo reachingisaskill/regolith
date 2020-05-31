@@ -22,6 +22,9 @@ namespace Regolith
     SDL_Texture* texture;
     int width;
     int height;
+
+    RawTexture() : texture( nullptr ), width( 0 ), height( 0 ) {}
+    RawTexture( SDL_Texture* t, int w, int h ) : texture( t ), width( w ), height( h ) {}
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,8 +66,6 @@ namespace Regolith
 
     public:
       Texture();
-
-      explicit Texture( RawTexture );
 
       virtual ~Texture();
 

@@ -7,7 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Create a test data structure
 
-struct test_base : public Regolith::MassProduceable
+struct test_base : public Regolith::MassProduceable<>
 {
   int variable;
 };
