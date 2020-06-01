@@ -28,10 +28,10 @@ namespace Regolith
       std::string _textureFile;
 
       // Map of all the raw texture pointers
-      NamedReferenceVector< RawTexture > _rawTextures;
+      RawTextureMap _rawTextures;
       
       // List of all the raw texture vectors for the handlers
-      NamedReferenceVector< IDNumberSet > _rawTextureLookup;
+      NamedReferenceVector< RawTextureCache > _rawTextureLookup;
 
       // Map of the status of all IDNumberSets
       std::map<IDNumber, bool> _loadedCaches;
@@ -86,15 +86,14 @@ namespace Regolith
       // Raw Textures
 
       // Request a texture with a given name
-      IDNumber requestRawTexture( std::string name ) { return _rawTextures.addName( name ); }
-      RawTexture* getRawTexture( IDNumber id ) { return &_rawTextures[ id ]; }
-      RawTexture* getRawTexture( std::string name ) { return &_rawTextures.get( name ); }
+      RawTexturePointer requestRawTexture( std::string name );
+      RawTexture* getRawTexture( std::string name ) { return &_rawTextures[ name ]; }
 
       // Returns true if the texture file is owned by the global handler
-      bool isGlobal( IDNumber i ) { return _globalData.isCached( i ); }
+      bool isGlobal( RawTexturePointer p ) { return _globalData.isCached( p ); }
 
 
-      void print();
+//      void print();
   };
 
 }

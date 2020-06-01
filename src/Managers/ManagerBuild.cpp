@@ -121,10 +121,10 @@ namespace Regolith
         (*it)->validate();
     }
 
-    _theData.print();
-    std::cout << "\n\n\n LOADING ALL DATA\n\n\n";
+//    _theData.print();
+//    std::cout << "\n\n\n LOADING ALL DATA\n\n\n";
     _theData.loadAll();
-    _theData.print();
+//    _theData.print();
   }
 
 

@@ -11,7 +11,7 @@ namespace Regolith
 
   DataManager::DataManager() :
     _textureFile(),
-    _rawTextures( "raw_textures" ),
+    _rawTextures(),
     _rawTextureLookup( "raw_texture_lookup" ),
     _gameObjects( "game_objects" ),
     _globalData()
@@ -27,10 +27,10 @@ namespace Regolith
     _rawTextureLookup.clear();
 
     INFO_LOG( "Clearing raw texture data" );
-    for ( NamedReferenceVector< RawTexture >::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
+    for ( RawTextureMap::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
     {
-      if ( it->texture != nullptr )
-        SDL_DestroyTexture( it->texture );
+      if ( it->second.texture != nullptr )
+        SDL_DestroyTexture( it->second.texture );
     }
     _rawTextures.clear();
 
@@ -65,25 +65,24 @@ namespace Regolith
 
     Json::Value temp_data;
     Utilities::loadJsonData( temp_data, _textureFile );
-    Utilities::validateJson( temp_data, "textures", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( temp_data["textures"], 0, Utilities::JSON_TYPE_ARRAY );
     Json::Value& texture_data = temp_data["textures"];
 
-    IDNumberSet& textureVector = _rawTextureLookup[i];
-    IDNumberSet::iterator end = textureVector.end();
-    for ( IDNumberSet::iterator it = textureVector.begin(); it != end; ++it )
+    RawTextureCache& textureCache = _rawTextureLookup[i];
+    RawTextureCache::iterator end = textureCache.end();
+    for ( RawTextureCache::iterator it = textureCache.begin(); it != end; ++it )
     {
-      std::string name = _rawTextures.getName( (*it) );
+      std::string name = (*it)->first;
 
       Json::ArrayIndex i;
       for ( i = 0; i < texture_data.size(); ++i )
       {
         Json::Value& datum = texture_data[i];
         Utilities::validateJson( datum, "name", Utilities::JSON_TYPE_STRING );
-        if ( datum["name"] == name )
+
+        if ( datum["name"].asString() == name )
         {
-          _rawTextures[(*it)] = makeTexture( datum );
-          DEBUG_STREAM << "TEXTURE: " << name << ", " << (*it) << " : " << &_rawTextures[(*it)] << " Versus " << _globalData.findTexture( name );
+          (*it)->second = makeTexture( datum );
+          DEBUG_STREAM << "TEXTURE: " << name << ", " << (*it);
           break;
         }
       }
@@ -106,11 +105,15 @@ namespace Regolith
 
     _loadedCaches[i] = false;
 
-    IDNumberSet& textureVector = _rawTextureLookup[i];
-    IDNumberSet::iterator end = textureVector.end();
-    for ( IDNumberSet::iterator it = textureVector.begin(); it != end; ++it )
+    RawTextureCache& textureCache = _rawTextureLookup[i];
+    RawTextureCache::iterator end = textureCache.end();
+    for ( RawTextureCache::iterator it = textureCache.begin(); it != end; ++it )
     {
-      SDL_DestroyTexture( _rawTextures[ (*it) ].texture );
+      if ( (*it)->second.texture != nullptr )
+      {
+        SDL_DestroyTexture( (*it)->second.texture );
+        (*it)->second.texture = nullptr;
+      }
     }
   }
 
@@ -123,6 +126,19 @@ namespace Regolith
     }
   }
 
+
+  RawTexturePointer DataManager::requestRawTexture( std::string name )
+  {
+    RawTextureMap::iterator it = _rawTextures.find( name );
+    if ( it == _rawTextures.end() )
+    {
+      it = _rawTextures.insert( std::make_pair( name, RawTexture() ) ).first;
+    }
+
+    return  &(*it);
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure
 
@@ -131,7 +147,7 @@ namespace Regolith
     INFO_LOG( "Configuring the Data Manager." );
     // Configure the global handler
     _globalData.configure( "global" );
-    print();
+//    print();
 
     // Load the json data
     Utilities::validateJson( json_data, "global_objects", Utilities::JSON_TYPE_ARRAY );
@@ -139,6 +155,35 @@ namespace Regolith
 
     // Find the texture index file
     _textureFile = json_data["texture_data_file"].asString();
+
+    // Load and validate the index file
+    Json::Value temp_data;
+    Utilities::loadJsonData( temp_data, _textureFile );
+    Utilities::validateJson( temp_data, "textures", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( temp_data["textures"], 0, Utilities::JSON_TYPE_ARRAY );
+    Json::Value texture_data = temp_data["textures"];
+
+    Json::ArrayIndex i;
+    for ( i = 0; i < texture_data.size(); ++i )
+    {
+      Json::Value& datum = texture_data[i];
+      Utilities::validateJson( datum, "name", Utilities::JSON_TYPE_STRING );
+      std::string name = datum["name"].asString();
+
+      // Throw an error if there are duplicates.
+      if ( _rawTextures.find( name ) != _rawTextures.end() )
+      {
+        Exception ex( "DataManager::configure()", "Duplicate names found in texture list" );
+        ex.addDetail( "Name", name );
+        throw ex;
+      }
+
+      _rawTextures[name] = makeTexture( datum ); // Fill the info
+      SDL_DestroyTexture( _rawTextures[name].texture ); // Delete the texture data
+    }
+
+    temp_data.clear();
+
 
     // Find the global object list
     Json::Value& game_objects = json_data["global_objects"];
@@ -167,9 +212,9 @@ namespace Regolith
       _gameObjects.addObject( obj, name );
     }
 
-    print();
-    std::cout << "\n\n\n  LOADING GLOBAL \n\n\n";
-    DEBUG_STREAM << "  LOADING GLOBAL";
+//    print();
+//    std::cout << "\n\n\n  LOADING GLOBAL \n\n\n";
+//    DEBUG_STREAM << "  LOADING GLOBAL";
     // Load the global data textures into memory
     load( _rawTextureLookup.getID( "global" ) );
   }
@@ -186,35 +231,35 @@ namespace Regolith
   }
 
 
-  void DataManager::print()
-  {
-    std::cout << "Loaded Status: \n";
-  
-    for ( std::map< IDNumber, bool >::iterator it = _loadedCaches.begin(); it != _loadedCaches.end(); ++it )
-    {
-      std::cout << "ID : " << it->first << " - Loaded : " << it->second << '\n';
-    }
-
-    std::cout << "\nTextures Lookup:\n";
-
-    for ( size_t i = 0; i < _rawTextureLookup.size(); ++i )
-    {
-      IDNumberSet& textures = _rawTextureLookup[i];
-      std::cout << "  Lookup: " << i << " - " << _rawTextureLookup.getName( i ) << '\n';
-
-      for ( IDNumberSet::iterator it = textures.begin(); it != textures.end(); ++it )
-      {
-        std::cout << "    Texture : " << (*it) << " @ " << &_rawTextures[(*it)] << " -> " << _rawTextures[(*it)].texture << '\n';
-      }
-    }
-
-    std::cout << "\nRaw Textures:\n";
-
-    for ( size_t i = 0; i < _rawTextures.size(); ++i )
-    {
-        std::cout << "  Texture : " << i << " @ " << &_rawTextures[i] << " -> " << _rawTextures[i].texture << '\n';
-    }
-  }
+//  void DataManager::print()
+//  {
+//    std::cout << "Loaded Status: \n";
+//  
+//    for ( std::map< IDNumber, bool >::iterator it = _loadedCaches.begin(); it != _loadedCaches.end(); ++it )
+//    {
+//      std::cout << "ID : " << it->first << " - Loaded : " << it->second << '\n';
+//    }
+//
+//    std::cout << "\nTextures Lookup:\n";
+//
+//    for ( size_t i = 0; i < _rawTextureLookup.size(); ++i )
+//    {
+//      IDNumberSet& textures = _rawTextureLookup[i];
+//      std::cout << "  Lookup: " << i << " - " << _rawTextureLookup.getName( i ) << '\n';
+//
+//      for ( IDNumberSet::iterator it = textures.begin(); it != textures.end(); ++it )
+//      {
+//        std::cout << "    Texture : " << (*it) << " @ " << &_rawTextures[(*it)] << " -> " << _rawTextures[(*it)].texture << '\n';
+//      }
+//    }
+//
+//    std::cout << "\nRaw Textures:\n";
+//
+//    for ( size_t i = 0; i < _rawTextures.size(); ++i )
+//    {
+//        std::cout << "  Texture : " << i << " @ " << &_rawTextures[i] << " -> " << _rawTextures[i].texture << '\n';
+//    }
+//  }
 
 }
 

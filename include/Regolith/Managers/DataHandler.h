@@ -28,7 +28,7 @@ namespace Regolith
       IDNumber _handlerID;
 
       // List of all the textures required for this data handler - owned by the manager
-      IDNumberSet* _requiredTextures;
+      RawTextureCache* _requiredTextures;
 
       // Reference to all th game objects - owned by the manager
       NamedVector<GameObject, true >& _gameObjects;
@@ -53,7 +53,7 @@ namespace Regolith
       RawTexture* findTexture( std::string );
 
       // Returns true if that texture is cached by this handler
-      bool isCached( IDNumber ) const;
+      bool isCached( RawTexturePointer ) const;
 
 
 ////////////////////////////////////////////////////////////////////////////////

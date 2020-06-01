@@ -25,6 +25,7 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful Typedefs
+  class RawTexture;
   class Drawable;
   class Moveable;
   class Collidable;
@@ -39,6 +40,11 @@ namespace Regolith
   typedef std::map< TeamID, CollidableList > TeamMap;
   typedef std::set< Clickable* > ClickableSet;
   typedef std::set< IDNumber > IDNumberSet;
+
+  typedef std::map< std::string, RawTexture > RawTextureMap;
+  typedef RawTextureMap::value_type* RawTexturePointer;
+  typedef std::set< RawTexturePointer > RawTextureCache;
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
