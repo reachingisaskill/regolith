@@ -14,6 +14,7 @@
 #include "Regolith/Managers/FocusHandler.h"
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Managers/ContextHandler.h"
 #include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/GamePlay/Camera.h"
 
@@ -33,7 +34,7 @@ namespace Regolith
    * The standard rendering interface is still to use the current scene, and let the scene
    * call the rendering function for the current context.
    */
-  class Context : public MassProduceable<>, public ControllableInterface, public Component
+  class Context : public MassProduceable<ContextHandler&>, public ControllableInterface, public Component
   {
     // Contexts should not be copyable
     Context( const Context& ) = delete;
@@ -88,7 +89,7 @@ namespace Regolith
       virtual ~Context();
 
       // Configure the context
-      void configure( Json::Value& ) override;
+      void configure( Json::Value&, ContextHandler& ) override;
 
 
       // Return the input handler for this context

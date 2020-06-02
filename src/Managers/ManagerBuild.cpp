@@ -92,7 +92,7 @@ namespace Regolith
 
       // Find the first context to load
       std::string entry = json_data["entry_point"].asString();
-      _entryPoint = requestContext( entry );
+      _entryPoint = _theContexts.requestContext( entry );
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream
     {
@@ -114,12 +114,6 @@ namespace Regolith
     _theData.validate();
 
     // Validate all the contexts
-    NamedVector<Context, true>::iterator context_end = _contexts.end();
-    for ( NamedVector<Context, true>::iterator it = _contexts.begin(); it != context_end; ++it )
-    {
-      if ( (*it) != nullptr )
-        (*it)->validate();
-    }
 
 //    _theData.print();
 //    std::cout << "\n\n\n LOADING ALL DATA\n\n\n";
@@ -270,41 +264,7 @@ namespace Regolith
   {
     INFO_LOG( "Loading contexts" );
 
-    Json::ArrayIndex context_data_size = context_data.size();
-    for ( Json::ArrayIndex i = 0; i != context_data_size; ++i )
-    {
-      buildContext( context_data[i] );
-    }
-  }
-
-
-  Context* Manager::buildContext( Json::Value& json_data )
-  {
-    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
-    std::string name = json_data["name"].asString();
-    INFO_STREAM << "Attempting to build context: " << name;
-
-    Context* obj = nullptr;
-
-    if ( Utilities::validateJson( json_data, "file", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      std::string context_file = json_data["file"].asString();
-      INFO_STREAM << "Bulding context from file: " << context_file;
-
-      Json::Value context_file_data;
-      Utilities::loadJsonData( context_file_data, context_file );
-
-      obj = _contextFactory.build( context_file_data );
-      _contexts.addObject( obj, name );
-    }
-    else
-    {
-      INFO_LOG( "Bulding context" );
-      obj = _contextFactory.build( json_data );
-      _contexts.addObject( obj, name );
-    }
-
-    return obj;
+    _theContexts.configure( context_data );
   }
 
 }

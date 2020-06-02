@@ -37,8 +37,11 @@ namespace Regolith
   }
 
 
-  void TitleScene::configure( Json::Value& json_data )
+  void TitleScene::configure( Json::Value& json_data, ContextHandler& handler )
   {
+    // Call the base class variant first
+    Context::configure( json_data, handler );
+
     Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "menu", Utilities::JSON_TYPE_STRING );
 
@@ -50,19 +53,16 @@ namespace Regolith
     // Load the menu context - required for a title!
     std::string menu_name = json_data["menu"].asString();
     INFO_STREAM << "Setting title scene menu to: " << menu_name;
-    _firstContext = Manager::getInstance()->requestContext( menu_name );
-
-    // Call the base class variant to finish the configuration
-    Context::configure( json_data );
+    _firstContext = Manager::getInstance()->getContextManager().requestContext( menu_name );
   }
 
 
   void TitleScene::validate() const
   {
-    if ( Manager::getInstance()->getContext( _firstContext ) == nullptr )
+    if ( Manager::getInstance()->getContextManager().getContext( _firstContext ) == nullptr )
     {
       Exception ex( "TitleScene::validate() const", "Menu context not configured" );
-      ex.addDetail( "Name", Manager::getInstance()->getContextName( _firstContext ) );
+      ex.addDetail( "Name", Manager::getInstance()->getContextManager().getContextName( _firstContext ) );
       throw ex;
     }
   }

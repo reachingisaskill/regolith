@@ -21,10 +21,10 @@ namespace Regolith
   }
 
 
-  void DataHandler::configure( std::string name )
-  {
-    Manager::getInstance()->getDataManager().configureHandler( this, name );
-  }
+//  void DataHandler::configure( std::string name )
+//  {
+//    Manager::getInstance()->getDataManager().configureHandler( this, name );
+//  }
 
 
   RawTexture* DataHandler::findTexture( std::string name )
@@ -33,7 +33,7 @@ namespace Regolith
     RawTexturePointer pointer = Manager::getInstance()->getDataManager().requestRawTexture( name );
 
     DEBUG_STREAM << "Finding texture: " << name << " - " << (Manager::getInstance()->getDataManager().isGlobal( pointer )? " is " : " is not " ) << "global";
-   pointer ( ! Manager::getInstance()->getDataManager().isGlobal( pointer ) )
+    if ( ! Manager::getInstance()->getDataManager().isGlobal( pointer ) )
     {
       // Add it to the current handler ONLY if the global handler doesnt already own it
       _requiredTextures->insert( pointer );

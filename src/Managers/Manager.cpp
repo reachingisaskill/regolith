@@ -21,11 +21,13 @@ namespace Regolith
 {
 
   Manager::Manager() :
+    _theThreads(),
     _theWindow(),
     _theInput(),
     _theAudio(),
     _theHardware(),
     _theData(),
+    _theContexts(),
     _theEngine( _theInput, _defaultColor ),
     _theRenderer( nullptr ),
     _entryPoint( 0 ),
@@ -34,7 +36,6 @@ namespace Regolith
     _signalFactory(),
     _fonts(),
     _teamNames(),
-    _contexts( "manager_context_list" ),
     _title(),
     _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
@@ -64,19 +65,12 @@ namespace Regolith
     _signalFactory.addBuilder<InputVectorSignal>( "input_vector" );
     _signalFactory.addBuilder<GameEventSignal>( "game_event" );
     _signalFactory.addBuilder<ChangeContextSignal>( "context_change" );
-
-    // Set up a null value
-    _contexts.addObject( nullptr, "null" );
   }
 
 
   Manager::~Manager()
   {
     _defaultFont = nullptr;
-
-    // Remove each of scenes and clear the vector
-    INFO_LOG( "Deleteing Scenes" );
-    _contexts.clear();
 
     INFO_LOG( "Clearing team list" );
     _teamNames.clear();
@@ -109,14 +103,14 @@ namespace Regolith
   void Manager::openContext( IDNumber c )
   {
     DEBUG_LOG( "Opening Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, getContext( c ) ) );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, _theContexts.getContext( c ) ) );
   }
 
 
   void Manager::transferContext( IDNumber c )
   {
     DEBUG_LOG( "Transferring Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, getContext( c ) ) );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, _theContexts.getContext( c ) ) );
   }
 
 
@@ -129,8 +123,8 @@ namespace Regolith
 
   void Manager::setContextStack( IDNumber c )
   {
-    DEBUG_LOG( "Closing All Contexts" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, getContext( c ) ) );
+    DEBUG_LOG( "Resetting Context Stack" );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, _theContexts.getContext( c ) ) );
   }
 
 
@@ -139,15 +133,15 @@ namespace Regolith
 
   void Manager::run()
   {
-    if ( _contexts.size() == 0 )
-    {
-      FAILURE_LOG( "Context list is empty - there is nothing to render!" );
-      Exception ex( "Manager::run()", "No contexts to load", false );
-      throw ex;
-    }
-
     // Reset the stack to the first context
     setContextStack( _entryPoint );
+
+    // Start all the waiting threads
+    {
+      std::lock_guard<std::mutex> lk( _theThreads.StartCondition.mutex );
+      _theThreads.StartCondition.data = true;
+    }
+    _theThreads.StartCondition.variable.notify_all();
 
     // Start the engine!
     _theEngine.run();
@@ -178,7 +172,6 @@ namespace Regolith
     return found->second;
   }
 
-//  Context* Manager::buildContext( Json::Value& ) // See Managers/ManagerBuild.cpp
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure user events

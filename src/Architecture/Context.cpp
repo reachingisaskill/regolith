@@ -267,7 +267,7 @@ namespace Regolith
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // Context configuration
 
-  void Context::configure( Json::Value& json_data )
+  void Context::configure( Json::Value& json_data, ContextHandler& handler )
   {
     INFO_LOG( "Configuring Context" );
 
@@ -280,7 +280,7 @@ namespace Regolith
 
 
     // Configure the data handler
-    _theData.configure( json_data["data_handler"].asString() );
+    handler.configureDataHandler( _theData, json_data["data_handler"].asString() );
     // Configure the collision rules
     _theCollision.configure( json_data["collision_handling"] );
     // Configure the input mapping
@@ -366,7 +366,7 @@ namespace Regolith
     Json::ArrayIndex context_data_size = context_data.size();
     for ( Json::ArrayIndex i = 0; i != context_data_size; ++i )
     {
-      Manager::getInstance()->buildContext( context_data[i] );
+      handler.buildContext( context_data[i] );
     }
 
 

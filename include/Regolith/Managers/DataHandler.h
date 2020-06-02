@@ -41,7 +41,7 @@ namespace Regolith
 
       ~DataHandler();
 
-      void configure( std::string );
+//      void configure( std::string );
 
       IDNumber getID() const { return _handlerID; }
 

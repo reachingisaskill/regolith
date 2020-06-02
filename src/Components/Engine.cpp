@@ -14,7 +14,6 @@ namespace Regolith
     _defaultColor( color ),
     _contextStack(),
     _frameTimer(),
-    _quit( false ),
     _pause( false )
   {
   }
@@ -34,16 +33,25 @@ namespace Regolith
     }
 
     // Reset the flags
-    _quit = false;
+    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
     _pause = false;
+
+    // Condition variables for thread signalling
+    Condition<bool>& stackUpdate = Manager::getInstance()->getThreadManager().StackUpdate;
 
     // Reset the timer
     _frameTimer.lap();
 
+    // Grab the stack
+    std::unique_lock<std::mutex> stackLock( stackUpdate.mutex );
     // Load the first context
     performStackOperations();
+    stackLock.unlock();
+    // Let everyone know that stack operations have been completed.
+    stackUpdate.variable.notify_all();
 
-    while ( ! _quit )
+
+    while ( ! quitFlag )
     {
       // Handle global events with no context
       _inputManager.handleEvents( nullptr );
@@ -84,7 +92,13 @@ namespace Regolith
         // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
         if ( ! _stackOperationQueue.empty() )
         {
-          performStackOperations();
+          if ( stackLock.try_lock() )
+          {
+            performStackOperations();
+            stackUpdate.data = true;
+            stackLock.unlock();
+            stackUpdate.variable.notify_all();
+          }
         }
       }
     }
@@ -105,7 +119,7 @@ namespace Regolith
     {
       case REGOLITH_EVENT_QUIT :
         _pause = true;
-        _quit = true;
+        Manager::getInstance()->quit();
         break;
 
       case REGOLITH_EVENT_ENGINE_PAUSE :
@@ -187,7 +201,7 @@ namespace Regolith
 
     if ( _contextStack.empty() )
     {
-      quit();
+      Manager::getInstance()->quit();
       return;
     }
 

@@ -42,7 +42,7 @@ namespace Regolith
       virtual ~Platformer();
 
       // Configure the Scene
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, ContextHandler& ) override;
 
       // Validate the Scene
       virtual void validate() const override;

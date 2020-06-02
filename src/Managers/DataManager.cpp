@@ -5,11 +5,17 @@
 
 #include "logtastic.h"
 
+#include <atomic>
+
 
 namespace Regolith
 {
 
+  void theLoadingThread();
+
+
   DataManager::DataManager() :
+    _loadingThread( theLoadingThread ),
     _textureFile(),
     _rawTextures(),
     _rawTextureLookup( "raw_texture_lookup" ),
@@ -22,6 +28,9 @@ namespace Regolith
   DataManager::~DataManager()
   {
     INFO_LOG( "Deleting Data Manager." );
+
+    INFO_LOG( "Closing the loading thread." );
+    _loadingThread.join();
 
     INFO_LOG( "Clearing texture caches." );
     _rawTextureLookup.clear();
@@ -38,7 +47,7 @@ namespace Regolith
   }
 
 
-  void DataManager::configureHandler( DataHandler* handler, std::string name )
+  void DataManager::configureHandler( DataHandler& handler, std::string name )
   {
     IDNumber id;
     if ( ! _rawTextureLookup.exists( name ) )
@@ -51,8 +60,8 @@ namespace Regolith
       id = _rawTextureLookup.getID( name );
     }
 
-    handler->_requiredTextures = &_rawTextureLookup[ id ];
-    handler->_handlerID = id;
+    handler._requiredTextures = &_rawTextureLookup[ id ];
+    handler._handlerID = id;
   }
 
 
@@ -146,8 +155,7 @@ namespace Regolith
   {
     INFO_LOG( "Configuring the Data Manager." );
     // Configure the global handler
-    _globalData.configure( "global" );
-//    print();
+    configureHandler( _globalData, "global" );
 
     // Load the json data
     Utilities::validateJson( json_data, "global_objects", Utilities::JSON_TYPE_ARRAY );
@@ -212,9 +220,6 @@ namespace Regolith
       _gameObjects.addObject( obj, name );
     }
 
-//    print();
-//    std::cout << "\n\n\n  LOADING GLOBAL \n\n\n";
-//    DEBUG_STREAM << "  LOADING GLOBAL";
     // Load the global data textures into memory
     load( _rawTextureLookup.getID( "global" ) );
   }
@@ -231,35 +236,45 @@ namespace Regolith
   }
 
 
-//  void DataManager::print()
-//  {
-//    std::cout << "Loaded Status: \n";
-//  
-//    for ( std::map< IDNumber, bool >::iterator it = _loadedCaches.begin(); it != _loadedCaches.end(); ++it )
-//    {
-//      std::cout << "ID : " << it->first << " - Loaded : " << it->second << '\n';
-//    }
-//
-//    std::cout << "\nTextures Lookup:\n";
-//
-//    for ( size_t i = 0; i < _rawTextureLookup.size(); ++i )
-//    {
-//      IDNumberSet& textures = _rawTextureLookup[i];
-//      std::cout << "  Lookup: " << i << " - " << _rawTextureLookup.getName( i ) << '\n';
-//
-//      for ( IDNumberSet::iterator it = textures.begin(); it != textures.end(); ++it )
-//      {
-//        std::cout << "    Texture : " << (*it) << " @ " << &_rawTextures[(*it)] << " -> " << _rawTextures[(*it)].texture << '\n';
-//      }
-//    }
-//
-//    std::cout << "\nRaw Textures:\n";
-//
-//    for ( size_t i = 0; i < _rawTextures.size(); ++i )
-//    {
-//        std::cout << "  Texture : " << i << " @ " << &_rawTextures[i] << " -> " << _rawTextures[i].texture << '\n';
-//    }
-//  }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Loading/unloading thread
+
+  void theLoadingThread()
+  {
+    INFO_LOG( "Data Manager loading thread initialised and waiting to start" );
+    {
+      Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
+      std::unique_lock<std::mutex> lk( startCondition.mutex );
+      startCondition.variable.wait( lk, [&]()->bool{ return startCondition.data; } );
+      lk.unlock();
+    }
+    INFO_LOG( "Data Manager loading thread go." );
+
+
+    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+    Condition<bool>& stackUpdate = Manager::getInstance()->getThreadManager().StackUpdate;
+
+    std::unique_lock<std::mutex> stackLock( stackUpdate.mutex );
+
+    while( ! quitFlag )
+    {
+      stackUpdate.variable.wait( stackLock, [&]()->bool{ return quitFlag || stackUpdate.data; } );
+
+      DEBUG_STREAM << "LOADING THREAD WORKING";
+
+
+
+      // TODO:
+      // Add the loading logic and queueing system!
+
+
+
+      stackUpdate.data = false;
+    }
+
+    stackLock.unlock();
+    INFO_LOG( "Data Manager loading thread stopped." );
+  }
 
 }
 

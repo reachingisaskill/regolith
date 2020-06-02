@@ -35,7 +35,6 @@ namespace Regolith
       ContextStack::reverse_iterator _visibleStackStart;
       ContextStack::reverse_iterator _visibleStackEnd;
       Timer _frameTimer;
-      bool _quit;
       bool _pause;
 
     protected:
@@ -53,9 +52,6 @@ namespace Regolith
 
       // Start the engine running. In order to stop it the quit() function must be used.
       void run();
-
-      // Set the quit flag and exit at the end of the current frame
-      void quit() { _quit = true; }
 
 
       // Returns a pointer to the current context with focus

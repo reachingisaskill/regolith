@@ -11,6 +11,8 @@
 #include "Regolith/Managers/AudioManager.h"
 #include "Regolith/Managers/HardwareManager.h"
 #include "Regolith/Managers/DataManager.h"
+#include "Regolith/Managers/ThreadManager.h"
+#include "Regolith/Managers/ContextManager.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Components/Window.h"
 #include "Regolith/Components/Engine.h"
@@ -34,7 +36,7 @@ namespace Regolith
 
   // Factory typedefs
   typedef FactoryTemplate< GameObject, DataHandler& > ObjectFactory;
-  typedef FactoryTemplate< Context > ContextFactory;
+  typedef FactoryTemplate< Context, ContextHandler& > ContextFactory;
   typedef FactoryTemplate< Signal > SignalFactory;
 
   // Manager class
@@ -46,11 +48,13 @@ namespace Regolith
 
     private:
       // Crucial objects for Regolith
+      ThreadManager _theThreads;
       Window _theWindow;
       InputManager _theInput;
       AudioManager _theAudio;
       HardwareManager _theHardware;
       DataManager _theData;
+      ContextManager _theContexts;
       Engine _theEngine;
       SDL_Renderer* _theRenderer;
       IDNumber _entryPoint;
@@ -63,9 +67,6 @@ namespace Regolith
       // Owned memory for objects, contexts, etc
       FontMap _fonts;
       TeamNameMap _teamNames;
-
-      // Containers of all the data loaded/to be loaded into memory
-      NamedVector< Context, true > _contexts;
 
       // Useful global constants
       std::string _title;
@@ -114,6 +115,10 @@ namespace Regolith
       void run();
 
 
+      // Set the atomic quit flag
+      void quit() { _theThreads.quit(); }
+
+
       ////////////////////////////////////////////////////////////////////////////////
       // Get the pointers to various managers and builders
 
@@ -135,6 +140,9 @@ namespace Regolith
       // Return a pointer to the required font data
       TTF_Font* getFontPointer( std::string );
 
+      // Return a reference to the thread manager
+      ThreadManager& getThreadManager() { return _theThreads; }
+
       // Return a reference to the input manager
       InputManager& getInputManager() { return _theInput; }
 
@@ -144,24 +152,15 @@ namespace Regolith
       // Return a reference to the data manager
       DataManager& getDataManager() { return _theData; }
 
+      // Return a reference to the data manager
+      ContextManager& getContextManager() { return _theContexts; }
+
       // Return a reference to the global data handler manager
       const DataHandler& getGlobalData() { return _theData.globalData(); }
 
 
       ////////////////////////////////////////////////////////////////////////////////
       // Context Memory
-
-      // Asks the manager to build a context and store the memory. Returns a pointer to the new context
-      Context* buildContext( Json::Value& );
-
-      // Return a pointer to a requested context - creating an entry if one doesn't exist
-      IDNumber requestContext( std::string name ) { return _contexts.addName( name ); }
-
-      // Return the name of a given context. Mostly useful for debugging!
-      std::string getContextName( IDNumber id ) { return _contexts.getName( id ); }
-
-      // Return a pointer to a requested context
-      Context* getContext( IDNumber id ) { return _contexts[ id ]; }
 
       // Return a pointer to the current active context - may become invalid after rendering!
       Context* getCurrentContext() { return _theEngine.currentContext(); }

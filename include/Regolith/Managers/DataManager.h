@@ -8,6 +8,7 @@
 #include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/Utilities/NamedReferenceVector.h"
 
+#include <thread>
 #include <vector>
 #include <map>
 
@@ -24,6 +25,9 @@ namespace Regolith
   class DataManager
   {
     private:
+      // Loading thread container
+      std::thread _loadingThread;
+
       // Path to the list of all texture files and their modifiers
       std::string _textureFile;
 
@@ -54,7 +58,7 @@ namespace Regolith
       void validate() const;
 
       // Request a handler. Returns the ID
-      void configureHandler( DataHandler*, std::string );
+      void configureHandler( DataHandler&, std::string );
 
 
 ////////////////////////////////////////////////////////////////////////////////

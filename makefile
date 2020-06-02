@@ -49,7 +49,7 @@ LIB_NAME = Regolith
 
 # Includes and Libraries
 INC_FLAGS += -I${INC_DIR}
-LIB_FLAGS += -llogtastic -ljsoncpp -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer
+LIB_FLAGS += -llogtastic -ljsoncpp -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lpthread
 EXEC_LIB_FLAGS += -ltestass
 
 

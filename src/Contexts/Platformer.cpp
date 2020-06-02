@@ -67,12 +67,12 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configuration
 
-  void Platformer::configure( Json::Value& json_data )
+  void Platformer::configure( Json::Value& json_data, ContextHandler& handler )
   {
     INFO_LOG( "Configuring Platformer Context" );
 
     // Call the base class variant first
-    Context::configure( json_data );
+    Context::configure( json_data, handler );
 
 
     Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING );
@@ -120,7 +120,7 @@ namespace Regolith
     {
       std::string pause = json_data["pause_context"].asString();
 
-      _pauseMenu = Manager::getInstance()->requestContext( pause );
+      _pauseMenu = Manager::getInstance()->getContextManager().requestContext( pause );
 
       INFO_STREAM << "Registered pause context: " << pause;
     }
