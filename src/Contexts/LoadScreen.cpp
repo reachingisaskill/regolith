@@ -11,6 +11,7 @@ namespace Regolith
     Context(),
     _theMusic( 0 ),
     _nextContext( 0 ),
+    _nextContextHandler( 0 ),
     _running( false )
   {
   }

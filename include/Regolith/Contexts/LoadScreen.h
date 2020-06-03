@@ -14,6 +14,7 @@ namespace Regolith
     private:
       IDNumber _theMusic;
       IDNumber _nextContext;
+      IDNumber _nextContextHandler;
       bool _running;
 
     protected:
@@ -39,6 +40,14 @@ namespace Regolith
       // Title Scenes take ownership of the display.
       virtual bool overridesPreviousContext() const override { return true; }
 
+//////////////////////////////////////////////////
+      // Loading Functionality
+
+      // The context to load after the data is available
+      void setNextContext( IDNumber n ) { _nextContext = n; }
+
+      // The Context handler to load data for
+      void setNextContextHandler( IDNumber n ) { _nextContextHandler = n; }
 
 //////////////////////////////////////////////////
       // Requirements for the ControllableInterface - input action handling

@@ -36,19 +36,11 @@ namespace Regolith
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
     _pause = false;
 
-    // Condition variables for thread signalling
-    Condition<bool>& stackUpdate = Manager::getInstance()->getThreadManager().StackUpdate;
-
     // Reset the timer
     _frameTimer.lap();
 
-    // Grab the stack
-    std::unique_lock<std::mutex> stackLock( stackUpdate.mutex );
     // Load the first context
     performStackOperations();
-    stackLock.unlock();
-    // Let everyone know that stack operations have been completed.
-    stackUpdate.variable.notify_all();
 
 
     while ( ! quitFlag )
@@ -92,13 +84,7 @@ namespace Regolith
         // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
         if ( ! _stackOperationQueue.empty() )
         {
-          if ( stackLock.try_lock() )
-          {
-            performStackOperations();
-            stackUpdate.data = true;
-            stackLock.unlock();
-            stackUpdate.variable.notify_all();
-          }
+          performStackOperations();
         }
       }
     }

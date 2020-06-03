@@ -2,7 +2,7 @@
 #ifndef REGOLITH_THREAD_SAFE_BUFFER_H_
 #define REGOLITH_THREAD_SAFE_BUFFER_H_
 
-#include "Regolith/Global/Defintions.h"
+#include "Regolith/Global/Definitions.h"
 
 #include <mutex>
 
@@ -70,7 +70,8 @@ namespace Regolith
     _mutexStart(),
     _mutexEnd(),
     _start( nullptr ),
-    _end( nullptr )
+    _end( nullptr ),
+    _elementCount( 0 )
   {
   }
 

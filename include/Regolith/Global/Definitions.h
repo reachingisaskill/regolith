@@ -9,6 +9,8 @@
 #include <map>
 #include <limits>
 #include <string>
+#include <thread>
+#include <mutex>
 
 
 namespace Regolith
@@ -45,6 +47,10 @@ namespace Regolith
   typedef RawTextureMap::value_type* RawTexturePointer;
   typedef std::set< RawTexturePointer > RawTextureCache;
 
+
+
+  typedef std::unique_lock< std::mutex > UniqueLock;
+  typedef std::lock_guard< std::mutex > GuardLock;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +156,7 @@ namespace Regolith
     REGOLITH_EVENT_AUDIO_HARDWARE,
 
     REGOLITH_EVENT_CAMERA_RESIZE,
+    REGOLITH_EVENT_DATA_LOADED,
 
     REGOLITH_EVENT_TOTAL
   };

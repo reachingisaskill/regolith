@@ -330,15 +330,27 @@
     "level_boundaries" : 10
   },
 
-  "contexts" :
+  "context_groups" :
   [
     {
-      "name" : "title_context",
-      "file" : "test_data/test_title.json"
+      "name" : "title",
+      "contexts" :
+      [
+        {
+          "name" : "title_context",
+          "file" : "test_data/test_title.json"
+        }
+      ]
     },
     {
-      "name" : "platformer",
-      "file" : "test_data/test_platformer.json"
+      "name" : "test_levels",
+      "contexts" :
+      [
+        {
+          "name" : "platformer",
+          "file" : "test_data/test_platformer.json"
+        }
+      ]
     }
   ],
 

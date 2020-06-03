@@ -23,6 +23,21 @@ namespace Regolith
   }
 
 
+  void ContextHandler::configure( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
+    Json::Value& contexts = json_data["contexts"];
+    Json::ArrayIndex contexts_size = contexts.size();
+
+    // Other setup info goes here
+
+    for ( Json::ArrayIndex i = 0; i < contexts_size; ++i )
+    {
+      buildContext( contexts[i] );
+    }
+  }
+
+
   void ContextHandler::configureDataHandler( DataHandler& handler, std::string name )
   {
     Manager::getInstance()->getDataManager().configureHandler( handler, name );

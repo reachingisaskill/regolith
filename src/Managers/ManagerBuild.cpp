@@ -54,7 +54,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "game_data", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_ARRAY );
       Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
 
 
@@ -88,7 +88,7 @@ namespace Regolith
 
 
       // Load all the contexts
-      this->_loadContexts( json_data["contexts"] );
+      this->_loadContexts( json_data["context_groups"] );
 
       // Find the first context to load
       std::string entry = json_data["entry_point"].asString();
@@ -114,11 +114,7 @@ namespace Regolith
     _theData.validate();
 
     // Validate all the contexts
-
-//    _theData.print();
-//    std::cout << "\n\n\n LOADING ALL DATA\n\n\n";
-    _theData.loadAll();
-//    _theData.print();
+    _theContexts.validate();
   }
 
 

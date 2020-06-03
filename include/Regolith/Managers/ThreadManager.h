@@ -44,6 +44,9 @@ namespace Regolith
 
       static std::atomic<bool> QuitFlag;
 
+
+      Condition<bool> DataUpdate;
+
       Condition<bool> StackUpdate;
   };
 

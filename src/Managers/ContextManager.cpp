@@ -1,6 +1,7 @@
 
 #include "Regolith/Managers/ContextManager.h"
 #include "Regolith/Architecture/Context.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 
 namespace Regolith
@@ -8,8 +9,10 @@ namespace Regolith
 
   ContextManager::ContextManager() :
     _contexts( "manager_context_list" ),
-    _contextHandlers()
+    _contextHandlers( "manager_context_handlers" )
   {
+    _contexts.addObject( nullptr, "null" );
+    _contextHandlers.addObject( nullptr, "null" );
   }
 
 
@@ -17,6 +20,7 @@ namespace Regolith
   {
     INFO_LOG( "Destroying Context Manager" );
     _contexts.clear();
+    _contextHandlers.clear();
   }
 
 
@@ -26,15 +30,16 @@ namespace Regolith
   void ContextManager::configure( Json::Value& context_data )
   {
     Json::ArrayIndex context_data_size = context_data.size();
-    _contextHandlers.reserve( context_data_size );
-
     for ( Json::ArrayIndex i = 0; i != context_data_size; ++i )
     {
-      INFO_LOG( "Bulding context handler" );
+      Utilities::validateJson( context_data[i], "name", Utilities::JSON_TYPE_STRING );
+      std::string name = context_data[i]["name"].asString();
 
-      _contextHandlers.push_back( ContextHandler( _contextHandlers.size(), _contexts ) );
+      INFO_STREAM << "Bulding context handler: " << name;
 
-      _contextHandlers[ _contextHandlers.size()-1 ].buildContext( context_data[i] );
+      IDNumber id = _contextHandlers.addObject( new ContextHandler( _contextHandlers.size(), _contexts ), name );
+
+      _contextHandlers[ id ]->configure( context_data[i] );
     }
   }
 

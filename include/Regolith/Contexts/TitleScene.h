@@ -10,8 +10,8 @@ namespace Regolith
   class TitleScene : public Context
   {
     private:
-      unsigned int _defaultMusic;
-      unsigned int _firstContext;
+      IDNumber _defaultMusic;
+      IDNumber _firstContext;
       
     protected:
       // Hooks for context state changes

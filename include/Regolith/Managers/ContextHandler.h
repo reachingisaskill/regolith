@@ -40,6 +40,9 @@ namespace Regolith
       ~ContextHandler();
 
 
+      // Configure the handler
+      void configure( Json::Value& );
+
       // Configures a context's data handler and caches the id number
       void configureDataHandler( DataHandler&, std::string );
 

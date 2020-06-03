@@ -20,6 +20,10 @@
 namespace Regolith
 {
 
+  // Forward declare the signal handler
+  void deathSignals( int );
+
+
   Manager::Manager() :
     _theThreads(),
     _theWindow(),
@@ -44,6 +48,15 @@ namespace Regolith
     _gravityConst( 0.0, 0.01 ),
     _dragConst( 0.005 )
   {
+    // Set up signal handlers
+    logtastic::registerSignalHandler( SIGABRT, deathSignals );
+    logtastic::registerSignalHandler( SIGFPE, deathSignals );
+    logtastic::registerSignalHandler( SIGILL, deathSignals );
+    logtastic::registerSignalHandler( SIGINT, deathSignals );
+    logtastic::registerSignalHandler( SIGSEGV, deathSignals );
+    logtastic::registerSignalHandler( SIGTERM, deathSignals );
+
+
     // Set up the object factory
 //    _objectFactory.addBuilder<FPSString>( "fps_string" );
     _objectFactory.addBuilder<SimpleSprite>( "simple_sprite" );
@@ -70,6 +83,9 @@ namespace Regolith
 
   Manager::~Manager()
   {
+    // Close the threads first
+    _theThreads.quit();
+
     _defaultFont = nullptr;
 
     INFO_LOG( "Clearing team list" );
@@ -205,6 +221,18 @@ namespace Regolith
   void Manager::raiseEvent( RegolithEvent eventNum )
   {
     SDL_PushEvent( &_gameEvents[ eventNum ] );
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Signal handler
+
+  void deathSignals( int signal )
+  {
+    FAILURE_STREAM << "Regolith received signal: " << signal;
+    FAILURE_LOG( "Trying to die gracefully..." );
+    Manager::getInstance()->quit();
+    Manager::killInstance();
   }
 
 }

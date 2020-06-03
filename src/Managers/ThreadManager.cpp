@@ -1,6 +1,8 @@
 
 #include "Regolith/Managers/ThreadManager.h"
 
+#include "logtastic.h"
+
 
 namespace Regolith
 {
@@ -10,6 +12,7 @@ namespace Regolith
 
 
   ThreadManager::ThreadManager() :
+    DataUpdate( false ),
     StackUpdate( false )
   {
   }
@@ -21,14 +24,19 @@ namespace Regolith
     QuitFlag = true;
 
     // Notify everything one last time to ensue all the threads see the quit flag
+    StartCondition.variable.notify_all();
+    DataUpdate.variable.notify_all();
     StackUpdate.variable.notify_all();
   }
 
 
   void ThreadManager::quit()
   {
+    INFO_LOG( "Thread Manager Calling Quit" );
     QuitFlag = true;
 
+    StartCondition.variable.notify_all();
+    DataUpdate.variable.notify_all();
     StackUpdate.variable.notify_all();
   }
 

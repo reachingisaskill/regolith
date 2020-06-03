@@ -7,6 +7,7 @@
 #include "Regolith/GamePlay/Texture.h"
 #include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/Utilities/NamedReferenceVector.h"
+#include "Regolith/Utilities/MutexedBuffer.h"
 
 #include <thread>
 #include <vector>
@@ -24,6 +25,10 @@ namespace Regolith
 
   class DataManager
   {
+    friend void theLoadingThread();
+    friend void loadFunction();
+    friend void unloadFunction();
+
     private:
       // Loading thread container
       std::thread _loadingThread;
@@ -35,7 +40,7 @@ namespace Regolith
       RawTextureMap _rawTextures;
       
       // List of all the raw texture vectors for the handlers
-      NamedReferenceVector< RawTextureCache > _rawTextureLookup;
+      NamedReferenceVector< RawTextureCache > _rawTextureCaches;
 
       // Map of the status of all IDNumberSets
       std::map<IDNumber, bool> _loadedCaches;
@@ -45,6 +50,16 @@ namespace Regolith
 
       // Handler for data in global space
       DataHandler _globalData;
+
+
+      // Loading queue
+      MutexedBuffer< IDNumber > _loadQueue;
+
+      // Unloading queue
+      MutexedBuffer< IDNumber > _unloadQueue;
+
+      // Handler to load
+      MutexedBuffer< IDNumber > _handlerQueue;
 
     public:
       // Con/de-struction
@@ -77,14 +92,15 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Dynamic loading/unloading
 
+      // Load the data for a specific context group
+      void loadHandler( IDNumber );
+
       // Load all the data in a specific handler
       void load( IDNumber );
 
       // Unload all the data in a specific handler
       void unload( IDNumber );
 
-      // Load all handlers - mostly useful for testing
-      void loadAll();
 
 ////////////////////////////////////////////////////////////////////////////////
       // Raw Textures

@@ -5,6 +5,7 @@
 
 #include "logtastic.h"
 
+#include <mutex>
 #include <atomic>
 
 
@@ -12,15 +13,20 @@ namespace Regolith
 {
 
   void theLoadingThread();
+  void loadFunction();
+  void unloadFunction();
 
 
   DataManager::DataManager() :
     _loadingThread( theLoadingThread ),
     _textureFile(),
     _rawTextures(),
-    _rawTextureLookup( "raw_texture_lookup" ),
+    _rawTextureCaches( "raw_texture_caches" ),
     _gameObjects( "game_objects" ),
-    _globalData()
+    _globalData(),
+    _loadQueue(),
+    _unloadQueue(),
+    _handlerQueue()
   {
   }
 
@@ -33,7 +39,7 @@ namespace Regolith
     _loadingThread.join();
 
     INFO_LOG( "Clearing texture caches." );
-    _rawTextureLookup.clear();
+    _rawTextureCaches.clear();
 
     INFO_LOG( "Clearing raw texture data" );
     for ( RawTextureMap::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
@@ -50,89 +56,57 @@ namespace Regolith
   void DataManager::configureHandler( DataHandler& handler, std::string name )
   {
     IDNumber id;
-    if ( ! _rawTextureLookup.exists( name ) )
+    if ( ! _rawTextureCaches.exists( name ) )
     {
-      id = _rawTextureLookup.addName( name );
+      id = _rawTextureCaches.addName( name );
       _loadedCaches[ id ] = false;
     }
     else
     {
-      id = _rawTextureLookup.getID( name );
+      id = _rawTextureCaches.getID( name );
     }
 
-    handler._requiredTextures = &_rawTextureLookup[ id ];
+    handler._requiredTextures = &_rawTextureCaches[ id ];
     handler._handlerID = id;
+  }
+
+
+  void DataManager::loadHandler( IDNumber i )
+  {
+    DEBUG_STREAM << "LOAD HANDLER: " << i;
+    _handlerQueue.push( i );
+
+    {
+      std::lock_guard<std::mutex>( Manager::getInstance()->getThreadManager().DataUpdate.mutex );
+      Manager::getInstance()->getThreadManager().DataUpdate.data = true;
+    }
+    Manager::getInstance()->getThreadManager().DataUpdate.variable.notify_all();
   }
 
 
   void DataManager::load( IDNumber i )
   {
-    if ( _loadedCaches[i] ) return;
-    DEBUG_STREAM << "Loading Data Cache: " << i;
+    DEBUG_STREAM << "LOAD: " << i;
+    _loadQueue.push( i );
 
-    _loadedCaches[i] = true;
-
-    Json::Value temp_data;
-    Utilities::loadJsonData( temp_data, _textureFile );
-    Json::Value& texture_data = temp_data["textures"];
-
-    RawTextureCache& textureCache = _rawTextureLookup[i];
-    RawTextureCache::iterator end = textureCache.end();
-    for ( RawTextureCache::iterator it = textureCache.begin(); it != end; ++it )
     {
-      std::string name = (*it)->first;
-
-      Json::ArrayIndex i;
-      for ( i = 0; i < texture_data.size(); ++i )
-      {
-        Json::Value& datum = texture_data[i];
-        Utilities::validateJson( datum, "name", Utilities::JSON_TYPE_STRING );
-
-        if ( datum["name"].asString() == name )
-        {
-          (*it)->second = makeTexture( datum );
-          DEBUG_STREAM << "TEXTURE: " << name << ", " << (*it);
-          break;
-        }
-      }
-
-      if ( i == texture_data.size() ) // Texture wasn't found
-      {
-        Exception ex( "DataManager::load()", "Could not find texture resource to load" );
-        ex.addDetail( "Name", name );
-        ex.addDetail( "ID", (*it) );
-        throw ex;
-      }
+      std::lock_guard<std::mutex>( Manager::getInstance()->getThreadManager().DataUpdate.mutex );
+      Manager::getInstance()->getThreadManager().DataUpdate.data = true;
     }
+    Manager::getInstance()->getThreadManager().DataUpdate.variable.notify_all();
   }
 
 
   void DataManager::unload( IDNumber i )
   {
-    if ( ! _loadedCaches[i] ) return;
-    DEBUG_STREAM << "Unloading Data Cache: " << i;
+    DEBUG_STREAM << "UNLOAD: " << i;
+    _unloadQueue.push( i );
 
-    _loadedCaches[i] = false;
-
-    RawTextureCache& textureCache = _rawTextureLookup[i];
-    RawTextureCache::iterator end = textureCache.end();
-    for ( RawTextureCache::iterator it = textureCache.begin(); it != end; ++it )
     {
-      if ( (*it)->second.texture != nullptr )
-      {
-        SDL_DestroyTexture( (*it)->second.texture );
-        (*it)->second.texture = nullptr;
-      }
+      std::lock_guard<std::mutex>( Manager::getInstance()->getThreadManager().DataUpdate.mutex );
+      Manager::getInstance()->getThreadManager().DataUpdate.data = true;
     }
-  }
-
-
-  void DataManager::loadAll()
-  {
-    for ( size_t i = 0; i < _rawTextureLookup.size(); ++i )
-    {
-      load( i );
-    }
+    Manager::getInstance()->getThreadManager().DataUpdate.variable.notify_all();
   }
 
 
@@ -220,8 +194,13 @@ namespace Regolith
       _gameObjects.addObject( obj, name );
     }
 
-    // Load the global data textures into memory
-    load( _rawTextureLookup.getID( "global" ) );
+    DEBUG_LOG( "Loading the global objects" );
+
+    // Push the global cache ID onto the queue
+    _loadQueue.push( _rawTextureCaches.getID( "global" ) );
+
+    // Run the load function in this thread - load thread only active once engine starts
+    loadFunction();
   }
 
 
@@ -241,39 +220,132 @@ namespace Regolith
 
   void theLoadingThread()
   {
+    INFO_LOG( "Data Manager loading thread start." );
+
+    DataManager& manager = Manager::getInstance()->getDataManager();
+    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+
     INFO_LOG( "Data Manager loading thread initialised and waiting to start" );
     {
       Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
       std::unique_lock<std::mutex> lk( startCondition.mutex );
-      startCondition.variable.wait( lk, [&]()->bool{ return startCondition.data; } );
+      startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
     }
     INFO_LOG( "Data Manager loading thread go." );
 
 
-    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
-    Condition<bool>& stackUpdate = Manager::getInstance()->getThreadManager().StackUpdate;
+    Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
+    IDNumber temp_number;
 
-    std::unique_lock<std::mutex> stackLock( stackUpdate.mutex );
-
+    std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
+    INFO_LOG( "Loading thread waiting for first command" );
     while( ! quitFlag )
     {
-      stackUpdate.variable.wait( stackLock, [&]()->bool{ return quitFlag || stackUpdate.data; } );
+      dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
 
       DEBUG_STREAM << "LOADING THREAD WORKING";
 
+      do
+      {
+        if ( manager._handlerQueue.pop( temp_number ) )
+        {
 
 
-      // TODO:
-      // Add the loading logic and queueing system!
 
 
 
-      stackUpdate.data = false;
+
+
+
+        }
+
+        unloadFunction();
+        loadFunction();
+      }
+      while ( ! manager._handlerQueue.empty() );
+
+      dataUpdate.data = false;
+      Manager::getInstance()->raiseEvent( REGOLITH_EVENT_DATA_LOADED );
     }
 
-    stackLock.unlock();
+    dataLock.unlock();
     INFO_LOG( "Data Manager loading thread stopped." );
+  }
+
+
+  void loadFunction()
+  {
+    DataManager& manager = Manager::getInstance()->getDataManager();
+    IDNumber temp_number;
+
+    if ( ! manager._loadQueue.empty() )
+    {
+      Json::Value temp_data;
+      Utilities::loadJsonData( temp_data, manager._textureFile );
+      Json::Value& texture_data = temp_data["textures"];
+
+      while ( manager._loadQueue.pop( temp_number ) )
+      {
+        if ( manager._loadedCaches[temp_number] ) continue;
+        manager._loadedCaches[temp_number] = true;
+        DEBUG_STREAM << "Loading Data Cache: " << temp_number;
+
+
+        RawTextureCache& textureCache = manager._rawTextureCaches[temp_number];
+        RawTextureCache::iterator end = textureCache.end();
+        for ( RawTextureCache::iterator it = textureCache.begin(); it != end; ++it )
+        {
+          std::string name = (*it)->first;
+
+          Json::ArrayIndex i;
+          for ( i = 0; i < texture_data.size(); ++i )
+          {
+            Json::Value& datum = texture_data[i];
+            if ( datum["name"].asString() == name )
+            {
+              (*it)->second = makeTexture( datum );
+              DEBUG_STREAM << "TEXTURE: " << name << ", " << (*it);
+              break;
+            }
+          }
+
+          if ( temp_number == texture_data.size() ) // Texture wasn't found
+          {
+            ERROR_STREAM << "Could not find texture resource to load : " << name << " - " << (*it);
+//              Exception ex( "DataManager::load()", "Could not find texture resource to load" );
+//              ex.addDetail( "Name", name );
+//              ex.addDetail( "ID", (*it) );
+//              throw ex;
+          }
+        }
+      }
+    }
+  }
+
+
+  void unloadFunction()
+  {
+    DataManager& manager = Manager::getInstance()->getDataManager();
+    IDNumber temp_number;
+
+    while ( manager._unloadQueue.pop( temp_number ) )
+    {
+      if ( ! manager._loadedCaches[temp_number] ) continue;
+      manager._loadedCaches[temp_number] = false;
+      DEBUG_STREAM << "Unloading Data Cache: " << temp_number;
+
+      RawTextureCache& textureCache = manager._rawTextureCaches[temp_number];
+      RawTextureCache::iterator end = textureCache.end();
+      for ( RawTextureCache::iterator it = textureCache.begin(); it != end; ++it )
+      {
+        if ( (*it)->second.texture != nullptr )
+        {
+          SDL_DestroyTexture( (*it)->second.texture );
+          (*it)->second.texture = nullptr;
+        }
+      }
+    }
   }
 
 }

@@ -15,10 +15,12 @@ int main( int, char** )
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_integration.log" );
-  logtastic::start( "Regolith - Integration Test", REGOLITH_VERSION_NUMBER );
 
+  // Create the manager first so that it can register signal handlers
   INFO_LOG( "Initialising the manager" );
   Manager* man = Manager::createInstance();
+
+  logtastic::start( "Regolith - Integration Test", REGOLITH_VERSION_NUMBER );
 
   try
   {

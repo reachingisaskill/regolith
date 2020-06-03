@@ -3,7 +3,7 @@
 #define REGOLITH_MANAGERS_CONTEXT_MANAGER_H_
 
 #include "Regolith/Managers/ContextHandler.h"
-#include "Regolith/Utilities/NamedVector.h"
+#include "Regolith/Utilities/NamedReferenceVector.h"
 
 
 namespace Regolith
@@ -16,7 +16,7 @@ namespace Regolith
       NamedVector< Context, true > _contexts;
 
       // Vector of the individual context handlers
-      std::vector< ContextHandler > _contextHandlers;
+      NamedVector< ContextHandler, true > _contextHandlers;
 
 
     public:
