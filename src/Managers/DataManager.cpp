@@ -33,7 +33,12 @@ namespace Regolith
 
   DataManager::~DataManager()
   {
-    INFO_LOG( "Deleting Data Manager." );
+  }
+
+
+  void DataManager::clear()
+  {
+    INFO_LOG( "Clearing Data Manager." );
 
     INFO_LOG( "Closing the loading thread." );
     _loadingThread.join();
@@ -45,7 +50,10 @@ namespace Regolith
     for ( RawTextureMap::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
     {
       if ( it->second.texture != nullptr )
+      {
         SDL_DestroyTexture( it->second.texture );
+        it->second.texture = nullptr;
+      }
     }
     _rawTextures.clear();
 
@@ -162,6 +170,7 @@ namespace Regolith
 
       _rawTextures[name] = makeTexture( datum ); // Fill the info
       SDL_DestroyTexture( _rawTextures[name].texture ); // Delete the texture data
+      _rawTextures[name].texture = nullptr; // Null
     }
 
     temp_data.clear();
@@ -215,6 +224,23 @@ namespace Regolith
   }
 
 
+  void DataManager::loadEntryPoint( IDNumber id )
+  {
+    const ContextHandler* handler = Manager::getInstance()->getContextManager().getContextHandler( id );
+    const ContextHandler::DataCacheList& caches = handler->getDataCache();
+
+    ContextHandler::DataCacheList::const_iterator end = caches.end();
+    for ( ContextHandler::DataCacheList::const_iterator it = caches.begin(); it != end; ++it )
+    {
+      // Push the data cache
+      _loadQueue.push( (*it) );
+    }
+
+    // Run the load function in this thread - load thread only active once engine starts
+    loadFunction();
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Loading/unloading thread
 
@@ -250,18 +276,35 @@ namespace Regolith
       {
         if ( manager._handlerQueue.pop( temp_number ) )
         {
+          const ContextHandler* handler = Manager::getInstance()->getContextManager().getContextHandler( temp_number );
 
+          const ContextHandler::DataCacheList& caches = handler->getDataCache();
 
-
-
-
-
-
-
+          std::map<IDNumber, bool>::iterator end = manager._loadedCaches.end();
+          for ( std::map<IDNumber, bool>::iterator it = manager._loadedCaches.begin(); it != end; ++it )
+          {
+            ContextHandler::DataCacheList::const_iterator found = caches.find( it->first );
+            if ( found == caches.end() ) 
+            {
+              if ( it->second )
+              {
+                manager._unloadQueue.push( it->first );
+              }
+            }
+            else
+            {
+              if ( ! it->second )
+              {
+                manager._loadQueue.push( it->first );
+              }
+            }
+          }
         }
 
         unloadFunction();
+
         loadFunction();
+
       }
       while ( ! manager._handlerQueue.empty() );
 
@@ -331,7 +374,9 @@ namespace Regolith
 
     while ( manager._unloadQueue.pop( temp_number ) )
     {
+      if ( temp_number == manager._globalData.getID() ) continue;
       if ( ! manager._loadedCaches[temp_number] ) continue;
+
       manager._loadedCaches[temp_number] = false;
       DEBUG_STREAM << "Unloading Data Cache: " << temp_number;
 

@@ -61,6 +61,8 @@ namespace Regolith
       void set( std::string, DATA* );
 
       DATA* operator[]( size_t i ) { return _data[ i ]; }
+      
+      const DATA* operator[]( size_t i ) const { return _data[ i ]; }
 
       bool exists( std::string ) const;
 
@@ -286,6 +288,8 @@ namespace Regolith
       void set( std::string, DATA* );
 
       DATA* operator[]( size_t i ) { return _data[ i ]; }
+      
+      const DATA* operator[]( size_t i ) const { return _data[ i ]; }
 
       bool exists( std::string ) const;
 

@@ -2,6 +2,7 @@
 #include "Regolith/Managers/ContextHandler.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
+#include "Regolith/Contexts/LoadScreen.h"
 
 
 namespace Regolith
@@ -9,6 +10,7 @@ namespace Regolith
 
   ContextHandler::ContextHandler( IDNumber id, NamedVector< Context, true >& contexts ) :
     _id( id ),
+    _loadScreen( nullptr ),
     _dataCache(),
     _contextCache(),
     _contexts( contexts )
@@ -25,11 +27,32 @@ namespace Regolith
 
   void ContextHandler::configure( Json::Value& json_data )
   {
+    ContextManager& manager = Manager::getInstance()->getContextManager();
+
     Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
     Json::Value& contexts = json_data["contexts"];
     Json::ArrayIndex contexts_size = contexts.size();
 
     // Other setup info goes here
+
+    if ( Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      _loadScreen = dynamic_cast<LoadScreen*>( manager.getContext( manager.requestContext( json_data["load_screen"].asString() ) ) );
+      if ( _loadScreen == nullptr )
+      {
+        Exception ex( "ContextHandler::configure()", "Invalid load screen provided." );
+        ex.addDetail( "Context Handler", json_data["name"].asString() );
+        ex.addDetail( "Load Screen", json_data["load_screen"].asString() );
+        throw ex;
+      }
+    }
+    else
+    {
+      Exception ex( "ContextHandler::configure()", "No load screen is provided for context handler." );
+      ex.addDetail( "Context Handler", json_data["name"].asString() );
+      throw ex;
+    }
+
 
     for ( Json::ArrayIndex i = 0; i < contexts_size; ++i )
     {

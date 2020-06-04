@@ -28,6 +28,8 @@ namespace Regolith
       audioHandler()->setSong( _theMusic );
 
     _running = true;
+
+    Manager::getInstance()->getDataManager().loadHandler( _nextContextHandler );
   }
 
 

@@ -354,7 +354,7 @@
     }
   ],
 
-  "entry_point" : "title_context"
+  "entry_point" : { "handler" : "title", "context" : "title_context" }
 
 }
 

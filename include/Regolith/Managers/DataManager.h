@@ -66,6 +66,9 @@ namespace Regolith
       DataManager();
       ~DataManager();
 
+      // Clear all the stored data
+      void clear();
+
       // Basic configuration of object and build the global objects
       void configure( Json::Value& );
 
@@ -74,6 +77,10 @@ namespace Regolith
 
       // Request a handler. Returns the ID
       void configureHandler( DataHandler&, std::string );
+
+
+      // Special function to load the entry point context handler in the current thread
+      void loadEntryPoint( IDNumber );
 
 
 ////////////////////////////////////////////////////////////////////////////////

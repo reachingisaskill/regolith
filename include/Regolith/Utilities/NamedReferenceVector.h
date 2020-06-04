@@ -56,6 +56,8 @@ namespace Regolith
 
       DATA& operator[]( size_t i ) { return _data[ i ]; }
 
+      const DATA& operator[]( size_t i ) const { return _data[ i ]; }
+
       bool exists( std::string ) const;
 
       bool exists( size_t ) const;

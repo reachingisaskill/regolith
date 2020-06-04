@@ -10,17 +10,22 @@ namespace Regolith
 {
   class DataHandler;
   class Context;
+  class LoadScreen;
 
   class ContextHandler
   {
     friend class ContextManager;
 
-    typedef std::set< IDNumber > DataCacheList;
-    typedef std::set< IDNumber > ContextCacheList;
+    public:
+      typedef std::set< IDNumber > DataCacheList;
+      typedef std::set< IDNumber > ContextCacheList;
 
     private:
       // ID of this handler
       const IDNumber _id;
+
+      // Pointer to the load screen
+      LoadScreen* _loadScreen;
 
       // List of the data handles ids used by these contexts
       DataCacheList _dataCache;
@@ -47,8 +52,16 @@ namespace Regolith
       void configureDataHandler( DataHandler&, std::string );
 
 
+      // Return the ID of the load screen
+      LoadScreen* getLoadScreen() const { return _loadScreen; }
+
+
       // Asks the Handler to build a context and store the memory. Returns a pointer to the new context
       Context* buildContext( Json::Value& );
+
+
+      // Returns a const reference to the data cache
+      const DataCacheList& getDataCache() const { return _dataCache; }
 
   };
 

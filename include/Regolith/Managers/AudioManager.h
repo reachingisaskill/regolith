@@ -57,6 +57,8 @@ namespace Regolith
       // Destructor
       ~AudioManager();
 
+      // Clear the stored data
+      void clear();
 
       // Build the audio handler and load all the files
       void configure( Json::Value& );

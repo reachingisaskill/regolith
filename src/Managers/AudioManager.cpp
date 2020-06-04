@@ -39,6 +39,12 @@ namespace Regolith
 
   AudioManager::~AudioManager()
   {
+  }
+
+
+  void AudioManager::clear()
+  {
+    INFO_LOG( "Clearing the audio manager" );
     // Drop the hook in case something happens
     Mix_HookMusicFinished( nullptr );
     nextTrack = nullptr;

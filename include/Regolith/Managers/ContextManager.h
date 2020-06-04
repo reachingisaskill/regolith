@@ -43,6 +43,13 @@ namespace Regolith
       // Return a pointer to a requested context
       Context* getContext( IDNumber id ) { return _contexts[ id ]; }
 
+
+      // Return a pointer to a specific context handler
+      IDNumber requestContextHandler( std::string name ) { return _contextHandlers.addName( name ); }
+
+      // Return a pointer to a specific context handler
+      const ContextHandler* getContextHandler( IDNumber i ) const { return _contextHandlers[i]; }
+
   };
 
 }

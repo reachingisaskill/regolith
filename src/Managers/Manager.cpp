@@ -12,6 +12,7 @@
 #include "Regolith/Contexts/TitleScene.h"
 #include "Regolith/Contexts/Platformer.h"
 #include "Regolith/Contexts/Menu.h"
+#include "Regolith/Contexts/LoadScreen.h"
 #include "Regolith/GamePlay/Signal.h"
 
 #include "logtastic.h"
@@ -67,6 +68,7 @@ namespace Regolith
     _objectFactory.addBuilder<Region>( "region" );
 
     // Set up the context factory
+    _contextFactory.addBuilder<LoadScreen>( "load_screen" );
     _contextFactory.addBuilder<TitleScene>( "title_scene" );
     _contextFactory.addBuilder<MenuContext>( "menu" );
     _contextFactory.addBuilder<Platformer>( "platformer" );
@@ -97,6 +99,10 @@ namespace Regolith
       TTF_CloseFont( it->second );
     }
     _fonts.clear();
+
+    _theData.clear();
+
+    _theAudio.clear();
 
     INFO_LOG( "Destroying the renderer" );
     SDL_DestroyRenderer( _theRenderer );
@@ -141,6 +147,18 @@ namespace Regolith
   {
     DEBUG_LOG( "Resetting Context Stack" );
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, _theContexts.getContext( c ) ) );
+  }
+
+
+  void Manager::openContextHandler( IDNumber h, IDNumber c )
+  {
+    DEBUG_LOG( "Opening New Context Handler" );
+
+    LoadScreen* load_screen = _theContexts.getContextHandler( h )->getLoadScreen();
+    load_screen->setNextContext( c );
+    load_screen->setNextContextHandler( h );
+
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, load_screen ) );
   }
 
 

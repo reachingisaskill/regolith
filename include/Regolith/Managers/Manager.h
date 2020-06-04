@@ -100,8 +100,10 @@ namespace Regolith
       void _loadData( Json::Value& );
       // Load all the resources
       void _loadGlobalGameObjects( Json::Value& );
-      // Load all the resources
+      // Load all the contexts
       void _loadContexts( Json::Value& );
+      // Load all the entry point to the game
+      void _loadEntryPoint( Json::Value& );
 
     public:
       virtual ~Manager();
@@ -214,6 +216,10 @@ namespace Regolith
 
       // Resets the context stack to the provided context
       void setContextStack( IDNumber );
+
+
+      // Changes the context handler and opens a new context from it
+      void openContextHandler( IDNumber, IDNumber );
 
 
       ////////////////////////////////////////////////////////////////////////////////

@@ -55,7 +55,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "game_data", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_OBJECT );
 
 
       // Load the input device configuration first so objects can register game-wide behaviours
@@ -90,9 +90,10 @@ namespace Regolith
       // Load all the contexts
       this->_loadContexts( json_data["context_groups"] );
 
-      // Find the first context to load
-      std::string entry = json_data["entry_point"].asString();
-      _entryPoint = _theContexts.requestContext( entry );
+
+      // Configure the entry point 
+      this->_loadEntryPoint( json_data["entry_point"] );
+
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream
     {
@@ -263,5 +264,20 @@ namespace Regolith
     _theContexts.configure( context_data );
   }
 
+
+  void Manager::_loadEntryPoint( Json::Value& json_data )
+  {
+    INFO_LOG( "Loading entry point" );
+
+    Utilities::validateJson( json_data, "handler", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "context", Utilities::JSON_TYPE_STRING );
+
+    std::string handler_name = json_data["handler"].asString();
+    std::string context_name = json_data["context"].asString();
+
+    _entryPoint = _theContexts.requestContext( context_name );
+
+    _theData.loadEntryPoint( _theContexts.requestContextHandler( handler_name ) );
+  }
 }
 
