@@ -1,0 +1,51 @@
+{
+  "type" : "load_screeb",
+
+  "input_mapping" : "null",
+
+  "default_music" : "null",
+
+  "collision_handling" :
+  {
+    "collision_rules" : [],
+    "container_rules" : []
+  },
+
+  "camera" :
+  {
+    "follow:" : null,
+    "lower_limit" : [ 0.0, 0.0 ],
+    "upper_limit" : [ 1024.0, 768.0 ]
+  },
+
+  "layers" : 
+  [
+    {
+      "name" : "the_layer",
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024,
+      "height" : 768,
+      "movement_scale" : [ 0.0, 0.0 ],
+
+      "elements" :
+      [
+        {
+          "name" : "background",
+          "type" : "simple_sprite",
+          "position" : [ 0.0, 0.0 ],
+          "texture_name" : "black_screen"
+        },
+        {
+          "name" : "loading_text",
+          "type" : "simple_sprite",
+          "position" : [ 0.0, 0.0 ],
+          "alignment" : [ "center", "center" ],
+          "texture_name" : "loading_text"
+        }
+      ]
+    }
+  ],
+
+  "contexts" : []
+
+}

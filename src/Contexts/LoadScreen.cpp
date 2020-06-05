@@ -43,6 +43,8 @@ namespace Regolith
 
   void LoadScreen::configure( Json::Value& json_data, ContextHandler& handler )
   {
+    json_data["data_handler"] = std::string( "global" );
+
     // Call the base class variant first
     Context::configure( json_data, handler );
 
