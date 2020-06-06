@@ -277,7 +277,7 @@ namespace Regolith
 
     _entryPoint = _theContexts.requestContext( context_name );
 
-    _theData.loadEntryPoint( _theContexts.requestContextHandler( handler_name ) );
+    _theData.loadEntryPoint( _theContexts.requestContextGroup( handler_name ) );
   }
 }
 

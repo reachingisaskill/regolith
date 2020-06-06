@@ -28,7 +28,7 @@ namespace Regolith
       virtual ~TitleScene();
 
       // Trivial configure - call the base-class variant
-      virtual void configure( Json::Value&, ContextHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual void validate() const override;
 

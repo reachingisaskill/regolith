@@ -14,7 +14,7 @@ namespace Regolith
     private:
       IDNumber _theMusic;
       IDNumber _nextContext;
-      IDNumber _nextContextHandler;
+      IDNumber _nextContextGroup;
       bool _running;
 
     protected:
@@ -32,7 +32,7 @@ namespace Regolith
 
 
       // Trivial configure - call the base-class variant
-      virtual void configure( Json::Value&, ContextHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual void validate() const override;
 
@@ -47,7 +47,7 @@ namespace Regolith
       void setNextContext( IDNumber n ) { _nextContext = n; }
 
       // The Context handler to load data for
-      void setNextContextHandler( IDNumber n ) { _nextContextHandler = n; }
+      void setNextContextGroup( IDNumber n ) { _nextContextGroup = n; }
 
 //////////////////////////////////////////////////
       // Requirements for the ControllableInterface - input action handling

@@ -72,6 +72,8 @@ namespace Regolith
       (*it)->update( time );
       ++it;
     }
+
+    updateContext( time );
   }
 
 
@@ -267,7 +269,7 @@ namespace Regolith
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // Context configuration
 
-  void Context::configure( Json::Value& json_data, ContextHandler& handler )
+  void Context::configure( Json::Value& json_data, ContextGroup& handler )
   {
     INFO_LOG( "Configuring Context" );
 

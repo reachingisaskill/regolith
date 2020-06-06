@@ -11,7 +11,7 @@ namespace Regolith
     Context(),
     _theMusic( 0 ),
     _nextContext( 0 ),
-    _nextContextHandler( 0 ),
+    _nextContextGroup( 0 ),
     _running( false )
   {
   }
@@ -29,7 +29,7 @@ namespace Regolith
 
     _running = true;
 
-    Manager::getInstance()->getDataManager().loadHandler( _nextContextHandler );
+    Manager::getInstance()->getDataManager().loadHandler( _nextContextGroup );
   }
 
 
@@ -41,7 +41,7 @@ namespace Regolith
   }
 
 
-  void LoadScreen::configure( Json::Value& json_data, ContextHandler& handler )
+  void LoadScreen::configure( Json::Value& json_data, ContextGroup& handler )
   {
     json_data["data_handler"] = std::string( "global" );
 

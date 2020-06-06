@@ -2,8 +2,11 @@
 #ifndef REGOLITH_MANAGERS_CONTEXT_MANAGER_H_
 #define REGOLITH_MANAGERS_CONTEXT_MANAGER_H_
 
-#include "Regolith/Managers/ContextHandler.h"
-#include "Regolith/Utilities/NamedReferenceVector.h"
+#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Utilities/WrapperMap.h"
+
+#include <thread>
+#include <atomic>
 
 
 namespace Regolith
@@ -11,13 +14,29 @@ namespace Regolith
 
   class ContextManager
   {
+    friend void contextManagerLoadingThread();
+
     private:
-      // Owns the memory describing every context
-      NamedVector< Context, true > _contexts;
+      // Handle to the loading thread
+      std::thread _loadingThread;
+
+      // The data that exists in the global scope
+      ContextGroup _globalContextGroup;
 
       // Vector of the individual context handlers
-      NamedVector< ContextHandler, true > _contextHandlers;
+      WrapperMap< ContextGroup > _contextGroups;
 
+      // Record of the currently loaded context group
+      ContextGroup* _currentContextGroup;
+
+      // Pointer to the next context group to load
+      ContextGroup* _nextContextGroup;
+
+      // Atomic loaded flag for loading screen to check progress
+      std::atomic<bool> _isLoaded;
+
+      // Atomic progress counter
+      std::atomic<float> _loadedProgress;
 
     public:
       // Con/Destructors
@@ -31,25 +50,31 @@ namespace Regolith
       // Validate the created contexts
       void validate() const;
 
+
 //////////////////////////////////////////////////////////////////////////////// 
       // Context construction/manipulation
 
-      // Return a pointer to a requested context - creating an entry if one doesn't exist
-      IDNumber requestContext( std::string name ) { return _contexts.addName( name ); }
+      // Return a pointer to a specific context group
+      Wrapper<ContextGroup> requestContextGroup( std::string name ) { return _contextGroups.request( name ); }
 
-      // Return the name of a given context. Mostly useful for debugging!
-      std::string getContextName( IDNumber id ) { return _contexts.getName( id ); }
+      // Load a specific context group
+      void loadContextGroup( ContextGroup* );
 
-      // Return a pointer to a requested context
-      Context* getContext( IDNumber id ) { return _contexts[ id ]; }
+      // Return a pointer to the currently loaded context group
+      ContextGroup* getCurrentContextGroup() { return _currentContextGroup; }
+
+      // Return a pointer to the global context group
+      ContextGroup* getGlobalContextGroup() { return &_globalContextGroup; }
 
 
-      // Return a pointer to a specific context handler
-      IDNumber requestContextHandler( std::string name ) { return _contextHandlers.addName( name ); }
+//////////////////////////////////////////////////////////////////////////////// 
+      // Loading thread interactions
 
-      // Return a pointer to a specific context handler
-      const ContextHandler* getContextHandler( IDNumber i ) const { return _contextHandlers[i]; }
+      // Return false while a context group is being loaded
+      bool isLoaded() const { return _isLoaded; }
 
+      // Return a float value representing the loading progress
+      float loadingProgress() const { return _loadedProgress; }
   };
 
 }

@@ -26,7 +26,7 @@ namespace Regolith
       virtual ~MenuContext();
 
       // Trivial configure - call the base-class variant
-      virtual void configure( Json::Value&, ContextHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
 
       // Title Scenes take ownership of the display.

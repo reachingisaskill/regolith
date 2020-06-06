@@ -24,9 +24,6 @@ namespace Regolith
   {
     friend class DataManager;
     private:
-      // Identification of handler - set by the manager
-      IDNumber _handlerID;
-
       // List of all the textures required for this data handler - owned by the manager
       RawTextureCache* _requiredTextures;
 
@@ -59,25 +56,6 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Game Objects
 
-      // Return the ID for a given object name
-      IDNumber requestGameObject( std::string name ) { return _gameObjects.addName( name ); }
-
-      // Return the name for a given object ID
-      std::string getGameObjectName( IDNumber id ) { return _gameObjects.getName( id ); }
-
-      // Get a global object pointer
-      // Return a pointer to a given object. (Please don't delete it!)
-      GameObject* getGameObject( std::string name ) { return _gameObjects.get( name ); }
-      GameObject* getGameObject( IDNumber id ) { return _gameObjects[ id ]; }
-
-      // Return a pointer to a given object. (Please don't delete it!)
-      PhysicalObject* getPhysicalObject( std::string name ) { return dynamic_cast<PhysicalObject*>( _gameObjects.get( name ) ); }
-      PhysicalObject* getPhysicalObject( IDNumber id ) { return dynamic_cast<PhysicalObject*>( _gameObjects[id] ); }
-
-      // Spawn a cloned object - caller accepts ownership of memory
-      // Spawn a new instance of a resource and return the memory to the caller
-      PhysicalObject* spawn( IDNumber i, const Vector& pos ) { return dynamic_cast<PhysicalObject*>( _gameObjects[i] )->clone( pos ); }
-      PhysicalObject* spawn( std::string name, const Vector& pos ) { return dynamic_cast<PhysicalObject*>( _gameObjects.get(name) )->clone( pos ); }
 
   };
 

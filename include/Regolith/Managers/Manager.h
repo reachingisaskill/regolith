@@ -36,7 +36,7 @@ namespace Regolith
 
   // Factory typedefs
   typedef FactoryTemplate< GameObject, DataHandler& > ObjectFactory;
-  typedef FactoryTemplate< Context, ContextHandler& > ContextFactory;
+  typedef FactoryTemplate< Context, ContextGroup& > ContextFactory;
   typedef FactoryTemplate< Signal > SignalFactory;
 
   // Manager class
@@ -219,7 +219,7 @@ namespace Regolith
 
 
       // Changes the context handler and opens a new context from it
-      void openContextHandler( IDNumber, IDNumber );
+      void openContextGroup( IDNumber, IDNumber );
 
 
       ////////////////////////////////////////////////////////////////////////////////

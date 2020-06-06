@@ -25,8 +25,7 @@ namespace Regolith
     _gameObjects( "game_objects" ),
     _globalData(),
     _loadQueue(),
-    _unloadQueue(),
-    _handlerQueue()
+    _unloadQueue()
   {
   }
 
@@ -76,19 +75,6 @@ namespace Regolith
 
     handler._requiredTextures = &_rawTextureCaches[ id ];
     handler._handlerID = id;
-  }
-
-
-  void DataManager::loadHandler( IDNumber i )
-  {
-    DEBUG_STREAM << "LOAD HANDLER: " << i;
-    _handlerQueue.push( i );
-
-    {
-      std::lock_guard<std::mutex>( Manager::getInstance()->getThreadManager().DataUpdate.mutex );
-      Manager::getInstance()->getThreadManager().DataUpdate.data = true;
-    }
-    Manager::getInstance()->getThreadManager().DataUpdate.variable.notify_all();
   }
 
 
@@ -226,11 +212,11 @@ namespace Regolith
 
   void DataManager::loadEntryPoint( IDNumber id )
   {
-    const ContextHandler* handler = Manager::getInstance()->getContextManager().getContextHandler( id );
-    const ContextHandler::DataCacheList& caches = handler->getDataCache();
+    const ContextGroup* handler = Manager::getInstance()->getContextManager().getContextGroup( id );
+    const ContextGroup::DataCacheList& caches = handler->getDataCache();
 
-    ContextHandler::DataCacheList::const_iterator end = caches.end();
-    for ( ContextHandler::DataCacheList::const_iterator it = caches.begin(); it != end; ++it )
+    ContextGroup::DataCacheList::const_iterator end = caches.end();
+    for ( ContextGroup::DataCacheList::const_iterator it = caches.begin(); it != end; ++it )
     {
       // Push the data cache
       _loadQueue.push( (*it) );
@@ -270,43 +256,10 @@ namespace Regolith
     {
       dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
 
-      DEBUG_STREAM << "LOADING THREAD WORKING";
+      DEBUG_STREAM << "DATA LOADING THREAD WORKING";
 
-      do
-      {
-        if ( manager._handlerQueue.pop( temp_number ) )
-        {
-          const ContextHandler* handler = Manager::getInstance()->getContextManager().getContextHandler( temp_number );
-
-          const ContextHandler::DataCacheList& caches = handler->getDataCache();
-
-          std::map<IDNumber, bool>::iterator end = manager._loadedCaches.end();
-          for ( std::map<IDNumber, bool>::iterator it = manager._loadedCaches.begin(); it != end; ++it )
-          {
-            ContextHandler::DataCacheList::const_iterator found = caches.find( it->first );
-            if ( found == caches.end() ) 
-            {
-              if ( it->second )
-              {
-                manager._unloadQueue.push( it->first );
-              }
-            }
-            else
-            {
-              if ( ! it->second )
-              {
-                manager._loadQueue.push( it->first );
-              }
-            }
-          }
-        }
-
-        unloadFunction();
-
-        loadFunction();
-
-      }
-      while ( ! manager._handlerQueue.empty() );
+      unloadFunction();
+      loadFunction();
 
       dataUpdate.data = false;
       Manager::getInstance()->raiseEvent( REGOLITH_EVENT_DATA_LOADED );

@@ -37,7 +37,7 @@ namespace Regolith
   }
 
 
-  void TitleScene::configure( Json::Value& json_data, ContextHandler& handler )
+  void TitleScene::configure( Json::Value& json_data, ContextGroup& handler )
   {
     // Call the base class variant first
     Context::configure( json_data, handler );

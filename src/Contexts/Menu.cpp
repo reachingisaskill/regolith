@@ -34,7 +34,7 @@ namespace Regolith
   }
 
 
-  void MenuContext::configure( Json::Value& json_data, ContextHandler& handler )
+  void MenuContext::configure( Json::Value& json_data, ContextGroup& handler )
   {
     Context::configure( json_data, handler );
   }

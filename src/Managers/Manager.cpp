@@ -150,13 +150,13 @@ namespace Regolith
   }
 
 
-  void Manager::openContextHandler( IDNumber h, IDNumber c )
+  void Manager::openContextGroup( IDNumber h, IDNumber c )
   {
     DEBUG_LOG( "Opening New Context Handler" );
 
-    LoadScreen* load_screen = _theContexts.getContextHandler( h )->getLoadScreen();
+    LoadScreen* load_screen = _theContexts.getContextGroup( h )->getLoadScreen();
     load_screen->setNextContext( c );
-    load_screen->setNextContextHandler( h );
+    load_screen->setNextContextGroup( h );
 
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, load_screen ) );
   }

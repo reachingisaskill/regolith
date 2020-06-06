@@ -67,7 +67,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configuration
 
-  void Platformer::configure( Json::Value& json_data, ContextHandler& handler )
+  void Platformer::configure( Json::Value& json_data, ContextGroup& handler )
   {
     INFO_LOG( "Configuring Platformer Context" );
 

@@ -58,9 +58,6 @@ namespace Regolith
       // Unloading queue
       MutexedBuffer< IDNumber > _unloadQueue;
 
-      // Handler to load
-      MutexedBuffer< IDNumber > _handlerQueue;
-
     public:
       // Con/de-struction
       DataManager();
