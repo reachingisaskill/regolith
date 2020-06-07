@@ -21,8 +21,10 @@ namespace Regolith
   class ContextGroup
   {
     typedef std::list<PhysicalObject*> SpawnedList;
-    typedef std::queue<ContextGroupAction*> ActionQueue;
+    typedef std::queue<ContextGroupOperation*> OperationQueue;
+    class Operation;
 
+////////////////////////////////////////////////////////////////////////////////
     private:
       // Audio handlers are local to the context group
       AudioHandler _theAudio;
@@ -45,12 +47,13 @@ namespace Regolith
       // List of all the spawned physical objects used by the contexts
       SpawnedList _spawnedObjects;
 
-      // Actions to trigger on load - Messaging the contexts before they have loaded.
-      ActionList _onLoadActions;
+      // Operations to trigger on load - Messaging the contexts before they have loaded.
+      OperationQueue _onLoadOperations;
 
       // Starting point when this context group is loaded
       Context* _entryPoint;
 
+////////////////////////////////////////////////////////////////////////////////
     public:
       // Constructor
       ContextGroup( IDNumber, NamedVector< Context, true >& );
@@ -66,6 +69,9 @@ namespace Regolith
 
       // Return the ID of the load screen
       LoadScreen* getLoadScreen() const { return _loadScreen; }
+
+      // Set the entry point when this context group loads
+      void setEntryPoint( Context* c ) { _entryPoint = c; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -98,11 +104,37 @@ namespace Regolith
       // Spawn a new instance of a resource and return the pointer to the caller
       PhysicalObject* spawn( std::string name, const Vector& pos );
 
-      // Spawn a new instance of a resource and return the pointer to the caller. This ensures memory ownership stays with the context group - not the caller
-      PhysicalObject* spawn( Wrapper<PhysicalObject*>, const Vector& pos );
+      // Spawn a new instance of a resource and return the pointer to the caller. Memory ownership stays with the context group, not the caller
+      PhysicalObject* spawn( PhysicalObject*, const Vector& pos );
 
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Context Group Operations
+
+    class Operation
+    {
+      public:
+        enum OperationType
+        {
+          ACTION_NULL,
+          ACTION_SET_ENTRY_POINT
+        };
+
+      private:
+        Operation _operation;
+        std::string _key;
+        std::string _value;
+
+      public:
+        Operation( OperationType, std::string, std::string = std::string("") );
+
+        void trigger( ContextGroup* );
+
+    };
 
   };
+
 
 }
 

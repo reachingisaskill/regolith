@@ -15,24 +15,34 @@
 
 namespace Regolith
 {
+  class Context;
 
   class ContextLayer
   {
     friend class Camera;
 
+////////////////////////////////////////////////////////////////////////////////
     private:
+      Context* _owner;
       Vector _position; // Can be considered as the offset wrt to the camera
       Vector _movementScale; // Movement wrt the camera position
       float _width;
       float _height;
 
+
+////////////////////////////////////////////////////////////////////////////////
     public:
-      // Constuct with position, movement scale, width and height
-      ContextLayer( Vector, Vector, float, float );
+      // Constuct
+      ContextLayer();
       // Clear all the caches
       ~ContextLayer();
 
+      // Configure with position, movement scale, width and height
+      void configure( Vector, Vector, float, float );
 
+
+////////////////////////////////////////////////////////////////////////////////
+      // Caches
 
       // List of all drawable objects
       DrawableList drawables;
@@ -40,12 +50,18 @@ namespace Regolith
       // List of all moveable objects
       MoveableList moveables;
 
-      // Map of all teams. Note a team cannot collide with it's own members!
+      // Map of all teams.
       TeamMap teams;
 
       // Set of all the objects that are "clickable"
       ClickableSet clickables;
 
+      // Cache of all objects that are animated
+      AnimatedList animated;
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Layer details
 
       // Return the position of the layer
       const Vector& getPosition() const { return _position; }
@@ -57,6 +73,15 @@ namespace Regolith
       const float& getWidth() const { return _width; }
       const float& getHeight() const { return _height; }
 
+
+////////////////////////////////////////////////////////////////////////////////
+      // Object spawning and caching
+
+      // Spawn a copy of the provided object at the requested position 
+      void spawn( PhysicalObject*, const Vector& );
+
+      // Cache an object in this layer
+      virtual void cacheObject( GameObject* );
 
   };
 

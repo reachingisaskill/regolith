@@ -19,7 +19,7 @@ namespace Regolith
 
   DataManager::DataManager() :
     _loadingThread( theLoadingThread ),
-    _textureFile(),
+    _indexFile(),
     _rawTextures(),
     _rawTextureCaches( "raw_texture_caches" ),
     _gameObjects( "game_objects" ),
@@ -130,11 +130,11 @@ namespace Regolith
     Utilities::validateJson( json_data, "texture_data_file", Utilities::JSON_TYPE_STRING );
 
     // Find the texture index file
-    _textureFile = json_data["texture_data_file"].asString();
+    _indexFile = json_data["texture_data_file"].asString();
 
     // Load and validate the index file
     Json::Value temp_data;
-    Utilities::loadJsonData( temp_data, _textureFile );
+    Utilities::loadJsonData( temp_data, _indexFile );
     Utilities::validateJson( temp_data, "textures", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( temp_data["textures"], 0, Utilities::JSON_TYPE_ARRAY );
     Json::Value texture_data = temp_data["textures"];
@@ -201,12 +201,6 @@ namespace Regolith
 
   void DataManager::validate() const
   {
-    NamedVector<GameObject, true>::const_iterator obj_end = _gameObjects.end();
-    for ( NamedVector<GameObject, true>::const_iterator it = _gameObjects.begin(); it != obj_end; ++it )
-    {
-      if ( (*it) != nullptr )
-        (*it)->validate();
-    }
   }
 
 
@@ -278,7 +272,7 @@ namespace Regolith
     if ( ! manager._loadQueue.empty() )
     {
       Json::Value temp_data;
-      Utilities::loadJsonData( temp_data, manager._textureFile );
+      Utilities::loadJsonData( temp_data, manager._indexFile );
       Json::Value& texture_data = temp_data["textures"];
 
       while ( manager._loadQueue.pop( temp_number ) )

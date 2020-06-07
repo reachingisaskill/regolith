@@ -6,16 +6,11 @@
 #include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/Architecture/Component.h"
-#include "Regolith/Architecture/Animated.h"
-#include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/ContextLayer.h"
 #include "Regolith/Managers/InputHandler.h"
-#include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/FocusHandler.h"
 #include "Regolith/Managers/CollisionHandler.h"
-#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/ContextGroup.h"
-#include "Regolith/Utilities/NamedVector.h"
+#include "Regolith/Utilities/WrapperMap.h"
 #include "Regolith/GamePlay/Camera.h"
 
 #include <list>
@@ -23,6 +18,10 @@
 
 namespace Regolith
 {
+
+  class Animated;
+  class PhysicalObject;
+  class ContextLayer;
 
   /*
    * Defines a context interface.
@@ -40,17 +39,15 @@ namespace Regolith
     Context( const Context& ) = delete;
     Context& operator=( const Context& ) = delete;
 
-    // Useful typedefs
-    typedef std::list< Animated* > AnimatedList;
-    typedef std::list< PhysicalObject* > PhysicalObjectList;
+    friend class ContextLayer;
 
+//////////////////////////////////////////////////////////////////////////////// 
     private:
       // Context-local audio and input handlers
+      ContextGroup* _owner;
       InputHandler _theInput;
-      AudioHandler _theAudio;
       FocusHandler _theFocus;
       CollisionHandler _theCollision;
-      DataHandler _theData;
 
       // Camera for the context
       Camera _theCamera;
@@ -62,15 +59,10 @@ namespace Regolith
       bool _pauseable;
 
       // Named vector of all the layers owned by the current context
-      NamedVector< ContextLayer, true > _layers;
-
-      // Owned memory of all the objects that are spawned within this context
-      PhysicalObjectList _spawnedObjects;
-
-      // Cache of all objects that are animated
-      AnimatedList _animatedObjects;
+      WrapperMap< ContextLayer > _layers;
 
 
+//////////////////////////////////////////////////////////////////////////////// 
     protected:
       // Set the pauseable flag
       void setPauseable( bool p ) { _pauseable = p; }
@@ -84,8 +76,8 @@ namespace Regolith
       // Called during the update loop for frame-dependent context actions
       virtual void updateContext( time ) {}
 
-      ContextLayer* getLayer( unsigned int num ) { return _layers[num]; }
 
+//////////////////////////////////////////////////////////////////////////////// 
     public:
       // Con/De-structor
       Context();
@@ -94,20 +86,17 @@ namespace Regolith
       // Configure the context
       void configure( Json::Value&, ContextGroup& ) override;
 
-
       // Return the input handler for this context
       InputHandler* inputHandler() { return &_theInput; }
 
-      // Return the audio handler for this context
-      AudioHandler* audioHandler() { return &_theAudio; }
 
-      // Return the data handler for this context
-      DataHandler* dataHandler() { return &_theData; }
+//////////////////////////////////////////////////////////////////////////////// 
+      // Context Stack functions
 
       // Return the state of the pause flag
       bool isPaused() const { return _paused; }
 
-      // Public interface to context states
+      // Interface for context stack
       void startContext() { _theAudio.play(); this->onStart(); }
       void stopContext() { _theAudio.stop(); this->onStop(); }
       void pauseContext() { if ( (! _paused) && _pauseable ) { _paused = true; _theAudio.pause(); this->onPause(); } }
@@ -119,6 +108,8 @@ namespace Regolith
       virtual bool overridesPreviousContext() const = 0;
 
 
+////////////////////////////////////////////////////////////////////////////////      
+      // Engine update loop functions
 
       // Update the animated objects
       void update( float );
@@ -136,20 +127,11 @@ namespace Regolith
       void resolveCollisions();
 
 
+////////////////////////////////////////////////////////////////////////////////
+      // Object and layer interface
 
-      // Return the ID of a layer so that it may be referenced when spawining objects
-      unsigned int getLayerID( std::string name ) { return _layers.getID( name ); }
-
-
-
-      // Spawn an object with a given ID and place it in the provided layer, at the provided position
-      void spawn( unsigned int, unsigned int, const Vector& );
-
-      // Insert a spawned object (memory owned by another, probably derived class) and cache it in the provided layer
-      void addSpawnedObject( PhysicalObject*, unsigned int );
-
-      // Cache an object, this will NOT add objects to any layers, but will ensure any update functions are called.
-      virtual void cacheObject( GameObject* );
+      // Return a layer proxy so that it may be referenced when spawining objects
+      Wrapper<ContextLayer> requestLayer( std::string name ) { return _layers.request( name ); }
 
   };
 

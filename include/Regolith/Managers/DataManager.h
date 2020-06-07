@@ -34,7 +34,7 @@ namespace Regolith
       std::thread _loadingThread;
 
       // Path to the list of all texture files and their modifiers
-      std::string _textureFile;
+      std::string _indexFile;
 
       // Map of all the raw texture pointers
       RawTextureMap _rawTextures;
@@ -44,12 +44,6 @@ namespace Regolith
 
       // Map of the status of all IDNumberSets
       std::map<IDNumber, bool> _loadedCaches;
-
-      // All objects used by the contexts using this handler.
-      NamedVector<GameObject, true > _gameObjects;
-
-      // Handler for data in global space
-      DataHandler _globalData;
 
 
       // Loading queue

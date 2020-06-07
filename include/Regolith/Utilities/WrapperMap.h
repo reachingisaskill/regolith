@@ -64,6 +64,10 @@ namespace Regolith
 
       size_t size() const { return _dataMap.size(); }
 
+
+      iterator find( std::string name ) { return _dataMap.find( name ); }
+      const_iterator find( std::string name ) const { return _dataMap.find( name ); }
+
       iterator begin() { return _dataMap.begin(); }
       const_iterator begin() const { return _dataMap.begin(); }
 
@@ -105,27 +109,24 @@ namespace Regolith
 
 
   template < DATA >
-  DATA& WrapperMap::get( std::string name )
-  {
-    MapType::iterator found = _dataMap.find( name );
-    if ( found == _dataMap.end() )
-    {
-      Exception ex( "WrapperMap::get()", "Object not found in map." );
-      ex.addDetail( "Map Name", _name );
-      ex.addDetail( "Object Name", name );
-      throw ex;
-    }
-
-    return *found;
-  }
-
-
-  template < DATA >
   DATA& WrapperMap::set( std::string name, DATA& obj )
   {
     DATA& datum = _dataMap[name];
     datum = obj;
     return datum;
+  }
+
+
+  template < DATA >
+  DATA& WrapperMap::get( std::string name )
+  {
+    MapType::iterator found = _dataMap.find( name );
+    if ( found == _dataMap.end() )
+    {
+      found = _dataMap.insert( std::make_pair( name, DATA() ) ).first;
+    }
+
+    return *found;
   }
 
 
