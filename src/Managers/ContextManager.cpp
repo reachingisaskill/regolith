@@ -142,8 +142,8 @@ namespace Regolith
 
       // Signal that the context group has been loaded
       contextUpdate.data = false;
-      manager._isLoaded = true;
       manager._loadedProgress = 1.0;
+      manager._isLoaded = true;
     }
 
     contextLock.unlock();

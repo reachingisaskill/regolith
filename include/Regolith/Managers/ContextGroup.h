@@ -7,7 +7,7 @@
 #include "Regolith/Manager/AudioHandler.h"
 #include "Regolith/Manager/DataHandler.h"
 #include "Regolith/Utilities/NamedVector.h"
-#include "Regolith/Utilities/WrapperMap.h"
+#include "Regolith/Utilities/ProxyMap.h"
 
 #include <list>
 #include <queue>
@@ -30,7 +30,7 @@ namespace Regolith
       AudioHandler _theAudio;
 
       // List of data handlers that can be individually loaded/unloaded
-      WrapperMap< DataHandler > _dataHandlers;
+      ProxyMap< DataHandler > _dataHandlers;
 
       // File name to load
       std::string _fileName;
@@ -39,10 +39,10 @@ namespace Regolith
       LoadScreen* _loadScreen;
 
       // List of the contexts controlled by this handler
-      WrapperMap< Context* > _contexts;
+      ProxyMap< Context* > _contexts;
 
       // List of all the game objects owned by the contexts
-      WrapperMap< GameObject* > _gameObjects;
+      ProxyMap< GameObject* > _gameObjects;
 
       // List of all the spawned physical objects used by the contexts
       SpawnedList _spawnedObjects;
@@ -78,7 +78,7 @@ namespace Regolith
       // Context functions
 
       // Return a proxy for a requested context.
-      Wrapper<Context*> requestContext( std::string name ) { return _contexts.request( name ); }
+      Proxy<Context*> requestContext( std::string name ) { return _contexts.request( name ); }
 
       // Return a pointer to a requested context.
       Context* getContext( std::string name ) { return _contexts.get( name ); }
@@ -88,14 +88,14 @@ namespace Regolith
       // Game Object functions
 
       // Return a proxy for a game object
-      Wrapper<GameObject> requestGameObject( std::string name ) { return _gameObjects.request( name ); }
+      Proxy<GameObject> requestGameObject( std::string name ) { return _gameObjects.request( name ); }
 
       // Return a pointer to a given object.
       GameObject* getGameObject( std::string name ) { return _gameObjects.get( name ); }
 
 
       // Return a proxy for a physical object (Pointer is implecitly converted in wrappers)
-      Wrapper<PhysicalObject> requestPhysicalObject( std::string name ) { return _gameObjects.request( name ); }
+      Proxy<PhysicalObject> requestPhysicalObject( std::string name ) { return _gameObjects.request( name ); }
 
       // Return a pointer to a given object.
       PhysicalObject* getPhysicalObject( std::string name ) { return dynamic_cast<PhysicalObject*>( _gameObjects.get( name ) ); }

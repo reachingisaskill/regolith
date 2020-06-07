@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_UTILITIES_WRAPPER_MAP_H_
-#define REGOLITH_UTILITIES_WRAPPER_MAP_H_
+#ifndef REGOLITH_UTILITIES_PROXY_MAP_H_
+#define REGOLITH_UTILITIES_PROXY_MAP_H_
 
 #include <map>
 #include <string>
@@ -12,13 +12,13 @@ namespace Regolith
 {
 
   template< DATA >
-  class Wrapper
+  class Proxy
   {
     private:
       DATA* data;
 
     public:
-      Wrapper( DATA* d = nullptr ) : data( d ) {}
+      Proxy( DATA* d = nullptr ) : data( d ) {}
 
       DATA& operator->() { return *data; }
       const DATA& operator->() const { return *data; }
@@ -27,16 +27,16 @@ namespace Regolith
       const DATA& operator*() const { return *data; }
 
       template < OTHER >
-      operator Wrapper<OTHER>() const { return Wrapper( dynamic_cast<OTHER>( data ) ); }
+      operator Proxy<OTHER>() const { return Proxy( dynamic_cast<OTHER>( data ) ); }
 
       operator bool() const { return data != nullptr; }
   };
 
 
   template< DATA >
-  class WrapperMap
+  class ProxyMap
   {
-    typedef typename Wrapper<DATA> ObjectWrapper;
+    typedef typename Proxy<DATA> ObjectProxy;
     typedef typename std::map< std::string, DATA > MapType;
 
     public:
@@ -49,11 +49,11 @@ namespace Regolith
       MapType _dataMap;
 
     public:
-      WrapperMap( const char* );
+      ProxyMap( const char* );
 
-      ~WrapperMap();
+      ~ProxyMap();
 
-      ObjectWrapper request( std::string );
+      ObjectProxy request( std::string );
 
       DATA& get( std::string );
       const DATA& get( std::string ) const;
@@ -80,7 +80,7 @@ namespace Regolith
   // Template member function definitions
 
   template < DATA >
-  WrapperMap<DATA>::WrapperMap( const char* name ) :
+  ProxyMap<DATA>::ProxyMap( const char* name ) :
     _name( name ),
     _dataMap()
   {
@@ -88,15 +88,15 @@ namespace Regolith
 
 
   template < DATA >
-  WrapperMap<DATA>::~WrapperMap()
+  ProxyMap<DATA>::~ProxyMap()
   {
-    INFO_STREAM << "Delete Wrapper Map: " << _name;
+    INFO_STREAM << "Delete Proxy Map: " << _name;
     _dataMap.clear();
   }
 
 
   template < DATA >
-  ObjectWrapper WrapperMap<DATA>::request( std::string name )
+  ObjectProxy ProxyMap<DATA>::request( std::string name )
   {
     MapType::iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
@@ -104,12 +104,12 @@ namespace Regolith
       found = _dataMap.insert( std::make_pair( name, DATA() ) ).first;
     }
 
-    return ObjectWrapper( &(*found) );
+    return ObjectProxy( &(*found) );
   }
 
 
   template < DATA >
-  DATA& WrapperMap::set( std::string name, DATA& obj )
+  DATA& ProxyMap::set( std::string name, DATA& obj )
   {
     DATA& datum = _dataMap[name];
     datum = obj;
@@ -118,7 +118,7 @@ namespace Regolith
 
 
   template < DATA >
-  DATA& WrapperMap::get( std::string name )
+  DATA& ProxyMap::get( std::string name )
   {
     MapType::iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
@@ -131,12 +131,12 @@ namespace Regolith
 
 
   template < DATA >
-  const DATA& WrapperMap::get( std::string name ) const
+  const DATA& ProxyMap::get( std::string name ) const
   {
     MapType::const_iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
     {
-      Exception ex( "WrapperMap::get()", "Object not found in map." );
+      Exception ex( "ProxyMap::get()", "Object not found in map." );
       ex.addDetail( "Map Name", _name );
       ex.addDetail( "Object Name", name );
       throw ex;
@@ -147,7 +147,7 @@ namespace Regolith
 
 
   template < DATA >
-  bool WrapperMap::exists( std::string name ) const
+  bool ProxyMap::exists( std::string name ) const
   {
     MapType::const_iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
@@ -158,5 +158,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_UTILITIES_WRAPPER_MAP_H_
+#endif // REGOLITH_UTILITIES_PROXY_MAP_H_
 

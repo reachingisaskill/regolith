@@ -4,12 +4,12 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/GamePlay/Texture.h"
-#include "Regolith/Architecture/GameObject.h"
-#include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Utilities/NamedVector.h"
+#include "Regolith/GamePlay/Noises.h"
+#include "Regolith/Utilities/ProxyMap.h"
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 
 namespace Regolith
@@ -22,40 +22,43 @@ namespace Regolith
 
   class DataHandler
   {
-    friend class DataManager;
+    friend void dataLoadFunction();
+    friend void dataUnloadFunction();
+
     private:
-      // List of all the textures required for this data handler - owned by the manager
-      RawTextureCache* _requiredTextures;
+      // List of all the textures
+      RawTextureMap _rawTextures;
 
-      // Reference to all th game objects - owned by the manager
-      NamedVector<GameObject, true >& _gameObjects;
+      // List of all the sounds
+      RawSoundMap _rawSounds;
 
-      // Optional context for the manager to use during loading
-      IDNumber _loadScreen;
+      // List of all the music
+      RawMusicMap _rawMusic;
+
+      // Stores a flag to record whether the data is in memory or not
+      bool _isLoaded;
+
 
     public:
       DataHandler();
 
       ~DataHandler();
 
-//      void configure( std::string );
-
       IDNumber getID() const { return _handlerID; }
 
+      bool isLoaded() const { return _isLoaded; }
 
 ////////////////////////////////////////////////////////////////////////////////
       // Raw Textures
 
-      // Request a raw texture point - caches this texture in the handler to be dynamically loaded
-      RawTexture* findTexture( std::string );
+      // Get an texture with a given name
+      RawTexture* getRawTexture( std::string );
 
-      // Returns true if that texture is cached by this handler
-      bool isCached( RawTexturePointer ) const;
+      // Get an texture with a given name
+      RawSound* getRawSound( std::string );
 
-
-////////////////////////////////////////////////////////////////////////////////
-      // Game Objects
-
+      // Get an texture with a given name
+      RawMusic* getRawMusic( std::string );
 
   };
 

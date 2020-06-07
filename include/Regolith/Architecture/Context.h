@@ -10,7 +10,7 @@
 #include "Regolith/Managers/FocusHandler.h"
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/ContextGroup.h"
-#include "Regolith/Utilities/WrapperMap.h"
+#include "Regolith/Utilities/ProxyMap.h"
 #include "Regolith/GamePlay/Camera.h"
 
 #include <list>
@@ -59,7 +59,7 @@ namespace Regolith
       bool _pauseable;
 
       // Named vector of all the layers owned by the current context
-      WrapperMap< ContextLayer > _layers;
+      ProxyMap< ContextLayer > _layers;
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -131,7 +131,7 @@ namespace Regolith
       // Object and layer interface
 
       // Return a layer proxy so that it may be referenced when spawining objects
-      Wrapper<ContextLayer> requestLayer( std::string name ) { return _layers.request( name ); }
+      Proxy<ContextLayer> requestLayer( std::string name ) { return _layers.request( name ); }
 
   };
 

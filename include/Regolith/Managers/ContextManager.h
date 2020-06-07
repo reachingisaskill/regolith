@@ -3,7 +3,7 @@
 #define REGOLITH_MANAGERS_CONTEXT_MANAGER_H_
 
 #include "Regolith/Managers/ContextGroup.h"
-#include "Regolith/Utilities/WrapperMap.h"
+#include "Regolith/Utilities/ProxyMap.h"
 
 #include <thread>
 #include <atomic>
@@ -24,7 +24,7 @@ namespace Regolith
       ContextGroup _globalContextGroup;
 
       // Vector of the individual context handlers
-      WrapperMap< ContextGroup > _contextGroups;
+      ProxyMap< ContextGroup > _contextGroups;
 
       // Record of the currently loaded context group
       ContextGroup* _currentContextGroup;
@@ -55,7 +55,7 @@ namespace Regolith
       // Context construction/manipulation
 
       // Return a pointer to a specific context group
-      Wrapper<ContextGroup> requestContextGroup( std::string name ) { return _contextGroups.request( name ); }
+      Proxy<ContextGroup> requestContextGroup( std::string name ) { return _contextGroups.request( name ); }
 
       // Load a specific context group
       void loadContextGroup( ContextGroup* );

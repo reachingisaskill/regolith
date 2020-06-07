@@ -28,6 +28,8 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful Typedefs
   class RawTexture;
+  class RawSound;
+  class RawMusic;
   class Drawable;
   class Moveable;
   class Collidable;
@@ -45,9 +47,8 @@ namespace Regolith
   typedef std::set< IDNumber > IDNumberSet;
 
   typedef std::map< std::string, RawTexture > RawTextureMap;
-  typedef RawTextureMap::value_type* RawTexturePointer;
-  typedef std::set< RawTexturePointer > RawTextureCache;
-
+  typedef std::map< std::string, RawSound > RawSoundMap;
+  typedef std::map< std::string, RawMusic > RawMusicMap;
 
 
   typedef std::unique_lock< std::mutex > UniqueLock;

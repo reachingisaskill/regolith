@@ -1,6 +1,7 @@
 
 #include "Regolith/Managers/DataManager.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 #include "logtastic.h"
@@ -12,18 +13,14 @@
 namespace Regolith
 {
 
-  void theLoadingThread();
-  void loadFunction();
-  void unloadFunction();
+  void dataLoadingThread();
+  void dataLoadFunction();
+  void dataUnloadFunction();
 
 
   DataManager::DataManager() :
     _loadingThread( theLoadingThread ),
     _indexFile(),
-    _rawTextures(),
-    _rawTextureCaches( "raw_texture_caches" ),
-    _gameObjects( "game_objects" ),
-    _globalData(),
     _loadQueue(),
     _unloadQueue()
   {
@@ -32,6 +29,8 @@ namespace Regolith
 
   DataManager::~DataManager()
   {
+    INFO_LOG( "Destroying Data Manager." );
+    clear();
   }
 
 
@@ -39,49 +38,15 @@ namespace Regolith
   {
     INFO_LOG( "Clearing Data Manager." );
 
-    INFO_LOG( "Closing the loading thread." );
-    _loadingThread.join();
-
-    INFO_LOG( "Clearing texture caches." );
-    _rawTextureCaches.clear();
-
-    INFO_LOG( "Clearing raw texture data" );
-    for ( RawTextureMap::iterator it = _rawTextures.begin(); it != _rawTextures.end(); ++it )
-    {
-      if ( it->second.texture != nullptr )
-      {
-        SDL_DestroyTexture( it->second.texture );
-        it->second.texture = nullptr;
-      }
-    }
-    _rawTextures.clear();
-
-    INFO_LOG( "Data manager deleted." );
+    _loadQueue.clear();
+    _unloadQueue.clear();
   }
 
 
-  void DataManager::configureHandler( DataHandler& handler, std::string name )
+  void DataManager::load( DataHandler* handler )
   {
-    IDNumber id;
-    if ( ! _rawTextureCaches.exists( name ) )
-    {
-      id = _rawTextureCaches.addName( name );
-      _loadedCaches[ id ] = false;
-    }
-    else
-    {
-      id = _rawTextureCaches.getID( name );
-    }
-
-    handler._requiredTextures = &_rawTextureCaches[ id ];
-    handler._handlerID = id;
-  }
-
-
-  void DataManager::load( IDNumber i )
-  {
-    DEBUG_STREAM << "LOAD: " << i;
-    _loadQueue.push( i );
+    DEBUG_STREAM << "LOAD";
+    _loadQueue.push( handler );
 
     {
       std::lock_guard<std::mutex>( Manager::getInstance()->getThreadManager().DataUpdate.mutex );
@@ -91,10 +56,10 @@ namespace Regolith
   }
 
 
-  void DataManager::unload( IDNumber i )
+  void DataManager::unload( DataHandler* hander )
   {
-    DEBUG_STREAM << "UNLOAD: " << i;
-    _unloadQueue.push( i );
+    DEBUG_STREAM << "UNLOAD";
+    _unloadQueue.push( handler );
 
     {
       std::lock_guard<std::mutex>( Manager::getInstance()->getThreadManager().DataUpdate.mutex );
@@ -126,98 +91,47 @@ namespace Regolith
     configureHandler( _globalData, "global" );
 
     // Load the json data
-    Utilities::validateJson( json_data, "global_objects", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "texture_data_file", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "resource_index_file", Utilities::JSON_TYPE_STRING );
 
     // Find the texture index file
-    _indexFile = json_data["texture_data_file"].asString();
+    _indexFile = json_data["resource_index_file"].asString();
 
     // Load and validate the index file
     Json::Value temp_data;
     Utilities::loadJsonData( temp_data, _indexFile );
     Utilities::validateJson( temp_data, "textures", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( temp_data, "sounds", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( temp_data, "music", Utilities::JSON_TYPE_ARRAY );
+
     Utilities::validateJsonArray( temp_data["textures"], 0, Utilities::JSON_TYPE_ARRAY );
     Json::Value texture_data = temp_data["textures"];
 
-    Json::ArrayIndex i;
-    for ( i = 0; i < texture_data.size(); ++i )
-    {
-      Json::Value& datum = texture_data[i];
-      Utilities::validateJson( datum, "name", Utilities::JSON_TYPE_STRING );
-      std::string name = datum["name"].asString();
-
-      // Throw an error if there are duplicates.
-      if ( _rawTextures.find( name ) != _rawTextures.end() )
-      {
-        Exception ex( "DataManager::configure()", "Duplicate names found in texture list" );
-        ex.addDetail( "Name", name );
-        throw ex;
-      }
-
-      _rawTextures[name] = makeTexture( datum ); // Fill the info
-      SDL_DestroyTexture( _rawTextures[name].texture ); // Delete the texture data
-      _rawTextures[name].texture = nullptr; // Null
-    }
+//    Json::ArrayIndex i;
+//    for ( i = 0; i < texture_data.size(); ++i )
+//    {
+//      Json::Value& datum = texture_data[i];
+//      Utilities::validateJson( datum, "name", Utilities::JSON_TYPE_STRING );
+//      std::string name = datum["name"].asString();
+//
+//      // Throw an error if there are duplicates.
+//      if ( _rawTextures.find( name ) != _rawTextures.end() )
+//      {
+//        Exception ex( "DataManager::configure()", "Duplicate names found in texture list" );
+//        ex.addDetail( "Name", name );
+//        throw ex;
+//      }
+//
+//      _rawTextures[name] = makeTexture( datum ); // Fill the info
+//      SDL_DestroyTexture( _rawTextures[name].texture ); // Delete the texture data
+//      _rawTextures[name].texture = nullptr; // Null
+//    }
 
     temp_data.clear();
-
-
-    // Find the global object list
-    Json::Value& game_objects = json_data["global_objects"];
-
-    // Iterate the global objects list
-    Json::ArrayIndex game_objects_size = game_objects.size();
-    for ( Json::ArrayIndex i = 0; i != game_objects_size; ++i )
-    {
-      Utilities::validateJson( game_objects[i], "name", Utilities::JSON_TYPE_STRING );
-      std::string name = game_objects[i]["name"].asString();
-
-      INFO_STREAM << "Building global object : " << name;
-
-      GameObject* obj = Manager::getInstance()->getObjectFactory().build( game_objects[i], _globalData );
-
-      if ( obj->isPhysical() ) // If the object claims to be physical
-      {
-        PhysicalObject* new_obj = dynamic_cast<PhysicalObject*>( obj );
-        if ( new_obj == nullptr ) // Check that it's really physical!
-        {
-          Exception ex( "DataManager::configure()", "Could not cast game object to a physical object");
-          ex.addDetail( "Name", name );
-          throw ex;
-        }
-      }
-      _gameObjects.addObject( obj, name );
-    }
-
-    DEBUG_LOG( "Loading the global objects" );
-
-    // Push the global cache ID onto the queue
-    _loadQueue.push( _rawTextureCaches.getID( "global" ) );
-
-    // Run the load function in this thread - load thread only active once engine starts
-    loadFunction();
   }
 
 
   void DataManager::validate() const
   {
-  }
-
-
-  void DataManager::loadEntryPoint( IDNumber id )
-  {
-    const ContextGroup* handler = Manager::getInstance()->getContextManager().getContextGroup( id );
-    const ContextGroup::DataCacheList& caches = handler->getDataCache();
-
-    ContextGroup::DataCacheList::const_iterator end = caches.end();
-    for ( ContextGroup::DataCacheList::const_iterator it = caches.begin(); it != end; ++it )
-    {
-      // Push the data cache
-      _loadQueue.push( (*it) );
-    }
-
-    // Run the load function in this thread - load thread only active once engine starts
-    loadFunction();
   }
 
 
@@ -242,20 +156,28 @@ namespace Regolith
 
 
     Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
-    IDNumber temp_number;
-
     std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
+
     INFO_LOG( "Loading thread waiting for first command" );
     while( ! quitFlag )
     {
+      manager._loading = false;
       dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
+      manager._loading = true;
+      dataUpdate.data = false;
 
       DEBUG_STREAM << "DATA LOADING THREAD WORKING";
+      do
+      {
+        dataLock.unlock();
 
-      unloadFunction();
-      loadFunction();
+        unloadFunction();
+        loadFunction();
 
-      dataUpdate.data = false;
+        dataLock.lock();
+
+      } while( dataUpdate == true );
+
       Manager::getInstance()->raiseEvent( REGOLITH_EVENT_DATA_LOADED );
     }
 
@@ -264,10 +186,10 @@ namespace Regolith
   }
 
 
-  void loadFunction()
+  void dataLoadFunction()
   {
     DataManager& manager = Manager::getInstance()->getDataManager();
-    IDNumber temp_number;
+    DataHandler* temp_handler;
 
     if ( ! manager._loadQueue.empty() )
     {
@@ -275,68 +197,58 @@ namespace Regolith
       Utilities::loadJsonData( temp_data, manager._indexFile );
       Json::Value& texture_data = temp_data["textures"];
 
-      while ( manager._loadQueue.pop( temp_number ) )
+      while ( manager._loadQueue.pop( temp_handler ) )
       {
-        if ( manager._loadedCaches[temp_number] ) continue;
-        manager._loadedCaches[temp_number] = true;
-        DEBUG_STREAM << "Loading Data Cache: " << temp_number;
+        if ( temp_handler->isLoaded() ) continue;
 
-
-        RawTextureCache& textureCache = manager._rawTextureCaches[temp_number];
+        RawTextureMap& textureCache = temp_handler->_rawTextures;
         RawTextureCache::iterator end = textureCache.end();
-        for ( RawTextureCache::iterator it = textureCache.begin(); it != end; ++it )
+        for ( RawTextureMap::iterator it = textureCache.begin(); it != end; ++it )
         {
           std::string name = (*it)->first;
 
-          Json::ArrayIndex i;
-          for ( i = 0; i < texture_data.size(); ++i )
-          {
-            Json::Value& datum = texture_data[i];
-            if ( datum["name"].asString() == name )
-            {
-              (*it)->second = makeTexture( datum );
-              DEBUG_STREAM << "TEXTURE: " << name << ", " << (*it);
-              break;
-            }
-          }
-
-          if ( temp_number == texture_data.size() ) // Texture wasn't found
+          if ( ! texture_data.exists( name ) )
           {
             ERROR_STREAM << "Could not find texture resource to load : " << name << " - " << (*it);
-//              Exception ex( "DataManager::load()", "Could not find texture resource to load" );
-//              ex.addDetail( "Name", name );
-//              ex.addDetail( "ID", (*it) );
-//              throw ex;
+          }
+          else
+          {
+            (*it)->second = makeTexture( texture_data[ name ] );
+            DEBUG_STREAM << "Loaded Texture: " << name;
           }
         }
+
+        temp_handler->_isLoaded = true;
       }
     }
   }
 
 
-  void unloadFunction()
+  void dataUnloadFunction()
   {
     DataManager& manager = Manager::getInstance()->getDataManager();
-    IDNumber temp_number;
+    DataHandler* temp_handler;
 
-    while ( manager._unloadQueue.pop( temp_number ) )
+    while ( manager._unloadQueue.pop( temp_handler ) )
     {
-      if ( temp_number == manager._globalData.getID() ) continue;
-      if ( ! manager._loadedCaches[temp_number] ) continue;
+      if ( ! temp_handler->isLoaded() ) continue;
 
-      manager._loadedCaches[temp_number] = false;
-      DEBUG_STREAM << "Unloading Data Cache: " << temp_number;
-
-      RawTextureCache& textureCache = manager._rawTextureCaches[temp_number];
+      RawTextureMap& textureCache = temp_handler->_rawTextures;
       RawTextureCache::iterator end = textureCache.end();
-      for ( RawTextureCache::iterator it = textureCache.begin(); it != end; ++it )
+      for ( RawTextureMap::iterator it = textureCache.begin(); it != end; ++it )
       {
+        std::string name = (*it)->first;
+
         if ( (*it)->second.texture != nullptr )
         {
           SDL_DestroyTexture( (*it)->second.texture );
           (*it)->second.texture = nullptr;
         }
+
+        DEBUG_STREAM << "Unloaded texture: " << name;
       }
+
+      temp_handler->_isLoaded = false;
     }
   }
 

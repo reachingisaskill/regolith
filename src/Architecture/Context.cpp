@@ -60,8 +60,8 @@ namespace Regolith
     _theCamera.update( time );
 
     // Update all the animated objects
-    Wrapper<ContextLayer>::iterator end = _layers.end();
-    for ( Wrapper<ContextLayer>::iterator it = _layers.begin(); it != end; ++it )
+    Proxy<ContextLayer>::iterator end = _layers.end();
+    for ( Proxy<ContextLayer>::iterator it = _layers.begin(); it != end; ++it )
     {
       AnimatedList::iterator it = it->animated.begin();
       AnimatedList::iterator end = it->animated.end();
@@ -79,8 +79,8 @@ namespace Regolith
   void Context::step( float time )
   {
     DEBUG_LOG( "Context Step" );
-    Wrapper<ContextLayer>::iterator layer_end = _layers.end();
-    for ( Wrapper<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    Proxy<ContextLayer>::iterator layer_end = _layers.end();
+    for ( Proxy<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
       MoveableList& moveables = layer_it->moveables;
       DEBUG_STREAM << " Stepping : " << moveables.size();
@@ -105,8 +105,8 @@ namespace Regolith
   void Context::render()
   {
     DEBUG_LOG( "Context Render" );
-    Wrapper<ContextLayer>::iterator layer_end = _layers.end();
-    for ( Wrapper<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    Proxy<ContextLayer>::iterator layer_end = _layers.end();
+    for ( Proxy<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
       _theCamera.setLayer( &(*layer_it) );
 
@@ -135,8 +135,8 @@ namespace Regolith
   {
     DEBUG_LOG( "Context Collisions" );
 
-    Wrapper<ContextLayer>::iterator layer_end = _layers.end();
-    for ( Wrapper<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    Proxy<ContextLayer>::iterator layer_end = _layers.end();
+    for ( Proxy<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
       DEBUG_STREAM << " Starting Layer Collision: " << layer_it->teams.size();
 

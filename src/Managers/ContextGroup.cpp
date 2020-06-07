@@ -141,7 +141,7 @@ namespace Regolith
   void ContextGroup::unload()
   {
     INFO_LOG( "Unloading Contexts" );
-    for ( WrapperMap< Context* >::iterator it = _contexts.begin(); it != _contexts.end(); ++it )
+    for ( ProxyMap< Context* >::iterator it = _contexts.begin(); it != _contexts.end(); ++it )
     {
       delete it->second;
     }
@@ -155,7 +155,7 @@ namespace Regolith
     _spawnedObjects.clear();
 
     INFO_LOG( "Unloading Game Objects" );
-    for ( WrapperMap< GameObject* >::iterator it = _gameObjects.begin(); it != _gameObjects.end(); ++it )
+    for ( ProxyMap< GameObject* >::iterator it = _gameObjects.begin(); it != _gameObjects.end(); ++it )
     {
       delete it->second;
     }
