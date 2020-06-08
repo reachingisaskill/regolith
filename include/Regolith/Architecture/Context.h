@@ -6,6 +6,7 @@
 #include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/Architecture/Component.h"
+#include "Regolith/Architecture/ContextLayer.h"
 #include "Regolith/Managers/InputHandler.h"
 #include "Regolith/Managers/FocusHandler.h"
 #include "Regolith/Managers/CollisionHandler.h"
@@ -21,7 +22,7 @@ namespace Regolith
 
   class Animated;
   class PhysicalObject;
-  class ContextLayer;
+  class ContextGroup;
 
   /*
    * Defines a context interface.
@@ -135,6 +136,9 @@ namespace Regolith
 
       // Return a layer proxy so that it may be referenced when spawining objects
       Proxy<ContextLayer> requestLayer( std::string );
+
+      // Return a layer proxy so that it may be referenced when spawining objects
+      ContextLayer& getLayer( std::string );
 
   };
 

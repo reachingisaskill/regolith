@@ -45,10 +45,10 @@ namespace Regolith
 
   RawMusic* DataHandler::getRawMusic( std::string name )
   {
-    RawMusicMap::iterator found = _rawMusics.find( name );
-    if ( found == _rawMusics.end() )
+    RawMusicMap::iterator found = _rawMusic.find( name );
+    if ( found == _rawMusic.end() )
     {
-      found = _rawMusics.insert( std::make_pair( name, RawMusic() ) ).first;
+      found = _rawMusic.insert( std::make_pair( name, RawMusic() ) ).first;
     }
 
     return &(found->second);

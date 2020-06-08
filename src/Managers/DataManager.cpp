@@ -19,7 +19,7 @@ namespace Regolith
 
 
   DataManager::DataManager() :
-    _loadingThread( theLoadingThread ),
+    _loadingThread( dataLoadingThread ),
     _indexFile(),
     _loadQueue(),
     _unloadQueue()
@@ -56,7 +56,7 @@ namespace Regolith
   }
 
 
-  void DataManager::unload( DataHandler* hander )
+  void DataManager::unload( DataHandler* handler )
   {
     DEBUG_STREAM << "UNLOAD";
     _unloadQueue.push( handler );
@@ -69,26 +69,12 @@ namespace Regolith
   }
 
 
-  RawTexturePointer DataManager::requestRawTexture( std::string name )
-  {
-    RawTextureMap::iterator it = _rawTextures.find( name );
-    if ( it == _rawTextures.end() )
-    {
-      it = _rawTextures.insert( std::make_pair( name, RawTexture() ) ).first;
-    }
-
-    return  &(*it);
-  }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure
 
   void DataManager::configure( Json::Value& json_data )
   {
     INFO_LOG( "Configuring the Data Manager." );
-    // Configure the global handler
-    configureHandler( _globalData, "global" );
 
     // Load the json data
     Utilities::validateJson( json_data, "resource_index_file", Utilities::JSON_TYPE_STRING );
@@ -138,7 +124,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Loading/unloading thread
 
-  void theLoadingThread()
+  void dataLoadingThread()
   {
     INFO_LOG( "Data Manager loading thread start." );
 
@@ -171,12 +157,12 @@ namespace Regolith
       {
         dataLock.unlock();
 
-        unloadFunction();
-        loadFunction();
+        dataUnloadFunction();
+        dataLoadFunction();
 
         dataLock.lock();
 
-      } while( dataUpdate == true );
+      } while( dataUpdate.data == true );
 
       Manager::getInstance()->raiseEvent( REGOLITH_EVENT_DATA_LOADED );
     }
@@ -202,18 +188,18 @@ namespace Regolith
         if ( temp_handler->isLoaded() ) continue;
 
         RawTextureMap& textureCache = temp_handler->_rawTextures;
-        RawTextureCache::iterator end = textureCache.end();
+        RawTextureMap::iterator end = textureCache.end();
         for ( RawTextureMap::iterator it = textureCache.begin(); it != end; ++it )
         {
-          std::string name = (*it)->first;
+          std::string name = it->first;
 
-          if ( ! texture_data.exists( name ) )
+          if ( ! texture_data.isMember( name ) )
           {
-            ERROR_STREAM << "Could not find texture resource to load : " << name << " - " << (*it);
+            ERROR_STREAM << "Could not find texture resource to load : " << name;
           }
           else
           {
-            (*it)->second = makeTexture( texture_data[ name ] );
+            it->second = makeTexture( texture_data[ name ] );
             DEBUG_STREAM << "Loaded Texture: " << name;
           }
         }
@@ -234,15 +220,15 @@ namespace Regolith
       if ( ! temp_handler->isLoaded() ) continue;
 
       RawTextureMap& textureCache = temp_handler->_rawTextures;
-      RawTextureCache::iterator end = textureCache.end();
+      RawTextureMap::iterator end = textureCache.end();
       for ( RawTextureMap::iterator it = textureCache.begin(); it != end; ++it )
       {
-        std::string name = (*it)->first;
+        std::string name = it->first;
 
-        if ( (*it)->second.texture != nullptr )
+        if ( it->second.texture != nullptr )
         {
-          SDL_DestroyTexture( (*it)->second.texture );
-          (*it)->second.texture = nullptr;
+          SDL_DestroyTexture( it->second.texture );
+          it->second.texture = nullptr;
         }
 
         DEBUG_STREAM << "Unloaded texture: " << name;

@@ -11,7 +11,7 @@ namespace Regolith
   {
     private:
       IDNumber _defaultMusic;
-      IDNumber _firstContext;
+      Proxy<Context*> _menuContext;
       
     protected:
       // Hooks for context state changes

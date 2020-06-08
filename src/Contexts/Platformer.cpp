@@ -12,7 +12,7 @@ namespace Regolith
   Platformer::Platformer() :
     Context(),
     _defaultMusic( 0 ),
-    _pauseMenu( 0 ),
+    _pauseMenu(),
     _player( nullptr ),
     _spawnPoints( "spawn_points" ),
     _currentPlayerSpawn( 0 )
@@ -34,7 +34,7 @@ namespace Regolith
   void Platformer::onStart()
   {
     if ( _defaultMusic != 0 )
-      audioHandler()->setSong( _defaultMusic );
+      owner()->getAudioHandler().setSong( _defaultMusic );
 
     playerRespawn();
   }
@@ -42,7 +42,7 @@ namespace Regolith
 
   void Platformer::onStop()
   {
-    audioHandler()->stopSong();
+    owner()->getAudioHandler().stopSong();
   }
 
 
@@ -82,19 +82,22 @@ namespace Regolith
     Utilities::validateJson( json_data, "spawn_points", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["spawn_points"], 1, Utilities::JSON_TYPE_OBJECT );
 
+
     // Set the default music
     std::string default_music = json_data["default_music"].asString();
     INFO_STREAM << "Setting default music: " << default_music;
-    _defaultMusic = audioHandler()->getMusicID( default_music );
+    _defaultMusic = owner()->getAudioHandler().getMusicID( default_music );
 
-    // Set the character id
+
+    // Set the character
     std::string character_name = json_data["character"]["name"].asString();
     std::string character_layer = json_data["character"]["layer"].asString();
-    unsigned int playerID = dataHandler()->requestGameObject( character_name );
-    GameObject* temp = dataHandler()->getGameObject( playerID );
-    _player = dynamic_cast< ControllableCharacter* >( temp );
-    addSpawnedObject( _player, getLayerID( character_layer ) );
-    INFO_STREAM << "Register platformer character as:" << character_name;
+
+    _player = dynamic_cast< ControllableCharacter* >( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getGameObject( character_name ) );
+    getLayer( character_layer ).cacheObject( _player );
+
+    INFO_STREAM << "Register platformer character as: \"" << character_name << "\" in layer \"" << character_layer << "\"";
+
 
     // Spawn Points
     Json::Value& spawn_points = json_data["spawn_points"];
@@ -120,7 +123,7 @@ namespace Regolith
     {
       std::string pause = json_data["pause_context"].asString();
 
-      _pauseMenu = Manager::getInstance()->getContextManager().requestContext( pause );
+      _pauseMenu = owner()->requestContext( pause );
 
       INFO_STREAM << "Registered pause context: " << pause;
     }
@@ -155,7 +158,7 @@ namespace Regolith
         {
           if ( _pauseMenu != 0 )
           {
-            Manager::getInstance()->openContext( _pauseMenu );
+            Manager::getInstance()->openContext( *_pauseMenu );
           }
           else
           {

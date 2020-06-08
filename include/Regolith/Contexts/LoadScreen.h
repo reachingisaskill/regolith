@@ -13,15 +13,14 @@ namespace Regolith
   {
     private:
       IDNumber _theMusic;
-      IDNumber _nextContext;
-      IDNumber _nextContextGroup;
-      bool _running;
 
     protected:
       virtual void onStart() override;
       virtual void onStop() override;
       virtual void onPause() override {}
       virtual void onResume() override {}
+
+      virtual void updateContext( float ) override;
 
     public:
       // Trivial Constructor
@@ -34,20 +33,12 @@ namespace Regolith
       // Trivial configure - call the base-class variant
       virtual void configure( Json::Value&, ContextGroup& ) override;
 
-      virtual void validate() const override;
+      virtual void validate() const override {}
 
 
       // Title Scenes take ownership of the display.
       virtual bool overridesPreviousContext() const override { return true; }
 
-//////////////////////////////////////////////////
-      // Loading Functionality
-
-      // The context to load after the data is available
-      void setNextContext( IDNumber n ) { _nextContext = n; }
-
-      // The Context handler to load data for
-      void setNextContextGroup( IDNumber n ) { _nextContextGroup = n; }
 
 //////////////////////////////////////////////////
       // Requirements for the ControllableInterface - input action handling
@@ -68,10 +59,10 @@ namespace Regolith
       // Requirements for a component - event handling
 
       // Register game-wide events with the manager
-      virtual void registerEvents( InputManager& ) override;
+      virtual void registerEvents( InputManager& ) override {}
 
       // Regolith events
-      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override;
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
 
   };
 

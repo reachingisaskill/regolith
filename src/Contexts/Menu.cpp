@@ -24,13 +24,11 @@ namespace Regolith
 
   void MenuContext::onStart()
   {
-    DEBUG_LOG( "Starting Menu" );
   }
 
 
   void MenuContext::onStop()
   {
-    audioHandler()->stopSong();
   }
 
 

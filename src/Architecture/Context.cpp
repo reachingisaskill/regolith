@@ -211,6 +211,12 @@ namespace Regolith
   }
 
 
+  ContextLayer& Context::getLayer( std::string name )
+  {
+    return _layers.get( name );
+  }
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // Context configuration
 

@@ -10,7 +10,7 @@ namespace Regolith
   TitleScene::TitleScene() :
     Context(),
     _defaultMusic( 0 ),
-    _firstContext( 0 )
+    _menuContext( 0 )
   {
     // Don't want to be able to pause a title scene when it looses focus
     setPauseable( false );
@@ -25,15 +25,15 @@ namespace Regolith
   void TitleScene::onStart()
   {
     if ( _defaultMusic != 0 )
-      audioHandler()->setSong( _defaultMusic );
+      owner()->getAudioHandler().setSong( _defaultMusic );
 
-    Manager::getInstance()->openContext( _firstContext );
+    Manager::getInstance()->openContext( *_menuContext );
   }
 
 
   void TitleScene::onStop()
   {
-    audioHandler()->stopSong();
+    owner()->getAudioHandler().stopSong();
   }
 
 
@@ -48,21 +48,20 @@ namespace Regolith
     // Set the default music
     std::string default_music = json_data["default_music"].asString();
     INFO_STREAM << "Setting default music: " << default_music;
-    _defaultMusic = audioHandler()->getMusicID( default_music );
+    _defaultMusic = owner()->getAudioHandler().getMusicID( default_music );
 
     // Load the menu context - required for a title!
     std::string menu_name = json_data["menu"].asString();
     INFO_STREAM << "Setting title scene menu to: " << menu_name;
-    _firstContext = Manager::getInstance()->getContextManager().requestContext( menu_name );
+    _menuContext = owner()->requestContext( menu_name );
   }
 
 
   void TitleScene::validate() const
   {
-    if ( Manager::getInstance()->getContextManager().getContext( _firstContext ) == nullptr )
+    if ( ! _menuContext )
     {
       Exception ex( "TitleScene::validate() const", "Menu context not configured" );
-      ex.addDetail( "Name", Manager::getInstance()->getContextManager().getContextName( _firstContext ) );
       throw ex;
     }
   }

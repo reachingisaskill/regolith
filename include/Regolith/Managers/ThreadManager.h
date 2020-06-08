@@ -40,14 +40,19 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Conditions for threads to interact with
 
+      // Signals the start of the engine - all threads now active
       static Condition<bool> StartCondition;
 
+      // Every thread that sees this flag MUST end
       static std::atomic<bool> QuitFlag;
 
 
+      // Signals data in the DataManager Queue
       Condition<bool> DataUpdate;
 
-      Condition<bool> StackUpdate;
+      // Signals a ContextGroup to be loaded in the ContextManager
+      Condition<bool> ContextUpdate;
+
   };
 
 }

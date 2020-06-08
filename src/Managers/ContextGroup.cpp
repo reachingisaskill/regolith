@@ -3,6 +3,8 @@
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 #include "Regolith/Contexts/LoadScreen.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Architecture/Noisy.h"
 
 
 namespace Regolith
@@ -19,7 +21,7 @@ namespace Regolith
     _onLoadOperations(),
     _entryPoint( nullptr )
   {
-    _dataHandlers.set( "default", DataHandler );
+    _dataHandlers.create( "default" );
   }
 
 
@@ -27,13 +29,12 @@ namespace Regolith
   {
     INFO_LOG( "Deleting Context Group" );
     this->unload();
+  }
 
-    INFO_LOG( "Deleting Operations" );
-    for ( OperationQueue::iterator it = _onLoadOperations.begin(); it != _onLoadOperations.end(); ++it )
-    {
-      delete (*it);
-    }
-    _onLoadOperations.clear();
+
+  void ContextGroup::configure( std::string filename )
+  {
+    _fileName = filename;
   }
 
 
@@ -41,7 +42,7 @@ namespace Regolith
   {
     // Load Json Data
     Json::Value json_data;
-    loadJsonData( json_data, _fileName );
+    Utilities::loadJsonData( json_data, _fileName );
 
     // Validate top-level objects
     Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING );
@@ -51,7 +52,13 @@ namespace Regolith
 
 
     // Set the load screen pointer
-    _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContext( json_data["load_screen"].asString() );
+    _loadScreen = dynamic_cast<LoadScreen*>( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContext( json_data["load_screen"].asString() ) );
+    if ( _loadScreen == nullptr )
+    {
+      Exception ex( "ContextGroup::load()", "Could not find the requested LoadScreen. Is it the context type?" );
+      ex.addDetail( "Context Name",  json_data["load_screen"].asString() );
+      throw ex;
+    }
 
 
     // Load objects
@@ -69,11 +76,11 @@ namespace Regolith
       INFO_STREAM << "Building data handler: " << handler_name;
       Json::Value objects;
 
-      // Can load game objects from another file if the key is present
+      // Can load game objects from another file if the entry "file" is present
       if ( Utilities::validateJson( handler, "file", Utilities::JSON_TYPE_STRING, false ) )
       {
         Json::Value temp;
-        loadJsonData( temp, handler["file"].asString() );
+        Utilities::loadJsonData( temp, handler["file"].asString() );
 
         Utilities::validateJson( temp, "game_objects", Utilities::JSON_TYPE_ARRAY );
         objects = temp["game_objects"];
@@ -86,7 +93,6 @@ namespace Regolith
 
       DataHandler& current_handler = _dataHandlers.get( handler_name );
 
-      Json::Value& objects = json_data["game_objects"];
       Json::ArrayIndex objects_size = objects.size();
       for( Json::ArrayIndex i = 0; i < objects_size; ++i )
       {
@@ -114,7 +120,7 @@ namespace Regolith
       // Load the context data from another file if the key is present
       if ( Utilities::validateJson( contexts[i], "file", Utilities::JSON_TYPE_STRING, false ) )
       {
-        loadJsonData( context_data, contexts[i]["file"].asString() );
+        Utilities::loadJsonData( context_data, contexts[i]["file"].asString() );
       }
       else
       {
@@ -131,9 +137,10 @@ namespace Regolith
 
 
     // Trigger all the signals cached before this context was loaded
-    for ( OperationList::iterator it = _onLoadOperations.begin(); it != _onLoadOperations.end(); ++it )
+    while ( ! _onLoadOperations.empty() )
     {
-      (*it)->trigger();
+      _onLoadOperations.front().trigger( this );
+      _onLoadOperations.pop();
     }
   }
 
@@ -168,7 +175,7 @@ namespace Regolith
 
   PhysicalObject* ContextGroup::spawn( std::string name, const Vector& pos )
   {
-    PhysicalObject* new_obj = _gameObjects.get( name )->clone( pos );
+    PhysicalObject* new_obj = getPhysicalObject( name )->clone( pos );
     if ( new_obj->hasAudio() )
     {
       dynamic_cast<Noisy*>( new_obj )->registerSounds( &_theAudio );
@@ -195,7 +202,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Group Operations
 
-  ContextGroup::Operation::Operation( Operation op, std::string key, std::string value ) :
+  ContextGroup::Operation::Operation( OperationType op, std::string key, std::string value ) :
     _operation( op ),
     _key( key ),
     _value( value )
@@ -205,10 +212,10 @@ namespace Regolith
 
   void ContextGroup::Operation::trigger( ContextGroup* cg )
   {
-    switch( op )
+    switch( _operation )
     {
       case ACTION_SET_ENTRY_POINT :
-        op->setEntryPoint( op->getContext( _key ) );
+        cg->setEntryPoint( cg->getContext( _key ) );
         break;
 
       default:

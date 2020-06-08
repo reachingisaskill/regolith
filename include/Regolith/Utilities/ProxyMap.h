@@ -64,9 +64,13 @@ namespace Regolith
 
       DATA& set( std::string, DATA& );
 
+      DATA& create( std::string );
+
       bool exists( std::string ) const;
 
       size_t size() const { return _dataMap.size(); }
+
+      void clear() { _dataMap.clear(); }
 
 
       iterator find( std::string name ) { return _dataMap.find( name ); }
@@ -118,6 +122,13 @@ namespace Regolith
     DATA& datum = _dataMap[name];
     datum = obj;
     return datum;
+  }
+
+
+  template < class DATA >
+  DATA& ProxyMap<DATA>::create( std::string name )
+  {
+    return _dataMap[name];
   }
 
 

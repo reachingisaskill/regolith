@@ -35,7 +35,6 @@ namespace Regolith
     _theContexts(),
     _theEngine( _theInput, _defaultColor ),
     _theRenderer( nullptr ),
-    _entryPoint( 0 ),
     _objectFactory(),
     _contextFactory(),
     _signalFactory(),
@@ -122,17 +121,17 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Stack manipulation
 
-  void Manager::openContext( IDNumber c )
+  void Manager::openContext( Context* c )
   {
     DEBUG_LOG( "Opening Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, _theContexts.getContext( c ) ) );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, c ) );
   }
 
 
-  void Manager::transferContext( IDNumber c )
+  void Manager::transferContext( Context* c )
   {
     DEBUG_LOG( "Transferring Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, _theContexts.getContext( c ) ) );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, c ) );
   }
 
 
@@ -143,22 +142,10 @@ namespace Regolith
   }
 
 
-  void Manager::setContextStack( IDNumber c )
+  void Manager::setContextStack( Context* c )
   {
     DEBUG_LOG( "Resetting Context Stack" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, _theContexts.getContext( c ) ) );
-  }
-
-
-  void Manager::openContextGroup( IDNumber h, IDNumber c )
-  {
-    DEBUG_LOG( "Opening New Context Handler" );
-
-    LoadScreen* load_screen = _theContexts.getContextGroup( h )->getLoadScreen();
-    load_screen->setNextContext( c );
-    load_screen->setNextContextGroup( h );
-
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, load_screen ) );
+    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, c ) );
   }
 
 
@@ -168,7 +155,7 @@ namespace Regolith
   void Manager::run()
   {
     // Reset the stack to the first context
-    setContextStack( _entryPoint );
+    setContextStack( _theContexts.getCurrentContextGroup()->getEntryPoint() );
 
     // Start all the waiting threads
     {

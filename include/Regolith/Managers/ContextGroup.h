@@ -65,6 +65,9 @@ namespace Regolith
       // Destructor
       ~ContextGroup();
 
+      // Set the filename
+      void configure( std::string );
+
       // Return a reference to the audio handler
       AudioHandler& getAudioHandler() { return _theAudio; }
 
@@ -79,6 +82,9 @@ namespace Regolith
 
       // Set the entry point when this context group loads
       void setEntryPoint( Context* c ) { _entryPoint = c; }
+
+      // Return the entry point for this context group
+      Context* getEntryPoint() { return _entryPoint; }
 
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -13,7 +13,7 @@ namespace Regolith
 
   ThreadManager::ThreadManager() :
     DataUpdate( false ),
-    StackUpdate( false )
+    ContextUpdate( false )
   {
   }
 
@@ -26,7 +26,7 @@ namespace Regolith
     // Notify everything one last time to ensue all the threads see the quit flag
     StartCondition.variable.notify_all();
     DataUpdate.variable.notify_all();
-    StackUpdate.variable.notify_all();
+    ContextUpdate.variable.notify_all();
   }
 
 
@@ -37,7 +37,7 @@ namespace Regolith
 
     StartCondition.variable.notify_all();
     DataUpdate.variable.notify_all();
-    StackUpdate.variable.notify_all();
+    ContextUpdate.variable.notify_all();
   }
 
 }

@@ -23,14 +23,12 @@ namespace Regolith
     _isLoaded( false ),
     _loadedProgress( 1.0 )
   {
-    _contextGroups.addObject( nullptr, "null" );
   }
 
 
   ContextManager::~ContextManager()
   {
     INFO_LOG( "Destroying Context Manager" );
-    _contextGroups.clear();
     _globalContextGroup.unload();
   }
 
@@ -46,7 +44,7 @@ namespace Regolith
 
     // Load the global contexts and data first
     std::string global_file = json_data["global"].asString();
-    _globalContextGroup.setFile( global_file );
+    _globalContextGroup.configure( global_file );
     _globalContextGroup.load();
 
     // Create all the context groups but don't load any information
@@ -60,13 +58,13 @@ namespace Regolith
       std::string name = groups[i]["name"].asString();
       std::string file = groups[i]["file"].asString();
 
-      _contextGroups.addObject( new ContextGroup( file ), name );
+      _contextGroups.get( name ).configure( file );
     }
 
     // Find the starting context group and load it
     std::string entry_point = json_data["entry_point"].asString();
     _currentContextGroup = &_contextGroups.get( entry_point );
-    _currentContextGroup.load();
+    _currentContextGroup->load();
   }
 
 
@@ -82,10 +80,15 @@ namespace Regolith
 
     _nextContextGroup = cg;
 
-    Context* load_screen = _nextContextGroup->getLoadScreen();
+    Context* load_screen = (Context*)_nextContextGroup->getLoadScreen();
 
     Manager::getInstance()->setContextStack( load_screen );
+  }
 
+
+  void ContextManager::startContextGroup()
+  {
+    Manager::getInstance()->setContextStack( _currentContextGroup->getEntryPoint() );
   }
 
 
@@ -111,7 +114,6 @@ namespace Regolith
 
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
     Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
-    IDNumber temp_number;
 
     std::unique_lock<std::mutex> contextLock( contextUpdate.mutex );
     std::unique_lock<std::mutex> dataLock( dataUpdate.mutex, std::defer_lock );

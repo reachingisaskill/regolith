@@ -15,12 +15,12 @@ namespace Regolith
   {
     private:
       // Music to play at the start of the scene
-      unsigned int _defaultMusic;
+      IDNumber _defaultMusic;
 
       // Pointer to the pause menu context
-      unsigned int _pauseMenu;
+      Proxy<Context*> _pauseMenu;
 
-      // Memory is owned by the Manager
+      // Must be owned in the global context group
       ControllableCharacter* _player;
 
       // Data for player spawning

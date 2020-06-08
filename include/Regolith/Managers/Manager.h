@@ -57,7 +57,6 @@ namespace Regolith
       ContextManager _theContexts;
       Engine _theEngine;
       SDL_Renderer* _theRenderer;
-      IDNumber _entryPoint;
 
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
@@ -102,8 +101,6 @@ namespace Regolith
       void _loadGlobalGameObjects( Json::Value& );
       // Load all the contexts
       void _loadContexts( Json::Value& );
-      // Load all the entry point to the game
-      void _loadEntryPoint( Json::Value& );
 
     public:
       virtual ~Manager();
@@ -203,20 +200,16 @@ namespace Regolith
       // Pushed context stack operations to the engine
 
       // Open a new context on top of the stack
-      void openContext( IDNumber );
+      void openContext( Context* );
 
       // Open a new context in place of the current one
-      void transferContext( IDNumber );
+      void transferContext( Context* );
 
       // Closes and then pops the context on the top of the stack
       void closeContext();
 
       // Resets the context stack to the provided context
-      void setContextStack( IDNumber );
-
-
-      // Changes the context handler and opens a new context from it
-      void openContextGroup( IDNumber, IDNumber );
+      void setContextStack( Context* );
 
 
       ////////////////////////////////////////////////////////////////////////////////

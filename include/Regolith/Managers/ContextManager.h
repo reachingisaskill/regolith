@@ -41,7 +41,6 @@ namespace Regolith
     public:
       // Con/Destructors
       ContextManager();
-
       ~ContextManager();
 
       // Configure the manager
@@ -59,6 +58,9 @@ namespace Regolith
 
       // Load a specific context group
       void loadContextGroup( ContextGroup* );
+
+      // Tell the context manager that the loadscreen is finished and the first context in the new group can start
+      void startContextGroup();
 
       // Return a pointer to the currently loaded context group
       ContextGroup* getCurrentContextGroup() { return _currentContextGroup; }
