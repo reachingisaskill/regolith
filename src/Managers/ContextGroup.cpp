@@ -8,7 +8,7 @@
 namespace Regolith
 {
 
-  ContextGroup::ContextGroup( IDNumber id, NamedVector< Context, true >& contexts ) :
+  ContextGroup::ContextGroup() :
     _theAudio(),
     _dataHandlers( "Data Handlers" ),
     _fileName(),

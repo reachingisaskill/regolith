@@ -1,6 +1,14 @@
 
 #include "Regolith/Architecture/ContextLayer.h"
 #include "Regolith/Architecture/Context.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Architecture/Noisy.h"
+#include "Regolith/Architecture/Interactable.h"
+#include "Regolith/Architecture/Controllable.h"
+#include "Regolith/Architecture/Drawable.h"
+#include "Regolith/Architecture/Moveable.h"
+#include "Regolith/Architecture/Collidable.h"
+#include "Regolith/Architecture/Animated.h"
 
 
 namespace Regolith
@@ -45,21 +53,21 @@ namespace Regolith
     _position = pos;
     _movementScale = move_scale;
     _width = width;
-    _height = height
+    _height = height;
   }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Object spawning, placing and caching
 
-  void Context::spawn( PhysicalObject* obj, const Vector& position )
+  void ContextLayer::spawn( PhysicalObject* obj, const Vector& position )
   {
     PhysicalObject* object = _owner->_owner->spawn( obj, position );
     cacheObject( object );
   }
 
 
-  void Context::cacheObject( GameObject* object )
+  void ContextLayer::cacheObject( GameObject* object )
   {
     if ( object->hasInput() )
     {

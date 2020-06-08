@@ -44,8 +44,6 @@ namespace Regolith
 
       ~DataHandler();
 
-      IDNumber getID() const { return _handlerID; }
-
       bool isLoaded() const { return _isLoaded; }
 
 ////////////////////////////////////////////////////////////////////////////////

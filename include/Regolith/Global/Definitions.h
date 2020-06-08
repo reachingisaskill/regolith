@@ -30,7 +30,9 @@ namespace Regolith
   class RawTexture;
   class RawSound;
   class RawMusic;
+
   class Drawable;
+  class Animated;
   class Moveable;
   class Collidable;
   class Clickable;
@@ -44,7 +46,6 @@ namespace Regolith
   typedef std::list< Animated* > AnimatedList;
   typedef std::map< TeamID, CollidableList > TeamMap;
   typedef std::set< Clickable* > ClickableSet;
-  typedef std::set< IDNumber > IDNumberSet;
 
   typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::map< std::string, RawSound > RawSoundMap;

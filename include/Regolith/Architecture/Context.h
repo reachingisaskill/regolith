@@ -74,7 +74,7 @@ namespace Regolith
       virtual void onResume() = 0;
 
       // Called during the update loop for frame-dependent context actions
-      virtual void updateContext( time ) {}
+      virtual void updateContext( float ) {}
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -85,6 +85,9 @@ namespace Regolith
 
       // Configure the context
       void configure( Json::Value&, ContextGroup& ) override;
+
+      // Return a pointer to the owning context group
+      ContextGroup* owner() const { return _owner; }
 
       // Return the input handler for this context
       InputHandler* inputHandler() { return &_theInput; }
@@ -97,10 +100,10 @@ namespace Regolith
       bool isPaused() const { return _paused; }
 
       // Interface for context stack
-      void startContext() { _theAudio.play(); this->onStart(); }
-      void stopContext() { _theAudio.stop(); this->onStop(); }
-      void pauseContext() { if ( (! _paused) && _pauseable ) { _paused = true; _theAudio.pause(); this->onPause(); } }
-      void resumeContext() { if ( _paused ) { _paused = false; _theAudio.play(); this->onResume(); } }
+      void startContext() { this->onStart(); }
+      void stopContext() { this->onStop(); }
+      void pauseContext();
+      void resumeContext();
 
 
       // Returns true to pause and ignore the parent context. This prevents it from being rendered, updated, stepped, anything!
@@ -131,7 +134,7 @@ namespace Regolith
       // Object and layer interface
 
       // Return a layer proxy so that it may be referenced when spawining objects
-      Proxy<ContextLayer> requestLayer( std::string name ) { return _layers.request( name ); }
+      Proxy<ContextLayer> requestLayer( std::string );
 
   };
 

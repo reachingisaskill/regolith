@@ -19,7 +19,7 @@ namespace Regolith
 
   // Local function declarations
 
-  Vector placeInLayer( ContextLayer*, PhysicalObject*, Json::Value& );
+  Vector placeInLayer( ContextLayer&, PhysicalObject*, Json::Value& );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -34,8 +34,7 @@ namespace Regolith
     _theCamera(),
     _paused( false ),
     _pauseable( false ),
-    _layers( "Context Layers" ),
-    _animatedObjects()
+    _layers( "Context Layers" )
   {
   }
 
@@ -43,12 +42,28 @@ namespace Regolith
   Context::~Context()
   {
     INFO_LOG( "Destroying Context" );
+  }
 
-    INFO_LOG( "Clearing animated cache" );
-    _animatedObjects.clear();
 
-    INFO_LOG( "Clearing layers" );
-    _layers.clear();
+  void Context::pauseContext()
+  {
+    if ( (! _paused) && _pauseable )
+    {
+      _paused = true;
+      _owner->getAudioHandler().pause();
+      this->onPause();
+    }
+  }
+
+
+  void Context::resumeContext()
+  {
+    if ( _paused )
+    {
+      _paused = false;
+      _owner->getAudioHandler().play();
+      this->onResume();
+    }
   }
 
 
@@ -60,15 +75,15 @@ namespace Regolith
     _theCamera.update( time );
 
     // Update all the animated objects
-    Proxy<ContextLayer>::iterator end = _layers.end();
-    for ( Proxy<ContextLayer>::iterator it = _layers.begin(); it != end; ++it )
+    ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
+    for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      AnimatedList::iterator it = it->animated.begin();
-      AnimatedList::iterator end = it->animated.end();
-      while ( it != end )
+      AnimatedList::iterator anim_it = layer_it->second.animated.begin();
+      AnimatedList::iterator anim_end = layer_it->second.animated.end();
+      while ( anim_it != anim_end )
       {
-        (*it)->update( time );
-        ++it;
+        (*anim_it)->update( time );
+        ++anim_it;
       }
     }
 
@@ -79,10 +94,10 @@ namespace Regolith
   void Context::step( float time )
   {
     DEBUG_LOG( "Context Step" );
-    Proxy<ContextLayer>::iterator layer_end = _layers.end();
-    for ( Proxy<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
+    for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      MoveableList& moveables = layer_it->moveables;
+      MoveableList& moveables = layer_it->second.moveables;
       DEBUG_STREAM << " Stepping : " << moveables.size();
       MoveableList::iterator move_it = moveables.begin();
       MoveableList::iterator move_end = moveables.end();
@@ -105,14 +120,14 @@ namespace Regolith
   void Context::render()
   {
     DEBUG_LOG( "Context Render" );
-    Proxy<ContextLayer>::iterator layer_end = _layers.end();
-    for ( Proxy<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
+    for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      _theCamera.setLayer( &(*layer_it) );
+      _theCamera.setLayer( &(layer_it->second) );
 
-      DEBUG_STREAM << " Rendering layer. " << layer_it->drawables.size() << " Elements";
+      DEBUG_STREAM << " Rendering layer. " << layer_it->second.drawables.size() << " Elements";
 
-      DrawableList& drawables = layer_it->drawables;
+      DrawableList& drawables = layer_it->second.drawables;
       DrawableList::iterator draw_it = drawables.begin();
       DrawableList::iterator draw_end = drawables.end();
       while ( draw_it != draw_end )
@@ -135,17 +150,17 @@ namespace Regolith
   {
     DEBUG_LOG( "Context Collisions" );
 
-    Proxy<ContextLayer>::iterator layer_end = _layers.end();
-    for ( Proxy<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
+    for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      DEBUG_STREAM << " Starting Layer Collision: " << layer_it->teams.size();
+      DEBUG_STREAM << " Starting Layer Collision: " << layer_it->second.teams.size();
 
       // Colliding objects
       CollisionHandler::iterator end = _theCollision.collisionEnd();
       for ( CollisionHandler::iterator it = _theCollision.collisionBegin(); it != end; ++it )
       {
-        CollidableList& team1 = layer_it->teams[ it->first ];
-        CollidableList& team2 = layer_it->teams[ it->second ];
+        CollidableList& team1 = layer_it->second.teams[ it->first ];
+        CollidableList& team2 = layer_it->second.teams[ it->second ];
 
         CollidableList::iterator end1 = team1.end();
         CollidableList::iterator end2 = team2.end();
@@ -167,8 +182,8 @@ namespace Regolith
       end = _theCollision.containerEnd();
       for ( CollisionHandler::iterator it = _theCollision.containerBegin(); it != end; ++it )
       {
-        CollidableList& team1 = layer_it->teams[ it->first ];
-        CollidableList& team2 = layer_it->teams[ it->second ];
+        CollidableList& team1 = layer_it->second.teams[ it->first ];
+        CollidableList& team2 = layer_it->second.teams[ it->second ];
 
         CollidableList::iterator end1 = team1.end();
         CollidableList::iterator end2 = team2.end();
@@ -187,6 +202,12 @@ namespace Regolith
     }
 
     DEBUG_LOG( "Context Collisions Resolved" );
+  }
+
+
+  Proxy<ContextLayer> Context::requestLayer( std::string name )
+  {
+    return _layers.request( name );
   }
 
 
@@ -256,8 +277,8 @@ namespace Regolith
       {
         Utilities::validateJson( element_data[j], "name", Utilities::JSON_TYPE_STRING );
 
-        std::string name = element_data[j]["name"].asString();
-        INFO_STREAM << "Loading element into context layer: " << name;
+        std::string object_name = element_data[j]["name"].asString();
+        INFO_STREAM << "Adding game object into context layer: " << object_name;
 
         GameObject* object;
 
@@ -286,7 +307,7 @@ namespace Regolith
 
           Vector object_pos = placeInLayer( current_layer, phys_obj, element_data[j] );
 
-          current_layer.spawn( phys_obj, pos );
+          current_layer.spawn( phys_obj, object_pos );
         }
         else
         {

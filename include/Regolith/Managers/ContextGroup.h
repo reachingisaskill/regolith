@@ -4,8 +4,8 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Context.h"
-#include "Regolith/Manager/AudioHandler.h"
-#include "Regolith/Manager/DataHandler.h"
+#include "Regolith/Managers/AudioHandler.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
@@ -17,12 +17,16 @@ namespace Regolith
 {
   class LoadScreen;
   class PhysicalObject;
+  class Context;
 
   class ContextGroup
   {
-    typedef std::list<PhysicalObject*> SpawnedList;
-    typedef std::queue<ContextGroupOperation*> OperationQueue;
-    class Operation;
+    public:
+      class Operation;
+
+    private:
+      typedef std::list<PhysicalObject*> SpawnedList;
+      typedef std::queue<Operation> OperationQueue;
 
 ////////////////////////////////////////////////////////////////////////////////
     private:
@@ -56,10 +60,13 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
     public:
       // Constructor
-      ContextGroup( IDNumber, NamedVector< Context, true >& );
+      ContextGroup();
 
       // Destructor
       ~ContextGroup();
+
+      // Return a reference to the audio handler
+      AudioHandler& getAudioHandler() { return _theAudio; }
 
       // Load all the contexts and relevant data
       void load();
@@ -88,14 +95,14 @@ namespace Regolith
       // Game Object functions
 
       // Return a proxy for a game object
-      Proxy<GameObject> requestGameObject( std::string name ) { return _gameObjects.request( name ); }
+      Proxy<GameObject*> requestGameObject( std::string name ) { return _gameObjects.request( name ); }
 
       // Return a pointer to a given object.
       GameObject* getGameObject( std::string name ) { return _gameObjects.get( name ); }
 
 
       // Return a proxy for a physical object (Pointer is implecitly converted in wrappers)
-      Proxy<PhysicalObject> requestPhysicalObject( std::string name ) { return _gameObjects.request( name ); }
+      Proxy<PhysicalObject*> requestPhysicalObject( std::string name ) { return _gameObjects.request( name ); }
 
       // Return a pointer to a given object.
       PhysicalObject* getPhysicalObject( std::string name ) { return dynamic_cast<PhysicalObject*>( _gameObjects.get( name ) ); }
@@ -122,7 +129,7 @@ namespace Regolith
         };
 
       private:
-        Operation _operation;
+        OperationType _operation;
         std::string _key;
         std::string _value;
 

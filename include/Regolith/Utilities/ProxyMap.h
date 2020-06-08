@@ -11,7 +11,7 @@
 namespace Regolith
 {
 
-  template< DATA >
+  template< class DATA >
   class Proxy
   {
     private:
@@ -26,22 +26,26 @@ namespace Regolith
       DATA& operator*() { return *data; }
       const DATA& operator*() const { return *data; }
 
-      template < OTHER >
-      operator Proxy<OTHER>() const { return Proxy( dynamic_cast<OTHER>( data ) ); }
+      template < class OTHER >
+      operator Proxy<OTHER>() const { return Proxy<OTHER>( dynamic_cast<OTHER*>( data ) ); }
+
+      template < class OTHER >
+      operator Proxy<OTHER*>() const { return Proxy<OTHER*>( reinterpret_cast<OTHER**>( data ) ); }
 
       operator bool() const { return data != nullptr; }
   };
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  template< DATA >
+  template< class DATA >
   class ProxyMap
   {
-    typedef typename Proxy<DATA> ObjectProxy;
-    typedef typename std::map< std::string, DATA > MapType;
+    typedef Proxy<DATA> ProxyType;
+    typedef std::map< std::string, DATA > MapType;
 
     public:
-      typedef MapType::iterator iterator;
-      typedef MapType::const_iterator const_iterator;
+      typedef typename MapType::iterator iterator;
+      typedef typename MapType::const_iterator const_iterator;
 
     private:
       std::string _name;
@@ -53,14 +57,14 @@ namespace Regolith
 
       ~ProxyMap();
 
-      ObjectProxy request( std::string );
+      ProxyType request( std::string );
 
       DATA& get( std::string );
       const DATA& get( std::string ) const;
 
-      void set( std::string, DATA& );
+      DATA& set( std::string, DATA& );
 
-      bool exists( std::string );
+      bool exists( std::string ) const;
 
       size_t size() const { return _dataMap.size(); }
 
@@ -79,7 +83,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Template member function definitions
 
-  template < DATA >
+  template < class DATA >
   ProxyMap<DATA>::ProxyMap( const char* name ) :
     _name( name ),
     _dataMap()
@@ -87,7 +91,7 @@ namespace Regolith
   }
 
 
-  template < DATA >
+  template < class DATA >
   ProxyMap<DATA>::~ProxyMap()
   {
     INFO_STREAM << "Delete Proxy Map: " << _name;
@@ -95,21 +99,21 @@ namespace Regolith
   }
 
 
-  template < DATA >
-  ObjectProxy ProxyMap<DATA>::request( std::string name )
+  template < class DATA >
+  typename ProxyMap<DATA>::ProxyType ProxyMap<DATA>::request( std::string name )
   {
-    MapType::iterator found = _dataMap.find( name );
+    typename MapType::iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
     {
       found = _dataMap.insert( std::make_pair( name, DATA() ) ).first;
     }
 
-    return ObjectProxy( &(*found) );
+    return ProxyType( &(found->second) );
   }
 
 
-  template < DATA >
-  DATA& ProxyMap::set( std::string name, DATA& obj )
+  template < class DATA >
+  DATA& ProxyMap<DATA>::set( std::string name, DATA& obj )
   {
     DATA& datum = _dataMap[name];
     datum = obj;
@@ -117,23 +121,23 @@ namespace Regolith
   }
 
 
-  template < DATA >
-  DATA& ProxyMap::get( std::string name )
+  template < class DATA >
+  DATA& ProxyMap<DATA>::get( std::string name )
   {
-    MapType::iterator found = _dataMap.find( name );
+    typename MapType::iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
     {
       found = _dataMap.insert( std::make_pair( name, DATA() ) ).first;
     }
 
-    return *found;
+    return found->second;
   }
 
 
-  template < DATA >
-  const DATA& ProxyMap::get( std::string name ) const
+  template < class DATA >
+  const DATA& ProxyMap<DATA>::get( std::string name ) const
   {
-    MapType::const_iterator found = _dataMap.find( name );
+    typename MapType::const_iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
     {
       Exception ex( "ProxyMap::get()", "Object not found in map." );
@@ -142,14 +146,14 @@ namespace Regolith
       throw ex;
     }
 
-    return *found;
+    return found->second;
   }
 
 
-  template < DATA >
-  bool ProxyMap::exists( std::string name ) const
+  template < class DATA >
+  bool ProxyMap<DATA>::exists( std::string name ) const
   {
-    MapType::const_iterator found = _dataMap.find( name );
+    typename MapType::const_iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
       return false;
     else

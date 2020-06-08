@@ -25,7 +25,7 @@ namespace Regolith
   void LoadScreen::onStart()
   {
     if ( _theMusic != 0 )
-      audioHandler()->setSong( _theMusic );
+      owner()->getAudioHandler()->setSong( _theMusic );
 
     _running = true;
 

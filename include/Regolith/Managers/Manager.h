@@ -157,9 +157,6 @@ namespace Regolith
       // Return a reference to the data manager
       ContextManager& getContextManager() { return _theContexts; }
 
-      // Return a reference to the global data handler manager
-      const DataHandler& getGlobalData() { return _theData.globalData(); }
-
 
       ////////////////////////////////////////////////////////////////////////////////
       // Context Memory

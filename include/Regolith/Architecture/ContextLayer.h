@@ -38,7 +38,7 @@ namespace Regolith
       ~ContextLayer();
 
       // Configure with position, movement scale, width and height
-      void configure( Vector, Vector, float, float );
+      void configure( Context*, Vector, Vector, float, float );
 
 
 ////////////////////////////////////////////////////////////////////////////////
