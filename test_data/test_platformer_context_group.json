@@ -1,0 +1,141 @@
+{
+  "load_screen" : "test_load_screen",
+
+
+  "data_handlers" : 
+  {
+    "platformer" :
+    {
+      "platformer_edge" :
+      {
+        "type" : "region",
+        "collision_team" : "level_boundaries",
+        "collision_type" : "environment",
+        "collision" :
+        {
+          "position" : [ 0.0, 0.0 ],
+          "width" : 1900.0,
+          "height" : 1060.0
+        }
+      },
+      "platformer_background" :
+      {
+        "type" : "simple_sprite",
+        "texture_name" : "platformer_background"
+      },
+      "test_platform" :
+      {
+        "type" : "collidable_sprite",
+        "texture_name" : "test_platform",
+        "collision_team" : "environment",
+        "collision_type" : "environment",
+        "collision" :
+        {
+          "position" : [ 0.0, 0.0 ],
+          "width" : 1000.0,
+          "height" : 200.0
+        }
+      }
+    },
+    
+    "pause_menu" :
+    {
+      "pause_text" :
+      {
+        "type" : "simple_sprite",
+        "texture_name" : "pause_text"
+      },
+      "pause_quit_button" :
+      {
+        "type" : "simple_button",
+        "textures" :
+        {
+          "normal" : 
+          {
+            "texture_name" : "pause_quit_normal"
+          },
+          "focus" : 
+          {
+            "texture_name" : "pause_quit_focus"
+          },
+          "down" : 
+          {
+            "texture_name" : "pause_quit_down"
+          }
+        },
+        "signals" :
+        [
+          {
+            "type" : "context_change",
+            "context_name" : "title_context",
+            "operation" : "reset"
+          }
+        ]
+      }
+    }
+  },
+
+
+  "contexts" :
+  {
+    "platformer" : "test_data/test_platformer.json",
+
+    "pause_menu" :
+    {
+      "type" : "menu",
+      "data_handler" : "global",
+      "input_mapping" : "title",
+      "collision_handling" :
+      {
+        "collision_rules" : [],
+        "container_rules" : []
+      },
+
+      "camera" :
+      {
+        "follow" : null,
+        "lower_limit" : [ 0.0, 0.0 ],
+        "upper_limit" : [ 1024.0, 768.0 ]
+      },
+      
+      "layers" :
+      {
+        "background_layer" :
+        {
+          "position" : [ 0.0, 0.0 ],
+          "width" : 1024,
+          "height" : 768,
+          "movement_scale" : [ 0.0, 0.0 ],
+
+          "elements" : []
+        },
+
+        "menu_layer" :
+        {
+          "position" : [ 100.0, 100.0 ],
+          "width" : 1024,
+          "height" : 768,
+          "movement_scale" : [ 0.0, 0.0 ],
+
+          "elements" : 
+          [
+            {
+              "name" : "pause_text",
+              "position" : [ 0.0, 0.0 ],
+              "alignment" : [ "center", "center" ]
+            },
+            {
+              "name" : "pause_quit_button",
+              "position" : [ 0.0, 50.0 ],
+              "alignment" : [ "center", "center" ]
+            }
+          ]
+        }
+      }
+    }
+  },
+
+  "entry_point" : "platformer"
+
+}
+

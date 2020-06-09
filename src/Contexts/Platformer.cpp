@@ -11,7 +11,7 @@ namespace Regolith
 
   Platformer::Platformer() :
     Context(),
-    _defaultMusic( 0 ),
+    _defaultMusic( nullptr ),
     _pauseMenu(),
     _player( nullptr ),
     _spawnPoints( "spawn_points" ),
@@ -33,8 +33,8 @@ namespace Regolith
 
   void Platformer::onStart()
   {
-    if ( _defaultMusic != 0 )
-      owner()->getAudioHandler().setSong( _defaultMusic );
+    if ( _defaultMusic != nullptr )
+      owner()->getAudioHandler().setSong( _defaultMusic->getTrack() );
 
     playerRespawn();
   }
@@ -75,7 +75,6 @@ namespace Regolith
     Context::configure( json_data, handler );
 
 
-    Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "character", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data["character"], "name", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data["character"], "layer", Utilities::JSON_TYPE_STRING );
@@ -83,10 +82,20 @@ namespace Regolith
     Utilities::validateJsonArray( json_data["spawn_points"], 1, Utilities::JSON_TYPE_OBJECT );
 
 
-    // Set the default music
-    std::string default_music = json_data["default_music"].asString();
-    INFO_STREAM << "Setting default music: " << default_music;
-    _defaultMusic = owner()->getAudioHandler().getMusicID( default_music );
+    if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      // Set the default music
+      std::string default_music = json_data["default_music"].asString();
+      INFO_STREAM << "Setting default music: " << default_music;
+      _defaultMusic = dynamic_cast< MusicTrack* > ( owner()->getGameObject( default_music ) );
+
+      if ( _defaultMusic == nullptr )
+      {
+        Exception ex( "LoadScreen::configure()", "Specified track is not a MusicTrack object" );
+        ex.addDetail( "Name", default_music );
+        throw ex;
+      }
+    }
 
 
     // Set the character

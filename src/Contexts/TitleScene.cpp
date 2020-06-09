@@ -9,8 +9,8 @@ namespace Regolith
 
   TitleScene::TitleScene() :
     Context(),
-    _defaultMusic( 0 ),
-    _menuContext( 0 )
+    _defaultMusic( nullptr ),
+    _menuContext()
   {
     // Don't want to be able to pause a title scene when it looses focus
     setPauseable( false );
@@ -24,8 +24,8 @@ namespace Regolith
 
   void TitleScene::onStart()
   {
-    if ( _defaultMusic != 0 )
-      owner()->getAudioHandler().setSong( _defaultMusic );
+    if ( _defaultMusic != nullptr )
+      owner()->getAudioHandler().setSong( _defaultMusic->getTrack() );
 
     Manager::getInstance()->openContext( *_menuContext );
   }
@@ -42,13 +42,22 @@ namespace Regolith
     // Call the base class variant first
     Context::configure( json_data, handler );
 
-    Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "menu", Utilities::JSON_TYPE_STRING );
 
-    // Set the default music
-    std::string default_music = json_data["default_music"].asString();
-    INFO_STREAM << "Setting default music: " << default_music;
-    _defaultMusic = owner()->getAudioHandler().getMusicID( default_music );
+    if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      // Set the default music
+      std::string default_music = json_data["default_music"].asString();
+      INFO_STREAM << "Setting default music: " << default_music;
+      _defaultMusic = dynamic_cast< MusicTrack* > ( owner()->getGameObject( default_music ) );
+
+      if ( _defaultMusic == nullptr )
+      {
+        Exception ex( "LoadScreen::configure()", "Specified track is not a MusicTrack object" );
+        ex.addDetail( "Name", default_music );
+        throw ex;
+      }
+    }
 
     // Load the menu context - required for a title!
     std::string menu_name = json_data["menu"].asString();

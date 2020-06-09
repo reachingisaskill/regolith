@@ -3,6 +3,7 @@
 #define REGOLITH_CONTEXTS_TITLE_SCENE_H_
 
 #include "Regolith/Architecture/Context.h"
+#include "Regolith/GameObjects/MusicTrack.h"
 
 namespace Regolith
 {
@@ -10,7 +11,7 @@ namespace Regolith
   class TitleScene : public Context
   {
     private:
-      IDNumber _defaultMusic;
+      MusicTrack* _defaultMusic;
       Proxy<Context*> _menuContext;
       
     protected:

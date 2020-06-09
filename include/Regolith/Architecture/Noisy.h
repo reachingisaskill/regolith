@@ -45,7 +45,7 @@ namespace Regolith
 
 
       // Play a registered sound
-      void playSound( unsigned int id ) const { _handler->triggerEffect( id ); }
+      void playSound( RawSound* s ) const { _handler->playSound( s ); }
 
   };
 

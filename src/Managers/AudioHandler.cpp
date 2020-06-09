@@ -1,57 +1,89 @@
 
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/ThreadManager.h"
 
 
 namespace Regolith
 {
 
+  // This function takes the next track stored in the audio manager and plays it when the previous one has finished
+  void playNextTrack();
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
   AudioHandler::AudioHandler() :
-    _manager( Manager::getInstance()->getAudioManager() ),
-    _channels(),
-    _state( MUSIC_STATE_STOPPED )
+    _state( MUSIC_STATE_STOPPED ),
+    _channelPauses()
   {
   }
 
 
   AudioHandler::~AudioHandler()
   {
-    _channels.clear();
   }
 
 
-  void AudioHandler::registerChunk( unsigned int num )
+  void AudioHandler::configure()
   {
-    _channels.push_back( num );
+    int size = _channelPauses.size();
+    int result = Mix_AllocateChannels( size );
+
+    if ( result != size )
+    {
+      std::string error = Mix_GetError();
+      Exception ex( "AudioHandler::configure()", "Could not allocate requested channels" );
+      ex.addDetail( "Requested", size );
+      ex.addDetail( "Received", result );
+      ex.addDetail( "Mix Error", error );
+      throw ex;
+    }
+  }
+
+
+  void AudioHandler::requestChannel( RawSound* sound )
+  {
+    _channelPauses.push_back( 0 );
+    sound->channel = _channelPauses.size()-1;
   }
 
 
   void AudioHandler::_pauseAll()
   {
-    unsigned int numChannels = _channels.size();
+    unsigned int numChannels = _channelPauses.size();
     for ( unsigned int i = 0; i < numChannels; ++i )
     {
-      Mix_Pause( _channels[i] );
+      _channelPauses[i] += 1;
+      Mix_Pause( i );
     }
   }
 
 
   void AudioHandler::_resumeAll()
   {
-    unsigned int numChannels = _channels.size();
+    unsigned int numChannels = _channelPauses.size();
     for ( unsigned int i = 0; i < numChannels; ++i )
     {
-      Mix_Resume( _channels[i] );
+      int& number = _channelPauses[i];
+      if ( number == 0 ) continue;
+      else
+      {
+        number -= 1;
+        if ( number == 0 )
+        {
+          Mix_Resume( i );
+        }
+      }
     }
   }
 
 
   void AudioHandler::_stopAll()
   {
-    unsigned int numChannels = _channels.size();
+    unsigned int numChannels = _channelPauses.size();
     for ( unsigned int i = 0; i < numChannels; ++i )
     {
-      Mix_HaltChannel( _channels[i] );
+      Mix_HaltChannel( i );
     }
   }
 
@@ -117,21 +149,65 @@ namespace Regolith
   }
 
 
-  void AudioHandler::setSong( unsigned int n )
+  void AudioHandler::setSong( RawMusic* music )
   {
-    _manager.playTrack( n );
+    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
+
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      GuardLock lk( musicUpdate.mutex );
+
+      musicUpdate.data = music->music;
+
+      Mix_HookMusicFinished( playNextTrack );
+      Mix_FadeOutMusic( Manager::getInstance()->getAudioManager().getFadeTime() );
+    }
+    else
+    {
+      GuardLock lk( musicUpdate.mutex );
+      Mix_PlayMusic( music->music, -1 );
+    }
   }
 
 
   void AudioHandler::stopSong()
   {
-    _manager.stopMusic();
+    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
+    GuardLock lk( musicUpdate.mutex );
+
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      Mix_FadeOutMusic( Manager::getInstance()->getAudioManager().getFadeTime() );
+    }
   }
 
 
-  void AudioHandler::triggerEffect( unsigned int num )
+  void AudioHandler::playSound( RawSound* sound )
   {
-    _manager.playChunk( num );
+    if ( Mix_Playing( sound->channel ) ) // Sound already playing
+    {
+      return;
+    }
+
+    // Play the chunk exactly once on the first free channel
+    Mix_PlayChannel( sound->channel, sound->sound, 0 );
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // "Asynchronous" play next function
+
+  void playNextTrack()
+  {
+    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
+    GuardLock lk( musicUpdate.mutex );
+
+    DEBUG_LOG( "Playing next track" );
+    if ( musicUpdate.data != nullptr )
+    {
+      Mix_PlayMusic( musicUpdate.data, -1 );
+      musicUpdate.data = nullptr;
+    }
   }
 
 }

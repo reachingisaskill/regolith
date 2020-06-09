@@ -11,6 +11,7 @@ namespace Regolith
 {
 
   ContextGroup::ContextGroup() :
+    _isGlobalGroup( false ),
     _theAudio(),
     _dataHandlers( "Data Handlers" ),
     _fileName(),
@@ -21,7 +22,6 @@ namespace Regolith
     _onLoadOperations(),
     _entryPoint( nullptr )
   {
-    _dataHandlers.create( "default" );
   }
 
 
@@ -32,9 +32,10 @@ namespace Regolith
   }
 
 
-  void ContextGroup::configure( std::string filename )
+  void ContextGroup::configure( std::string filename, bool isGlobal )
   {
     _fileName = filename;
+    _isGlobalGroup = isGlobal;
   }
 
 
@@ -45,19 +46,26 @@ namespace Regolith
     Utilities::loadJsonData( json_data, _fileName );
 
     // Validate top-level objects
-    Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "data_handlers", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "data_handlers", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
 
 
-    // Set the load screen pointer
-    _loadScreen = dynamic_cast<LoadScreen*>( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContext( json_data["load_screen"].asString() ) );
-    if ( _loadScreen == nullptr )
+    // Global groups don't have a load-screen!
+    if ( _isGlobalGroup )
     {
-      Exception ex( "ContextGroup::load()", "Could not find the requested LoadScreen. Is it the context type?" );
-      ex.addDetail( "Context Name",  json_data["load_screen"].asString() );
-      throw ex;
+      _loadScreen = nullptr;
+    }
+    else
+    {
+      Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING );
+      // Set the load screen pointer
+      _loadScreen = dynamic_cast<LoadScreen*>( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContext( json_data["load_screen"].asString() ) );
+      if ( _loadScreen == nullptr )
+      {
+        Exception ex( "ContextGroup::load()", "Could not find the requested LoadScreen. Is it the correct context type?" );
+        ex.addDetail( "Context Name",  json_data["load_screen"].asString() );
+        throw ex;
+      }
     }
 
 
@@ -65,41 +73,34 @@ namespace Regolith
     ObjectFactory& obj_factory = Manager::getInstance()->getObjectFactory();
 
     Json::Value& data_handlers = json_data["data_handlers"];
-    Json::ArrayIndex data_handlers_size = data_handlers.size();
-    for( Json::ArrayIndex h_i = 0; h_i < data_handlers_size; ++h_i )
+    for( Json::Value::iterator h_it = data_handlers.begin(); h_it != data_handlers.end(); ++h_it )
     {
-      Json::Value& handler = data_handlers[h_i];
-
-      Utilities::validateJson( handler, "name", Utilities::JSON_TYPE_ARRAY );
-      std::string handler_name;
+      std::string handler_name = h_it.key().asString();
 
       INFO_STREAM << "Building data handler: " << handler_name;
       Json::Value objects;
 
       // Can load game objects from another file if the entry "file" is present
-      if ( Utilities::validateJson( handler, "file", Utilities::JSON_TYPE_STRING, false ) )
+      if ( h_it->isString() )
       {
         Json::Value temp;
-        Utilities::loadJsonData( temp, handler["file"].asString() );
+        Utilities::loadJsonData( temp, h_it->asString() );
 
-        Utilities::validateJson( temp, "game_objects", Utilities::JSON_TYPE_ARRAY );
+        Utilities::validateJson( temp, "game_objects", Utilities::JSON_TYPE_OBJECT );
         objects = temp["game_objects"];
       }
       else
       {
-        Utilities::validateJson( handler, "game_objects", Utilities::JSON_TYPE_ARRAY );
-        objects = handler["game_objects"];
+        objects = *h_it;
       }
 
-      DataHandler& current_handler = _dataHandlers.get( handler_name );
+      DataHandler& current_handler = _dataHandlers.createIfMissing( handler_name );
 
-      Json::ArrayIndex objects_size = objects.size();
-      for( Json::ArrayIndex i = 0; i < objects_size; ++i )
+      for( Json::Value::iterator o_it = objects.begin(); o_it != objects.end(); ++o_it )
       {
-        Utilities::validateJson( objects[i], "name", Utilities::JSON_TYPE_STRING );
-        std::string obj_name = objects[i]["name"].asString();
+        std::string obj_name = o_it.key().asString();
 
-        GameObject* obj = obj_factory.build( objects[i], current_handler );
+        GameObject* obj = obj_factory.build( *o_it, current_handler );
         _gameObjects.set( obj_name, obj );
       }
     }
@@ -109,22 +110,20 @@ namespace Regolith
     ContextFactory& cont_factory = Manager::getInstance()->getContextFactory();
 
     Json::Value& contexts = json_data["contexts"];
-    Json::ArrayIndex contexts_size = contexts.size();
-    for( Json::ArrayIndex i = 0; i < contexts_size; ++i )
+    for( Json::Value::iterator c_it = contexts.begin(); c_it != contexts.end(); ++c_it )
     {
-      Utilities::validateJson( contexts[i], "name", Utilities::JSON_TYPE_STRING );
-      std::string cont_name = contexts[i]["name"].asString();
+      std::string cont_name = c_it.key().asString();
 
       Json::Value context_data;
 
-      // Load the context data from another file if the key is present
-      if ( Utilities::validateJson( contexts[i], "file", Utilities::JSON_TYPE_STRING, false ) )
+      // Load the context data from another file if a string is provided
+      if ( c_it->isString() )
       {
-        Utilities::loadJsonData( context_data, contexts[i]["file"].asString() );
+        Utilities::loadJsonData( context_data, c_it->asString() );
       }
       else
       {
-        context_data = contexts[i];
+        context_data = *c_it;
       }
 
       Context* cont = cont_factory.build( context_data, *this );
@@ -133,7 +132,19 @@ namespace Regolith
 
 
     // Set the default entry point
-    _entryPoint = getContext( json_data["entry_point"].asString() );
+    if ( _isGlobalGroup )
+    {
+      _entryPoint = nullptr;
+    }
+    else
+    {
+      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
+      _entryPoint = getContext( json_data["entry_point"].asString() );
+    }
+
+
+    // Make sure the sounds each have their channels allocated and ready
+    _theAudio.configure();
 
 
     // Trigger all the signals cached before this context was loaded

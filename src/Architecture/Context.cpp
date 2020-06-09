@@ -226,7 +226,7 @@ namespace Regolith
     _owner = &handler;
 
     Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "camera", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "collision_handling", Utilities::JSON_TYPE_OBJECT );
 
@@ -246,38 +246,38 @@ namespace Regolith
 
 
     DEBUG_LOG( "Building context layers" );
-    Json::Value& layer_data = json_data["layers"];
-    Json::ArrayIndex layer_data_size = layer_data.size();
-    for ( Json::ArrayIndex i = 0; i != layer_data_size; ++i )
+    Json::Value& layers = json_data["layers"];
+    for ( Json::Value::iterator layer_it = layers.begin(); layer_it != layers.end(); ++layer_it )
     {
-      Utilities::validateJson( layer_data[i], "name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( layer_data[i], "position", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJsonArray( layer_data[i]["position"], 2, Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( layer_data[i], "width", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( layer_data[i], "height", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( layer_data[i], "elements", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( layer_data[i], "movement_scale", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJsonArray( layer_data[i]["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
+      Json::Value& layer_data = *layer_it;
 
-      std::string layer_name = layer_data[i]["name"].asString();
+      Utilities::validateJson( layer_data, "position", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJsonArray( layer_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( layer_data, "width", Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( layer_data, "height", Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( layer_data, "elements", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( layer_data, "movement_scale", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJsonArray( layer_data["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
+
+      std::string layer_name = layer_it.key().asString();
 
       INFO_STREAM << "Building context layer: " << layer_name;
 
-      float x = layer_data[i]["position"][0].asFloat();
-      float y = layer_data[i]["position"][1].asFloat();
-      float dx = layer_data[i]["movement_scale"][0].asFloat();
-      float dy = layer_data[i]["movement_scale"][1].asFloat();
-      float w = layer_data[i]["width"].asFloat();
-      float h = layer_data[i]["height"].asFloat();
+      float x = layer_data["position"][0].asFloat();
+      float y = layer_data["position"][1].asFloat();
+      float dx = layer_data["movement_scale"][0].asFloat();
+      float dy = layer_data["movement_scale"][1].asFloat();
+      float w = layer_data["width"].asFloat();
+      float h = layer_data["height"].asFloat();
 
 
       // Creates it if it doesn't already exist
-      ContextLayer& current_layer = _layers.get( layer_name );
+      ContextLayer& current_layer = _layers.create( layer_name );
       current_layer.configure( this, Vector( x, y ), Vector( dx, dy ), w, h );
 
 
       // Find and place all the requested elements
-      Json::Value& element_data = layer_data[i]["elements"];
+      Json::Value& element_data = layer_data["elements"];
       Json::ArrayIndex element_data_size = element_data.size();
       for ( Json::ArrayIndex j = 0; j != element_data_size; ++j )
       {
@@ -296,6 +296,14 @@ namespace Regolith
         else
         {
           object = _owner->getGameObject( object_name );
+        }
+
+        if ( object == nullptr )
+        {
+          Exception ex( "Context::configure()", "Object not found." );
+          ex.addDetail( "Object Name", object_name );
+          ex.addDetail( "Layer Name", layer_name );
+          throw ex;
         }
 
         // If a copy is required (make sure its physical)

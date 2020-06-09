@@ -27,6 +27,8 @@ namespace Regolith
 
     bool validateJson( Json::Value&, const char*, JsonType type = JSON_TYPE_NULL, bool required = true );
 
+    void validateJson( Json::Value&, JsonType type = JSON_TYPE_NULL );
+
     void validateJsonArray( Json::Value&, unsigned int, JsonType type = JSON_TYPE_NULL );
 
     void jsonProcessPosition( Json::Value&, Drawable*, Camera* );

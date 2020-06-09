@@ -115,7 +115,7 @@ namespace Regolith
     Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
 
     std::string texture_name = json_data["texture_name"].asString();
-    _theTexture = handler.findTexture( texture_name );
+    _theTexture = handler.getRawTexture( texture_name );
     INFO_STREAM << "Found texture: " << texture_name << " : " << _theTexture;
 
     // If its a spritesheet

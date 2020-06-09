@@ -3,6 +3,7 @@
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Components/Window.h"
 
+#include "Regolith/GameObjects/MusicTrack.h"
 #include "Regolith/GameObjects/SimpleSprite.h"
 #include "Regolith/GameObjects/CollidableSprite.h"
 #include "Regolith/GameObjects/AnimatedSprite.h"
@@ -59,6 +60,7 @@ namespace Regolith
 
     // Set up the object factory
 //    _objectFactory.addBuilder<FPSString>( "fps_string" );
+    _objectFactory.addBuilder<MusicTrack>( "music_track" );
     _objectFactory.addBuilder<SimpleSprite>( "simple_sprite" );
     _objectFactory.addBuilder<CollidableSprite>( "collidable_sprite" );
     _objectFactory.addBuilder<AnimatedSprite>( "animated_sprite" );
@@ -237,7 +239,6 @@ namespace Regolith
     FAILURE_STREAM << "Regolith received signal: " << signal;
     FAILURE_LOG( "Trying to die gracefully..." );
     Manager::getInstance()->quit();
-    Manager::killInstance();
   }
 
 }

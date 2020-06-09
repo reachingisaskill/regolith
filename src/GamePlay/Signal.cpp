@@ -28,7 +28,7 @@ namespace Regolith
   }
 
 
-  void InputActionSignal::configure( Json::Value& json_data )
+  void InputActionSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Action Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -52,7 +52,7 @@ namespace Regolith
     man->getInputManager().simulateBooleanAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
   }
 
-  void InputBooleanSignal::configure( Json::Value& json_data )
+  void InputBooleanSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Boolean Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -83,7 +83,7 @@ namespace Regolith
   }
 
 
-  void InputFloatSignal::configure( Json::Value& json_data )
+  void InputFloatSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Float Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -114,7 +114,7 @@ namespace Regolith
   }
 
 
-  void InputVectorSignal::configure( Json::Value& json_data )
+  void InputVectorSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Vector Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -147,7 +147,7 @@ namespace Regolith
   }
 
 
-  void InputMouseSignal::configure( Json::Value& json_data )
+  void InputMouseSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Mouse Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -180,7 +180,7 @@ namespace Regolith
   }
 
 
-  void GameEventSignal::configure( Json::Value& json_data )
+  void GameEventSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Game Event Signal" );
     Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
@@ -223,33 +223,33 @@ namespace Regolith
         break;
 
       case Engine::StackOperation::PUSH :
-        Manager::getInstance()->openContext( _theContext );
+        Manager::getInstance()->openContext( *_theContext );
         break;
 
       case Engine::StackOperation::RESET :
-        Manager::getInstance()->setContextStack( _theContext );
+        Manager::getInstance()->setContextStack( *_theContext );
         break;
 
       case Engine::StackOperation::TRANSFER :
-        Manager::getInstance()->transferContext( _theContext );
+        Manager::getInstance()->transferContext( *_theContext );
         break;
     }
   }
 
 
-  void ChangeContextSignal::configure( Json::Value& json_data )
+  void ChangeContextSignal::configure( Json::Value& json_data, ContextGroup& cg )
   {
     INFO_LOG( " Change Context Signal" );
     Utilities::validateJson( json_data, "context_name", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "operation", Utilities::JSON_TYPE_STRING );
 
     Engine::StackOperation::Operation op;
-    unsigned int context = 0;
+    Proxy<Context*> context;
 
     if ( json_data["operation"].asString() == "open" )
     {
       op = Engine::StackOperation::PUSH;
-      context = Manager::getInstance()->getContextManager().requestContext( json_data["context_name"].asString() );
+      context = cg.requestContext( json_data["context_name"].asString() );
     }
     if ( json_data["operation"].asString() == "close" )
     {
@@ -259,12 +259,12 @@ namespace Regolith
     if ( json_data["operation"].asString() == "transfer" )
     {
       op = Engine::StackOperation::TRANSFER;
-      context = Manager::getInstance()->getContextManager().requestContext( json_data["context_name"].asString() );
+      context = cg.requestContext( json_data["context_name"].asString() );
     }
     if ( json_data["operation"].asString() == "reset" )
     {
       op = Engine::StackOperation::RESET;
-      context = Manager::getInstance()->getContextManager().requestContext( json_data["context_name"].asString() );
+      context = cg.requestContext( json_data["context_name"].asString() );
     }
 
     _operation = op;
@@ -274,13 +274,10 @@ namespace Regolith
 
   void ChangeContextSignal::validate() const
   {
-    Context* temp = Manager::getInstance()->getContextManager().getContext( _theContext );
-    
-    if ( temp == nullptr )
+    if ( ! _theContext || ( (*_theContext) == nullptr ) )
     {
       Exception ex( "ChangeContextSignal::validate() const", "Specified context was not configured." );
-      ex.addDetail( "Context ID", _theContext );
-      ex.addDetail( "Name", Manager::getInstance()->getContextManager().getContextName( _theContext ) );
+      ex.addDetail( "Context Name", _theContext.getName() );
       throw ex;
     }
   }

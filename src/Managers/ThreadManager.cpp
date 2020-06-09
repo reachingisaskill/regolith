@@ -13,7 +13,8 @@ namespace Regolith
 
   ThreadManager::ThreadManager() :
     DataUpdate( false ),
-    ContextUpdate( false )
+    ContextUpdate( false ),
+    MusicUpdate( nullptr )
   {
   }
 
@@ -27,6 +28,7 @@ namespace Regolith
     StartCondition.variable.notify_all();
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
+    MusicUpdate.variable.notify_all();
   }
 
 
@@ -38,6 +40,7 @@ namespace Regolith
     StartCondition.variable.notify_all();
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
+    MusicUpdate.variable.notify_all();
   }
 
 }

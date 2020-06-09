@@ -16,9 +16,15 @@ namespace Regolith
   {
     private:
       DATA* data;
+      const std::string* name;
 
     public:
-      Proxy( DATA* d = nullptr ) : data( d ) {}
+      Proxy() : data( nullptr ), name( nullptr ) {}
+      Proxy( DATA* d, const std::string* n ) : data( d ), name( n ) {}
+
+      DATA* getData() { return data; }
+
+      const std::string& getName() const { return *name; }
 
       DATA& operator->() { return *data; }
       const DATA& operator->() const { return *data; }
@@ -27,10 +33,10 @@ namespace Regolith
       const DATA& operator*() const { return *data; }
 
       template < class OTHER >
-      operator Proxy<OTHER>() const { return Proxy<OTHER>( dynamic_cast<OTHER*>( data ) ); }
+      operator Proxy<OTHER>() const { return Proxy<OTHER>( dynamic_cast<OTHER*>( data ), name ); }
 
       template < class OTHER >
-      operator Proxy<OTHER*>() const { return Proxy<OTHER*>( reinterpret_cast<OTHER**>( data ) ); }
+      operator Proxy<OTHER*>() const { return Proxy<OTHER*>( reinterpret_cast<OTHER**>( data ), name ); }
 
       operator bool() const { return data != nullptr; }
   };
@@ -64,7 +70,11 @@ namespace Regolith
 
       DATA& set( std::string, DATA& );
 
+      DATA& create( std::string, DATA& );
+
       DATA& create( std::string );
+
+      DATA& createIfMissing( std::string );
 
       bool exists( std::string ) const;
 
@@ -112,7 +122,7 @@ namespace Regolith
       found = _dataMap.insert( std::make_pair( name, DATA() ) ).first;
     }
 
-    return ProxyType( &(found->second) );
+    return ProxyType( &(found->second), &(found->first) );
   }
 
 
@@ -126,9 +136,43 @@ namespace Regolith
 
 
   template < class DATA >
+  DATA& ProxyMap<DATA>::create( std::string name, DATA& data )
+  {
+    std::pair<typename MapType::iterator, bool> result = _dataMap.insert( std::make_pair( name, data ) );
+    if ( ! result.second )
+    {
+      WARN_STREAM << "ProxyMap: " << _name << ". Object (" << name << ") already exists. Recreating.";
+      _dataMap[name] = data;
+    }
+
+    return *(result.first);
+  }
+
+
+  template < class DATA >
   DATA& ProxyMap<DATA>::create( std::string name )
   {
-    return _dataMap[name];
+    std::pair<typename MapType::iterator, bool> result = _dataMap.insert( std::make_pair( name, DATA() ) );
+    if ( ! result.second )
+    {
+      WARN_STREAM << "ProxyMap: " << _name << ". Object (" << name << ") already exists. Recreating.";
+      _dataMap[name] = DATA();
+    }
+
+    return result.first->second;
+  }
+
+
+  template < class DATA >
+  DATA& ProxyMap<DATA>::createIfMissing( std::string name )
+  {
+    typename MapType::iterator found = _dataMap.find( name );
+    if ( found == _dataMap.end() )
+    {
+      found = _dataMap.insert( std::make_pair( name, DATA() ) ).first;
+    }
+
+    return found->second;
   }
 
 
@@ -138,7 +182,10 @@ namespace Regolith
     typename MapType::iterator found = _dataMap.find( name );
     if ( found == _dataMap.end() )
     {
-      found = _dataMap.insert( std::make_pair( name, DATA() ) ).first;
+      Exception ex( "ProxyMap::get()", "Object not found in map." );
+      ex.addDetail( "Map Name", _name );
+      ex.addDetail( "Object Name", name );
+      throw ex;
     }
 
     return found->second;

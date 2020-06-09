@@ -1,0 +1,36 @@
+{
+  "load_screen" : null,
+
+  "entry_point" : null,
+
+  "data_handlers" : 
+  {
+    "default" :
+    {
+      "test_character" :
+      {
+        "type" : "test_character",
+        "texture_name" : "the_ball",
+        "mass" : 1.0,
+        "collision_team" : "player",
+        "collision_type" : "character",
+        "collision" :
+        {
+          "position" : [ 0.0, 0.0 ],
+          "width" : 50.0,
+          "height" : 50.0
+        }
+      }
+    },
+
+    "load_screen_data" : "test_data/test_loadscreen.json"
+  },
+
+
+  "contexts" :
+  {
+    "test_load_screen" : "test_data/test_loadscreen.json"
+  }
+
+}
+

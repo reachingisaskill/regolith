@@ -54,8 +54,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "game_data", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
 
 
       // Load the input device configuration first so objects can register game-wide behaviours
@@ -88,7 +87,7 @@ namespace Regolith
 
 
       // Load all the contexts
-      this->_loadContexts( json_data["context_groups"] );
+      this->_loadContexts( json_data["contexts"] );
 
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream

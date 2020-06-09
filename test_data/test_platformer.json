@@ -3,7 +3,7 @@
 
   "input_mapping" : "platformer",
 
-  "default_music" : "null",
+  "default_music" : null,
 
   "data_handler" : "global",
 
@@ -38,9 +38,9 @@
   },
 
   "layers" : 
-  [
+  {
+    "background_layer" :
     {
-      "name" : "background_layer",
       "position" : [ 0.0, 0.0 ],
       "width" : 1920,
       "height" : 1080,
@@ -54,8 +54,8 @@
         }
       ]
     },
+    "foreground_layer" :
     {
-      "name" : "foreground_layer",
       "position" : [ 0.0, 0.0 ],
       "width" : 1920,
       "height" : 1080,
@@ -77,8 +77,8 @@
         }
       ]
     },
+    "hud_layer" :
     {
-      "name" : "hud_layer",
       "position" : [ 0.0, 0.0 ],
       "width" : 1024,
       "height" : 768,
@@ -88,67 +88,7 @@
       [
       ]
     }
-  ],
-
-  "contexts" : 
-  [
-    {
-      "name" : "pause_menu",
-      "type" : "menu",
-      "data_handler" : "global",
-      "input_mapping" : "title",
-      "collision_handling" :
-      {
-        "collision_rules" : [],
-        "container_rules" : []
-      },
-
-      "camera" :
-      {
-        "follow" : null,
-        "lower_limit" : [ 0.0, 0.0 ],
-        "upper_limit" : [ 1024.0, 768.0 ]
-      },
-      
-      "layers" :
-      [
-        {
-          "name" : "background_layer",
-          "position" : [ 0.0, 0.0 ],
-          "width" : 1024,
-          "height" : 768,
-          "movement_scale" : [ 0.0, 0.0 ],
-
-          "elements" : []
-        },
-        {
-          "name" : "menu_layer",
-          "position" : [ 100.0, 100.0 ],
-          "width" : 1024,
-          "height" : 768,
-          "movement_scale" : [ 0.0, 0.0 ],
-
-          "elements" : 
-          [
-            {
-              "name" : "pause_text",
-              "position" : [ 0.0, 0.0 ],
-              "alignment" : [ "center", "center" ],
-              "is_global" : true
-            },
-            {
-              "name" : "pause_quit_button",
-              "position" : [ 0.0, 50.0 ],
-              "alignment" : [ "center", "center" ],
-              "is_global" : true
-            }
-          ]
-        }
-      ],
-
-      "contexts" : []
-    }
-  ],
+  },
 
   "spawn_points" :
   [

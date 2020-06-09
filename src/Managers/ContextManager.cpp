@@ -39,26 +39,24 @@ namespace Regolith
   void ContextManager::configure( Json::Value& json_data )
   {
     Utilities::validateJson( json_data, "global", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
 
     // Load the global contexts and data first
     std::string global_file = json_data["global"].asString();
-    _globalContextGroup.configure( global_file );
+    _globalContextGroup.configure( global_file, true );
     _globalContextGroup.load();
 
     // Create all the context groups but don't load any information
     Json::Value& groups = json_data["context_groups"];
-    Json::ArrayIndex groups_size = groups.size();
-    for ( Json::ArrayIndex i = 0; i != groups_size; ++i )
+    for ( Json::Value::iterator it = groups.begin(); it != groups.end(); ++it )
     {
-      Utilities::validateJson( groups[i], "name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( groups[i], "file", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( *it, Utilities::JSON_TYPE_STRING );
 
-      std::string name = groups[i]["name"].asString();
-      std::string file = groups[i]["file"].asString();
+      std::string name = it.key().asString();
+      std::string file = it->asString();
 
-      _contextGroups.get( name ).configure( file );
+      _contextGroups.create( name ).configure( file );
     }
 
     // Find the starting context group and load it

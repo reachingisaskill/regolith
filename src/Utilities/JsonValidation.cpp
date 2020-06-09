@@ -12,7 +12,7 @@ namespace Regolith
 
     bool validateJson( Json::Value& json_data, const char* name, JsonType type, bool isRequired )
     {
-      if ( ! json_data.isMember( name ) )
+      if ( ! json_data.isMember( name ) || json_data[name].isNull() )
       {
         if ( isRequired )
         {
@@ -27,47 +27,61 @@ namespace Regolith
         }
       }
 
+      try
+      {
+        validateJson( json_data[name], type );
+      }
+      catch ( Exception& e )
+      {
+        e.addDetail( "Name", name );
+        throw e;
+      }
+
+      return true;
+    }
+
+
+    void validateJson( Json::Value& json_data, JsonType type )
+    {
       if ( type != JSON_TYPE_NULL )
       {
 
         switch ( type )
         {
           case JSON_TYPE_OBJECT :
-            if ( json_data[ name ].isObject() )
-              return true;
+            if ( json_data.isObject() )
+              return;
             break;
           case JSON_TYPE_ARRAY :
-            if ( json_data[ name ].isArray() )
-              return true;
+            if ( json_data.isArray() )
+              return;
             break;
           case JSON_TYPE_STRING :
-            if ( json_data[ name ].isString() )
-              return true;
+            if ( json_data.isString() )
+              return;
             break;
           case JSON_TYPE_FLOAT :
-            if ( json_data[ name ].isNumeric() )
-              return true;
+            if ( json_data.isNumeric() )
+              return;
             break;
           case JSON_TYPE_INTEGER :
-            if ( json_data[ name ].isIntegral() )
-              return true;
+            if ( json_data.isIntegral() )
+              return;
             break;
           case JSON_TYPE_BOOLEAN :
-            if ( json_data[ name ].isBool() )
-              return true;
+            if ( json_data.isBool() )
+              return;
             break;
           default :
-            return true;
+            return;
             break;
         }
 
         FAILURE_STREAM << "Json data failed validation. Could not resolve type ID: " << type;
         Exception ex( "validateJson()", "Wong data type", false );
-        ex.addDetail( "Name", name );
         ex.addDetail( "Type ID", type );
         throw ex;
       }
-      return true;
     }
 
 
@@ -193,6 +207,7 @@ namespace Regolith
 
     void loadJsonData( Json::Value& json_data, std::string filename )
     {
+      INFO_STREAM << "Loading Json File: " << filename;
       std::ifstream input( filename );
       Json::CharReaderBuilder reader_builder;
       Json::CharReader* reader = reader_builder.newCharReader();
@@ -200,7 +215,7 @@ namespace Regolith
       bool result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
       if ( ! result )
       {
-        ERROR_LOG( "loadJsonData() : Found errors parsing json" );
+        ERROR_STREAM << "loadJsonData() : Found errors parsing json file: " << filename;
         ERROR_STREAM << errors;
       }
       delete reader;

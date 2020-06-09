@@ -2,6 +2,7 @@
 #ifndef REGOLITH_MANAGERS_THREAD_MANAGER_H_
 #define REGOLITH_MANAGERS_THREAD_MANAGER_H_
 
+#include "Regolith/Global/Global.h"
 
 #include <thread>
 #include <mutex>
@@ -52,6 +53,9 @@ namespace Regolith
 
       // Signals a ContextGroup to be loaded in the ContextManager
       Condition<bool> ContextUpdate;
+
+      // Signals a change of song in the AudioManager
+      Condition<Mix_Music*> MusicUpdate;
 
   };
 

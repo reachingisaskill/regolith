@@ -4,6 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Managers/AudioManager.h"
+#include "Regolith/Utilities/ProxyMap.h"
 
 
 namespace Regolith
@@ -18,13 +19,11 @@ namespace Regolith
    */
   class AudioHandler
   {
-    typedef std::vector<int> ChannelLookup;
+    typedef std::vector<int> ChannelPauses;
     private:
-      AudioManager& _manager;
-
-      ChannelLookup _channels;
-
       MusicState _state;
+
+      ChannelPauses _channelPauses;
 
     protected:
       void _pauseAll();
@@ -40,28 +39,20 @@ namespace Regolith
 
 
       // Tell the handler it has control of this effect
-      void registerChunk( unsigned int );
+      void configure();
 
-
-      // Return a pointer to the audio manager
-      AudioManager& getManager() { return _manager; }
-
-
-      // Get the id for a track from the manager
-      unsigned int getMusicID( std::string name ) { return _manager.getMusicID( name ); }
-
-      // Get the id number for a sound effect from the handler
-      unsigned int getEffectID( std::string name ) { return _manager.getEffectID( name ); }
+      // Allocates a channel for the provided sound
+      void requestChannel( RawSound* );
 
 
       // Set the scene-music using the manager
-      void setSong( unsigned int n );
+      void setSong( RawMusic* );
 
       // Stop the music playing
       void stopSong();
 
       // Play a sound effect in the local context
-      void triggerEffect( unsigned int n );
+      void playSound( RawSound* );
 
 
       // Pause all sound effects

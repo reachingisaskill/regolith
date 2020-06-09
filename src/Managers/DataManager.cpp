@@ -85,11 +85,10 @@ namespace Regolith
     // Load and validate the index file
     Json::Value temp_data;
     Utilities::loadJsonData( temp_data, _indexFile );
-    Utilities::validateJson( temp_data, "textures", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( temp_data, "sounds", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( temp_data, "music", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJson( temp_data, "textures", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( temp_data, "sounds", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( temp_data, "music", Utilities::JSON_TYPE_OBJECT );
 
-    Utilities::validateJsonArray( temp_data["textures"], 0, Utilities::JSON_TYPE_ARRAY );
     Json::Value texture_data = temp_data["textures"];
 
 //    Json::ArrayIndex i;
@@ -182,14 +181,16 @@ namespace Regolith
       Json::Value temp_data;
       Utilities::loadJsonData( temp_data, manager._indexFile );
       Json::Value& texture_data = temp_data["textures"];
+      Json::Value& music_data = temp_data["music"];
+      Json::Value& sound_data = temp_data["sounds"];
 
       while ( manager._loadQueue.pop( temp_handler ) )
       {
         if ( temp_handler->isLoaded() ) continue;
 
         RawTextureMap& textureCache = temp_handler->_rawTextures;
-        RawTextureMap::iterator end = textureCache.end();
-        for ( RawTextureMap::iterator it = textureCache.begin(); it != end; ++it )
+        RawTextureMap::iterator texture_end = textureCache.end();
+        for ( RawTextureMap::iterator it = textureCache.begin(); it != texture_end; ++it )
         {
           std::string name = it->first;
 
@@ -200,6 +201,42 @@ namespace Regolith
           else
           {
             it->second = makeTexture( texture_data[ name ] );
+            DEBUG_STREAM << "Loaded Texture: " << name;
+          }
+        }
+
+
+        RawMusicMap& musicCache = temp_handler->_rawMusic;
+        RawMusicMap::iterator music_end = musicCache.end();
+        for ( RawMusicMap::iterator it = musicCache.begin(); it != music_end; ++it )
+        {
+          std::string name = it->first;
+
+          if ( ! music_data.isMember( name ) )
+          {
+            ERROR_STREAM << "Could not find music resource to load : " << name;
+          }
+          else
+          {
+            it->second = makeMusic( music_data[ name ] );
+            DEBUG_STREAM << "Loaded Music: " << name;
+          }
+        }
+
+
+        RawSoundMap& soundCache = temp_handler->_rawSounds;
+        RawSoundMap::iterator sound_end = soundCache.end();
+        for ( RawSoundMap::iterator it = soundCache.begin(); it != sound_end; ++it )
+        {
+          std::string name = it->first;
+
+          if ( ! sound_data.isMember( name ) )
+          {
+            ERROR_STREAM << "Could not find sound resource to load : " << name;
+          }
+          else
+          {
+            it->second = makeSound( sound_data[ name ] );
             DEBUG_STREAM << "Loaded Texture: " << name;
           }
         }
@@ -220,8 +257,8 @@ namespace Regolith
       if ( ! temp_handler->isLoaded() ) continue;
 
       RawTextureMap& textureCache = temp_handler->_rawTextures;
-      RawTextureMap::iterator end = textureCache.end();
-      for ( RawTextureMap::iterator it = textureCache.begin(); it != end; ++it )
+      RawTextureMap::iterator textures_end = textureCache.end();
+      for ( RawTextureMap::iterator it = textureCache.begin(); it != textures_end; ++it )
       {
         std::string name = it->first;
 
@@ -232,6 +269,36 @@ namespace Regolith
         }
 
         DEBUG_STREAM << "Unloaded texture: " << name;
+      }
+
+      RawMusicMap& musicCache = temp_handler->_rawMusic;
+      RawMusicMap::iterator music_end = musicCache.end();
+      for ( RawMusicMap::iterator it = musicCache.begin(); it != music_end; ++it )
+      {
+        std::string name = it->first;
+
+        if ( it->second.music != nullptr )
+        {
+          Mix_FreeMusic( it->second.music );
+          it->second.music = nullptr;
+        }
+
+        DEBUG_STREAM << "Unloaded music: " << name;
+      }
+
+      RawSoundMap& soundCache = temp_handler->_rawSounds;
+      RawSoundMap::iterator sounds_end = soundCache.end();
+      for ( RawSoundMap::iterator it = soundCache.begin(); it != sounds_end; ++it )
+      {
+        std::string name = it->first;
+
+        if ( it->second.sound != nullptr )
+        {
+          Mix_FreeChunk( it->second.sound );
+          it->second.sound = nullptr;
+        }
+
+        DEBUG_STREAM << "Unloaded sound: " << name;
       }
 
       temp_handler->_isLoaded = false;

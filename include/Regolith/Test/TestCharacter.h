@@ -19,16 +19,16 @@ namespace Regolith
       SDL_Rect _destination;
       float _movementForce;
       float _jumpSpeed;
-      unsigned int _jumpSound;
-      unsigned int _hardLandingSound;
+      RawSound* _jumpSound;
+      RawSound* _hardLandingSound;
 
       Timer _fallTimer;
 
     protected:
       void setMovementForce( float f ) { _movementForce = f; }
       void setJumpSpeed( float f ) { _jumpSpeed = f; }
-      void setJumpSound( unsigned int i ) { _jumpSound = i; }
-      void setHardSound( unsigned int i ) { _hardLandingSound = i; }
+      void setJumpSound( RawSound* s ) { _jumpSound = s; }
+      void setHardSound( RawSound* s ) { _hardLandingSound = s; }
 
 
       // Required for it to be noisy

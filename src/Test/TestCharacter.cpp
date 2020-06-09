@@ -17,8 +17,8 @@ namespace Regolith
     _destination( { 0, 0, 0, 0 } ),
     _movementForce( 0.005 ),
     _jumpSpeed( 3 ),
-    _jumpSound( 0 ),
-    _hardLandingSound( 0 ),
+    _jumpSound( nullptr ),
+    _hardLandingSound( nullptr ),
     _fallTimer()
   {
   }
@@ -31,8 +31,8 @@ namespace Regolith
 
   void TestCharacter::registerSoundEffects( AudioHandler* handler )
   {
-    handler->registerChunk( _jumpSound );
-    handler->registerChunk( _hardLandingSound );
+    handler->requestChannel( _jumpSound );
+    handler->requestChannel( _hardLandingSound );
   }
 
 

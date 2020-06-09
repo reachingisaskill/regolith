@@ -5,6 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Components/Engine.h"
+#include "Regolith/Utilities/ProxyMap.h"
 
 
 namespace Regolith
@@ -18,6 +19,7 @@ namespace Regolith
   // Forward declaration
   class Signal;
   class Context;
+  class ContextGroup;
 
 //  // Function to interpret the json data and return a built signal pointer
 //  Signal* makeSignal( Json::Value&, Context* );
@@ -25,7 +27,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Signal Base class
 
-  class Signal : public MassProduceable<>
+  class Signal : public MassProduceable<ContextGroup&>
   {
     private:
 
@@ -55,7 +57,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputActionSignal( *this ); }
   };
@@ -77,7 +79,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputBooleanSignal( *this ); }
   };
@@ -99,7 +101,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputFloatSignal( *this ); }
   };
@@ -121,7 +123,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputVectorSignal( *this ); }
   };
@@ -144,7 +146,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputMouseSignal( *this ); }
   };
@@ -165,7 +167,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new GameEventSignal( *this ); }
   };
@@ -194,7 +196,7 @@ namespace Regolith
   class ChangeContextSignal : public Signal
   {
     private:
-      unsigned int _theContext;
+      Proxy<Context*> _theContext;
       Engine::StackOperation::Operation _operation;
 
     public :
@@ -204,7 +206,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual void validate() const override;
 

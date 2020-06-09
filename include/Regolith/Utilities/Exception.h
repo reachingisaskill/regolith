@@ -23,7 +23,7 @@ namespace Regolith
 
     public:
       // Function name, error, details
-      Exception( std::string, std::string, bool recoverable = true );
+      Exception( std::string, std::string, bool recoverable = false );
       Exception( const Exception& );
       Exception( const Exception&& );
 

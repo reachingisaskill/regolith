@@ -4,6 +4,7 @@
 
 #include "Regolith/Architecture/Context.h"
 #include "Regolith/Architecture/Interactable.h"
+#include "Regolith/GameObjects/MusicTrack.h"
 
 
 namespace Regolith
@@ -12,7 +13,7 @@ namespace Regolith
   class LoadScreen : public Context
   {
     private:
-      IDNumber _theMusic;
+      MusicTrack* _theMusic;
 
     protected:
       virtual void onStart() override;

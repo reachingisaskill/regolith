@@ -110,7 +110,7 @@ namespace Regolith
 
       case REGOLITH_EVENT_ENGINE_PAUSE :
         INFO_LOG( "Pausing Engine" );
-        _pause = 1;
+        _pause = true;
         break;
 
       case REGOLITH_EVENT_ENGINE_RESUME :

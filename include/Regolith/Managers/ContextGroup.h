@@ -30,6 +30,9 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////
     private:
+      // Flag to indicate that this is the global context group
+      bool _isGlobalGroup;
+
       // Audio handlers are local to the context group
       AudioHandler _theAudio;
 
@@ -66,7 +69,7 @@ namespace Regolith
       ~ContextGroup();
 
       // Set the filename
-      void configure( std::string );
+      void configure( std::string, bool isGlobal = false );
 
       // Return a reference to the audio handler
       AudioHandler& getAudioHandler() { return _theAudio; }

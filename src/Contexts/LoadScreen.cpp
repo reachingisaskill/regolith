@@ -9,7 +9,7 @@ namespace Regolith
 
   LoadScreen::LoadScreen() :
     Context(),
-    _theMusic( 0 )
+    _theMusic( nullptr )
   {
   }
 
@@ -21,8 +21,8 @@ namespace Regolith
 
   void LoadScreen::onStart()
   {
-    if ( _theMusic != 0 )
-      owner()->getAudioHandler().setSong( _theMusic );
+    if ( _theMusic != nullptr )
+      owner()->getAudioHandler().setSong( _theMusic->getTrack() );
   }
 
 
@@ -49,12 +49,20 @@ namespace Regolith
     // Call the base class variant first
     Context::configure( json_data, handler );
 
-    Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING );
+    if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      // Set the default music
+      std::string default_music = json_data["default_music"].asString();
+      INFO_STREAM << "Setting default music: " << default_music;
+      _theMusic = dynamic_cast< MusicTrack* > ( owner()->getGameObject( default_music ) );
 
-    // Set the default music
-    std::string default_music = json_data["default_music"].asString();
-    INFO_STREAM << "Setting default music: " << default_music;
-    _theMusic = owner()->getAudioHandler().getMusicID( default_music );
+      if ( _theMusic == nullptr )
+      {
+        Exception ex( "LoadScreen::configure()", "Specified track is not a MusicTrack object" );
+        ex.addDetail( "Name", default_music );
+        throw ex;
+      }
+    }
   }
 
 }

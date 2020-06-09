@@ -5,6 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Context.h"
 #include "Regolith/GameObjects/ControllableCharacter.h"
+#include "Regolith/GameObjects/MusicTrack.h"
 #include "Regolith/Utilities/NamedReferenceVector.h"
 
 
@@ -15,7 +16,7 @@ namespace Regolith
   {
     private:
       // Music to play at the start of the scene
-      IDNumber _defaultMusic;
+      MusicTrack* _defaultMusic;
 
       // Pointer to the pause menu context
       Proxy<Context*> _pauseMenu;
