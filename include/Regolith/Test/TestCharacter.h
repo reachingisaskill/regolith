@@ -65,6 +65,11 @@ namespace Regolith
       virtual void onCollision( const Vector&, float, const Collidable* ) override;
 
 
+      // Override the width/height getters
+      virtual float getWidth() const override { return _theTexture.getWidth(); }
+      virtual float getHeight() const override { return _theTexture.getHeight(); }
+
+
 ////////////////////////////////////////////////////////////////////////////////
       // Controllable interface
       // Register context-wide actions with the handler

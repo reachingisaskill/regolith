@@ -12,6 +12,11 @@
 
   "textures" :
   {
+    "black_screen" : { "type" : "file", "path" : "test_data/test_black_screen.png" },
+
+    "loading_text" : { "type" : "text", "text" : "Loading...", "font" : "default_big", "colour" : [160, 160, 160, 255] },
+
+
     "title_background" : { "type" : "file", "path" : "test_data/test_wallpaper.jpg" },
 
     "platformer_background" : { "type" : "file", "path" : "test_data/test_background.png" },

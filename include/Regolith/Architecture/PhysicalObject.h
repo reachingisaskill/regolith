@@ -19,8 +19,6 @@ namespace Regolith
       Vector _position;
       float _mass;
       float _inverseMass;
-      float _width;
-      float _height;
       float _rotation;
 
     protected :
@@ -54,19 +52,20 @@ namespace Regolith
       const float& getMass() const { return _mass; }
       const float& getInverseMass() const { return _inverseMass; }
 
-      const Vector& position() { return _position; }
+      const Vector& position() const { return _position; }
       Vector getPosition() const { return _position; }
+      void setPosition( Vector p ) { _position = p; }
+
+      const float& rotation() const { return _rotation; }
+      float getRotation() const { return _rotation; }
+      void setRotation( float r ) { _rotation = r; }
+
       void move( Vector m ) { _position += m; }
       void rotate( float r ) { _rotation += r; }
 
-      float getWidth() const { return _width; }
-      float getHeight() const { return _height; }
-      float getRotation() const { return _rotation; }
+      virtual float getWidth() const = 0;
+      virtual float getHeight() const = 0;
 
-      void setPosition( Vector p ) { _position = p; }
-      void setWidth( float w ) { _width = w; }
-      void setHeight( float h ) { _height = h; }
-      void setRotation( float r ) { _rotation = r; }
   };
 
 }

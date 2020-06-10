@@ -1,12 +1,15 @@
 
 #include "Regolith/GameObjects/Trigger.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 
 namespace Regolith
 {
 
-  Trigger::Trigger() 
+  Trigger::Trigger() :
+    _width( 0.0 ),
+    _height( 0.0 )
   {
   }
 
@@ -19,6 +22,13 @@ namespace Regolith
   {
     Collidable::configure( json_data, handler );
     Interactable::configure( json_data, handler );
+
+
+    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_FLOAT );
+    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_FLOAT );
+
+    _width = json_data["width"].asFloat();
+    _height = json_data["height"].asFloat();
   }
 
 

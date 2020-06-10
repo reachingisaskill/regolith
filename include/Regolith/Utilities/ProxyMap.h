@@ -68,7 +68,7 @@ namespace Regolith
       DATA& get( std::string );
       const DATA& get( std::string ) const;
 
-      DATA& set( std::string, DATA& );
+      DATA& set( std::string, DATA );
 
       DATA& create( std::string, DATA& );
 
@@ -127,7 +127,7 @@ namespace Regolith
 
 
   template < class DATA >
-  DATA& ProxyMap<DATA>::set( std::string name, DATA& obj )
+  DATA& ProxyMap<DATA>::set( std::string name, DATA obj )
   {
     DATA& datum = _dataMap[name];
     datum = obj;

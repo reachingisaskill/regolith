@@ -44,6 +44,11 @@ namespace Regolith
 
       // Button click - trigger the interactions
       virtual void click() override { this->trigger(); }
+
+
+      // Override the width/height getters
+      virtual float getWidth() const override { return _currentTexture->getWidth(); }
+      virtual float getHeight() const override { return _currentTexture->getHeight(); }
   };
 
 }

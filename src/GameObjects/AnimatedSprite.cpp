@@ -28,6 +28,8 @@ namespace Regolith
     // Place the object
     _destination.x = position().x();
     _destination.y = position().y();
+    _destination.w = getWidth();
+    _destination.h = getHeight();
     
     // Move into the camera reference frame
     SDL_Rect destination = camera.place( _destination );
@@ -54,16 +56,8 @@ namespace Regolith
   void AnimatedSprite::configure( Json::Value& json_data, DataHandler& handler )
   {
     Drawable::configure( json_data, handler );
+
     _texture.configure( json_data, handler );
-
-    // Set the current sprite position
-    _destination.x = position().x();
-    _destination.y = position().y();
-    _destination.w = _texture.getWidth();
-    _destination.h = _texture.getHeight();
-
-    setWidth( _texture.getWidth() );
-    setHeight( _texture.getHeight() );
   }
 
 }

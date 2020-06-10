@@ -6,6 +6,7 @@
 #include "Regolith/Utilities/MutexedBuffer.h"
 
 #include <thread>
+#include <mutex>
 #include <vector>
 #include <map>
 
@@ -26,6 +27,10 @@ namespace Regolith
     friend void dataUnloadFunction();
 
     private:
+      // Flag to indicate the loading thread is active
+      bool _loading;
+      mutable std::mutex _loadFlagMutex;
+
       // Loading thread container
       std::thread _loadingThread;
 
@@ -39,8 +44,8 @@ namespace Regolith
       // Unloading queue
       MutexedBuffer< DataHandler* > _unloadQueue;
 
-      // Flag to indicate the loading thread is active
-      std::atomic<bool> _loading;
+    protected:
+      void setLoading( bool );
 
     public:
       // Con/de-struction
@@ -67,7 +72,7 @@ namespace Regolith
       void unload( DataHandler* );
 
       // Return true if the loading thread is active
-      bool isLoading() const { return _loading; }
+      bool isLoading() const;
 
   };
 

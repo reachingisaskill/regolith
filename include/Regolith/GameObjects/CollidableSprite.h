@@ -44,6 +44,11 @@ namespace Regolith
       Texture& texture() { return _texture; }
 
 
+      // Override the width/height getters
+      virtual float getWidth() const override { return _texture.getWidth(); }
+      virtual float getHeight() const override { return _texture.getHeight(); }
+
+
       // Function called when a collision is found with another object
       // Overlap vector, other object pointer
       virtual void onCollision( const Vector&, float, const Collidable* ) override;

@@ -18,8 +18,6 @@ namespace Regolith
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
     _clip( { 0, 0, 0, 0 } ),
-    _spriteWidth( 0 ),
-    _spriteHeight( 0 ),
     _currentSprite( 0 ),
     _rows( 0 ),
     _columns( 0 ),
@@ -39,15 +37,13 @@ namespace Regolith
   {
     SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
     // Render it to the window
-    DEBUG_STREAM << "Texture::Draw : " << renderer << ", " << _theTexture << ", " << _theTexture->texture << ", " << destination->w << ", " << destination->h;
+    DEBUG_STREAM << "Texture::Draw : " << renderer << ", " << _theTexture << ", " << _theTexture->texture << ", " << _theTexture->width << ", " << _theTexture->height << ", " << destination->w << ", " << destination->h;
     SDL_RenderCopyEx( renderer, _theTexture->texture, &_clip, destination, _angle, nullptr, _flipFlag );
   }
 
 
   void Texture::setClip( SDL_Rect c )
   {
-    _spriteWidth = c.w;
-    _spriteHeight = c.h;
     _clip = c;
   }
 
@@ -85,13 +81,13 @@ namespace Regolith
   void Texture::setSpriteNumber( int num )
   {
     _currentSprite = num;
-    int sprite_x = (_currentSprite % _columns) * _spriteWidth;
-    int sprite_y = (_currentSprite / _columns) * _spriteHeight;
+    int sprite_x = (_currentSprite % _columns) * _theTexture->width;
+    int sprite_y = (_currentSprite / _columns) * _theTexture->height;
 
     _clip.x = sprite_x;
     _clip.y = sprite_y;
-    _clip.w = _spriteWidth;
-    _clip.h = _spriteHeight;
+//    _clip.w = _spriteWidth;
+//    _clip.h = _spriteHeight;
   }
 
 
@@ -154,8 +150,10 @@ namespace Regolith
       _numSprites = 1;
     }
 
-    _spriteWidth = _theTexture->width / _columns;
-    _spriteHeight = _theTexture->height / _rows;
+    _clip.x = 0;
+    _clip.y = 0;
+    _clip.w = _theTexture->width / _columns;
+    _clip.h = _theTexture->height / _rows;
 
     if ( Utilities::validateJson( json_data, "clip", Utilities::JSON_TYPE_ARRAY, false ) )
     {
@@ -168,13 +166,6 @@ namespace Regolith
       _clip.y = y;
       _clip.w = w;
       _clip.h = h;
-    }
-    else
-    {
-      _clip.x = 0;
-      _clip.y = 0;
-      _clip.w = _spriteWidth;
-      _clip.h = _spriteHeight;
     }
 
     INFO_STREAM << "Configuring texture: " << _rows << "x" << _columns << " -> " << _numSprites << " T = " << _updatePeriod << " start: " << _currentSprite;
@@ -293,10 +284,9 @@ namespace Regolith
   {
     Manager* man = Manager::getInstance();
 
-    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "type", Utilities::JSON_TYPE_STRING );
 
-    INFO_STREAM << "Creating texture. Name: " << json_data["name"] << " of type: " << json_data["type"];
+    INFO_STREAM << "Creating texture of type: " << json_data["type"];
 
     if ( json_data["type"] == "file" )
     {

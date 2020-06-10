@@ -11,10 +11,8 @@ namespace Regolith
 
   RawMusic makeMusic( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "path", Utilities::JSON_TYPE_STRING );
 
-    std::string name = json_data["name"].asString();
     std::string path = json_data["path"].asString();
 
     Mix_Music* new_music = Mix_LoadMUS( path.c_str() );
@@ -23,7 +21,6 @@ namespace Regolith
     {
       std::string error = Mix_GetError();
       Exception ex( "AudioManager::addMusic()", "Failed to load music file" );
-      ex.addDetail( "Name", name );
       ex.addDetail( "Path", path );
       ex.addDetail( "Mix Error", error );
       throw ex;
@@ -35,10 +32,8 @@ namespace Regolith
 
   RawSound makeSound( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "name", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "path", Utilities::JSON_TYPE_STRING );
 
-    std::string name = json_data["name"].asString();
     std::string path = json_data["path"].asString();
 
     Mix_Chunk* new_chunk = Mix_LoadWAV( path.c_str() );
@@ -47,7 +42,6 @@ namespace Regolith
     {
       std::string error = Mix_GetError();
       Exception ex( "AudioHandler::addEffect()", "Failed to load effect file" );
-      ex.addDetail( "Name", name );
       ex.addDetail( "Path", path );
       ex.addDetail( "Mix Error", error );
       throw ex;

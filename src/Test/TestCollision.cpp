@@ -12,6 +12,8 @@ namespace Regolith
 
   TestCollision::TestCollision() :
     Collidable(),
+    _width( 0.0 ),
+    _height( 0.0 ),
     _collided( false ),
     _lastNormal( 0.0 ),
     _lastOverlap( 0.0 )

@@ -101,6 +101,8 @@ namespace Regolith
     }
     _fonts.clear();
 
+    _theContexts.clear();
+
     _theData.clear();
 
     _theAudio.clear();
@@ -156,15 +158,19 @@ namespace Regolith
 
   void Manager::run()
   {
-    // Reset the stack to the first context
-    setContextStack( _theContexts.getCurrentContextGroup()->getEntryPoint() );
-
     // Start all the waiting threads
     {
       std::lock_guard<std::mutex> lk( _theThreads.StartCondition.mutex );
       _theThreads.StartCondition.data = true;
     }
+    // Start all the helper threads
     _theThreads.StartCondition.variable.notify_all();
+
+    // Load the first context group blocking this thread until completion
+    _theContexts.loadEntryPoint();
+
+    // Reset the stack to the first context
+    setContextStack( _theContexts.getCurrentContextGroup()->getEntryPoint() );
 
     // Start the engine!
     _theEngine.run();
@@ -234,10 +240,27 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Signal handler
 
+#ifdef __linux__
+#include <execinfo.h>
+#include <stdio.h>
+#include <unistd.h>
+#endif
+
   void deathSignals( int signal )
   {
     FAILURE_STREAM << "Regolith received signal: " << signal;
     FAILURE_LOG( "Trying to die gracefully..." );
+
+#ifdef __linux__
+//    void* array[20];
+//    size_t size;
+//
+//    size = backtrace( array, 20 );
+//
+//    fprintf( stderr, "Error Signal %d:\n", signal );
+//    backtrace_symbols_fd( array, size, STDERR_FILENO );
+#endif
+
     Manager::getInstance()->quit();
   }
 

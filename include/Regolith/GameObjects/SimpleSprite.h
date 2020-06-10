@@ -41,6 +41,11 @@ namespace Regolith
 
       // SimpleSprite details
       Texture& texture() { return _texture; }
+
+
+      // Override the width/height getters
+      virtual float getWidth() const override { return _texture.getWidth(); }
+      virtual float getHeight() const override { return _texture.getHeight(); }
   };
 
 }

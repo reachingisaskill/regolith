@@ -37,7 +37,7 @@ namespace Regolith
       AudioHandler _theAudio;
 
       // List of data handlers that can be individually loaded/unloaded
-      ProxyMap< DataHandler > _dataHandlers;
+      ProxyMap< DataHandler* > _dataHandlers;
 
       // File name to load
       std::string _fileName;
@@ -59,6 +59,9 @@ namespace Regolith
 
       // Starting point when this context group is loaded
       Context* _entryPoint;
+
+      // Flag to indicate the group is loaded
+      bool _isLoaded;
 
 ////////////////////////////////////////////////////////////////////////////////
     public:
@@ -88,6 +91,9 @@ namespace Regolith
 
       // Return the entry point for this context group
       Context* getEntryPoint() { return _entryPoint; }
+
+      // Return a flag to indicate the group is loaded into memory
+      bool isLoaded() const { return _isLoaded; }
 
 
 ////////////////////////////////////////////////////////////////////////////////

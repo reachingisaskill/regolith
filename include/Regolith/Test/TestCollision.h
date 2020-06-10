@@ -13,6 +13,8 @@ namespace Regolith
   class TestCollision : public Collidable
   {
     private :
+      float _width;
+      float _height;
       bool _collided;
       Vector _lastNormal;
       float _lastOverlap;
@@ -28,6 +30,11 @@ namespace Regolith
 
       // Validate the configuration
       virtual void validate() const override;
+
+
+      // Override the width/height getters
+      virtual float getWidth() const override { return _width; }
+      virtual float getHeight() const override { return _height; }
 
 
       // Not clonable - but required to be physical

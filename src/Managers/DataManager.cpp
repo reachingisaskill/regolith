@@ -19,6 +19,8 @@ namespace Regolith
 
 
   DataManager::DataManager() :
+    _loading( false ),
+    _loadFlagMutex(),
     _loadingThread( dataLoadingThread ),
     _indexFile(),
     _loadQueue(),
@@ -30,7 +32,7 @@ namespace Regolith
   DataManager::~DataManager()
   {
     INFO_LOG( "Destroying Data Manager." );
-    clear();
+    _loadingThread.join();
   }
 
 
@@ -40,6 +42,14 @@ namespace Regolith
 
     _loadQueue.clear();
     _unloadQueue.clear();
+  }
+
+
+  void DataManager::setLoading( bool value )
+  {
+    std::lock_guard<std::mutex> gl( _loadFlagMutex );
+
+    _loading = value;
   }
 
 
@@ -66,6 +76,14 @@ namespace Regolith
       Manager::getInstance()->getThreadManager().DataUpdate.data = true;
     }
     Manager::getInstance()->getThreadManager().DataUpdate.variable.notify_all();
+  }
+
+
+  bool DataManager::isLoading() const
+  {
+    std::lock_guard<std::mutex> gl( _loadFlagMutex );
+
+    return _loading;
   }
 
 
@@ -127,7 +145,6 @@ namespace Regolith
   {
     INFO_LOG( "Data Manager loading thread start." );
 
-    DataManager& manager = Manager::getInstance()->getDataManager();
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
 
     INFO_LOG( "Data Manager loading thread initialised and waiting to start" );
@@ -140,20 +157,27 @@ namespace Regolith
     INFO_LOG( "Data Manager loading thread go." );
 
 
+    DataManager& manager = Manager::getInstance()->getDataManager();
     Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
     std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
 
     INFO_LOG( "Loading thread waiting for first command" );
     while( ! quitFlag )
     {
-      manager._loading = false;
-      dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
-      manager._loading = true;
-      dataUpdate.data = false;
+      if ( ! dataUpdate.data )
+      {
+        manager.setLoading( false );
+        dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
+        if ( quitFlag ) break;
+      }
+
+      manager.setLoading( true );
 
       DEBUG_STREAM << "DATA LOADING THREAD WORKING";
       do
       {
+        dataUpdate.data = false;
+
         dataLock.unlock();
 
         dataUnloadFunction();
@@ -163,7 +187,7 @@ namespace Regolith
 
       } while( dataUpdate.data == true );
 
-      Manager::getInstance()->raiseEvent( REGOLITH_EVENT_DATA_LOADED );
+      dataUpdate.variable.notify_all();
     }
 
     dataLock.unlock();
@@ -200,8 +224,9 @@ namespace Regolith
           }
           else
           {
+            DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << " @ " << it->second.texture;
             it->second = makeTexture( texture_data[ name ] );
-            DEBUG_STREAM << "Loaded Texture: " << name;
+            DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << " @ " << it->second.texture;
           }
         }
 

@@ -47,10 +47,6 @@ namespace Regolith
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
 
-      // Dimensions after clipping, etc
-      int _spriteWidth;
-      int _spriteHeight;
-
       // If its a spritesheet
       int _currentSprite;
       int _rows;
@@ -62,7 +58,11 @@ namespace Regolith
       float _count;
 
     protected:
+      // Return a reference to the clip object
       SDL_Rect& clip() { return _clip; }
+
+      // Manually set the clip around the texture (not compatible with spritesheet/animations)
+      virtual void setClip( SDL_Rect c );
 
     public:
       Texture();
@@ -83,14 +83,12 @@ namespace Regolith
 
 
       // Accessors
-      int getWidth() const { return _spriteWidth; }
-      int getHeight() const { return _spriteHeight; }
+      int getWidth() const { return _clip.w; }
+      int getHeight() const { return _clip.h; }
       virtual float getAngle() const { return _angle; }
 
 
-      // Manually set the clip around the texture (not compatible with spritesheet/animations)
-      virtual void setClip( SDL_Rect c );
-      virtual SDL_Rect getClip() { return _clip; }
+      SDL_Rect getClip() { return _clip; }
 
 
       // Colour Modulation

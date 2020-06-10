@@ -112,6 +112,8 @@ namespace Regolith
     // Place the object
     _destination.x = position().x();
     _destination.y = position().y();
+    _destination.w = getWidth();
+    _destination.h = getHeight();
     
     // Move into the camera reference frame
     SDL_Rect destination = camera.place( _destination );
@@ -163,11 +165,6 @@ namespace Regolith
     // Set the current sprite position
     _destination.x = position().x();
     _destination.y = position().y();
-    _destination.w = _theTexture.getWidth();
-    _destination.h = _theTexture.getHeight();
-
-    setWidth( _theTexture.getWidth() );
-    setHeight( _theTexture.getHeight() );
   }
 
   void TestCharacter::validate() const

@@ -17,6 +17,14 @@ namespace Regolith
     friend void contextManagerLoadingThread();
 
     private:
+      // Flag to indcate if everything is loaded
+      bool _loaded;
+      mutable std::mutex _loadedMutex;
+
+      // Progress counter!
+      float _progress;
+      mutable std::mutex _progressMutex;
+
       // Handle to the loading thread
       std::thread _loadingThread;
 
@@ -24,7 +32,7 @@ namespace Regolith
       ContextGroup _globalContextGroup;
 
       // Vector of the individual context handlers
-      ProxyMap< ContextGroup > _contextGroups;
+      ProxyMap< ContextGroup* > _contextGroups;
 
       // Record of the currently loaded context group
       ContextGroup* _currentContextGroup;
@@ -32,11 +40,12 @@ namespace Regolith
       // Pointer to the next context group to load
       ContextGroup* _nextContextGroup;
 
-      // Atomic loaded flag for loading screen to check progress
-      std::atomic<bool> _isLoaded;
+    protected:
+      // Set whether the context group is loaded
+      void setLoaded( bool );
 
-      // Atomic progress counter
-      std::atomic<float> _loadedProgress;
+      // Set the current loading progress
+      void setProgress( float );
 
     public:
       // Con/Destructors
@@ -49,15 +58,24 @@ namespace Regolith
       // Validate the created contexts
       void validate() const;
 
+      // Destroy everything and join the thread
+      void clear();
+
+      // Load the first configuration - halts the calling thread until completion
+      void loadEntryPoint();
+
 
 //////////////////////////////////////////////////////////////////////////////// 
       // Context construction/manipulation
 
       // Return a pointer to a specific context group
-      Proxy<ContextGroup> requestContextGroup( std::string name ) { return _contextGroups.request( name ); }
+      Proxy<ContextGroup*> requestContextGroup( std::string name ) { return _contextGroups.request( name ); }
 
-      // Load a specific context group
-      void loadContextGroup( ContextGroup* );
+      // Set a specific context group to load
+      void setNextContextGroup( ContextGroup* );
+
+      // Signal the manager to start the loading process. Should only be called by a global context!
+      void loadNextContextGroup();
 
       // Tell the context manager that the loadscreen is finished and the first context in the new group can start
       void startContextGroup();
@@ -73,10 +91,10 @@ namespace Regolith
       // Loading thread interactions
 
       // Return false while a context group is being loaded
-      bool isLoaded() const { return _isLoaded; }
+      bool isLoaded() const;
 
       // Return a float value representing the loading progress
-      float loadingProgress() const { return _loadedProgress; }
+      float loadingProgress() const;
   };
 
 }

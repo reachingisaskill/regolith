@@ -307,7 +307,7 @@ namespace Regolith
         }
 
         // If a copy is required (make sure its physical)
-        if ( Utilities::validateJson( element_data[j], "spawn_copy", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["spawn_copy"].asBool() )
+        if ( Utilities::validateJson( element_data[j], "spawn", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["spawn"].asBool() )
         {
           if ( ! object->isPhysical() )
           {

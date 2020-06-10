@@ -110,16 +110,14 @@ namespace Regolith
 
     // Spawn Points
     Json::Value& spawn_points = json_data["spawn_points"];
-    Json::ArrayIndex spawn_points_size = spawn_points.size();
-    for ( Json::ArrayIndex i = 0; i < spawn_points_size; ++i )
+    for ( Json::Value::iterator spawn_it = spawn_points.begin(); spawn_it != spawn_points.end(); ++spawn_it )
     {
-      Utilities::validateJson( spawn_points[i], "name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( spawn_points[i], "position", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJsonArray( spawn_points[i]["position"], 2, Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJsonArray( *spawn_it, 2, Utilities::JSON_TYPE_FLOAT );
 
-      std::string name = spawn_points[i]["name"].asString();
-      float x = spawn_points[i]["position"][0].asFloat();
-      float y = spawn_points[i]["position"][1].asFloat();
+      std::string name = spawn_it.key().asString();
+
+      float x = (*spawn_it)[0].asFloat();
+      float y = (*spawn_it)[1].asFloat();
       Vector pos( x, y );
 
       _spawnPoints.addObject( pos, name );

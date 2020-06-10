@@ -29,11 +29,6 @@ namespace Regolith
   void SimpleButton::onStateChange( Clickable::State state )
   {
     _currentTexture = &_textures[state];
-    _destination.w = _currentTexture->getWidth();
-    _destination.h = _currentTexture->getHeight();;
-
-    setWidth( _currentTexture->getWidth() );
-    setHeight( _currentTexture->getHeight() );
   }
 
 
@@ -50,6 +45,8 @@ namespace Regolith
     // Place the object
     _destination.x = position().x();
     _destination.y = position().y();
+    _destination.w = getWidth();
+    _destination.h = getHeight();
     
     // Move into the camera reference frame
     SDL_Rect destination = camera.place( _destination );

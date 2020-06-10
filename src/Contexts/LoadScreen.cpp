@@ -23,6 +23,8 @@ namespace Regolith
   {
     if ( _theMusic != nullptr )
       owner()->getAudioHandler().setSong( _theMusic->getTrack() );
+
+    Manager::getInstance()->getContextManager().loadNextContextGroup();
   }
 
 

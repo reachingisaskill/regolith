@@ -20,7 +20,8 @@ namespace Regolith
     _gameObjects( "Game Object Map" ),
     _spawnedObjects(),
     _onLoadOperations(),
-    _entryPoint( nullptr )
+    _entryPoint( nullptr ),
+    _isLoaded( false )
   {
   }
 
@@ -94,13 +95,13 @@ namespace Regolith
         objects = *h_it;
       }
 
-      DataHandler& current_handler = _dataHandlers.createIfMissing( handler_name );
+      DataHandler* current_handler = _dataHandlers.set( handler_name, new DataHandler() );
 
       for( Json::Value::iterator o_it = objects.begin(); o_it != objects.end(); ++o_it )
       {
         std::string obj_name = o_it.key().asString();
 
-        GameObject* obj = obj_factory.build( *o_it, current_handler );
+        GameObject* obj = obj_factory.build( *o_it, *current_handler );
         _gameObjects.set( obj_name, obj );
       }
     }
@@ -153,11 +154,49 @@ namespace Regolith
       _onLoadOperations.front().trigger( this );
       _onLoadOperations.pop();
     }
+
+    _isLoaded = true;
+
+    Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
+    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+
+    for ( ProxyMap< DataHandler* >::iterator it = _dataHandlers.begin(); it != _dataHandlers.end(); ++it )
+    {
+      Manager::getInstance()->getDataManager().load( it->second );
+    }
+
+    std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
+    if ( dataUpdate.data ) // Still loading
+    {
+      // Wait for the data thread to load all the data objects
+      dataUpdate.variable.wait( dataLock, [&]()->bool { return quitFlag || ! dataUpdate.data; } );
+    }
+    dataLock.unlock();
+
   }
 
 
   void ContextGroup::unload()
   {
+    _isLoaded = false;
+    INFO_LOG( "Unloading Data" );
+    Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
+    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+
+    for ( ProxyMap< DataHandler* >::iterator it = _dataHandlers.begin(); it != _dataHandlers.end(); ++it )
+    {
+      Manager::getInstance()->getDataManager().unload( it->second );
+    }
+
+    std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
+    if ( dataUpdate.data ) // Still unloading
+    {
+      // Wait for the data thread to load all the data objects
+      dataUpdate.variable.wait( dataLock, [&]()->bool { return quitFlag || ! dataUpdate.data; } );
+    }
+    dataLock.unlock();
+
+
     INFO_LOG( "Unloading Contexts" );
     for ( ProxyMap< Context* >::iterator it = _contexts.begin(); it != _contexts.end(); ++it )
     {

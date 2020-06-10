@@ -12,8 +12,6 @@ namespace Regolith
     _position(),
     _mass( 0.0 ),
     _inverseMass( 0.0 ),
-    _width(),
-    _height(),
     _rotation()
   {
   }
@@ -43,16 +41,6 @@ namespace Regolith
       float x =  json_data["position"][0].asFloat();
       float y =  json_data["position"][1].asFloat();
       _position = Vector( x, y );
-    }
-
-    if ( Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_FLOAT, false ) )
-    {
-      _width = json_data["width"].asFloat();
-    }
-
-    if ( Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_FLOAT, false ) )
-    {
-      _height = json_data["height"].asFloat();
     }
   }
 

@@ -62,7 +62,7 @@ INSTALL_DIR =
 
 
 # The Compiler
-CCC = g++ -g  -Wall -Wextra -pedantic ${DEFINES}
+CCC = g++ -g -rdynamic -Wall -Wextra -pedantic ${DEFINES}
 # CCC = g++ -O3 -Wall -Wextra -pedantic ${DEFINES} # Optimized Compilation
 ARCHIVE = ar rcs
 

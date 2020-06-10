@@ -91,11 +91,8 @@
   },
 
   "spawn_points" :
-  [
-    {
-      "name" : "start",
-      "position" : [ 50, 200 ]
-    }
-  ]
+  {
+    "start" : [ 50, 200 ]
+  }
 
 }

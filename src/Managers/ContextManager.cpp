@@ -15,13 +15,13 @@ namespace Regolith
   // Con/Destruction
 
   ContextManager::ContextManager() :
+    _loaded( false ),
+    _progress( 0.0 ),
     _loadingThread( contextManagerLoadingThread ),
     _globalContextGroup(),
-    _contextGroups( "manager_context_handlers" ),
+    _contextGroups( "Context Groups" ),
     _currentContextGroup( nullptr ),
-    _nextContextGroup( nullptr ),
-    _isLoaded( false ),
-    _loadedProgress( 1.0 )
+    _nextContextGroup( nullptr )
   {
   }
 
@@ -29,7 +29,66 @@ namespace Regolith
   ContextManager::~ContextManager()
   {
     INFO_LOG( "Destroying Context Manager" );
-    _globalContextGroup.unload();
+    _loadingThread.join();
+  }
+
+
+  void ContextManager::clear()
+  {
+    // Hold this mutex in case the loading thread is active
+    Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
+    std::unique_lock<std::mutex> lock( contextUpdate.mutex );
+
+    // Unload and then delete all the context groups
+    for ( ProxyMap< ContextGroup* >::iterator it = _contextGroups.begin(); it != _contextGroups.end(); ++it )
+    {
+      if ( it->second->isLoaded() )
+      {
+        it->second->unload();
+      }
+      delete it->second;
+    }
+    _contextGroups.clear();
+
+    // Unload the global context group
+    if ( _globalContextGroup.isLoaded() )
+    {
+      _globalContextGroup.unload();
+    }
+
+    lock.unlock();
+  }
+
+
+  void ContextManager::setLoaded( bool value )
+  {
+    std::lock_guard<std::mutex> lg( _loadedMutex );
+
+    _loaded = value;
+  }
+
+
+  bool ContextManager::isLoaded() const
+  {
+    std::lock_guard<std::mutex> lg( _loadedMutex );
+
+    return _loaded;
+  }
+
+
+  void ContextManager::setProgress( float value )
+  {
+    std::lock_guard<std::mutex> lg( _progressMutex );
+
+    _progress = value;
+  }
+
+
+  float ContextManager::loadingProgress() const
+  {
+    std::lock_guard<std::mutex> lg( _progressMutex );
+
+    return _progress;
   }
 
 
@@ -45,7 +104,6 @@ namespace Regolith
     // Load the global contexts and data first
     std::string global_file = json_data["global"].asString();
     _globalContextGroup.configure( global_file, true );
-    _globalContextGroup.load();
 
     // Create all the context groups but don't load any information
     Json::Value& groups = json_data["context_groups"];
@@ -56,13 +114,14 @@ namespace Regolith
       std::string name = it.key().asString();
       std::string file = it->asString();
 
-      _contextGroups.create( name ).configure( file );
+      ContextGroup* cg = new ContextGroup();
+      cg->configure( file );
+      _contextGroups.set( name, cg );
     }
 
     // Find the starting context group and load it
     std::string entry_point = json_data["entry_point"].asString();
-    _currentContextGroup = &_contextGroups.get( entry_point );
-    _currentContextGroup->load();
+    _nextContextGroup = _contextGroups.get( entry_point );
   }
 
 
@@ -71,16 +130,42 @@ namespace Regolith
   }
 
 
-  void ContextManager::loadContextGroup( ContextGroup* cg )
+  void ContextManager::loadEntryPoint()
   {
-    _isLoaded = false;
-    _loadedProgress = 0.0;
+    _currentContextGroup = _nextContextGroup;
+    _nextContextGroup = nullptr;
+
+    INFO_LOG( "Loading global context group" );
+    _globalContextGroup.load();
+    INFO_LOG( "Loading first context group" );
+    _currentContextGroup->load();
+    DEBUG_LOG( "Completed" );
+  }
+
+
+  void ContextManager::setNextContextGroup( ContextGroup* cg )
+  {
+    setLoaded( false );
+    setProgress( 0.0 );
 
     _nextContextGroup = cg;
 
     Context* load_screen = (Context*)_nextContextGroup->getLoadScreen();
 
     Manager::getInstance()->setContextStack( load_screen );
+  }
+
+
+  void ContextManager::loadNextContextGroup()
+  {
+    Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
+    std::unique_lock<std::mutex> lock( contextUpdate.mutex );
+
+    contextUpdate.data = true;
+
+    lock.unlock();
+
+    contextUpdate.variable.notify_all();
   }
 
 
@@ -97,7 +182,6 @@ namespace Regolith
   {
     INFO_LOG( "Context Manager loading thread start." );
 
-    ContextManager& manager = Manager::getInstance()->getContextManager();
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
 
     INFO_LOG( "Context Manager loading thread initialised and waiting to start" );
@@ -110,40 +194,36 @@ namespace Regolith
     INFO_LOG( "Context Manager loading thread go." );
 
 
+    ContextManager& manager = Manager::getInstance()->getContextManager();
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
-    Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
-
     std::unique_lock<std::mutex> contextLock( contextUpdate.mutex );
-    std::unique_lock<std::mutex> dataLock( dataUpdate.mutex, std::defer_lock );
 
     INFO_LOG( "Loading thread waiting for first command" );
     while( ! quitFlag )
     {
-      contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
+      if ( ! contextUpdate.data )
+      {
+        contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
+        if ( quitFlag ) break;
+      }
 
       DEBUG_STREAM << "CONTEXT LOADING THREAD WORKING";
 
       if ( manager._nextContextGroup != nullptr )
       {
-        // Halt the data thread first. No interfering.
-        dataLock.lock();
-        dataUpdate.data = true;
-
         // Update and load the current context group pointer
         manager._currentContextGroup->unload();
         manager._currentContextGroup = manager._nextContextGroup;
         manager._nextContextGroup = nullptr;
         manager._currentContextGroup->load();
-
-        // Wait for the data thread to load all the data objects
-        dataUpdate.variable.wait( dataLock, [&]()->bool { return quitFlag || ! dataUpdate.data; } );
-        dataLock.unlock();
       }
 
       // Signal that the context group has been loaded
       contextUpdate.data = false;
-      manager._loadedProgress = 1.0;
-      manager._isLoaded = true;
+      manager.setProgress( 1.0 );
+      manager.setLoaded( true );
+
+      contextUpdate.variable.notify_all();
     }
 
     contextLock.unlock();
