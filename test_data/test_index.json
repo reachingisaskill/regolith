@@ -1,60 +1,44 @@
 {
-  "sounds" :
+  "fonts": 
   {
-    "thud" : { "path" : "test_data/test_thud.wav" },
-    "landing" : { "path" : "test_data/test_landing.wav" }
+    "default": { "path": "test_data/test_font.ttf", "size": 28 },
+    "default_big": { "path": "test_data/test_font.ttf", "size": 42 }
   },
-
-  "music" :
+  "sounds": 
   {
-     "the_beat" : { "path" : "test_data/test_beat.wav" }
+    "thud": { "path": "test_data/test_thud.wav" },
+    "landing": { "path": "test_data/test_landing.wav" },
+    "test_beat": { "path": "test_data/test_beat.wav" }
   },
-
-  "textures" :
+  "music": 
   {
-    "black_screen" : { "type" : "file", "path" : "test_data/test_black_screen.png" },
-
-    "loading_text" : { "type" : "text", "text" : "Loading...", "font" : "default_big", "colour" : [160, 160, 160, 255] },
-
-
-    "title_background" : { "type" : "file", "path" : "test_data/test_wallpaper.jpg" },
-
-    "platformer_background" : { "type" : "file", "path" : "test_data/test_background.png" },
-
-    "test_animated_sprite" : { "type" : "file", "path" : "test_data/test_spritesheet.png", "colour_key" : [ 255, 255, 255 ] },
-
-    "test_platform" : { "type" : "file", "path" : "test_data/test_ground.png" },
-
-    "the_ball" : { "type" : "file", "path" : "test_data/test_ball.png", "colour_key" : [ 0, 255, 255 ] },
-
-
-    "title_welcome1" : { "type" : "text", "text" : "Welcome to the Regolith Integration Test", "font" : "default_big", "colour" : [ 255, 255, 255, 255] },
-
-    "title_start_button_up" : { "type" : "text", "text" : "Click here to start", "font" : "default", "colour" : [ 160, 160, 160, 255] },
-
-    "title_start_button_down" : { "type" : "text", "text" : "Click here to start", "font" : "default", "colour" : [ 255, 160, 160, 255] },
-
-    "title_start_button_focus" : { "type" : "text", "text" : "Click here to start", "font" : "default", "colour" : [ 255, 255, 255, 255] },
-
-    "title_test_button_up" : { "type" : "text", "text" : "Test button", "font" : "default", "colour" : [ 160, 160, 160, 255] },
-
-    "title_test_button_down" : { "type" : "text", "text" : "Test button", "font" : "default", "colour" : [ 255, 160, 160, 255] },
-
-    "title_test_button_focus" : { "type" : "text", "text" : "Test button", "font" : "default", "colour" : [ 255, 255, 255, 255] },
-
-    "title_quit_button_up" : { "type" : "text", "text" : "Exit", "font" : "default", "colour" : [ 160, 160, 160, 255] },
-
-    "title_quit_button_down" : { "type" : "text", "text" : "Exit", "font" : "default", "colour" : [ 255, 160, 160, 255] },
-
-    "title_quit_button_focus" : { "type" : "text", "text" : "Exit", "font" : "default", "colour" : [ 255, 255, 255, 255] },
-
-    "pause_text" : { "type" : "text", "text" : "Game Paused", "font" : "default_big", "colour" : [ 160, 160, 160, 255 ] },
-
-    "pause_quit_normal" : { "type" : "text", "text" : "Quit", "font" : "default_big", "colour" : [ 160, 160, 160, 255 ] },
-
-    "pause_quit_down" : { "type" : "text", "text" : "Quit", "font" : "default_big", "colour" : [ 255, 255, 255, 255 ] },
-
-    "pause_quit_focus" : { "type" : "text", "text" : "Quit", "font" : "default_big", "colour" : [ 255, 255, 255, 255 ] }
+    "the_beat": { "path": "test_data/test_beat.wav" }
+  },
+  "strings": 
+  {
+    "loading_text": { "text": "Loading...", "font": "default_big", "colour": [160, 160, 160, 255], "width": 210, "height": 39 },
+    "title_welcome1": { "text": "Welcome to the Regolith Integration Test", "font": "default_big", "colour": [255, 255, 255, 255], "width": 840, "height": 39 },
+    "title_start_button_up": { "text": "Click here to start", "font": "default", "colour": [160, 160, 160, 255], "width": 399, "height": 39 },
+    "title_start_button_down": { "text": "Click here to start", "font": "default", "colour": [255, 160, 160, 255], "width": 399, "height": 39 },
+    "title_start_button_focus": { "text": "Click here to start", "font": "default", "colour": [255, 255, 255, 255], "width": 399, "height": 39 },
+    "title_test_button_up": { "text": "Test button", "font": "default", "colour": [160, 160, 160, 255], "width": 232, "height": 39 },
+    "title_test_button_down": { "text": "Test button", "font": "default", "colour": [255, 160, 160, 255], "width": 232, "height": 39 },
+    "title_test_button_focus": { "text": "Test button", "font": "default", "colour": [255, 255, 255, 255], "width": 232, "height": 39 },
+    "title_quit_button_up": { "text": "Exit", "font": "default", "colour": [160, 160, 160, 255], "width": 84, "height": 39 },
+    "title_quit_button_down": { "text": "Exit", "font": "default", "colour": [255, 160, 160, 255], "width": 84, "height": 39 },
+    "title_quit_button_focus": { "text": "Exit", "font": "default", "colour": [255, 255, 255, 255], "width": 84, "height": 39 },
+    "pause_text": { "text": "Game Paused", "font": "default_big", "colour": [160, 160, 160, 255], "width": 231, "height": 39 },
+    "pause_quit_normal": { "text": "Quit", "font": "default_big", "colour": [160, 160, 160, 255], "width": 85, "height": 39 },
+    "pause_quit_down": { "text": "Quit", "font": "default_big", "colour": [255, 255, 255, 255], "width": 85, "height": 39 },
+    "pause_quit_focus": { "text": "Quit", "font": "default_big", "colour": [255, 255, 255, 255], "width": 85, "height": 39 }
+  },
+  "textures": 
+  {
+    "black_screen": { "path": "test_data/test_black_screen.png", "rows": 1, "columns": 1, "width": 1024, "height": 768 },
+    "title_background": { "path": "test_data/test_wallpaper.jpg", "rows": 1, "columns": 1, "width": 1024, "height": 768 },
+    "platformer_background": { "path": "test_data/test_background.png", "rows": 1, "columns": 1, "width": 1920, "height": 1080 },
+    "test_animated_sprite": { "path": "test_data/test_spritesheet.png", "colour_key": [255, 255, 255], "rows": 2, "columns": 2, "width": 100, "height": 100 },
+    "test_platform": { "path": "test_data/test_ground.png", "rows": 1, "columns": 1, "width": 1000, "height": 200 },
+    "the_ball": { "path": "test_data/test_ball.png", "colour_key": [0, 255, 255], "rows": 1, "columns": 1, "width": 50, "height": 50 }
   }
 }
-
