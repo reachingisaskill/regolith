@@ -30,6 +30,15 @@ namespace Regolith
   }
 
 
+  Interactable::~Interactable()
+  {
+    for ( SignalVector::iterator it = _actions.begin(); it != _actions.end(); ++it )
+    {
+      delete (*it);
+    }
+  }
+
+
   void Interactable::trigger()
   {
     // See if we've hit the limit

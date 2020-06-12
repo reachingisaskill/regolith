@@ -29,6 +29,7 @@ namespace Regolith
 //      Vector& operator= ( const Vector&& ); // Move assignment
 //      ~Vector(); // Destructor
 
+      void set( float x, float y ) { _x = x; _y = y; }
       void zero() { _x = 0.0; _y = 0.0; }
 
       float& x() { return _x; }

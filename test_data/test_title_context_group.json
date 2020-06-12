@@ -46,11 +46,13 @@
             },
             {
               "name" : "test_animated_sprite",
+              "spawn" : true,
               "position" : [ -100.0, 200 ],
               "alignment" : [ "right", "top" ]
             },
             {
               "name" : "test_animated_sprite",
+              "spawn" : true,
               "position" : [ 100.0, 200 ],
               "alignment" : [ "left", "top" ]
             },

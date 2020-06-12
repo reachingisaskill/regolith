@@ -16,21 +16,21 @@
   },
   "strings": 
   {
-    "loading_text": { "text": "Loading...", "font": "default_big", "colour": [160, 160, 160, 255], "width": 210, "height": 39 },
-    "title_welcome1": { "text": "Welcome to the Regolith Integration Test", "font": "default_big", "colour": [255, 255, 255, 255], "width": 840, "height": 39 },
-    "title_start_button_up": { "text": "Click here to start", "font": "default", "colour": [160, 160, 160, 255], "width": 399, "height": 39 },
-    "title_start_button_down": { "text": "Click here to start", "font": "default", "colour": [255, 160, 160, 255], "width": 399, "height": 39 },
-    "title_start_button_focus": { "text": "Click here to start", "font": "default", "colour": [255, 255, 255, 255], "width": 399, "height": 39 },
-    "title_test_button_up": { "text": "Test button", "font": "default", "colour": [160, 160, 160, 255], "width": 232, "height": 39 },
-    "title_test_button_down": { "text": "Test button", "font": "default", "colour": [255, 160, 160, 255], "width": 232, "height": 39 },
-    "title_test_button_focus": { "text": "Test button", "font": "default", "colour": [255, 255, 255, 255], "width": 232, "height": 39 },
-    "title_quit_button_up": { "text": "Exit", "font": "default", "colour": [160, 160, 160, 255], "width": 84, "height": 39 },
-    "title_quit_button_down": { "text": "Exit", "font": "default", "colour": [255, 160, 160, 255], "width": 84, "height": 39 },
-    "title_quit_button_focus": { "text": "Exit", "font": "default", "colour": [255, 255, 255, 255], "width": 84, "height": 39 },
-    "pause_text": { "text": "Game Paused", "font": "default_big", "colour": [160, 160, 160, 255], "width": 231, "height": 39 },
-    "pause_quit_normal": { "text": "Quit", "font": "default_big", "colour": [160, 160, 160, 255], "width": 85, "height": 39 },
-    "pause_quit_down": { "text": "Quit", "font": "default_big", "colour": [255, 255, 255, 255], "width": 85, "height": 39 },
-    "pause_quit_focus": { "text": "Quit", "font": "default_big", "colour": [255, 255, 255, 255], "width": 85, "height": 39 }
+    "loading_text": { "text": "Loading...", "font": "default_big", "colour": [160, 160, 160, 255] },
+    "title_welcome1": { "text": "Welcome to the Regolith Integration Test", "font": "default_big", "colour": [255, 255, 255, 255] },
+    "title_start_button_up": { "text": "Click here to start", "font": "default", "colour": [160, 160, 160, 255] },
+    "title_start_button_down": { "text": "Click here to start", "font": "default", "colour": [255, 160, 160, 255] },
+    "title_start_button_focus": { "text": "Click here to start", "font": "default", "colour": [255, 255, 255, 255] },
+    "title_test_button_up": { "text": "Test button", "font": "default", "colour": [160, 160, 160, 255] },
+    "title_test_button_down": { "text": "Test button", "font": "default", "colour": [255, 160, 160, 255] },
+    "title_test_button_focus": { "text": "Test button", "font": "default", "colour": [255, 255, 255, 255] },
+    "title_quit_button_up": { "text": "Exit", "font": "default", "colour": [160, 160, 160, 255] },
+    "title_quit_button_down": { "text": "Exit", "font": "default", "colour": [255, 160, 160, 255] },
+    "title_quit_button_focus": { "text": "Exit", "font": "default", "colour": [255, 255, 255, 255] },
+    "pause_text": { "text": "Game Paused", "font": "default_big", "colour": [160, 160, 160, 255] },
+    "pause_quit_normal": { "text": "Quit", "font": "default_big", "colour": [160, 160, 160, 255] },
+    "pause_quit_down": { "text": "Quit", "font": "default_big", "colour": [255, 255, 255, 255] },
+    "pause_quit_focus": { "text": "Quit", "font": "default_big", "colour": [255, 255, 255, 255] }
   },
   "textures": 
   {

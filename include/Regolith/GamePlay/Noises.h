@@ -7,9 +7,11 @@
 
 namespace Regolith
 {
+  class RawMusicDetail;
+  class RawSoundDetail;
 
-  RawMusic makeMusic( Json::Value& );
-  RawSound makeSound( Json::Value& );
+  RawMusic makeMusic( const RawMusicDetail& );
+  RawSound makeSound( const RawSoundDetail& );
 
   struct RawMusic
   {

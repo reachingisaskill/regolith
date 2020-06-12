@@ -13,6 +13,8 @@ namespace Regolith
   // Forward declaration
   class Camera;
   class DataHandler;
+  class RawTextureDetail;
+  class RawStringDetail;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Raw Texture Structure (Because SDL_Texture's don't store their dimensions).
@@ -22,18 +24,26 @@ namespace Regolith
     SDL_Texture* texture;
     int width;
     int height;
+    unsigned short int rows;
+    unsigned short int columns;
+    unsigned short cells;
 
-    RawTexture() : texture( nullptr ), width( 0 ), height( 0 ) {}
-    RawTexture( SDL_Texture* t, int w, int h ) : texture( t ), width( w ), height( h ) {}
+    RawTexture() : texture( nullptr ), width( 0 ), height( 0 ), rows( 0 ), columns( 0 ), cells( 0 ) {}
+    RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c ) : texture( t ), width( w ), height( h ), rows( r ), columns( c ), cells( r*c ) {}
+    RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c, unsigned short n ) : texture( t ), width( w ), height( h ), rows( r ), columns( c ), cells( n ) {}
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful functions
 
+  RawTexture makeTextureFromText( const RawStringDetail& );
   RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );
-  RawTexture makeTextureFromFile( std::string );
-  RawTexture makeTextureFromFile( std::string, SDL_Color );
-  RawTexture makeTexture( Json::Value& );
+
+  RawTexture makeTextureFromFile( const RawTextureDetail& );
+  RawTexture makeTextureFromFile( std::string, unsigned short r = 1, unsigned short c = 1 );
+  RawTexture makeTextureFromFile( std::string, SDL_Color, unsigned short r = 1, unsigned short c = 1);
+
+//  RawTexture makeTexture( Json::Value& );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Texture class. The simplest object of renderable data.
@@ -49,9 +59,6 @@ namespace Regolith
 
       // If its a spritesheet
       int _currentSprite;
-      int _rows;
-      int _columns;
-      int _numSprites;
 
       // If its animated
       float _updatePeriod;
@@ -115,7 +122,7 @@ namespace Regolith
 
 
       // Sprite details
-      int getNumberSprites() const { return _numSprites; }
+      int getNumberSprites() const { return _theTexture->cells; }
       void setSpriteNumber( int );
       const int& currentSpriteNumber() { return _currentSprite; }
   };

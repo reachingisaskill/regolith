@@ -318,13 +318,19 @@ namespace Regolith
           }
 
           PhysicalObject* phys_obj = dynamic_cast<PhysicalObject*>( object );
-
           Vector object_pos = placeInLayer( current_layer, phys_obj, element_data[j] );
 
           current_layer.spawn( phys_obj, object_pos );
         }
         else
         {
+          if ( object->isPhysical() )
+          {
+            PhysicalObject* phys_obj = dynamic_cast<PhysicalObject*>( object );
+            Vector object_pos = placeInLayer( current_layer, phys_obj, element_data[j] );
+            phys_obj->setPosition( object_pos );
+          }
+
           current_layer.cacheObject( object );
         }
       }
@@ -364,13 +370,17 @@ namespace Regolith
   Vector placeInLayer( ContextLayer& layer, PhysicalObject* object, Json::Value& json_data )
   {
     DEBUG_LOG( "Placing in Layer" );
-    Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+    Vector pos( 0.0 );
+    Vector offset( 0.0 );
 
-    float x = json_data["position"][0].asFloat();
-    float y = json_data["position"][1].asFloat();
-    Vector pos( x, y );
-    Vector offset( 0.0, 0.0 );
+    if ( Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY, false ) )
+    {
+      Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+
+      float x = json_data["position"][0].asFloat();
+      float y = json_data["position"][1].asFloat();
+      pos.set( x, y );
+    }
 
     if ( Utilities::validateJson( json_data, "alignment", Utilities::JSON_TYPE_ARRAY, false ) )
     {

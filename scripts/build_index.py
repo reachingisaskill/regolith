@@ -318,18 +318,6 @@ if __name__ == "__main__" :
       warnings.append( "WARNING: Font \"", font_name, "\" required by text string \"", string_name, "\" not found." )
 
     else :
-      font_path = font_dict[ font_name ]["path"]
-      font_size = font_dict[ font_name ]["size"]
-
-      temp_font = sdlttf.TTF_OpenFont( font_path.encode(), font_size )
-      temp_surface = sdlttf.TTF_RenderText_Solid( temp_font, string_data["text"].encode(), sdl2.SDL_Color( 255, 255, 255 ) ).contents
-      width = temp_surface.w
-      height = temp_surface.h
-      sdl2.SDL_FreeSurface( temp_surface )
-      sdlttf.TTF_CloseFont( temp_font )
-
-      string_data["width"] = width
-      string_data["height"] = height
       total_strings += 1
 
 

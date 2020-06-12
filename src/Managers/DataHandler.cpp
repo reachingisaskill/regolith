@@ -1,5 +1,6 @@
 
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Managers/Manager.h"
 
 
 namespace Regolith
@@ -24,7 +25,8 @@ namespace Regolith
     RawTextureMap::iterator found = _rawTextures.find( name );
     if ( found == _rawTextures.end() )
     {
-      found = _rawTextures.insert( std::make_pair( name, RawTexture() ) ).first;
+      RawTexture new_texture = Manager::getInstance()->getDataManager().buildRawTexture( name );
+      found = _rawTextures.insert( std::make_pair( name, new_texture ) ).first;
     }
 
     return &(found->second);

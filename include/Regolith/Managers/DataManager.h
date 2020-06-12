@@ -4,6 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Utilities/MutexedBuffer.h"
+#include "Regolith/Managers/RawObjectDetails.h"
 
 #include <thread>
 #include <mutex>
@@ -38,6 +39,22 @@ namespace Regolith
       std::string _indexFile;
 
 
+      // Map of texture details
+      RawTextureDetailMap _textureDetails;
+
+      // Map of string details
+      RawStringDetailMap _stringDetails;
+
+      // Map of music details
+      RawMusicDetailMap _musicDetails;
+
+      // Map of sounds details
+      RawSoundDetailMap _soundDetails;
+
+//      // Map of font details
+//      RawTextureDetailMap _fontDetails;
+
+
       // Loading queue
       MutexedBuffer< DataHandler* > _loadQueue;
 
@@ -59,7 +76,10 @@ namespace Regolith
       void configure( Json::Value& );
 
       // Validate the game objects
-      void validate() const;
+      void validate();
+
+      // Build a raw texture object with no pointer for a data handler using the index
+      RawTexture buildRawTexture( std::string ) const;
 
 
 ////////////////////////////////////////////////////////////////////////////////

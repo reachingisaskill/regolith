@@ -36,7 +36,7 @@ namespace Regolith
       // Copy the signal data
       Interactable( const Interactable& );
 
-      virtual ~Interactable() {}
+      virtual ~Interactable();
 
 
       // Set up the actions
