@@ -5,6 +5,8 @@
 #include "Regolith/Global/Json.h"
 #include "Regolith/Architecture/MassProduceable.h"
 
+#include "logtastic.h"
+
 
 namespace Regolith
 {
@@ -46,7 +48,14 @@ namespace Regolith
 
     new_object->configure( data, args... );
 
-    return dynamic_cast<BASE*>( new_object );
+    BASE* base_pointer = dynamic_cast<BASE*>( new_object );
+
+    if ( base_pointer == nullptr )
+    {
+      ERROR_STREAM << "FactoryBuilder : Failed to convert pointer to derived type!";
+    }
+
+    return base_pointer;
   }
 
 }

@@ -56,11 +56,11 @@ namespace Regolith
   }
 
 
-  void SimpleButton::configure( Json::Value& json_data, DataHandler& handler )
+  void SimpleButton::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& handler )
   {
-    Drawable::configure( json_data, handler );
-    Interactable::configure( json_data, handler );
-    Clickable::configure( json_data, handler );
+    Drawable::configure( json_data, cg, handler );
+    Interactable::configure( json_data, cg, handler );
+    Clickable::configure( json_data, cg, handler );
 
 
     Utilities::validateJson( json_data, "textures", Utilities::JSON_TYPE_OBJECT );

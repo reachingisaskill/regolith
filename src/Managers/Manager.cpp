@@ -159,6 +159,8 @@ namespace Regolith
   void Manager::run()
   {
     // Start all the waiting threads
+    _theThreads.startAll();
+
     {
       std::lock_guard<std::mutex> lk( _theThreads.StartCondition.mutex );
       _theThreads.StartCondition.data = true;
@@ -172,8 +174,13 @@ namespace Regolith
     // Reset the stack to the first context
     setContextStack( _theContexts.getCurrentContextGroup()->getEntryPoint() );
 
+
     // Start the engine!
     _theEngine.run();
+
+
+    // Join all the threads
+    _theThreads.stopAll();
   }
 
 

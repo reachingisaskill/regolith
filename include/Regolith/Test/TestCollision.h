@@ -26,7 +26,7 @@ namespace Regolith
 
 
       // Configure the class
-      virtual void configure( Json::Value&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
       // Validate the configuration
       virtual void validate() const override;

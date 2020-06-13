@@ -26,7 +26,7 @@ namespace Regolith
 
 
       // Configure the object
-      virtual void configure( Json::Value&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
 
       // Override the width/height getters

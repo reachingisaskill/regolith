@@ -1,6 +1,7 @@
 
 #include "Regolith/Architecture/Moveable.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -34,9 +35,9 @@ namespace Regolith
   }
 
 
-  void Moveable::configure( Json::Value& json_data, DataHandler& handler )
+  void Moveable::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& handler )
   {
-    PhysicalObject::configure( json_data, handler );
+    PhysicalObject::configure( json_data, cg, handler );
 
     if ( Utilities::validateJson( json_data, "velocity", Utilities::JSON_TYPE_FLOAT, false ) )
     {

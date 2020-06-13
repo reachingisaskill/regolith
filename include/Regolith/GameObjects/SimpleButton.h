@@ -31,7 +31,7 @@ namespace Regolith
       virtual ~SimpleButton();
 
       // Configure the button textures
-      virtual void configure( Json::Value&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
 
       // Return a new clone of the current object. Transfers ownership of memory

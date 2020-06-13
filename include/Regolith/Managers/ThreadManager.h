@@ -38,6 +38,13 @@ namespace Regolith
       // Signal everything!
       void quit();
 
+      // Send the start signals
+      void startAll();
+
+      // Send the stop signals and call join
+      void stopAll();
+
+
 ////////////////////////////////////////////////////////////////////////////////
       // Conditions for threads to interact with
 

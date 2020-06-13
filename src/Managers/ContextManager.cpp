@@ -201,11 +201,8 @@ namespace Regolith
     INFO_LOG( "Loading thread waiting for first command" );
     while( ! quitFlag )
     {
-      if ( ! contextUpdate.data )
-      {
-        contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
-        if ( quitFlag ) break;
-      }
+      contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
+      if ( quitFlag ) break;
 
       DEBUG_STREAM << "CONTEXT LOADING THREAD WORKING";
 

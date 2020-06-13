@@ -19,9 +19,9 @@ namespace Regolith
   }
 
 
-  void Region::configure( Json::Value& json_data, DataHandler& handler )
+  void Region::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& handler )
   {
-    Collidable::configure( json_data, handler );
+    Collidable::configure( json_data, cg, handler );
 
     Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_FLOAT );
     Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_FLOAT );

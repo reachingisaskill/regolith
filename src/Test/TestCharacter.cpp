@@ -156,9 +156,9 @@ namespace Regolith
   }
 
 
-  void TestCharacter::configure( Json::Value& json_data, DataHandler& handler )
+  void TestCharacter::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& handler )
   {
-    ControllableCharacter::configure( json_data, handler );
+    ControllableCharacter::configure( json_data, cg, handler );
 
     _theTexture.configure( json_data, handler );
 

@@ -6,6 +6,7 @@
 
 namespace Regolith
 {
+  class ContextGroup;
   class DataHandler;
 
   /*
@@ -21,7 +22,7 @@ namespace Regolith
    * Movement => Movable
    * Click => Clickable
    */
-  class GameObject : public MassProduceable< DataHandler& >
+  class GameObject : public MassProduceable< ContextGroup&, DataHandler& >
   {
     public:
       virtual ~GameObject() {}

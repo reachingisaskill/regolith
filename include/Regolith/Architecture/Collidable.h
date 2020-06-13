@@ -34,7 +34,7 @@ namespace Regolith
       virtual ~Collidable() {}
 
 
-      virtual void configure( Json::Value&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
 
       // Return the team id - determines collision interactions

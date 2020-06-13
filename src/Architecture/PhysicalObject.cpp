@@ -1,5 +1,6 @@
 
 #include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -27,7 +28,7 @@ namespace Regolith
   }
 
 
-  void PhysicalObject::configure( Json::Value& json_data, DataHandler& )
+  void PhysicalObject::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
     if ( Utilities::validateJson( json_data, "mass", Utilities::JSON_TYPE_FLOAT, false ) )
     {

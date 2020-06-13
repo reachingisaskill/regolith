@@ -47,9 +47,9 @@ namespace Regolith
   }
 
 
-  void SimpleSprite::configure( Json::Value& json_data, DataHandler& handler )
+  void SimpleSprite::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& handler )
   {
-    Drawable::configure( json_data, handler );
+    Drawable::configure( json_data, cg, handler );
 
     _texture.configure( json_data, handler );
   }

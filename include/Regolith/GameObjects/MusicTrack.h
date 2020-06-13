@@ -22,7 +22,7 @@ namespace Regolith
       ~MusicTrack();
 
       // Configure the music track
-      void configure( Json::Value&, DataHandler& );
+      void configure( Json::Value&, ContextGroup&, DataHandler& );
 
       // Return the track pointer
       RawMusic* getTrack() const { return _track; }

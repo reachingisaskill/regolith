@@ -1,5 +1,6 @@
 
 #include "Regolith/Architecture/Clickable.h"
+#include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -126,7 +127,7 @@ namespace Regolith
   }
 
 
-  void Clickable::configure( Json::Value& json_data, DataHandler& )
+  void Clickable::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
     if ( Utilities::validateJson( json_data, "clickable_state", Utilities::JSON_TYPE_STRING, false ) )
     {

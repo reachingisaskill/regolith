@@ -41,7 +41,7 @@ namespace Regolith
   }
 
 
-  void TestCollision::configure( Json::Value&, DataHandler& )
+  void TestCollision::configure( Json::Value&, ContextGroup&, DataHandler& )
   {
 //    Collidable::configure( json_data, handler );
   }

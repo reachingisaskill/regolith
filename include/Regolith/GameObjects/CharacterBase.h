@@ -22,7 +22,7 @@ namespace Regolith
       virtual ~CharacterBase();
 
       // Configuration
-      virtual void configure( Json::Value&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
       // Replace the character at the specified position
       virtual void respawn( const Vector& ) = 0;

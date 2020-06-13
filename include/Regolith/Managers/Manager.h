@@ -35,9 +35,9 @@ namespace Regolith
   typedef std::map< std::string, TeamID > TeamNameMap;
 
   // Factory typedefs
-  typedef FactoryTemplate< GameObject, DataHandler& > ObjectFactory;
+  typedef FactoryTemplate< Signal, ContextGroup&, DataHandler& > SignalFactory;
+  typedef FactoryTemplate< GameObject, ContextGroup&, DataHandler& > ObjectFactory;
   typedef FactoryTemplate< Context, ContextGroup& > ContextFactory;
-  typedef FactoryTemplate< Signal > SignalFactory;
 
   // Manager class
   // Global storage for all scenes, renderers and windows.

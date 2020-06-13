@@ -3,6 +3,8 @@
 #include "Regolith/Architecture/Context.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -28,7 +30,7 @@ namespace Regolith
   }
 
 
-  void InputActionSignal::configure( Json::Value& json_data, ContextGroup& )
+  void InputActionSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
     INFO_LOG( " Input Action Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -52,7 +54,7 @@ namespace Regolith
     man->getInputManager().simulateBooleanAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
   }
 
-  void InputBooleanSignal::configure( Json::Value& json_data, ContextGroup& )
+  void InputBooleanSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
     INFO_LOG( " Input Boolean Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -83,7 +85,7 @@ namespace Regolith
   }
 
 
-  void InputFloatSignal::configure( Json::Value& json_data, ContextGroup& )
+  void InputFloatSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
     INFO_LOG( " Input Float Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -114,7 +116,7 @@ namespace Regolith
   }
 
 
-  void InputVectorSignal::configure( Json::Value& json_data, ContextGroup& )
+  void InputVectorSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
     INFO_LOG( " Input Vector Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -147,7 +149,7 @@ namespace Regolith
   }
 
 
-  void InputMouseSignal::configure( Json::Value& json_data, ContextGroup& )
+  void InputMouseSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
     INFO_LOG( " Input Mouse Signal" );
     Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
@@ -180,9 +182,8 @@ namespace Regolith
   }
 
 
-  void GameEventSignal::configure( Json::Value& json_data, ContextGroup& )
+  void GameEventSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
-    INFO_LOG( " Game Event Signal" );
     Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
 
     _theEvent = getRegolithEventID( json_data["event"].asString() );
@@ -237,7 +238,7 @@ namespace Regolith
   }
 
 
-  void ChangeContextSignal::configure( Json::Value& json_data, ContextGroup& cg )
+  void ChangeContextSignal::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& )
   {
     INFO_LOG( " Change Context Signal" );
     Utilities::validateJson( json_data, "context_name", Utilities::JSON_TYPE_STRING );

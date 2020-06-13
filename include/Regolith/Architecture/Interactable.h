@@ -21,6 +21,8 @@ namespace Regolith
     typedef std::vector< Signal* > SignalVector;
 
     private :
+      unsigned int _copyCounter;
+
       SignalVector _actions;
       unsigned int _triggerCount;
       unsigned int _triggerLimit;
@@ -36,11 +38,14 @@ namespace Regolith
       // Copy the signal data
       Interactable( const Interactable& );
 
+      // Assignment operator
+      Interactable& operator=( const Interactable& );
+
       virtual ~Interactable();
 
 
       // Set up the actions
-      virtual void configure( Json::Value&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
       // Validate the signals
       virtual void validate() const override;

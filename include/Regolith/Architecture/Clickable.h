@@ -40,7 +40,7 @@ namespace Regolith
 
 
       // Configuration function
-      virtual void configure( Json::Value&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
 
       // This object is clickable

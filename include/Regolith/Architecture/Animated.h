@@ -19,7 +19,7 @@ namespace Regolith
     public:
       virtual ~Animated() {}
 
-      virtual void configure( Json::Value&, DataHandler& ) override {}
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override {}
 
 
       bool hasAnimation() const override { return true; }

@@ -20,13 +20,13 @@ namespace Regolith
   }
 
 
-  void CharacterBase::configure( Json::Value& json_data, DataHandler& handler )
+  void CharacterBase::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& handler )
   {
-    Drawable::configure( json_data, handler );
-    Animated::configure( json_data, handler );
-    Moveable::configure( json_data, handler );
-    Noisy::configure( json_data, handler );
-    Collidable::configure( json_data, handler );
+    Drawable::configure( json_data, cg, handler );
+    Animated::configure( json_data, cg, handler );
+    Moveable::configure( json_data, cg, handler );
+    Noisy::configure( json_data, cg, handler );
+    Collidable::configure( json_data, cg, handler );
   }
 
 }
