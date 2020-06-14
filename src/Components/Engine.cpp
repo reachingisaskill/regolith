@@ -166,6 +166,7 @@ namespace Regolith
             _contextStack.pop_front();
           }
           DEBUG_LOG( "Loading new base context" );
+          DEBUG_STREAM << " CONTEXT: @ " << sop.context;
           _contextStack.push_front( sop.context );
           _contextStack.front()->startContext();
           break;

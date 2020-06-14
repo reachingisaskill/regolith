@@ -25,9 +25,6 @@ namespace Regolith
       float _progress;
       mutable std::mutex _progressMutex;
 
-      // Handle to the loading thread
-      std::thread _loadingThread;
-
       // The data that exists in the global scope
       ContextGroup _globalContextGroup;
 
@@ -71,7 +68,7 @@ namespace Regolith
       // Return a pointer to a specific context group
       Proxy<ContextGroup*> requestContextGroup( std::string name ) { return _contextGroups.request( name ); }
 
-      // Set a specific context group to load
+      // Set a specific context group to load - Signals should ONLY use this interface!
       void setNextContextGroup( ContextGroup* );
 
       // Signal the manager to start the loading process. Should only be called by a global context!

@@ -1,5 +1,6 @@
 
 #include "Regolith/Managers/DataManager.h"
+#include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
@@ -13,7 +14,6 @@
 namespace Regolith
 {
 
-  void dataLoadingThread();
   void dataLoadFunction();
   void dataUnloadFunction();
 
@@ -21,7 +21,6 @@ namespace Regolith
   DataManager::DataManager() :
     _loading( false ),
     _loadFlagMutex(),
-    _loadingThread( dataLoadingThread ),
     _indexFile(),
     _textureDetails(),
     _stringDetails(),
@@ -36,7 +35,6 @@ namespace Regolith
   DataManager::~DataManager()
   {
     INFO_LOG( "Destroying Data Manager." );
-    _loadingThread.join();
   }
 
 
@@ -247,7 +245,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Loading/unloading thread
 
-  void dataLoadingThread()
+  void dataManagerLoadingThread()
   {
     INFO_LOG( "Data Manager loading thread start." );
 
@@ -270,12 +268,8 @@ namespace Regolith
     INFO_LOG( "Loading thread waiting for first command" );
     while( ! quitFlag )
     {
-      if ( ! dataUpdate.data )
-      {
-        manager.setLoading( false );
-        dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
-        if ( quitFlag ) break;
-      }
+      dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
+      if ( quitFlag ) break;
 
       manager.setLoading( true );
 

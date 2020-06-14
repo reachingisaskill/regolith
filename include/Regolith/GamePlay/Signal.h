@@ -215,6 +215,29 @@ namespace Regolith
   };
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Context Group Change Signal
+
+  class ChangeContextGroupSignal : public Signal
+  {
+    private:
+      Proxy<ContextGroup*> _theContextGroup;
+
+    public :
+      // Con/Destruction
+      ChangeContextGroupSignal();
+      virtual ~ChangeContextGroupSignal() {}
+
+      void trigger() const;
+
+      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+
+      virtual void validate() const override;
+
+      virtual Signal* clone() const override { return new ChangeContextGroupSignal( *this ); }
+  };
+
+
 }
 
 #endif // REOGLITH_GAMEPLAY_SIGNAL_H_

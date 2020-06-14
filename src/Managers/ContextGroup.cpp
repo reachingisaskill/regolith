@@ -15,12 +15,12 @@ namespace Regolith
     _theAudio(),
     _dataHandlers( "Data Handlers" ),
     _fileName(),
-    _loadScreen( nullptr ),
+    _loadScreen(),
     _contexts( "Context Map" ),
     _gameObjects( "Game Object Map" ),
     _spawnedObjects(),
     _onLoadOperations(),
-    _entryPoint( nullptr ),
+    _entryPoint(),
     _isLoaded( false )
   {
   }
@@ -30,10 +30,7 @@ namespace Regolith
   {
     INFO_LOG( "Deleting Context Group" );
 
-    Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
-    GuardLock( contextUpdate.mutex );
-
-    if ( isLoaded ) this->unload();
+    if ( _isLoaded ) this->unload();
   }
 
 
@@ -41,11 +38,7 @@ namespace Regolith
   {
     _fileName = filename;
     _isGlobalGroup = isGlobal;
-  }
 
-
-  void ContextGroup::load()
-  {
     // Load Json Data
     Json::Value json_data;
     Utilities::loadJsonData( json_data, _fileName );
@@ -54,25 +47,46 @@ namespace Regolith
     Utilities::validateJson( json_data, "data_handlers", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
 
-
     // Global groups don't have a load-screen!
-    if ( _isGlobalGroup )
-    {
-      _loadScreen = nullptr;
-    }
-    else
+    if ( ! _isGlobalGroup )
     {
       Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING );
+      _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->requestContext( json_data["load_screen"].asString() );
+
       // Set the load screen pointer
-      _loadScreen = dynamic_cast<LoadScreen*>( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContext( json_data["load_screen"].asString() ) );
-      if ( _loadScreen == nullptr )
-      {
-        Exception ex( "ContextGroup::load()", "Could not find the requested LoadScreen. Is it the correct context type?" );
-        ex.addDetail( "Context Name",  json_data["load_screen"].asString() );
-        throw ex;
-      }
+//      _loadScreen = dynamic_cast<LoadScreen*>( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContext( json_data["load_screen"].asString() ) );
+//      if ( _loadScreen == nullptr )
+//      {
+//        Exception ex( "ContextGroup::configure()", "Could not find the requested LoadScreen. Is it the correct context type?" );
+//        ex.addDetail( "Context Name",  json_data["load_screen"].asString() );
+//        throw ex;
+//      }
     }
 
+    // Load a space for every context
+    Json::Value& contexts = json_data["contexts"];
+    for( Json::Value::iterator c_it = contexts.begin(); c_it != contexts.end(); ++c_it )
+    {
+      std::string cont_name = c_it.key().asString();
+      _contexts.set( cont_name, nullptr );
+    }
+
+
+    // Set the default entry point
+    if ( ! _isGlobalGroup )
+    {
+      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
+      _entryPoint = requestContext( json_data["entry_point"].asString() );
+    }
+
+  }
+
+
+  void ContextGroup::load()
+  {
+    // Load Json Data
+    Json::Value json_data;
+    Utilities::loadJsonData( json_data, _fileName );
 
     // Load objects
     ObjectFactory& obj_factory = Manager::getInstance()->getObjectFactory();
@@ -136,18 +150,6 @@ namespace Regolith
     }
 
 
-    // Set the default entry point
-    if ( _isGlobalGroup )
-    {
-      _entryPoint = nullptr;
-    }
-    else
-    {
-      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
-      _entryPoint = getContext( json_data["entry_point"].asString() );
-    }
-
-
     // Make sure the sounds each have their channels allocated and ready
     _theAudio.configure();
 
@@ -194,8 +196,9 @@ namespace Regolith
     for ( ProxyMap< Context* >::iterator it = _contexts.begin(); it != _contexts.end(); ++it )
     {
       delete it->second;
+      it->second = nullptr;
     }
-    _contexts.clear();
+//    _contexts.clear();
 
     INFO_LOG( "Unloading Spawned Objects" );
     for ( SpawnedList::iterator it = _spawnedObjects.begin(); it != _spawnedObjects.end(); ++it )
@@ -258,7 +261,7 @@ namespace Regolith
     switch( _operation )
     {
       case ACTION_SET_ENTRY_POINT :
-        cg->setEntryPoint( cg->getContext( _key ) );
+        cg->setEntryPoint( cg->requestContext( _key ) );
         break;
 
       default:

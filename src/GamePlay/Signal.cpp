@@ -283,5 +283,41 @@ namespace Regolith
     }
   }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Context Group Change Signal
+
+  ChangeContextGroupSignal::ChangeContextGroupSignal() :
+    _theContextGroup()
+  {
+  }
+
+
+  void ChangeContextGroupSignal::trigger() const
+  {
+    DEBUG_STREAM << "CHANGE CONTEXT GROUP : " << _theContextGroup.getName() << " @ " << *_theContextGroup;
+    Manager::getInstance()->getContextManager().setNextContextGroup( *_theContextGroup );
+  }
+
+
+  void ChangeContextGroupSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
+  {
+    INFO_LOG( " Change Context Group Signal" );
+    Utilities::validateJson( json_data, "context_group", Utilities::JSON_TYPE_STRING );
+
+    _theContextGroup = Manager::getInstance()->getContextManager().requestContextGroup( json_data["context_group"].asString() );
+  }
+
+
+  void ChangeContextGroupSignal::validate() const
+  {
+    if ( ! _theContextGroup || ( (*_theContextGroup) == nullptr ) )
+    {
+      Exception ex( "ChangeContextGroupSignal::validate() const", "Specified context group was not configured." );
+      ex.addDetail( "Context Group Name", _theContextGroup.getName() );
+      throw ex;
+    }
+  }
+
 }
 

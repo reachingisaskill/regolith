@@ -24,6 +24,8 @@ namespace Regolith
     if ( _theMusic != nullptr )
       owner()->getAudioHandler().setSong( _theMusic->getTrack() );
 
+    DEBUG_LOG( "LOAD SCREEN START" );
+
     Manager::getInstance()->getContextManager().loadNextContextGroup();
   }
 

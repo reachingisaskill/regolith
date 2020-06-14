@@ -1,5 +1,6 @@
 
 #include "Regolith/Managers/ContextManager.h"
+#include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -17,7 +18,6 @@ namespace Regolith
   ContextManager::ContextManager() :
     _loaded( false ),
     _progress( 0.0 ),
-    _loadingThread( contextManagerLoadingThread ),
     _globalContextGroup(),
     _contextGroups( "Context Groups" ),
     _currentContextGroup( nullptr ),
@@ -29,7 +29,6 @@ namespace Regolith
   ContextManager::~ContextManager()
   {
     INFO_LOG( "Destroying Context Manager" );
-    _loadingThread.join();
   }
 
 
@@ -115,7 +114,7 @@ namespace Regolith
       std::string file = it->asString();
 
       ContextGroup* cg = new ContextGroup();
-      cg->configure( file );
+      cg->configure( file, false );
       _contextGroups.set( name, cg );
     }
 
@@ -152,6 +151,7 @@ namespace Regolith
 
     Context* load_screen = (Context*)_nextContextGroup->getLoadScreen();
 
+    DEBUG_STREAM << "Load scree start @ " << load_screen;
     Manager::getInstance()->setContextStack( load_screen );
   }
 

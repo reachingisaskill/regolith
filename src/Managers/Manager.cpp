@@ -81,6 +81,7 @@ namespace Regolith
     _signalFactory.addBuilder<InputVectorSignal>( "input_vector" );
     _signalFactory.addBuilder<GameEventSignal>( "game_event" );
     _signalFactory.addBuilder<ChangeContextSignal>( "context_change" );
+    _signalFactory.addBuilder<ChangeContextGroupSignal>( "context_group_change" );
   }
 
 
@@ -148,7 +149,7 @@ namespace Regolith
 
   void Manager::setContextStack( Context* c )
   {
-    DEBUG_LOG( "Resetting Context Stack" );
+    DEBUG_STREAM << "Resetting Context Stack @ " << c;
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, c ) );
   }
 
@@ -160,13 +161,6 @@ namespace Regolith
   {
     // Start all the waiting threads
     _theThreads.startAll();
-
-    {
-      std::lock_guard<std::mutex> lk( _theThreads.StartCondition.mutex );
-      _theThreads.StartCondition.data = true;
-    }
-    // Start all the helper threads
-    _theThreads.StartCondition.variable.notify_all();
 
     // Load the first context group blocking this thread until completion
     _theContexts.loadEntryPoint();

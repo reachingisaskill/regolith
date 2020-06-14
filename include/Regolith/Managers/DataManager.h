@@ -23,7 +23,7 @@ namespace Regolith
 
   class DataManager
   {
-    friend void dataLoadingThread();
+    friend void dataManagerLoadingThread();
     friend void dataLoadFunction();
     friend void dataUnloadFunction();
 
@@ -31,9 +31,6 @@ namespace Regolith
       // Flag to indicate the loading thread is active
       bool _loading;
       mutable std::mutex _loadFlagMutex;
-
-      // Loading thread container
-      std::thread _loadingThread;
 
       // Path to the list of all texture files and their modifiers
       std::string _indexFile;

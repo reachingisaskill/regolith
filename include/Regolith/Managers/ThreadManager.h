@@ -12,6 +12,18 @@
 
 namespace Regolith
 {
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // List of all threads
+
+  // Data Manager loading thread
+  void dataManagerLoadingThread();
+
+  // Context Manager loading thread
+  void contextManagerLoadingThread();
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Condition structure for storing condition variables
 
   template < class DATA >
   struct Condition
@@ -24,10 +36,16 @@ namespace Regolith
     explicit Condition( DATA d ) : data( d ) {}
   };
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Manager Class
   class ThreadManager
   {
     private:
+      // Data manager thread container
+      std::thread _dataManagerThread;
+
+      // Context manager thread container
+      std::thread _contextManagerThread;
 
     public:
       // Con/Destructors

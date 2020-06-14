@@ -82,6 +82,10 @@
       },
       "signals" :
       [
+        {
+          "type" : "context_group_change",
+          "context_group" : "platformer_group"
+        }
       ]
     },
     "title_test_button" :

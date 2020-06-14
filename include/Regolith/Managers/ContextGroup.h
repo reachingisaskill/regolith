@@ -43,7 +43,7 @@ namespace Regolith
       std::string _fileName;
 
       // Pointer to the load screen
-      LoadScreen* _loadScreen;
+      Proxy<LoadScreen*> _loadScreen;
 
       // List of the contexts controlled by this handler
       ProxyMap< Context* > _contexts;
@@ -58,7 +58,7 @@ namespace Regolith
       OperationQueue _onLoadOperations;
 
       // Starting point when this context group is loaded
-      Context* _entryPoint;
+      Proxy< Context* > _entryPoint;
 
       // Flag to indicate the group is loaded
       bool _isLoaded;
@@ -84,13 +84,13 @@ namespace Regolith
       void unload();
 
       // Return the ID of the load screen
-      LoadScreen* getLoadScreen() const { return _loadScreen; }
+      LoadScreen* getLoadScreen() const { return *_loadScreen; }
 
       // Set the entry point when this context group loads
-      void setEntryPoint( Context* c ) { _entryPoint = c; }
+      void setEntryPoint( Proxy<Context*> c ) { _entryPoint = c; }
 
       // Return the entry point for this context group
-      Context* getEntryPoint() { return _entryPoint; }
+      Context* getEntryPoint() { return *_entryPoint; }
 
       // Return a flag to indicate the group is loaded into memory
       bool isLoaded() const { return _isLoaded; }
