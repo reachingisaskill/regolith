@@ -37,6 +37,12 @@ namespace Regolith
       virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
 
+      // Override the width/height getters
+      virtual float getWidth() const override { return _collision.width(); }
+      virtual float getHeight() const override { return _collision.height(); }
+
+
+
       // Return the team id - determines collision interactions
       TeamID getTeam() const { return _teamID; }
 

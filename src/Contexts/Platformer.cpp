@@ -103,8 +103,15 @@ namespace Regolith
     std::string character_layer = json_data["character"]["layer"].asString();
 
     _player = dynamic_cast< ControllableCharacter* >( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getGameObject( character_name ) );
-    getLayer( character_layer ).cacheObject( _player );
+    if ( _player == nullptr )
+    {
+      Exception ex( "Platformer::configure()", "Could not locate player character as type: ControllableCharacter." );
+      ex.addDetail( "Character Name", character_name );
+      ex.addDetail( "Character Layer", character_layer );
+      throw ex;
+    }
 
+    getLayer( character_layer ).cacheObject( _player );
     INFO_STREAM << "Register platformer character as: \"" << character_name << "\" in layer \"" << character_layer << "\"";
 
 

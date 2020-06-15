@@ -260,37 +260,63 @@ namespace Regolith
     }
     INFO_LOG( "Data Manager loading thread go." );
 
-
     DataManager& manager = Manager::getInstance()->getDataManager();
     Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
     std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
 
-    INFO_LOG( "Loading thread waiting for first command" );
-    while( ! quitFlag )
+    try
     {
-      dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
-      if ( quitFlag ) break;
 
-      manager.setLoading( true );
-
-      DEBUG_STREAM << "DATA LOADING THREAD WORKING";
-      do
+      INFO_LOG( "Loading thread waiting for first command" );
+      while( ! quitFlag )
       {
-        dataUpdate.data = false;
+        dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
+        if ( quitFlag ) break;
 
+        manager.setLoading( true );
+
+        DEBUG_STREAM << "DATA LOADING THREAD WORKING";
+        do
+        {
+          dataUpdate.data = false;
+
+          dataLock.unlock();
+
+          dataUnloadFunction();
+          dataLoadFunction();
+
+          dataLock.lock();
+
+        } while( dataUpdate.data == true );
+
+        dataUpdate.variable.notify_all();
+      }
+
+      dataLock.unlock();
+    }
+    catch ( const Exception& ex )
+    {
+      Manager::getInstance()->getThreadManager().error();
+      if ( dataLock.owns_lock() )
+      {
+        dataUpdate.variable.notify_all();
         dataLock.unlock();
-
-        dataUnloadFunction();
-        dataLoadFunction();
-
-        dataLock.lock();
-
-      } while( dataUpdate.data == true );
-
-      dataUpdate.variable.notify_all();
+      }
+      FAILURE_LOG( "Regolith Exception thrown from Data Manager Thread." );
+      std::cerr << ex.elucidate();
+    }
+    catch( const std::exception& ex )
+    {
+      Manager::getInstance()->getThreadManager().error();
+      if ( dataLock.owns_lock() )
+      {
+        dataUpdate.variable.notify_all();
+        dataLock.unlock();
+      }
+      FAILURE_LOG( "Standard Exception thrown from Data Manager Thread." );
+      std::cerr << ex.what();
     }
 
-    dataLock.unlock();
     INFO_LOG( "Data Manager loading thread stopped." );
   }
 
@@ -311,28 +337,37 @@ namespace Regolith
         for ( RawTextureMap::iterator it = textureCache.begin(); it != texture_end; ++it )
         {
           std::string name = it->first;
-          RawTextureDetailMap::iterator texture_found = manager._textureDetails.find( name );
-          if ( texture_found != manager._textureDetails.end() )
+          try
           {
-            DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
-            it->second = makeTextureFromFile( texture_found->second );
-//            it->second = makeTextureFromFile( texture_data[ name ] );
-            DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
-          }
-          else
-          {
-            RawStringDetailMap::iterator string_found = manager._stringDetails.find( name );
-            if ( string_found != manager._stringDetails.end() )
+            RawTextureDetailMap::iterator texture_found = manager._textureDetails.find( name );
+            if ( texture_found != manager._textureDetails.end() )
             {
               DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
-              it->second = makeTextureFromText( string_found->second );
-  //            it->second = makeTextureFromText( string_data[ name ] );
+              it->second = makeTextureFromFile( texture_found->second );
+  //            it->second = makeTextureFromFile( texture_data[ name ] );
               DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
             }
             else
             {
-              ERROR_STREAM << "Could not find texture resource to load : " << name;
+              RawStringDetailMap::iterator string_found = manager._stringDetails.find( name );
+              if ( string_found != manager._stringDetails.end() )
+              {
+                DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
+                it->second = makeTextureFromText( string_found->second );
+    //            it->second = makeTextureFromText( string_data[ name ] );
+                DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
+              }
+              else
+              {
+                throw Exception( "dataLoadFunction()", "Could not find texture resource to load." );
+              }
             }
+          }
+          catch( Exception& ex )
+          {
+            ex.addDetail( "Texture Name", name );
+            std::cerr << ex.elucidate();
+            Manager::getInstance()->getThreadManager().error();
           }
         }
 
@@ -342,16 +377,24 @@ namespace Regolith
         for ( RawMusicMap::iterator it = musicCache.begin(); it != music_end; ++it )
         {
           std::string name = it->first;
-          RawMusicDetailMap::iterator music_found = manager._musicDetails.find( name );
-
-          if ( music_found == manager._musicDetails.end() )
+          try
           {
-            ERROR_STREAM << "Could not find music resource to load : " << name;
+            RawMusicDetailMap::iterator music_found = manager._musicDetails.find( name );
+            if ( music_found == manager._musicDetails.end() )
+            {
+              throw Exception( "dataLoadFunction()", "Could not find music resource to load." );
+            }
+            else
+            {
+              it->second = makeMusic( music_found->second );
+              DEBUG_STREAM << "Loaded Music: " << name;
+            }
           }
-          else
+          catch( Exception& ex )
           {
-            it->second = makeMusic( music_found->second );
-            DEBUG_STREAM << "Loaded Music: " << name;
+            ex.addDetail( "Texture Name", name );
+            std::cerr << ex.elucidate();
+            Manager::getInstance()->getThreadManager().error();
           }
         }
 
@@ -361,16 +404,24 @@ namespace Regolith
         for ( RawSoundMap::iterator it = soundCache.begin(); it != sound_end; ++it )
         {
           std::string name = it->first;
-          RawSoundDetailMap::iterator sound_found = manager._soundDetails.find( name );
-
-          if ( sound_found == manager._soundDetails.end() )
+          try
           {
-            ERROR_STREAM << "Could not find sound resource to load : " << name;
+            RawSoundDetailMap::iterator sound_found = manager._soundDetails.find( name );
+            if ( sound_found == manager._soundDetails.end() )
+            {
+              throw Exception( "dataLoadFunction()", "Could not find sound resource to load." );
+            }
+            else
+            {
+              it->second = makeSound( sound_found->second );
+              DEBUG_STREAM << "Loaded Sound: " << name;
+            }
           }
-          else
+          catch( Exception& ex )
           {
-            it->second = makeSound( sound_found->second );
-            DEBUG_STREAM << "Loaded Sound: " << name;
+            ex.addDetail( "Texture Name", name );
+            std::cerr << ex.elucidate();
+            Manager::getInstance()->getThreadManager().error();
           }
         }
 

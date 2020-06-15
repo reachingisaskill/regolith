@@ -118,9 +118,18 @@ namespace Regolith
       for( Json::Value::iterator o_it = objects.begin(); o_it != objects.end(); ++o_it )
       {
         std::string obj_name = o_it.key().asString();
+        INFO_STREAM << "Building game object: " << obj_name;
 
-        GameObject* obj = obj_factory.build( *o_it, *this, *current_handler );
-        _gameObjects.set( obj_name, obj );
+        try
+        {
+          GameObject* obj = obj_factory.build( *o_it, *this, *current_handler );
+          _gameObjects.set( obj_name, obj );
+        }
+        catch ( Exception& ex )
+        {
+          ex.addDetail( "Object Name", obj_name );
+          throw ex;
+        }
       }
     }
 
@@ -133,6 +142,7 @@ namespace Regolith
     {
       std::string cont_name = c_it.key().asString();
 
+      INFO_STREAM << "Building context: " << cont_name;
       Json::Value context_data;
 
       // Load the context data from another file if a string is provided
@@ -145,8 +155,16 @@ namespace Regolith
         context_data = *c_it;
       }
 
-      Context* cont = cont_factory.build( context_data, *this );
-      _contexts.set( cont_name, cont );
+      try
+      {
+        Context* cont = cont_factory.build( context_data, *this );
+        _contexts.set( cont_name, cont );
+      }
+      catch ( Exception& ex )
+      {
+        ex.addDetail( "Context Name", cont_name );
+        throw ex;
+      }
     }
 
 

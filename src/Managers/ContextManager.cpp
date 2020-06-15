@@ -198,32 +198,59 @@ namespace Regolith
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
     std::unique_lock<std::mutex> contextLock( contextUpdate.mutex );
 
-    INFO_LOG( "Loading thread waiting for first command" );
-    while( ! quitFlag )
+    try
     {
-      contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
-      if ( quitFlag ) break;
 
-      DEBUG_STREAM << "CONTEXT LOADING THREAD WORKING";
-
-      if ( manager._nextContextGroup != nullptr )
+      INFO_LOG( "Loading thread waiting for first command" );
+      while( ! quitFlag )
       {
-        // Update and load the current context group pointer
-        manager._currentContextGroup->unload();
-        manager._currentContextGroup = manager._nextContextGroup;
-        manager._nextContextGroup = nullptr;
-        manager._currentContextGroup->load();
+        contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
+        if ( quitFlag ) break;
+
+        DEBUG_STREAM << "CONTEXT LOADING THREAD WORKING";
+
+        if ( manager._nextContextGroup != nullptr )
+        {
+          // Update and load the current context group pointer
+          manager._currentContextGroup->unload();
+          manager._currentContextGroup = manager._nextContextGroup;
+          manager._nextContextGroup = nullptr;
+          manager._currentContextGroup->load();
+        }
+
+        // Signal that the context group has been loaded
+        contextUpdate.data = false;
+        manager.setProgress( 1.0 );
+        manager.setLoaded( true );
+
+        contextUpdate.variable.notify_all();
       }
 
-      // Signal that the context group has been loaded
-      contextUpdate.data = false;
-      manager.setProgress( 1.0 );
-      manager.setLoaded( true );
-
-      contextUpdate.variable.notify_all();
+      contextLock.unlock();
+    }
+    catch( Exception& ex )
+    {
+      Manager::getInstance()->getThreadManager().error();
+      if ( contextLock.owns_lock() )
+      {
+        contextUpdate.variable.notify_all();
+        contextLock.unlock();
+      }
+      FAILURE_LOG( "Regolith Exception thrown from Context Manager Thread." );
+      std::cerr << ex.elucidate();
+    }
+    catch( std::exception& ex )
+    {
+      Manager::getInstance()->getThreadManager().error();
+      if ( contextLock.owns_lock() )
+      {
+        contextUpdate.variable.notify_all();
+        contextLock.unlock();
+      }
+      FAILURE_LOG( "Standard Exception thrown from Context Manager Thread." );
+      std::cerr << ex.what();
     }
 
-    contextLock.unlock();
     INFO_LOG( "Context Manager loading thread stopped." );
   }
 

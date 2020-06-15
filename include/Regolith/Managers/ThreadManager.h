@@ -56,6 +56,9 @@ namespace Regolith
       // Signal everything!
       void quit();
 
+      // Signal everything!
+      void error();
+
       // Send the start signals
       void startAll();
 
@@ -71,6 +74,9 @@ namespace Regolith
 
       // Every thread that sees this flag MUST end
       static std::atomic<bool> QuitFlag;
+
+      // Every thread that sees this flag MUST end
+      static std::atomic<bool> ErrorFlag;
 
 
       // Signals data in the DataManager Queue

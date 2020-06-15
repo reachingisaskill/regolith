@@ -13,8 +13,6 @@ namespace Regolith
   class Region : public Collidable
   {
     private:
-      float _width;
-      float _height;
 
     protected:
 
@@ -26,11 +24,6 @@ namespace Regolith
 
       // Configure the object
       virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
-
-
-      // Override the width/height getters
-      virtual float getWidth() const override { return _width; }
-      virtual float getHeight() const override { return _height; }
 
 
       // Function called when a collision is found with another object

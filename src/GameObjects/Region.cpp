@@ -7,9 +7,7 @@
 namespace Regolith
 {
 
-  Region::Region() :
-    _width( 0.0 ),
-    _height( 0.0 )
+  Region::Region()
   {
   }
 
@@ -22,12 +20,6 @@ namespace Regolith
   void Region::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& handler )
   {
     Collidable::configure( json_data, cg, handler );
-
-    Utilities::validateJson( json_data, "width", Utilities::JSON_TYPE_FLOAT );
-    Utilities::validateJson( json_data, "height", Utilities::JSON_TYPE_FLOAT );
-
-    _width = json_data["width"].asFloat();
-    _height = json_data["height"].asFloat();
   }
 
 

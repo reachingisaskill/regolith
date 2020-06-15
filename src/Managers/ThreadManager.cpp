@@ -9,6 +9,7 @@ namespace Regolith
 
   Condition<bool> ThreadManager::StartCondition( false );
   std::atomic<bool> ThreadManager::QuitFlag( false );
+  std::atomic<bool> ThreadManager::ErrorFlag( false );
 
 
   ThreadManager::ThreadManager() :
@@ -37,6 +38,19 @@ namespace Regolith
   void ThreadManager::quit()
   {
     INFO_LOG( "Thread Manager Calling Quit" );
+    QuitFlag = true;
+
+    StartCondition.variable.notify_all();
+    DataUpdate.variable.notify_all();
+    ContextUpdate.variable.notify_all();
+    MusicUpdate.variable.notify_all();
+  }
+
+
+  void ThreadManager::error()
+  {
+    ERROR_LOG( "Thread Manager Calling Quit. An error has occured." );
+    ErrorFlag = true;
     QuitFlag = true;
 
     StartCondition.variable.notify_all();

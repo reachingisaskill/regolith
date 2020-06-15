@@ -18,7 +18,6 @@ namespace Regolith
     private:
       std::string _error;
       std::vector< std::string > _details;
-      std::string _elucidate;
       bool _recoverable;
 
     public:
@@ -44,7 +43,7 @@ namespace Regolith
 
       virtual const char* what() const noexcept;
 
-      virtual const char* elucidate();
+      virtual std::string elucidate() const;
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

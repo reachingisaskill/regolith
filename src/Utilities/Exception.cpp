@@ -13,7 +13,6 @@ namespace Regolith
   Exception::Exception( std::string function, std::string name, bool recoverable ) :
     _error( name + " in " + function ),
     _details(),
-    _elucidate(),
     _recoverable( recoverable )
   {
     if ( _recoverable )
@@ -30,7 +29,6 @@ namespace Regolith
   Exception::Exception( const Exception& ex ) :
     _error( ex._error ),
     _details( ex._details ),
-    _elucidate(),
     _recoverable( ex._recoverable )
   {
   }
@@ -39,7 +37,6 @@ namespace Regolith
   Exception::Exception( const Exception&& ex ) :
     _error( std::move(ex._error) ),
     _details( std::move(ex._details) ),
-    _elucidate(),
     _recoverable( std::move(ex._recoverable) )
   {
   }
@@ -49,7 +46,6 @@ namespace Regolith
   {
     this->_error = ex._error;
     this->_details = ex._details;
-    this->_elucidate = "";
 
     return *this;
   }
@@ -59,7 +55,6 @@ namespace Regolith
   {
     this->_error = ex._error;
     this->_details = ex._details;
-    this->_elucidate = "";
 
     return *this;
   }
@@ -71,20 +66,19 @@ namespace Regolith
   }
 
 
-  const char* Exception::elucidate()
+  std::string Exception::elucidate() const
   {
     std::stringstream whatStream;
     whatStream << ( _recoverable ? "Recoverable" : "Non-recoverable" ) << " exception occured: " <<  _error;
 
-    DetailVector::iterator end = _details.end();
-    for ( DetailVector::iterator it = _details.begin(); it != end; ++it )
+    DetailVector::const_iterator end = _details.end();
+    for ( DetailVector::const_iterator it = _details.begin(); it != end; ++it )
     {
       whatStream << "\n   + " << (*it);
     }
     whatStream << '\n';
 
-    _elucidate = whatStream.str();
-    return _elucidate.c_str();
+    return whatStream.str();
   }
 }
 

@@ -1,4 +1,4 @@
-//#define LOGTASTIC_DEBUG_OFF
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Texture.h"
 #include "Regolith/Managers/Manager.h"
@@ -35,7 +35,6 @@ namespace Regolith
   {
     SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
     // Render it to the window
-    DEBUG_STREAM << "Texture::Draw : " << renderer << ", " << _theTexture << ", " << _theTexture->texture << ", " << _theTexture->width << ", " << _theTexture->height << ", " << destination->w << ", " << destination->h;
     SDL_RenderCopyEx( renderer, _theTexture->texture, &_clip, destination, _angle, nullptr, _flipFlag );
   }
 
@@ -81,8 +80,6 @@ namespace Regolith
     _currentSprite = num;
     int sprite_x = (_currentSprite % _theTexture->columns) * _clip.w;
     int sprite_y = (_currentSprite / _theTexture->columns) * _clip.h;
-
-    DEBUG_STREAM << "SPRITE_NUMBER : " << sprite_x << ", " << sprite_y;
 
     _clip.x = sprite_x;
     _clip.y = sprite_y;
