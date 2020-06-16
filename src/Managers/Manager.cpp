@@ -253,13 +253,13 @@ namespace Regolith
     FAILURE_LOG( "Trying to die gracefully..." );
 
 #ifdef __linux__
-//    void* array[20];
-//    size_t size;
-//
-//    size = backtrace( array, 20 );
-//
-//    fprintf( stderr, "Error Signal %d:\n", signal );
-//    backtrace_symbols_fd( array, size, STDERR_FILENO );
+    void* array[20];
+    size_t size;
+
+    size = backtrace( array, 20 );
+
+    fprintf( stderr, "Error Signal %d:\n", signal );
+    backtrace_symbols_fd( array, size, STDERR_FILENO );
 #endif
 
     Manager::getInstance()->quit();

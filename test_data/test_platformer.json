@@ -33,6 +33,7 @@
   "camera" :
   {
     "follow" : "test_character",
+    "global" : true,
     "lower_limit" : [ 0.0, 0.0 ],
     "upper_limit" : [ 1920.0, 1080.0 ]
   },

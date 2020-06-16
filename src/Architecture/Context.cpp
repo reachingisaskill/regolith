@@ -289,7 +289,7 @@ namespace Regolith
         GameObject* object;
 
         // If a global object is requested
-        if ( Utilities::validateJson( element_data[j], "is_global", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["is_global"].asBool() )
+        if ( Utilities::validateJson( element_data[j], "global", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["global"].asBool() )
         {
           object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getGameObject( object_name );
         }
@@ -352,9 +352,18 @@ namespace Regolith
     {
       std::string camera_follow = camera_data["follow"].asString();
 
-      PhysicalObject* followee = _owner->getPhysicalObject( camera_follow );
-      INFO_STREAM << "Setting camera to follow : " << camera_follow << " @ " << followee;
-      _theCamera.followMe( followee );
+      if ( Utilities::validateJson( camera_data, "global", Utilities::JSON_TYPE_BOOLEAN, false ) && camera_data["global"].asBool() )
+      {
+        PhysicalObject* followee = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getPhysicalObject( camera_follow );
+        INFO_STREAM << "Setting camera to follow global object : " << camera_follow << " @ " << followee;
+        _theCamera.followMe( followee );
+      }
+      else
+      {
+        PhysicalObject* followee = _owner->getPhysicalObject( camera_follow );
+        INFO_STREAM << "Setting camera to follow : " << camera_follow << " @ " << followee;
+        _theCamera.followMe( followee );
+      }
     }
 
     // Let the focus handler register input actions

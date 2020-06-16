@@ -74,12 +74,13 @@ namespace Regolith
     // Call the base class variant first
     Context::configure( json_data, handler );
 
+    INFO_LOG( "Configuring platformer specific data" );
+
 
     Utilities::validateJson( json_data, "character", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data["character"], "name", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data["character"], "layer", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "spawn_points", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["spawn_points"], 1, Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( json_data, "spawn_points", Utilities::JSON_TYPE_OBJECT );
 
 
     if ( Utilities::validateJson( json_data, "default_music", Utilities::JSON_TYPE_STRING, false ) )
@@ -101,6 +102,8 @@ namespace Regolith
     // Set the character
     std::string character_name = json_data["character"]["name"].asString();
     std::string character_layer = json_data["character"]["layer"].asString();
+
+    INFO_STREAM << "Loading the character : " << character_name;
 
     _player = dynamic_cast< ControllableCharacter* >( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getGameObject( character_name ) );
     if ( _player == nullptr )
