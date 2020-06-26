@@ -50,7 +50,7 @@ namespace Regolith
 
       while ( ! _pause )
       {
-        DEBUG_LOG( "RENDER LOOP START" );
+        DEBUG_LOG( "ENGINE Render loop start" );
 
         // Handle events globally and context-specific actions using the contexts input handler
         _inputManager.handleEvents( _contextStack.front()->inputHandler() );
@@ -62,10 +62,10 @@ namespace Regolith
         float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
 
 
-        DEBUG_STREAM << " CONTEXT STACK SIZE : " << _contextStack.size();
+        DEBUG_STREAM << "ENGINE context stack size : " << _contextStack.size();
         for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
         {
-          DEBUG_LOG( "   Processing Context" );
+          DEBUG_LOG( "ENGINE Processing Context" );
           Context* this_context = (*context_it);
           if ( ! this_context->isPaused() )
           {
@@ -77,7 +77,7 @@ namespace Regolith
         }
 
 
-        DEBUG_LOG( "RENDER" );
+        DEBUG_LOG( "ENGINE Render" );
         SDL_RenderPresent( _theRenderer );
 
 
@@ -160,13 +160,11 @@ namespace Regolith
         case StackOperation::RESET :
           while ( ! _contextStack.empty() )
           {
-            DEBUG_LOG( "Closing All Contexts" );
             _contextStack.front()->resumeContext();
             _contextStack.front()->stopContext();
             _contextStack.pop_front();
           }
           DEBUG_LOG( "Loading new base context" );
-          DEBUG_STREAM << " CONTEXT: @ " << sop.context;
           _contextStack.push_front( sop.context );
           _contextStack.front()->startContext();
           break;
@@ -196,11 +194,9 @@ namespace Regolith
     // Start at the end and work backwards until either:
     //  - We hit the beginning of the stack, OR
     //  - One of the contexts overrides all the previous ones.
-    DEBUG_LOG( "CONTEXT STACK pointer reset" );
     _visibleStackStart = --_contextStack.rend();
     while ( ( _visibleStackStart != _contextStack.rbegin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
     {
-      DEBUG_LOG( "Decrementing" );
       --_visibleStackStart;
     }
 

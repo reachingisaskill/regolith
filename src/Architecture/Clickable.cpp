@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Architecture/Clickable.h"
 #include "Regolith/Managers/ContextGroup.h"

@@ -68,9 +68,8 @@
         "signals" :
         [
           {
-            "type" : "context_change",
-            "context_name" : "title_context",
-            "operation" : "reset"
+            "type" : "context_group_change",
+            "context_group" : "title_group"
           }
         ]
       }

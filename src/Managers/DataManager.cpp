@@ -1,3 +1,4 @@
+//#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/DataManager.h"
 #include "Regolith/Managers/ThreadManager.h"
@@ -57,7 +58,7 @@ namespace Regolith
 
   void DataManager::load( DataHandler* handler )
   {
-    DEBUG_STREAM << "LOAD";
+    DEBUG_STREAM << "DATA MANAGER LOAD";
     _loadQueue.push( handler );
 
     {
@@ -70,7 +71,7 @@ namespace Regolith
 
   void DataManager::unload( DataHandler* handler )
   {
-    DEBUG_STREAM << "UNLOAD";
+    DEBUG_STREAM << "DATA MANAGER UNLOAD";
     _unloadQueue.push( handler );
 
     {
@@ -342,7 +343,6 @@ namespace Regolith
             RawTextureDetailMap::iterator texture_found = manager._textureDetails.find( name );
             if ( texture_found != manager._textureDetails.end() )
             {
-              DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
               it->second = makeTextureFromFile( texture_found->second );
   //            it->second = makeTextureFromFile( texture_data[ name ] );
               DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
@@ -352,7 +352,6 @@ namespace Regolith
               RawStringDetailMap::iterator string_found = manager._stringDetails.find( name );
               if ( string_found != manager._stringDetails.end() )
               {
-                DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
                 it->second = makeTextureFromText( string_found->second );
     //            it->second = makeTextureFromText( string_data[ name ] );
                 DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;

@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Engine.h"

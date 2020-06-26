@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Managers/Manager.h"
@@ -254,7 +255,7 @@ namespace Regolith
 
   void InputManager::registerEventRequest( Component* object, RegolithEvent event )
   {
-    INFO_STREAM << "Registered input request for event: " << event << " " << object;
+    DEBUG_STREAM << "Registered input request for event: " << event << " " << object;
     _eventMaps[event].insert( object );
   }
 
@@ -281,7 +282,7 @@ namespace Regolith
   {
     if ( ! _inputMappers.exists( name ) ) 
     {
-      INFO_STREAM << "Creating new input mapping set: " << name;
+      DEBUG_STREAM << "Creating new input mapping set: " << name;
       _inputMappers.addObject( new InputMappingSet(), name );
     }
 

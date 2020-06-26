@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/InputHandler.h"
 #include "Regolith/Managers/Manager.h"
@@ -27,7 +28,7 @@ namespace Regolith
 
   void InputHandler::registerInputRequest( ControllableInterface* object, InputAction action )
   {
-    INFO_STREAM << "Registered input request for action: " << action << " " << object;
+    DEBUG_STREAM << "Registered input request for action: " << action << " " << object;
     _actionMaps[action].insert( object );
   }
 

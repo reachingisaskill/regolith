@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Camera.h"
 #include "Regolith/Architecture/PhysicalObject.h"

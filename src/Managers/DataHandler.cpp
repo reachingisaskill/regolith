@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/Manager.h"

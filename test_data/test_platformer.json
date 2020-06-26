@@ -66,11 +66,13 @@
       [
         {
           "name" : "test_platform",
-          "position" : [ -100, 1000 ]
+          "position" : [ -100, 1000 ],
+          "spawn" : true
         },
         {
           "name" : "test_platform",
-          "position" : [ 1100, 1000 ]
+          "position" : [ 1100, 1000 ],
+          "spawn" : true
         },
         {
           "name" : "platformer_edge",

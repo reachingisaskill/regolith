@@ -162,6 +162,12 @@ namespace Regolith
 
     _theTexture.configure( json_data, handler );
 
+    Utilities::validateJson( json_data, "jump_sound", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "landing_sound", Utilities::JSON_TYPE_STRING );
+
+    _jumpSound = handler.getRawSound( json_data["jump_sound"].asString() );
+    _hardLandingSound = handler.getRawSound( json_data["landing_sound"].asString() );
+
     // Set the current sprite position
     _destination.x = position().x();
     _destination.y = position().y();

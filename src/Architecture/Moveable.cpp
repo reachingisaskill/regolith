@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Architecture/Moveable.h"
 #include "Regolith/Managers/Manager.h"

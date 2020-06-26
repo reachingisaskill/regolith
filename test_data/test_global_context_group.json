@@ -19,7 +19,9 @@
           "position" : [ 0.0, 0.0 ],
           "width" : 50.0,
           "height" : 50.0
-        }
+        },
+        "jump_sound" : "thud",
+        "landing_sound" : "landing"
       }
     },
 

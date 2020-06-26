@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Signal.h"
 #include "Regolith/Architecture/Context.h"

@@ -1,3 +1,4 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/ContextManager.h"
 #include "Regolith/Managers/ThreadManager.h"
@@ -151,7 +152,7 @@ namespace Regolith
 
     Context* load_screen = (Context*)_nextContextGroup->getLoadScreen();
 
-    DEBUG_STREAM << "Load scree start @ " << load_screen;
+    DEBUG_STREAM << "Load screen start @ " << load_screen;
     Manager::getInstance()->setContextStack( load_screen );
   }
 
