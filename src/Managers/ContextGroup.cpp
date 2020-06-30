@@ -179,24 +179,31 @@ namespace Regolith
       _onLoadOperations.pop();
     }
 
-    _isLoaded = true;
-
-    Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
-    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
-
     for ( ProxyMap< DataHandler* >::iterator it = _dataHandlers.begin(); it != _dataHandlers.end(); ++it )
     {
-      Manager::getInstance()->getDataManager().load( it->second );
+      DEBUG_STREAM << "Loading Data Handler : " << it->first;
+      it->second->load();
     }
 
-    std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
-    if ( dataUpdate.data ) // Still loading
-    {
-      // Wait for the data thread to load all the data objects
-      dataUpdate.variable.wait( dataLock, [&]()->bool { return quitFlag || ! dataUpdate.data; } );
-    }
-    dataLock.unlock();
+    _isLoaded = true;
 
+//    Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
+//    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+//
+//    for ( ProxyMap< DataHandler* >::iterator it = _dataHandlers.begin(); it != _dataHandlers.end(); ++it )
+//    {
+//      Manager::getInstance()->getDataManager().load( it->second );
+//    }
+//
+//    std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
+//    if ( dataUpdate.data ) // Still loading
+//    {
+//      // Wait for the data thread to load all the data objects
+//      dataUpdate.variable.wait( dataLock, [&]()->bool { return quitFlag || ! dataUpdate.data; } );
+//    }
+//    dataLock.unlock();
+
+    DEBUG_LOG( "Context Group Loaded" );
   }
 
 

@@ -276,7 +276,7 @@ namespace Regolith
 
         manager.setLoading( true );
 
-        DEBUG_STREAM << "DATA LOADING THREAD WORKING";
+        DEBUG_LOG( "DATA LOADING THREAD WORKING" );
         do
         {
           dataUpdate.data = false;
@@ -289,6 +289,7 @@ namespace Regolith
           dataLock.lock();
 
         } while( dataUpdate.data == true );
+        DEBUG_LOG( "DATA LOADING THREAD FINISHED" );
 
         dataUpdate.variable.notify_all();
       }
@@ -327,104 +328,16 @@ namespace Regolith
     DataManager& manager = Manager::getInstance()->getDataManager();
     DataHandler* temp_handler;
 
-    if ( ! manager._loadQueue.empty() )
+    while ( manager._loadQueue.pop( temp_handler ) )
     {
-      while ( manager._loadQueue.pop( temp_handler ) )
+      try
       {
-        if ( temp_handler->isLoaded() ) continue;
-
-        RawTextureMap& textureCache = temp_handler->_rawTextures;
-        RawTextureMap::iterator texture_end = textureCache.end();
-        for ( RawTextureMap::iterator it = textureCache.begin(); it != texture_end; ++it )
-        {
-          std::string name = it->first;
-          try
-          {
-            RawTextureDetailMap::iterator texture_found = manager._textureDetails.find( name );
-            if ( texture_found != manager._textureDetails.end() )
-            {
-              it->second = makeTextureFromFile( texture_found->second );
-  //            it->second = makeTextureFromFile( texture_data[ name ] );
-              DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
-            }
-            else
-            {
-              RawStringDetailMap::iterator string_found = manager._stringDetails.find( name );
-              if ( string_found != manager._stringDetails.end() )
-              {
-                it->second = makeTextureFromText( string_found->second );
-    //            it->second = makeTextureFromText( string_data[ name ] );
-                DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
-              }
-              else
-              {
-                throw Exception( "dataLoadFunction()", "Could not find texture resource to load." );
-              }
-            }
-          }
-          catch( Exception& ex )
-          {
-            ex.addDetail( "Texture Name", name );
-            std::cerr << ex.elucidate();
-            Manager::getInstance()->getThreadManager().error();
-          }
-        }
-
-
-        RawMusicMap& musicCache = temp_handler->_rawMusic;
-        RawMusicMap::iterator music_end = musicCache.end();
-        for ( RawMusicMap::iterator it = musicCache.begin(); it != music_end; ++it )
-        {
-          std::string name = it->first;
-          try
-          {
-            RawMusicDetailMap::iterator music_found = manager._musicDetails.find( name );
-            if ( music_found == manager._musicDetails.end() )
-            {
-              throw Exception( "dataLoadFunction()", "Could not find music resource to load." );
-            }
-            else
-            {
-              it->second = makeMusic( music_found->second );
-              DEBUG_STREAM << "Loaded Music: " << name;
-            }
-          }
-          catch( Exception& ex )
-          {
-            ex.addDetail( "Texture Name", name );
-            std::cerr << ex.elucidate();
-            Manager::getInstance()->getThreadManager().error();
-          }
-        }
-
-
-        RawSoundMap& soundCache = temp_handler->_rawSounds;
-        RawSoundMap::iterator sound_end = soundCache.end();
-        for ( RawSoundMap::iterator it = soundCache.begin(); it != sound_end; ++it )
-        {
-          std::string name = it->first;
-          try
-          {
-            RawSoundDetailMap::iterator sound_found = manager._soundDetails.find( name );
-            if ( sound_found == manager._soundDetails.end() )
-            {
-              throw Exception( "dataLoadFunction()", "Could not find sound resource to load." );
-            }
-            else
-            {
-              it->second = makeSound( sound_found->second );
-              DEBUG_STREAM << "Loaded Sound: " << name;
-            }
-          }
-          catch( Exception& ex )
-          {
-            ex.addDetail( "Texture Name", name );
-            std::cerr << ex.elucidate();
-            Manager::getInstance()->getThreadManager().error();
-          }
-        }
-
-        temp_handler->_isLoaded = true;
+        temp_handler->load();
+      }
+      catch( Exception& ex )
+      {
+        std::cerr << ex.elucidate();
+        Manager::getInstance()->getThreadManager().error();
       }
     }
   }
@@ -437,54 +350,15 @@ namespace Regolith
 
     while ( manager._unloadQueue.pop( temp_handler ) )
     {
-      if ( ! temp_handler->isLoaded() ) continue;
-
-      RawTextureMap& textureCache = temp_handler->_rawTextures;
-      RawTextureMap::iterator textures_end = textureCache.end();
-      for ( RawTextureMap::iterator it = textureCache.begin(); it != textures_end; ++it )
+      try
       {
-        std::string name = it->first;
-
-        if ( it->second.texture != nullptr )
-        {
-          SDL_DestroyTexture( it->second.texture );
-          it->second.texture = nullptr;
-        }
-
-        DEBUG_STREAM << "Unloaded texture: " << name;
+        temp_handler->unload();
       }
-
-      RawMusicMap& musicCache = temp_handler->_rawMusic;
-      RawMusicMap::iterator music_end = musicCache.end();
-      for ( RawMusicMap::iterator it = musicCache.begin(); it != music_end; ++it )
+      catch( Exception& ex )
       {
-        std::string name = it->first;
-
-        if ( it->second.music != nullptr )
-        {
-          Mix_FreeMusic( it->second.music );
-          it->second.music = nullptr;
-        }
-
-        DEBUG_STREAM << "Unloaded music: " << name;
+        std::cerr << ex.elucidate();
+        Manager::getInstance()->getThreadManager().error();
       }
-
-      RawSoundMap& soundCache = temp_handler->_rawSounds;
-      RawSoundMap::iterator sounds_end = soundCache.end();
-      for ( RawSoundMap::iterator it = soundCache.begin(); it != sounds_end; ++it )
-      {
-        std::string name = it->first;
-
-        if ( it->second.sound != nullptr )
-        {
-          Mix_FreeChunk( it->second.sound );
-          it->second.sound = nullptr;
-        }
-
-        DEBUG_STREAM << "Unloaded sound: " << name;
-      }
-
-      temp_handler->_isLoaded = false;
     }
   }
 

@@ -22,9 +22,6 @@ namespace Regolith
 
   class DataHandler
   {
-    friend void dataLoadFunction();
-    friend void dataUnloadFunction();
-
     private:
       // List of all the textures
       RawTextureMap _rawTextures;
@@ -38,13 +35,20 @@ namespace Regolith
       // Stores a flag to record whether the data is in memory or not
       bool _isLoaded;
 
+      // Mutex controls load/unload/flag access and operations
+      mutable std::mutex _loadingMutex;
+
 
     public:
       DataHandler();
 
       ~DataHandler();
 
-      bool isLoaded() const { return _isLoaded; }
+      bool isLoaded() const;
+
+      void load();
+
+      void unload();
 
 ////////////////////////////////////////////////////////////////////////////////
       // Raw Textures

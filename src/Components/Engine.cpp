@@ -50,8 +50,6 @@ namespace Regolith
 
       while ( ! _pause )
       {
-        DEBUG_LOG( "ENGINE Render loop start" );
-
         // Handle events globally and context-specific actions using the contexts input handler
         _inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
@@ -62,10 +60,9 @@ namespace Regolith
         float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
 
 
-        DEBUG_STREAM << "ENGINE context stack size : " << _contextStack.size();
+        // Iterate through all the visible contexts and update as necessary
         for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
         {
-          DEBUG_LOG( "ENGINE Processing Context" );
           Context* this_context = (*context_it);
           if ( ! this_context->isPaused() )
           {
@@ -73,11 +70,12 @@ namespace Regolith
             this_context->step( time );
             this_context->resolveCollisions();
           }
+          // Draw everything to the back buffer
           this_context->render();
         }
 
 
-        DEBUG_LOG( "ENGINE Render" );
+        // Blits the back buffer to the front buffer
         SDL_RenderPresent( _theRenderer );
 
 

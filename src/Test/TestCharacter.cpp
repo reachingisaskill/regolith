@@ -38,7 +38,6 @@ namespace Regolith
 
   void TestCharacter::registerActions( InputHandler& handler )
   {
-    DEBUG_LOG( "Registering player input requests" );
     handler.registerInputRequest( this, INPUT_ACTION_MOVE_UP );
     handler.registerInputRequest( this, INPUT_ACTION_MOVE_DOWN );
     handler.registerInputRequest( this, INPUT_ACTION_MOVE_LEFT );
@@ -55,7 +54,6 @@ namespace Regolith
     static Manager* man = Manager::getInstance();
 
     float speed = _movementForce / man->getDrag();
-    DEBUG_STREAM << " TestCharacter : " << (int)action << " : " << value << ", " << speed;
 
     switch ( action )
     {
@@ -95,15 +93,14 @@ namespace Regolith
         if ( value && ( std::fabs( this->velocity().y() ) < epsilon ) )
         {
           this->velocity().y() -= _jumpSpeed;
-         playSound( _jumpSound );
+          DEBUG_STREAM << "TestCharacter Playing Jump Sound : " << _jumpSound->sound;
+          playSound( _jumpSound );
         }
         break;
 
       default :
         break;
     }
-
-    DEBUG_STREAM << " TestCharacter: " << this->velocity();
   }
 
 
@@ -117,7 +114,6 @@ namespace Regolith
     
     // Move into the camera reference frame
     SDL_Rect destination = camera.place( _destination );
-    DEBUG_STREAM << "TestCharacter RENDER: Original: " << _destination.w << ", " << _destination.h << ", NEW: " << destination.x << ", " << destination.y << ", " << destination.w << ", " << destination.h;
 
     _theTexture.draw( &destination );
   }
@@ -151,8 +147,6 @@ namespace Regolith
     DEBUG_STREAM << getVelocity()%normal << normal;
     this->move( overlap*normal );
     this->addVelocity( getVelocity().fabs()%normal );
-
-    DEBUG_STREAM << "On Collision Player :" << object->getTeam() << ", " << overlap << " , " << normal << " -- Pos " << getPosition() << ", Vel " << getVelocity();
   }
 
 

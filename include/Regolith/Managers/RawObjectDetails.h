@@ -59,6 +59,20 @@ namespace Regolith
 
   typedef std::map<std::string, RawFontDetail> RawFontDetailMap;
 
+
+  struct RawAsset
+  {
+    enum AssetType { TEXTURE, STRING, MUSIC, SOUND } type;
+
+    union
+    {
+      RawTextureDetail textureDetail;
+      RawStringDetail stringDetail;
+      RawMusicDetail musicDetail;
+      RawSoundDetail soundDetail;
+    };
+  };
+
 }
 
 #endif // REGOLITH_MANAGERS_RAW_OBJECT_DETAILS_H_

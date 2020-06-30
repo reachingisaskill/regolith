@@ -253,11 +253,16 @@ namespace Regolith
     FAILURE_STREAM << "Regolith received signal: " << signal;
     FAILURE_LOG( "Trying to die gracefully..." );
 
+    ERROR_STREAM << "Last SDL Error : " << SDL_GetError();
+    ERROR_STREAM << "Last IMG Error : " << IMG_GetError();
+    ERROR_STREAM << "Last TTF Error : " << TTF_GetError();
+    ERROR_STREAM << "Last MIX Error : " << Mix_GetError();
+
 #ifdef __linux__
     void* array[20];
     size_t size;
 
-    size = backtrace( array, 20 );
+    size = backtrace( array, 50 );
 
     fprintf( stderr, "Error Signal %d:\n", signal );
     backtrace_symbols_fd( array, size, STDERR_FILENO );

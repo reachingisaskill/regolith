@@ -23,7 +23,7 @@ namespace Regolith
 
   class DataManager
   {
-    friend void dataManagerLoadingThread();
+//    friend void dataManagerLoadingThread();
     friend void dataLoadFunction();
     friend void dataUnloadFunction();
 

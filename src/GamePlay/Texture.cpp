@@ -109,7 +109,7 @@ namespace Regolith
 
     std::string texture_name = json_data["texture_name"].asString();
     _theTexture = handler.getRawTexture( texture_name );
-    INFO_STREAM << "Found texture: " << texture_name << " : " << _theTexture;
+    DEBUG_STREAM << "Found texture: " << texture_name << " : " << _theTexture;
 
     if ( json_data.isMember( "update_period" ) )
     {
@@ -130,7 +130,7 @@ namespace Regolith
     _clip.w = _theTexture->width / _theTexture->columns;
     _clip.h = _theTexture->height / _theTexture->rows;
 
-    INFO_STREAM << "Configuring texture: " << _theTexture->rows << "x" << _theTexture->columns << " -> " << _theTexture->cells << " T = " << _updatePeriod << " start: " << _currentSprite;
+    DEBUG_STREAM << "Configuring texture: " << _theTexture->rows << "x" << _theTexture->columns << " -> " << _theTexture->cells << " T = " << _updatePeriod << " start: " << _currentSprite;
   }
 
 
@@ -139,7 +139,7 @@ namespace Regolith
 
   RawTexture makeTextureFromFile( const RawTextureDetail& detail )
   {
-    INFO_LOG( "Creating file-based texture." );
+    DEBUG_LOG( "Creating file-based texture." );
 
     // If there is a colour key, apply it
     if ( detail.colourkey.a > 0 )
@@ -157,11 +157,11 @@ namespace Regolith
   {
     Manager* man = Manager::getInstance();
 
-    INFO_LOG( "Creating string-based texture." );
+    DEBUG_LOG( "Creating string-based texture." );
 
     // Find the specified font
     TTF_Font* font = man->getFontPointer( detail.font );
-    INFO_STREAM << "Creating text using font: " << detail.font;
+    DEBUG_STREAM << "Creating text using font: " << detail.font;
 
     return makeTextureFromText( font, detail.text, detail.colour );
   }
@@ -278,7 +278,7 @@ namespace Regolith
 //
 //    Utilities::validateJson( json_data, "type", Utilities::JSON_TYPE_STRING );
 //
-//    INFO_STREAM << "Creating texture of type: " << json_data["type"];
+//    DEBUG_STREAM << "Creating texture of type: " << json_data["type"];
 //
 //    if ( json_data["type"] == "file" )
 //    {
@@ -329,12 +329,12 @@ namespace Regolith
 //      if ( Utilities::validateJson( json_data, "font", Utilities::JSON_TYPE_STRING, false ) )
 //      {
 //        font = man->getFontPointer( json_data["font"].asString() );
-//        INFO_STREAM << "Creating text using font: " << json_data["font"].asString();
+//        DEBUG_STREAM << "Creating text using font: " << json_data["font"].asString();
 //      }
 //      else
 //      {
 //        font = man->getDefaultFont();
-//        INFO_LOG( "Using default font" );
+//        DEBUG_LOG( "Using default font" );
 //      }
 //
 //      return makeTextureFromText( font, text_string, color );
