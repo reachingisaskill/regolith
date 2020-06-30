@@ -10,7 +10,13 @@
 namespace Regolith
 {
 
-  struct RawTextureDetail
+  // Enumeration of the possible assets that can be loaded
+  enum AssetType { TEXTURE, STRING, MUSIC, SOUND };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Structures for each asset type 
+
+  struct TextureDetail
   {
     std::string filename;
     unsigned int width;
@@ -20,10 +26,8 @@ namespace Regolith
     SDL_Color colourkey;
   };
 
-  typedef std::map<std::string, RawTextureDetail> RawTextureDetailMap;
 
-
-  struct RawStringDetail
+  struct StringDetail
   {
     std::string text;
     std::string font;
@@ -32,46 +36,50 @@ namespace Regolith
     SDL_Color colour;
   };
 
-  typedef std::map<std::string, RawStringDetail> RawStringDetailMap;
 
-
-  struct RawMusicDetail
+  struct MusicDetail
   {
     std::string filename;
   };
 
-  typedef std::map<std::string, RawMusicDetail> RawMusicDetailMap;
 
-
-  struct RawSoundDetail
+  struct SoundDetail
   {
     std::string filename;
   };
 
-  typedef std::map<std::string, RawSoundDetail> RawSoundDetailMap;
+
+//  struct FontDetail
+//  {
+//    std::string filename;
+//    unsigned int size;
+//  };
 
 
-  struct RawFontDetail
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Asset union class
+
+  struct Asset
   {
-    std::string filename;
-    unsigned int size;
-  };
-
-  typedef std::map<std::string, RawFontDetail> RawFontDetailMap;
-
-
-  struct RawAsset
-  {
-    enum AssetType { TEXTURE, STRING, MUSIC, SOUND } type;
+    const AssetType type;
 
     union
     {
-      RawTextureDetail textureDetail;
-      RawStringDetail stringDetail;
-      RawMusicDetail musicDetail;
-      RawSoundDetail soundDetail;
+      TextureDetail textureDetail;
+      StringDetail stringDetail;
+      MusicDetail musicDetail;
+      SoundDetail soundDetail;
+//      FontDetail fontDetail;
     };
+
+    Asset( TextureDetail d ) : type ( ASSET_TEXTURE ), textureDetail( d ) {}
+    Asset( StringDetail d ) : type ( ASSET_STRING ), stringDetail( d ) {}
+    Asset( MusicDetail d ) : type ( ASSET_MUSIC ), musicDetail( d ) {}
+    Asset( SoundDetail d ) : type ( ASSET_SOUND ), soundDetail( d ) {}
+//    Asset( FontDetail d ) : type ( ASSET_FONT ), fontDetail( d ) {}
   };
+
+  typedef std::map< std::string, Asset > AssetMap;
 
 }
 

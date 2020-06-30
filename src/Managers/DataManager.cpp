@@ -157,8 +157,8 @@ namespace Regolith
       {
         detail.colourkey = { 0, 0, 0, 0 };
       }
-      _textureDetails.insert( std::make_pair( name, detail ) );
-      DEBUG_STREAM << "INDEX Texture: " << name;
+      _assets.insert( std::make_pair( name, Asset( detail ) ) );
+      DEBUG_STREAM << "ASSET Texture: " << name;
     }
 
     for ( Json::Value::iterator it = index_data["strings"].begin(); it != index_data["strings"].end(); ++it )
@@ -175,8 +175,8 @@ namespace Regolith
       detail.colour.a = data["colour"][3].asInt();
       detail.width = 0;
       detail.height = 0;
-      _stringDetails.insert( std::make_pair( name, detail ) );
-      DEBUG_STREAM << "INDEX String: " << name;
+      _assets.insert( std::make_pair( name, Asset( detail ) ) );
+      DEBUG_STREAM << "ASSET String: " << name;
     }
 
     for ( Json::Value::iterator it = index_data["music"].begin(); it != index_data["music"].end(); ++it )
@@ -187,8 +187,8 @@ namespace Regolith
       std::string name = it.key().asString();
       detail.filename = data["path"].asString();
 
-      _musicDetails.insert( std::make_pair( name, detail ) );
-      DEBUG_STREAM << "INDEX Music: " << name;
+      _assets.insert( std::make_pair( name, Asset( detail ) ) );
+      DEBUG_STREAM << "ASSET Music: " << name;
     }
 
 
@@ -200,8 +200,8 @@ namespace Regolith
       std::string name = it.key().asString();
       detail.filename = data["path"].asString();
 
-      _soundDetails.insert( std::make_pair( name, detail ) );
-      DEBUG_STREAM << "INDEX Sound: " << name;
+      _assets.insert( std::make_pair( name, Asset( detail ) ) );
+      DEBUG_STREAM << "ASSET Sound: " << name;
     }
 
 
@@ -213,7 +213,7 @@ namespace Regolith
 //      std::string name = it.key().asString();
 //      detail.filename = data["filename"].asString();
 //
-//      _fontDetails.insert( std::make_pair( name, detail ) );
+//      _assets.insert( std::make_pair( name, Asset( detail ) ) );
 //    }
 
   }

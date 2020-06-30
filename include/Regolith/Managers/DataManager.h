@@ -35,7 +35,10 @@ namespace Regolith
       // Path to the list of all texture files and their modifiers
       std::string _indexFile;
 
+      // Map of all the assets that can be used
+      AssetMap _assets;
 
+      /*
       // Map of texture details
       RawTextureDetailMap _textureDetails;
 
@@ -50,6 +53,7 @@ namespace Regolith
 
 //      // Map of font details
 //      RawTextureDetailMap _fontDetails;
+      */
 
 
       // Loading queue
@@ -91,6 +95,11 @@ namespace Regolith
       // Return true if the loading thread is active
       bool isLoading() const;
 
+
+////////////////////////////////////////////////////////////////////////////////
+      // Inspect the index information
+
+      Asset& getAsset( std::string );
   };
 
 }
