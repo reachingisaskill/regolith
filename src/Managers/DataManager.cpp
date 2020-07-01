@@ -23,10 +23,7 @@ namespace Regolith
     _loading( false ),
     _loadFlagMutex(),
     _indexFile(),
-    _textureDetails(),
-    _stringDetails(),
-    _musicDetails(),
-    _soundDetails(),
+    _assets(),
     _loadQueue(),
     _unloadQueue()
   {
@@ -90,25 +87,170 @@ namespace Regolith
   }
 
 
+  const Asset& DataManager::getAsset( std::string name ) const
+  {
+    AssetMap::const_iterator found = _assets.find( name );
+    if ( found == _assets.end() )
+    {
+      Exception ex( "DataManager::getAsset()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+    return found->second;
+  }
+
+
   RawTexture DataManager::buildRawTexture( std::string name ) const
   {
-    RawTextureDetailMap::const_iterator texture_found = _textureDetails.find( name );
-    if ( texture_found != _textureDetails.end() )
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
     {
-      return RawTexture( nullptr, texture_found->second.width, texture_found->second.height, texture_found->second.rows, texture_found->second.columns );
+      Exception ex( "DataManager::buildRawTexture()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
     }
-    else
+
+    switch ( asset_found->second.type )
     {
-      RawStringDetailMap::const_iterator string_found = _stringDetails.find( name );
-      if ( string_found != _stringDetails.end() )
-      {
-        return RawTexture( nullptr, string_found->second.width, string_found->second.height, 1, 1 );
-      }
-      else
-      {
-        ERROR_STREAM << "Could not find requested texture name: " << name;
-        return RawTexture();
-      }
+      case ASSET_TEXTURE :
+        return RawTexture( nullptr, asset_found->second.textureDetail.width, asset_found->second.textureDetail.height, asset_found->second.textureDetail.rows, asset_found->second.textureDetail.columns );
+        break;
+
+      case ASSET_STRING :
+        return RawTexture( nullptr, asset_found->second.stringDetails.width, asset_found->second.stringDetails.height, 1, 1 );
+        break;
+
+      default :
+        Exception ex( "DataManager::buildRawTexture()", "Asset is not a texture" );
+        ex.addDetail( "Expected", "ASSET_TEXTURE or ASSET_STRING" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
+  }
+
+
+  RawMusic DataManager::buildRawMusic( std::string name ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::buildRawMusic()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_MUSIC :
+        return RawMusic();
+        break;
+
+      case ASSET_SOUND :
+        return RawMusic();
+        break;
+
+      default :
+        Exception ex( "DataManager::buildRawMusic()", "Asset is not a music track" );
+        ex.addDetail( "Expected", "ASSET_MUSIC or ASSET_SOUND" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
+  }
+
+
+  RawSound DataManager::buildRawSound( std::string name ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::buildRawSound()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_SOUND :
+        return RawSound();
+        break;
+
+      default :
+        Exception ex( "DataManager::buildRawMusic()", "Asset is not a music track" );
+        ex.addDetail( "Expected", "ASSET_SOUND" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
+  }
+
+
+  void DataManager::loadRawTexture( std::string name, RawTexture& texture ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::loadRawTexture()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+    texture.texture = 
+  }
+
+
+  void DataManager::loadRawMusic( std::string name, RawMusic& music ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::buildRawMusic()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_MUSIC :
+        return RawMusic();
+        break;
+
+      case ASSET_SOUND :
+        return RawMusic();
+        break;
+
+      default :
+        Exception ex( "DataManager::loadRawMusic()", "Asset is not a music track" );
+        ex.addDetail( "Expected", "ASSET_MUSIC or ASSET_SOUND" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
+  }
+
+
+  void DataManager::loadRawSound( std::string name, RawSound& sound ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::loadRawSound()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_SOUND :
+        return RawSound();
+        break;
+
+      default :
+        Exception ex( "DataManager::buildRawMusic()", "Asset is not a music track" );
+        ex.addDetail( "Expected", "ASSET_SOUND" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
     }
   }
 

@@ -36,6 +36,9 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful functions
 
+  void loadTexture( RawTexture&, const RawStringDetail& );
+  void loadTexture( RawTexture&, const RawTextureDetail& );
+
   RawTexture makeTextureFromText( const RawStringDetail& );
   RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );
 

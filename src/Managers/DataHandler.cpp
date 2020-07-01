@@ -203,7 +203,8 @@ namespace Regolith
     RawSoundMap::iterator found = _rawSounds.find( name );
     if ( found == _rawSounds.end() )
     {
-      found = _rawSounds.insert( std::make_pair( name, RawSound() ) ).first;
+      RawSound new_sound = Manager::getInstance()->getDataManager().buildRawSound( name );
+      found = _rawSounds.insert( std::make_pair( name, new_sound ) ).first;
     }
 
     return &(found->second);
@@ -215,7 +216,8 @@ namespace Regolith
     RawMusicMap::iterator found = _rawMusic.find( name );
     if ( found == _rawMusic.end() )
     {
-      found = _rawMusic.insert( std::make_pair( name, RawMusic() ) ).first;
+      RawMusic new_music = Manager::getInstance()->getDataManager().buildRawMusic( name );
+      found = _rawMusic.insert( std::make_pair( name, new_music ) ).first;
     }
 
     return &(found->second);

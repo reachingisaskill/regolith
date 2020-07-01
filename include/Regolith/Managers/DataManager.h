@@ -79,9 +79,6 @@ namespace Regolith
       // Validate the game objects
       void validate();
 
-      // Build a raw texture object with no pointer for a data handler using the index
-      RawTexture buildRawTexture( std::string ) const;
-
 
 ////////////////////////////////////////////////////////////////////////////////
       // Dynamic loading/unloading
@@ -99,7 +96,28 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Inspect the index information
 
-      Asset& getAsset( std::string );
+      // Return a reference to the asset info
+      const Asset& getAsset( std::string ) const;
+
+
+      // Build a raw texture object with no pointer for a data handler using the index
+      RawTexture buildRawTexture( std::string ) const;
+
+      // Build a raw music object with no pointer for a data handler using the index
+      RawMusic buildRawMusic( std::string ) const;
+
+      // Build a raw sound object with no pointer for a data handler using the index
+      RawSound buildRawSound( std::string ) const;
+
+
+      // Build a raw texture object with no pointer for a data handler using the index
+      void loadRawTexture( std::string, RawTexture& ) const;
+
+      // Build a raw music object with no pointer for a data handler using the index
+      void loadRawMusic( std::string, RawMusic& ) const;
+
+      // Build a raw sound object with no pointer for a data handler using the index
+      void loadRawSound( std::string, RawSound& ) const;
   };
 
 }

@@ -11,7 +11,8 @@ namespace Regolith
 {
 
   // Enumeration of the possible assets that can be loaded
-  enum AssetType { TEXTURE, STRING, MUSIC, SOUND };
+  enum AssetType { ASSET_TEXTURE, ASSET_STRING, ASSET_MUSIC, ASSET_SOUND };
+  static const char* const AssetTypeNames[] = { "ASSET_TEXTURE", "ASSET_STRING", "ASSET_MUSIC", "ASSET_SOUND" };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Structures for each asset type 
