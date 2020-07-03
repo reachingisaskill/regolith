@@ -137,6 +137,83 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Texture creation functions
 
+  SDL_Texture* loadTextureFromString( std::string textureString, TTF_Font* font, SDL_Color& color )
+  {
+    SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
+    SDL_Texture* theTexture;
+
+    SDL_Surface* textSurface = TTF_RenderText_Solid( font, textureString.c_str(), color );
+    if ( textSurface == nullptr )
+    {
+      Exception ex( "Scene::_addTextureFromText()", "Could not render text", true );
+      ex.addDetail( "Text string", textureString );
+      ex.addDetail( "SDL_ttf error", TTF_GetError() );
+      throw ex;
+    }
+
+    // Create the texture from the surface
+    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
+    if ( loadedTexture == nullptr )
+    {
+      // Remove before we throw
+      SDL_FreeSurface( textSurface );
+      // Throw the exception
+      Exception ex( "Scene::_addTextureFromText()", "Could not convert to texture", true );
+      ex.addDetail( "Text string", textureString );
+      ex.addDetail( "SDL_ttf error", TTF_GetError() );
+      throw ex;
+    }
+
+    // Fill the RawTexture object
+    theTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
+
+    // Remove the unneeded surface
+    SDL_FreeSurface( textSurface );
+
+    return theTexture;
+  }
+
+
+  SDL_Texture* loadTextureFromFile( std::string path, SDL_Color* key )
+  {
+    Manager* man = Manager::getInstance();
+
+    // Load the image into a surface
+    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
+    if ( loadedSurface == nullptr )
+    {
+      Exception ex( "Scene::addTextureFromFile()", "Could not load image data", false );
+      ex.addDetail( "Image path", path );
+      ex.addDetail( "SDL_img error", IMG_GetError() );
+      throw ex;
+    }
+
+    if ( key != nullptr )
+    {
+      SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key->r, key->g, key->b ) );
+    }
+
+    // Create SDL_Texture
+    SDL_Texture* theTexture = SDL_CreateTextureFromSurface( man->getRendererPointer(), loadedSurface );
+    if ( loadedTexture == nullptr )
+    {
+      SDL_FreeSurface( loadedSurface );
+      Exception ex( "Scene::addTextureFromFile()", "Could not convert to texture", false );
+      ex.addDetail( "Image path", path );
+      ex.addDetail( "SDL error", SDL_GetError() );
+      throw ex;
+    }
+
+    // Delete the surface data
+    SDL_FreeSurface( loadedSurface );
+
+    // Return the SDL_Texture pointer
+    return theTexture;
+  }
+
+
+  /*
+
   RawTexture makeTextureFromFile( const RawTextureDetail& detail )
   {
     DEBUG_LOG( "Creating file-based texture." );
@@ -164,77 +241,6 @@ namespace Regolith
     DEBUG_STREAM << "Creating text using font: " << detail.font;
 
     return makeTextureFromText( font, detail.text, detail.colour );
-  }
-
-
-  RawTexture makeTextureFromText( TTF_Font* font, std::string textureString, SDL_Color color )
-  {
-    static SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
-    RawTexture theTexture;
-
-    SDL_Surface* textSurface = TTF_RenderText_Solid( font, textureString.c_str(), color );
-    if ( textSurface == nullptr )
-    {
-      Exception ex( "Scene::_addTextureFromText()", "Could not render text", true );
-      ex.addDetail( "Text string", textureString );
-      ex.addDetail( "SDL_ttf error", TTF_GetError() );
-      throw ex;
-    }
-
-    // Create the texture from the surface
-    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
-    if ( loadedTexture == nullptr )
-    {
-      // Remove before we throw
-      SDL_FreeSurface( textSurface );
-      // Throw the exception
-      Exception ex( "Scene::_addTextureFromText()", "Could not convert to texture", true );
-      ex.addDetail( "Text string", textureString );
-      ex.addDetail( "SDL_ttf error", TTF_GetError() );
-      throw ex;
-    }
-
-    // Fill the RawTexture object
-    theTexture.texture = SDL_CreateTextureFromSurface( renderer, textSurface );
-    theTexture.width = textSurface->w;
-    theTexture.height = textSurface->h;
-
-    // Remove the unneeded surface
-    SDL_FreeSurface( textSurface );
-
-    return theTexture;
-  }
-
-
-  RawTexture makeTextureFromFile( std::string path, unsigned short rows, unsigned short cols )
-  {
-    Manager* man = Manager::getInstance();
-
-    // Load the image into a surface
-    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
-    if ( loadedSurface == nullptr )
-    {
-      Exception ex( "Scene::addTextureFromFile()", "Could not load image data", false );
-      ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL_img error", IMG_GetError() );
-      throw ex;
-    }
-
-    // Create SDL_Texture
-    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( man->getRendererPointer(), loadedSurface );
-    if ( loadedTexture == nullptr )
-    {
-      SDL_FreeSurface( loadedSurface );
-      Exception ex( "Scene::addTextureFromFile()", "Could not convert to texture", false );
-      ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL error", SDL_GetError() );
-      throw ex;
-    }
-
-    RawTexture theTexture( loadedTexture, loadedSurface->w, loadedSurface->h, rows, cols );
-    SDL_FreeSurface( loadedSurface );
-
-    return theTexture;
   }
 
 
@@ -344,6 +350,7 @@ namespace Regolith
 //    ex.addDetail( "Type", json_data["type"].asString() );
 //    throw ex;
 //  }
+  */
 
 
 }

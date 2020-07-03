@@ -122,6 +122,7 @@ namespace Regolith
 
       default :
         Exception ex( "DataManager::buildRawTexture()", "Asset is not a texture" );
+        ex.addDetail( "Asset Name", name );
         ex.addDetail( "Expected", "ASSET_TEXTURE or ASSET_STRING" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
@@ -152,6 +153,7 @@ namespace Regolith
 
       default :
         Exception ex( "DataManager::buildRawMusic()", "Asset is not a music track" );
+        ex.addDetail( "Asset Name", name );
         ex.addDetail( "Expected", "ASSET_MUSIC or ASSET_SOUND" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
@@ -178,6 +180,7 @@ namespace Regolith
 
       default :
         Exception ex( "DataManager::buildRawMusic()", "Asset is not a music track" );
+        ex.addDetail( "Asset Name", name );
         ex.addDetail( "Expected", "ASSET_SOUND" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
@@ -195,7 +198,25 @@ namespace Regolith
       ex.addDetail( "Asset Name", name );
       throw ex;
     }
-    texture.texture = 
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_TEXTURE :
+        texture.texture = makeTextureFromFile( asset_found->second.textureDetail.filename );
+        break;
+
+      case ASSET_STRING :
+        texture.texture = makeTextureFromString( asset_found->second.stringDetail.text, asset_found->second.stringDetail.font, asset_found->second.stringDetail.colour );
+        break;
+
+      default :
+        Exception ex( "DataManager::loadRawTexture()", "Asset is not a texture" );
+        ex.addDetail( "Asset Name", name );
+        ex.addDetail( "Expected", "ASSET_TEXTURE or ASSET_STRING" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
   }
 
 
@@ -212,15 +233,16 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_MUSIC :
-        return RawMusic();
+        music.music = makeMusic( asset_found->second.musicDetail.filename );
         break;
 
       case ASSET_SOUND :
-        return RawMusic();
+        music.music = makeMusic( asset_found->second.soundDetail.filename );
         break;
 
       default :
         Exception ex( "DataManager::loadRawMusic()", "Asset is not a music track" );
+        ex.addDetail( "Asset Name", name );
         ex.addDetail( "Expected", "ASSET_MUSIC or ASSET_SOUND" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
@@ -242,11 +264,12 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_SOUND :
-        return RawSound();
+        sound.sound = makeSound( asset_found->second.soundDetail.filename );
         break;
 
       default :
-        Exception ex( "DataManager::buildRawMusic()", "Asset is not a music track" );
+        Exception ex( "DataManager::loadRawSound()", "Asset is not a sound file" );
+        ex.addDetail( "Asset Name", name );
         ex.addDetail( "Expected", "ASSET_SOUND" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;

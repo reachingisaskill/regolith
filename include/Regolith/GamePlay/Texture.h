@@ -36,15 +36,14 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful functions
 
-  void loadTexture( RawTexture&, const RawStringDetail& );
-  void loadTexture( RawTexture&, const RawTextureDetail& );
+  SDL_Texture* loadTextureFromFile( std::string, SDL_Color* key = nullptr );
+  SDL_Texture* loadTextureFromString( std::string, TTF_Font*, SDL_Color& );
 
-  RawTexture makeTextureFromText( const RawStringDetail& );
-  RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );
-
-  RawTexture makeTextureFromFile( const RawTextureDetail& );
-  RawTexture makeTextureFromFile( std::string, unsigned short r = 1, unsigned short c = 1 );
-  RawTexture makeTextureFromFile( std::string, SDL_Color, unsigned short r = 1, unsigned short c = 1);
+//  RawTexture makeTextureFromText( const RawStringDetail& );
+//  RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );
+//
+//  RawTexture makeTextureFromFile( const RawTextureDetail& );
+//  RawTexture makeTextureFromFile( std::string, SDL_Color, unsigned short r = 1, unsigned short c = 1);
 
 //  RawTexture makeTexture( Json::Value& );
 

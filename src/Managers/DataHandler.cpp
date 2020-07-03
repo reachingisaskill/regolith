@@ -54,25 +54,8 @@ namespace Regolith
       std::string name = it->first;
       try
       {
-        RawTextureDetailMap::iterator texture_found = manager._textureDetails.find( name );
-        if ( texture_found != manager._textureDetails.end() )
-        {
-          it->second = makeTextureFromFile( texture_found->second );
-          DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
-        }
-        else
-        {
-          RawStringDetailMap::iterator string_found = manager._stringDetails.find( name );
-          if ( string_found != manager._stringDetails.end() )
-          {
-            it->second = makeTextureFromText( string_found->second );
-            DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
-          }
-          else
-          {
-            throw Exception( "DataHandler::load()", "Could not find texture resource to load." );
-          }
-        }
+        manager.loadRawTexture( name, it->second );
+        DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
       }
       catch( Exception& ex )
       {
@@ -87,16 +70,8 @@ namespace Regolith
       std::string name = it->first;
       try
       {
-        RawMusicDetailMap::iterator music_found = manager._musicDetails.find( name );
-        if ( music_found == manager._musicDetails.end() )
-        {
-          throw Exception( "DataHandler::load()", "Could not find music resource to load." );
-        }
-        else
-        {
-          it->second = makeMusic( music_found->second );
-          DEBUG_STREAM << "Loaded Music: " << name << " @ " << it->second.music;
-        }
+        manager.loadRawMusic( name, it->second );
+        DEBUG_STREAM << "Loaded Music: " << name << " @ " << it->second.music;
       }
       catch( Exception& ex )
       {
@@ -111,16 +86,8 @@ namespace Regolith
       std::string name = it->first;
       try
       {
-        RawSoundDetailMap::iterator sound_found = manager._soundDetails.find( name );
-        if ( sound_found == manager._soundDetails.end() )
-        {
-          throw Exception( "DataHandler::load()", "Could not find sound resource to load." );
-        }
-        else
-        {
-          it->second = makeSound( sound_found->second );
-          DEBUG_STREAM << "Loaded Sound: " << name << " @ " << it->second.sound;
-        }
+        manager.loadRawSound( name, it->second );
+        DEBUG_STREAM << "Loaded Sound: " << name << " @ " << it->second.sound;
       }
       catch( Exception& ex )
       {
