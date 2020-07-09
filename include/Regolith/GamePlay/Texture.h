@@ -36,8 +36,8 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful functions
 
-  SDL_Texture* loadTextureFromFile( std::string, SDL_Color* key = nullptr );
-  SDL_Texture* loadTextureFromString( std::string, TTF_Font*, SDL_Color& );
+  SDL_Texture* loadTextureFromFile( std::string, const SDL_Color& );
+  SDL_Texture* loadTextureFromString( std::string, TTF_Font*, const SDL_Color& );
 
 //  RawTexture makeTextureFromText( const RawStringDetail& );
 //  RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );

@@ -137,7 +137,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Texture creation functions
 
-  SDL_Texture* loadTextureFromString( std::string textureString, TTF_Font* font, SDL_Color& color )
+  SDL_Texture* loadTextureFromString( std::string textureString, TTF_Font* font, const SDL_Color& color )
   {
     SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
     SDL_Texture* theTexture;
@@ -174,7 +174,7 @@ namespace Regolith
   }
 
 
-  SDL_Texture* loadTextureFromFile( std::string path, SDL_Color* key )
+  SDL_Texture* loadTextureFromFile( std::string path, const SDL_Color& key )
   {
     Manager* man = Manager::getInstance();
 
@@ -188,14 +188,14 @@ namespace Regolith
       throw ex;
     }
 
-    if ( key != nullptr )
+    if ( key.a != 0 )
     {
-      SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key->r, key->g, key->b ) );
+      SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key.r, key.g, key.b ) );
     }
 
     // Create SDL_Texture
     SDL_Texture* theTexture = SDL_CreateTextureFromSurface( man->getRendererPointer(), loadedSurface );
-    if ( loadedTexture == nullptr )
+    if ( theTexture == nullptr )
     {
       SDL_FreeSurface( loadedSurface );
       Exception ex( "Scene::addTextureFromFile()", "Could not convert to texture", false );

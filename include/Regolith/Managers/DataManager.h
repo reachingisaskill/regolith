@@ -23,7 +23,7 @@ namespace Regolith
 
   class DataManager
   {
-//    friend void dataManagerLoadingThread();
+    friend void dataManagerLoadingThread();
     friend void dataLoadFunction();
     friend void dataUnloadFunction();
 
@@ -77,7 +77,7 @@ namespace Regolith
       void configure( Json::Value& );
 
       // Validate the game objects
-      void validate();
+      void validate() const;
 
 
 ////////////////////////////////////////////////////////////////////////////////

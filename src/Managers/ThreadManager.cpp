@@ -15,9 +15,12 @@ namespace Regolith
   ThreadManager::ThreadManager() :
     _dataManagerThread( dataManagerLoadingThread ),
     _contextManagerThread( contextManagerLoadingThread ),
+    _engineProcessingThread( engineProcessingThread ),
     DataUpdate( false ),
     ContextUpdate( false ),
-    MusicUpdate( nullptr )
+    MusicUpdate( nullptr ),
+    FrameSynchronisation( false ),
+    RenderSynchronisation( false )
   {
   }
 
@@ -25,13 +28,18 @@ namespace Regolith
   ThreadManager::~ThreadManager()
   {
     // Make sure this is true if the thread manager is being destroyed!
-    QuitFlag = true;
+    if ( QuitFlag == false )
+    {
+      this->stopAll();
+    }
 
     // Notify everything one last time to ensue all the threads see the quit flag
     StartCondition.variable.notify_all();
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
+    FrameSynchronisation.variable.notify_all();
+    RenderSynchronisation.variable.notify_all();
   }
 
 
@@ -44,6 +52,8 @@ namespace Regolith
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
+    FrameSynchronisation.variable.notify_all();
+    RenderSynchronisation.variable.notify_all();
   }
 
 
@@ -57,6 +67,8 @@ namespace Regolith
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
+    FrameSynchronisation.variable.notify_all();
+    RenderSynchronisation.variable.notify_all();
   }
 
 
@@ -75,10 +87,13 @@ namespace Regolith
 
   void ThreadManager::stopAll()
   {
-    // Quit MUST have been called already by this point
+    // Call quit first to make sure everything is going to stop.
+    this->quit();
+
     // Wait for all the threads to re-join
     _dataManagerThread.join();
     _contextManagerThread.join();
+    _engineProcessingThread.join();
   }
 
 }

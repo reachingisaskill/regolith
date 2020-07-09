@@ -21,6 +21,9 @@ namespace Regolith
   // Context Manager loading thread
   void contextManagerLoadingThread();
 
+  // Context Manager loading thread
+  void engineProcessingThread();
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Condition structure for storing condition variables
@@ -46,6 +49,9 @@ namespace Regolith
 
       // Context manager thread container
       std::thread _contextManagerThread;
+
+      // Context manager thread container
+      std::thread _engineProcessingThread;
 
     public:
       // Con/Destructors
@@ -87,6 +93,12 @@ namespace Regolith
 
       // Signals a change of song in the AudioManager
       Condition<Mix_Music*> MusicUpdate;
+
+      // Signals the start of a new frame 
+      Condition<bool> FrameSynchronisation;
+
+      // Signals the end of the context rendering (to avoid data races)
+      Condition<bool> RenderSynchronisation;
 
   };
 

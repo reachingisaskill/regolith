@@ -10,37 +10,37 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Construction functions
 
-  RawMusic makeMusic( const RawMusicDetail& detail )
+  Mix_Music* loadMusic( std::string filename )
   {
-    Mix_Music* new_music = Mix_LoadMUS( detail.filename.c_str() );
+    Mix_Music* new_music = Mix_LoadMUS( filename.c_str() );
 
     if ( new_music == nullptr )
     {
       std::string error = Mix_GetError();
       Exception ex( "AudioManager::addMusic()", "Failed to load music file" );
-      ex.addDetail( "Path", detail.filename );
+      ex.addDetail( "Path", filename );
       ex.addDetail( "Mix Error", error );
       throw ex;
     }
 
-    return RawMusic( new_music );
+    return new_music;
   }
 
 
-  RawSound makeSound( const RawSoundDetail& detail )
+  Mix_Chunk* loadSound( std::string filename )
   {
-    Mix_Chunk* new_chunk = Mix_LoadWAV( detail.filename.c_str() );
+    Mix_Chunk* new_chunk = Mix_LoadWAV( filename.c_str() );
 
     if ( new_chunk == nullptr )
     {
       std::string error = Mix_GetError();
       Exception ex( "AudioHandler::addEffect()", "Failed to load effect file" );
-      ex.addDetail( "Path", detail.filename );
+      ex.addDetail( "Path", filename );
       ex.addDetail( "Mix Error", error );
       throw ex;
     }
 
-    return RawSound( new_chunk );
+    return new_chunk;
   }
 
 

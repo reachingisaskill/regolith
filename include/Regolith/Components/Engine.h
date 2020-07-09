@@ -7,17 +7,23 @@
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/GamePlay/Timer.h"
 
+#include <mutex>
+#include <condition_variable>
+
 
 namespace Regolith
 {
 
   class Context;
+  class DataHandler;
 
   typedef std::deque< Context* > ContextStack;
 
 
   class Engine : public Component
   {
+    friend void engineProcessingThread( Engine& );
+
     public:
       class StackOperation;
 
@@ -37,6 +43,10 @@ namespace Regolith
       Timer _frameTimer;
       bool _pause;
 
+      std::mutex _textureRenderMutex;
+      unsigned _queueRenderRate;
+      /* Some queue of surfaces to render into textures */
+
     protected:
       void performStackOperations();
 
@@ -49,6 +59,9 @@ namespace Regolith
 
       // Set the renderer pointer - now ready to run
       void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
+
+      // Mutex-controlled rendering function. Turns surfaces into textures for a data handler.
+      void renderTextures( DataHandler* ) const;
 
       // Start the engine running. In order to stop it the quit() function must be used.
       void run();

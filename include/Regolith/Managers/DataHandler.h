@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <pair>
 
 
 namespace Regolith
@@ -22,6 +23,9 @@ namespace Regolith
 
   class DataHandler
   {
+    typedef std::pair< SDL_Surface*, RawTexture* > SurfaceTexturePair;
+    typedef std::queue< SurfaceTexturePair > SurfaceRenderQueue;
+
     private:
       // List of all the textures
       RawTextureMap _rawTextures;
@@ -31,6 +35,10 @@ namespace Regolith
 
       // List of all the music
       RawMusicMap _rawMusic;
+
+      // Queue of surfaces to render in the engine.
+      SurfaceRenderQueue _surfaceRenderQueue;
+
 
       // Stores a flag to record whether the data is in memory or not
       bool _isLoaded;

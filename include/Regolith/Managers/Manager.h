@@ -136,6 +136,9 @@ namespace Regolith
       // Get the pointer to the window
       Window& getWindow() { return _theWindow; }
 
+      // Get the reference to the engine
+      Engine& getEngine() { return _theEngine; }
+
       // Return a pointer to the required font data
       TTF_Font* getFontPointer( std::string );
 

@@ -117,7 +117,7 @@ namespace Regolith
         break;
 
       case ASSET_STRING :
-        return RawTexture( nullptr, asset_found->second.stringDetails.width, asset_found->second.stringDetails.height, 1, 1 );
+        return RawTexture( nullptr, asset_found->second.stringDetail.width, asset_found->second.stringDetail.height, 1, 1 );
         break;
 
       default :
@@ -202,11 +202,11 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_TEXTURE :
-        texture.texture = makeTextureFromFile( asset_found->second.textureDetail.filename );
+        texture.texture = loadTextureFromFile( asset_found->second.textureDetail.filename, asset_found->second.textureDetail.colourkey );
         break;
 
       case ASSET_STRING :
-        texture.texture = makeTextureFromString( asset_found->second.stringDetail.text, asset_found->second.stringDetail.font, asset_found->second.stringDetail.colour );
+        texture.texture = loadTextureFromString( asset_found->second.stringDetail.text, asset_found->second.stringDetail.font, asset_found->second.stringDetail.colour );
         break;
 
       default :
@@ -233,11 +233,11 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_MUSIC :
-        music.music = makeMusic( asset_found->second.musicDetail.filename );
+        music.music = loadMusic( asset_found->second.musicDetail.filename );
         break;
 
       case ASSET_SOUND :
-        music.music = makeMusic( asset_found->second.soundDetail.filename );
+        music.music = loadMusic( asset_found->second.soundDetail.filename );
         break;
 
       default :
@@ -264,7 +264,7 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_SOUND :
-        sound.sound = makeSound( asset_found->second.soundDetail.filename );
+        sound.sound = loadSound( asset_found->second.soundDetail.filename );
         break;
 
       default :
@@ -303,7 +303,7 @@ namespace Regolith
     for ( Json::Value::iterator it = index_data["textures"].begin(); it != index_data["textures"].end(); ++it )
     {
       Json::Value& data = *it;
-      RawTextureDetail detail;
+      TextureDetail detail;
 
       std::string name = it.key().asString();
       detail.filename = data["path"].asString();
@@ -322,24 +322,39 @@ namespace Regolith
       {
         detail.colourkey = { 0, 0, 0, 0 };
       }
-      _assets.insert( std::make_pair( name, Asset( detail ) ) );
+      _assets.insert( { name, Asset( detail ) } );
+//      _assets[name] = Asset( detail );
       DEBUG_STREAM << "ASSET Texture: " << name;
     }
 
     for ( Json::Value::iterator it = index_data["strings"].begin(); it != index_data["strings"].end(); ++it )
     {
       Json::Value& data = *it;
-      RawStringDetail detail;
+      StringDetail detail;
+
+      std::string font_name = data["font"].asString();
 
       std::string name = it.key().asString();
       detail.text = data["text"].asString();
-      detail.font = data["font"].asString();
+      detail.font = Manager::getInstance()->getFontPointer( font_name );
       detail.colour.r = data["colour"][0].asInt();
       detail.colour.g = data["colour"][1].asInt();
       detail.colour.b = data["colour"][2].asInt();
       detail.colour.a = data["colour"][3].asInt();
-      detail.width = 0;
-      detail.height = 0;
+
+      SDL_Surface* textSurface = TTF_RenderText_Solid( detail.font, detail.text.c_str(), detail.colour );
+      if ( textSurface == nullptr )
+      {
+        Exception ex( "DataManager::configure()", "Could not render text" );
+        ex.addDetail( "Text string", detail.text.c_str() );
+        ex.addDetail( "Font", detail.font );
+        ex.addDetail( "SDL_TTF Error", TTF_GetError() );
+        throw ex;
+      }
+      detail.width = textSurface->w;
+      detail.height = textSurface->h;
+      SDL_FreeSurface( textSurface );
+
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "ASSET String: " << name;
     }
@@ -347,7 +362,7 @@ namespace Regolith
     for ( Json::Value::iterator it = index_data["music"].begin(); it != index_data["music"].end(); ++it )
     {
       Json::Value& data = *it;
-      RawMusicDetail detail;
+      MusicDetail detail;
 
       std::string name = it.key().asString();
       detail.filename = data["path"].asString();
@@ -360,7 +375,7 @@ namespace Regolith
     for ( Json::Value::iterator it = index_data["sounds"].begin(); it != index_data["sounds"].end(); ++it )
     {
       Json::Value& data = *it;
-      RawSoundDetail detail;
+      SoundDetail detail;
 
       std::string name = it.key().asString();
       detail.filename = data["path"].asString();
@@ -373,7 +388,7 @@ namespace Regolith
 //    for ( Json::Value::iterator it = index_data["font"].begin(); it != index_data["font"].end(); ++it )
 //    {
 //      Json::Value& data = *it;
-//      RawFontDetail detail;
+//      FontDetail detail;
 //
 //      std::string name = it.key().asString();
 //      detail.filename = data["filename"].asString();
@@ -384,27 +399,8 @@ namespace Regolith
   }
 
 
-  void DataManager::validate()
+  void DataManager::validate() const
   {
-    for ( RawStringDetailMap::iterator it = _stringDetails.begin(); it != _stringDetails.end(); ++it )
-    {
-      RawStringDetail& data = it->second;
-
-      TTF_Font* font = Manager::getInstance()->getFontPointer( data.font );
-      SDL_Surface* textSurface = TTF_RenderText_Solid( font, data.text.c_str(), data.colour );
-      if ( textSurface == nullptr )
-      {
-        Exception ex( "DataManager::configure()", "Could not render text" );
-        ex.addDetail( "Text string", data.text.c_str() );
-        ex.addDetail( "Font", data.font );
-        ex.addDetail( "SDL_TTF Error", TTF_GetError() );
-        throw ex;
-      }
-
-      data.width = textSurface->w;
-      data.height = textSurface->h;
-      SDL_FreeSurface( textSurface );
-    }
   }
 
 

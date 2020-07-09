@@ -31,7 +31,7 @@ namespace Regolith
   struct StringDetail
   {
     std::string text;
-    std::string font;
+    TTF_Font* font;
     unsigned int width;
     unsigned int height;
     SDL_Color colour;
@@ -73,11 +73,15 @@ namespace Regolith
 //      FontDetail fontDetail;
     };
 
-    Asset( TextureDetail d ) : type ( ASSET_TEXTURE ), textureDetail( d ) {}
-    Asset( StringDetail d ) : type ( ASSET_STRING ), stringDetail( d ) {}
-    Asset( MusicDetail d ) : type ( ASSET_MUSIC ), musicDetail( d ) {}
-    Asset( SoundDetail d ) : type ( ASSET_SOUND ), soundDetail( d ) {}
-//    Asset( FontDetail d ) : type ( ASSET_FONT ), fontDetail( d ) {}
+    Asset( TextureDetail );
+    Asset( StringDetail );
+    Asset( MusicDetail );
+    Asset( SoundDetail );
+//    Asset( FontDetail );
+
+    Asset( const Asset& );
+
+    ~Asset();
   };
 
   typedef std::map< std::string, Asset > AssetMap;

@@ -10,8 +10,8 @@ namespace Regolith
   class RawMusicDetail;
   class RawSoundDetail;
 
-  RawMusic makeMusic( const RawMusicDetail& );
-  RawSound makeSound( const RawSoundDetail& );
+  Mix_Music* loadMusic( std::string );
+  Mix_Chunk* loadSound( std::string );
 
   struct RawMusic
   {

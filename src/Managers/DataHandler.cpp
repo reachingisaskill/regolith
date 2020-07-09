@@ -11,7 +11,9 @@ namespace Regolith
     _rawTextures(),
     _rawSounds(),
     _rawMusic(),
-    _isLoaded( false )
+    _surfaceRenderQueue(),
+    _isLoaded( false ),
+    _loadingMutex()
   {
   }
 
@@ -34,7 +36,7 @@ namespace Regolith
 
   bool DataHandler::isLoaded() const
   {
-    LockGuard lg( _loadedFlagMutex );
+    GuardLock lg( _loadingMutex );
     return _isLoaded;
   }
 
@@ -43,7 +45,7 @@ namespace Regolith
   {
     INFO_LOG( "Loading Data Handler" );
 
-    LockGuard lg( _loadedFlagMutex );
+    GuardLock lg( _loadingMutex );
     if ( _isLoaded ) return;
 
     DataManager& manager = Manager::getInstance()->getDataManager();
@@ -54,8 +56,10 @@ namespace Regolith
       std::string name = it->first;
       try
       {
-        manager.loadRawTexture( name, it->second );
-        DEBUG_STREAM << "Loaded Texture: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
+        SDL_Suraface* surface = manager.loadRawTexture( name, it->second );
+        _surfaceRenderQueue.push_back( std::make_pair( surface, &it->second ) );
+        DEBUG_STREAM << "Loaded Surface: " << name;
+//        DEBUG_STREAM << "Loaded Surface: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
       }
       catch( Exception& ex )
       {
@@ -104,7 +108,7 @@ namespace Regolith
   {
     INFO_LOG( "Unloading Data Handler" );
 
-    LockGuard lg( _loadedFlagMutex );
+    GuardLock lg( _loadingMutex );
     if ( ! _isLoaded ) return;
 
     RawTextureMap::iterator textures_end = _rawTextures.end();

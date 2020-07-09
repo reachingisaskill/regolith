@@ -1,6 +1,7 @@
 
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/DataHandler.h"
 
 #include "logtastic.h"
 
@@ -8,13 +9,22 @@
 namespace Regolith
 {
 
+  // The thread that runs update/step/collisions etc.
+  // Primary thread is for rendering ONLY
+  void engineProcessingThread( Engine& );
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Engine member function definitions
+
   Engine::Engine( InputManager& input, SDL_Color& color ) :
     _theRenderer( nullptr ),
     _inputManager( input ),
     _defaultColor( color ),
     _contextStack(),
     _frameTimer(),
-    _pause( false )
+    _pause( false ),
+    _textureRenderMutex(),
+    _queueRenderRate( 1 )
   {
   }
 
@@ -36,56 +46,120 @@ namespace Regolith
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
     _pause = false;
 
-    // Reset the timer
-    _frameTimer.lap();
+    // Synchronise the start of the frame
+    Condition<bool>& frameSync = Manager::getInstance()->getThreadManager().FrameSynchronisation;
+    // Synchronise access to the contexts
+    Condition<bool>& renderSync = Manager::getInstance()->getThreadManager().RenderSynchronisation;
 
-    // Load the first context
-    performStackOperations();
+    std::unique_lock<std::mutex> frameLock( frameSync.mutex, std::defer_lock );
+    std::unique_lock<std::mutex> renderLock( renderSync.mutex, std::defer_lock );
 
 
     while ( ! quitFlag )
     {
-      // Handle global events with no context
-      _inputManager.handleEvents( nullptr );
-
-      while ( ! _pause )
+      try
       {
-        // Handle events globally and context-specific actions using the contexts input handler
-        _inputManager.handleEvents( _contextStack.front()->inputHandler() );
-
-
-        SDL_SetRenderDrawColor( _theRenderer, _defaultColor.r, _defaultColor.g, _defaultColor.b, _defaultColor.a );
-        SDL_RenderClear( _theRenderer );
-
-        float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
-
-
-        // Iterate through all the visible contexts and update as necessary
-        for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
+        while ( ! _pause )
         {
-          Context* this_context = (*context_it);
-          if ( ! this_context->isPaused() )
+          // Notify the start of the frame
+          frameLock.lock();
+          frameSync.data = true;
+          frameSync.variable.notify_all();
+          frameLock.unlock();
+
+          // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
+          renderLock.lock();
+
+
+          // Setup the rendering process
+          SDL_SetRenderDrawColor( _theRenderer, _defaultColor.r, _defaultColor.g, _defaultColor.b, _defaultColor.a );
+          SDL_RenderClear( _theRenderer );
+
+          // Iterate through all the visible contexts and update as necessary
+          for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
           {
-            this_context->update( time );
-            this_context->step( time );
-            this_context->resolveCollisions();
+            // Draw everything to the back buffer
+            (*context_it)->render();
           }
-          // Draw everything to the back buffer
-          this_context->render();
-        }
+
+          // Blits the back buffer to the front buffer
+          SDL_RenderPresent( _theRenderer );
 
 
-        // Blits the back buffer to the front buffer
-        SDL_RenderPresent( _theRenderer );
+
+          // Notify that the contexts can be updated
+          renderSync.data = true;
+          renderSync.variable.notify_all();
+          renderLock.unlock();
 
 
-        // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
-        if ( ! _stackOperationQueue.empty() )
-        {
-          performStackOperations();
+          // Render some of the texture queue for the remaing frame time
+          unsigned int counter = 0;
+          while ( ( /*Queue is not empty*/ ) && ( counter < _queueRenderRate ) )
+          {
+            // Render a surface to a texture
+
+
+
+            rawTexture->texture = SDL_CreateTextureFromSurface( _theRenderer, surface );
+            if ( rawTexture->texture == nullptr )
+            {
+              SDL_FreeSurface( surface );
+              Exception ex( "Engine::run()", "Could not surfaceconvert to texture", false );
+              ex.addDetail( "SDL error", SDL_GetError() );
+              throw ex;
+            }
+
+            // Delete the surface data
+            SDL_FreeSurface( surface );
+          }
+
         }
       }
+      catch ( Exception& ex )
+      {
+        Manager::getInstance()->getThreadManager().error();
+        if ( frameLock.owns_lock() )
+        {
+          frameLock.unlock();
+        }
+        if ( renderLock.owns_lock() )
+        {
+          renderLock.unlock();
+        }
+        FAILURE_LOG( "Regolith Exception thrown from Engine Rendering Thread." );
+        std::cerr << ex.elucidate();
+      }
+      catch ( std::exception& ex )
+      {
+        Manager::getInstance()->getThreadManager().error();
+        if ( frameLock.owns_lock() )
+        {
+          frameLock.unlock();
+        }
+        if ( renderLock.owns_lock() )
+        {
+          renderLock.unlock();
+        }
+        FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
+        std::cerr << ex.what();
+      }
     }
+  }
+
+
+  void Engine::renderTextures( DataHandler* handler )
+  {
+    // Only one DataHandler can be rendered at a time.
+    GuardLock lock( _textureRenderMutex );
+
+
+
+
+    // Push surfaces into the rendering queue and wait for it to become empty.
+
+
+
   }
 
 
@@ -200,6 +274,137 @@ namespace Regolith
 
     // Set the end iterator
     _visibleStackEnd = _contextStack.rend();
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Engine processing thread definition
+
+  void engineProcessingThread()
+  {
+    INFO_LOG( "Engine processing thread start." );
+
+    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+
+    INFO_LOG( "Engine processing thread initialised and waiting to start" );
+    {
+      Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
+      std::unique_lock<std::mutex> lk( startCondition.mutex );
+      startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
+      lk.unlock();
+    }
+    INFO_LOG( "Engine processing thread go." );
+
+
+    Engine& engine = Manager::getInstance()->getEngine();
+
+    // Synchronise the start of the frame
+    Condition<bool>& frameSync = Manager::getInstance()->getThreadManager().FrameSynchronisation;
+    std::unique_lock<std::mutex> frameLock( frameSync.mutex );
+
+    // Synchronise access to the contexts
+    Condition<bool>& renderSync = Manager::getInstance()->getThreadManager().RenderSynchronisation;
+    std::unique_lock<std::mutex> renderLock( renderSync.mutex );
+
+
+
+    // Reset the timer
+    engine._frameTimer.lap();
+
+    // Load the first context while the renderLock is held
+    engine.performStackOperations();
+    renderLock.unlock();
+
+
+
+    try
+    {
+
+      INFO_LOG( "Engine processing thread waiting for first command" );
+      while ( ! quitFlag )
+      {
+        // Handle global events with no context
+        engine._inputManager.handleEvents( nullptr );
+
+        while ( ! _pause )
+        {
+          frameSync.variable.wait( frameLock, [&]()->bool{ return quitFlag || frameSync.data; } );
+          if ( quitFlag ) break;
+          frameLock.unlock();
+
+
+          // Handle events globally and context-specific actions using the contexts input handler
+          engine._inputManager.handleEvents( _contextStack.front()->inputHandler() );
+
+
+
+          renderLock.lock();
+          renderSync.variable.wait( renderLock, [&]()->bool{ return quitFlag || renderSync.data; } );
+          if ( quitFlag ) break;
+          renderLock.unlock();
+
+
+
+          float time = (float)engine._frameTimer.lap(); // Only conversion from int to float happens here.
+
+          // Iterate through all the visible contexts and update as necessary
+          for ( ContextStack::reverse_iterator context_it = engine._visibleStackStart; context_it != engine._visibleStackEnd; ++context_it )
+          {
+            Context* this_context = (*context_it);
+            if ( ! this_context->isPaused() )
+            {
+              this_context->update( time );
+              this_context->step( time );
+              this_context->resolveCollisions();
+            }
+          }
+
+
+
+          // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
+          if ( ! engine._stackOperationQueue.empty() )
+          {
+            engine.performStackOperations();
+          }
+
+
+
+          frameLock.lock();
+        }
+      }
+
+      frameLock.unlock();
+    }
+    catch( Exception& ex )
+    {
+      Manager::getInstance()->getThreadManager().error();
+      if ( frameLock.owns_lock() )
+      {
+        frameLock.unlock();
+      }
+      if ( renderLock.owns_lock() )
+      {
+        renderLock.unlock();
+      }
+      FAILURE_LOG( "Regolith Exception thrown from Engine Processing Thread." );
+      std::cerr << ex.elucidate();
+    }
+    catch( std::exception& ex )
+    {
+      Manager::getInstance()->getThreadManager().error();
+      if ( frameLock.owns_lock() )
+      {
+        frameLock.unlock();
+      }
+      if ( renderLock.owns_lock() )
+      {
+        renderLock.unlock();
+      }
+      FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
+      std::cerr << ex.what();
+    }
+
+    INFO_LOG( "Engine Processing thread stopped." );
   }
 
 }
