@@ -43,9 +43,9 @@ namespace Regolith
       Timer _frameTimer;
       bool _pause;
 
-      std::mutex _textureRenderMutex;
       unsigned _queueRenderRate;
-      /* Some queue of surfaces to render into textures */
+      std::mutex _renderQueueMutex;
+      DataHandler* _currentDataHandler;
 
     protected:
       void performStackOperations();

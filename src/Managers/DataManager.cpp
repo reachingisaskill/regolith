@@ -202,11 +202,11 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_TEXTURE :
-        texture.texture = loadTextureFromFile( asset_found->second.textureDetail.filename, asset_found->second.textureDetail.colourkey );
+        texture.surface = loadSurfaceFromFile( asset_found->second.textureDetail.filename, asset_found->second.textureDetail.colourkey );
         break;
 
       case ASSET_STRING :
-        texture.texture = loadTextureFromString( asset_found->second.stringDetail.text, asset_found->second.stringDetail.font, asset_found->second.stringDetail.colour );
+        texture.surface = loadSurfaceFromString( asset_found->second.stringDetail.text, asset_found->second.stringDetail.font, asset_found->second.stringDetail.colour );
         break;
 
       default :

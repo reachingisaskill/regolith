@@ -13,6 +13,7 @@ namespace Regolith
     _rawMusic(),
     _surfaceRenderQueue(),
     _isLoaded( false ),
+    _isRendered( true ),
     _loadingMutex()
   {
   }
@@ -25,7 +26,6 @@ namespace Regolith
     if ( _isLoaded )
     {
       this->unload();
-      _isLoaded = false;
     }
 
     _rawTextures.clear();
@@ -48,6 +48,8 @@ namespace Regolith
     GuardLock lg( _loadingMutex );
     if ( _isLoaded ) return;
 
+    _isRendered = false;
+
     DataManager& manager = Manager::getInstance()->getDataManager();
 
     RawTextureMap::iterator texture_end = _rawTextures.end();
@@ -56,10 +58,9 @@ namespace Regolith
       std::string name = it->first;
       try
       {
-        SDL_Suraface* surface = manager.loadRawTexture( name, it->second );
-        _surfaceRenderQueue.push_back( std::make_pair( surface, &it->second ) );
-        DEBUG_STREAM << "Loaded Surface: " << name;
-//        DEBUG_STREAM << "Loaded Surface: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
+        manager.loadRawTexture( name, it->second );
+        _surfaceRenderQueue.push_back( &it->second );
+        DEBUG_STREAM << "Loaded Surface: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
       }
       catch( Exception& ex )
       {
@@ -67,6 +68,10 @@ namespace Regolith
         throw ex;
       }
     }
+
+    // Tell the engine to render the surfaces into textures on the rendering thread
+    Manager::getInstance()->renderSurfaces( this );
+
 
     RawMusicMap::iterator music_end = _rawMusic.end();
     for ( RawMusicMap::iterator it = _rawMusic.begin(); it != music_end; ++it )
@@ -98,6 +103,13 @@ namespace Regolith
         ex.addDetail( "Sound Name", name );
         throw ex;
       }
+    }
+
+
+    // Block the current thread while we wait for the engine to render all the textures
+    while ( ! _isRendered )
+    {
+      std::this_thread::sleep( std::chrono::milliseconds( 10 ) )
     }
 
     _isLoaded = true;
@@ -192,6 +204,24 @@ namespace Regolith
     }
 
     return &(found->second);
+  }
+
+
+  RawTexture* DataHandler::popRenderTexture() const
+  {
+    RawTexture* temp = nullptr;
+
+    if ( ! _surfaceRenderQueue.empty() )
+    {
+      temp = _surfaceRenderQueue.front();
+      _surfaceRenderQueue.pop();
+    }
+    else
+    {
+      _isRendered = true;
+    }
+
+    return temp;
   }
 
 }

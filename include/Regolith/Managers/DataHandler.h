@@ -5,12 +5,12 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/GamePlay/Texture.h"
 #include "Regolith/GamePlay/Noises.h"
+#include "Regolith/Components/Engine.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
 #include <string>
 #include <vector>
 #include <mutex>
-#include <pair>
 
 
 namespace Regolith
@@ -23,8 +23,9 @@ namespace Regolith
 
   class DataHandler
   {
-    typedef std::pair< SDL_Surface*, RawTexture* > SurfaceTexturePair;
-    typedef std::queue< SurfaceTexturePair > SurfaceRenderQueue;
+    friend void Engine::run();
+
+    typedef std::queue< RawTexture* > SurfaceRenderQueue;
 
     private:
       // List of all the textures
@@ -42,9 +43,14 @@ namespace Regolith
 
       // Stores a flag to record whether the data is in memory or not
       bool _isLoaded;
+      std::atomic<bool> _isRendered;
 
       // Mutex controls load/unload/flag access and operations
       mutable std::mutex _loadingMutex;
+
+    protected:
+      // Returns true if there is a 
+      RawTexture* popRenderTexture() const;
 
 
     public:

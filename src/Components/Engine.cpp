@@ -24,7 +24,8 @@ namespace Regolith
     _frameTimer(),
     _pause( false ),
     _textureRenderMutex(),
-    _queueRenderRate( 1 )
+    _queueRenderRate( 1 ),
+    _currentDataHandler( nullptr )
   {
   }
 
@@ -53,6 +54,7 @@ namespace Regolith
 
     std::unique_lock<std::mutex> frameLock( frameSync.mutex, std::defer_lock );
     std::unique_lock<std::mutex> renderLock( renderSync.mutex, std::defer_lock );
+    std::unique_lock<std::mutex> queueLock( _renderQueueMutex, std::defer_lock );
 
 
     while ( ! quitFlag )
@@ -93,25 +95,33 @@ namespace Regolith
           renderLock.unlock();
 
 
-          // Render some of the texture queue for the remaing frame time
-          unsigned int counter = 0;
-          while ( ( /*Queue is not empty*/ ) && ( counter < _queueRenderRate ) )
+          if ( queueLock.owns_lock() || queueLock.try_lock() )
           {
-            // Render a surface to a texture
-
-
-
-            rawTexture->texture = SDL_CreateTextureFromSurface( _theRenderer, surface );
-            if ( rawTexture->texture == nullptr )
+            if ( _currentDataHandler != nullptr )
             {
-              SDL_FreeSurface( surface );
-              Exception ex( "Engine::run()", "Could not surfaceconvert to texture", false );
-              ex.addDetail( "SDL error", SDL_GetError() );
-              throw ex;
+              // Render some of the texture queue for the remaing frame time
+              unsigned int counter = 0;
+              while ( ( counter < _queueRenderRate ) )
+              {
+                // Check if there are any surfaces to render
+                RawTexture* rawTexture = _currentDataHandler->popRenderTexture();
+                if ( rawTexture != nullptr )
+                {
+                  // Perform the rendering
+                  rawTexture.renderTexture( _theRenderer );
+                }
+                else
+                {
+                  // Remove the DataHandler pointer
+                  _currentDataHandler = nullptr;
+                  queueLock.unlock();
+                }
+              }
             }
-
-            // Delete the surface data
-            SDL_FreeSurface( surface );
+            else
+            {
+              queueLock.unlock();
+            }
           }
 
         }
@@ -150,16 +160,23 @@ namespace Regolith
 
   void Engine::renderTextures( DataHandler* handler )
   {
-    // Only one DataHandler can be rendered at a time.
-    GuardLock lock( _textureRenderMutex );
+    // Block current thread while the an existing DataHandler is rendered
+    UniqueLock lock( _renderQueueMutex, std::defer_lock );
+    while ( true )
+    {
+      lock.lock();
+      if ( _currentDataHandler == nullptr )
+      {
+        break;
+      }
+      lock.unlock();
 
+      std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+    }
 
+    _currentDataHandler = handler;
 
-
-    // Push surfaces into the rendering queue and wait for it to become empty.
-
-
-
+    lock.unlock();
   }
 
 

@@ -22,22 +22,25 @@ namespace Regolith
   struct RawTexture
   {
     SDL_Texture* texture;
+    SDL_Surface* surface;
     int width;
     int height;
     unsigned short int rows;
     unsigned short int columns;
     unsigned short cells;
 
-    RawTexture() : texture( nullptr ), width( 0 ), height( 0 ), rows( 0 ), columns( 0 ), cells( 0 ) {}
-    RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c ) : texture( t ), width( w ), height( h ), rows( r ), columns( c ), cells( r*c ) {}
-    RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c, unsigned short n ) : texture( t ), width( w ), height( h ), rows( r ), columns( c ), cells( n ) {}
+    RawTexture();
+    RawTexture( SDL_Texture*, int, int, unsigned short, unsigned short );
+    RawTexture( SDL_Texture*, int, int, unsigned short, unsigned short, unsigned short );
+
+    void renderTexture( SDL_Renderer* );
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful functions
 
-  SDL_Texture* loadTextureFromFile( std::string, const SDL_Color& );
-  SDL_Texture* loadTextureFromString( std::string, TTF_Font*, const SDL_Color& );
+  SDL_Surface* loadSurfaceFromFile( std::string, const SDL_Color& );
+  SDL_Surface* loadSurfaceFromString( std::string, TTF_Font*, const SDL_Color& );
 
 //  RawTexture makeTextureFromText( const RawStringDetail& );
 //  RawTexture makeTextureFromText( TTF_Font*, std::string, SDL_Color );
