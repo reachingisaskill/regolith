@@ -22,7 +22,7 @@ namespace Regolith
 
   class Engine : public Component
   {
-    friend void engineProcessingThread( Engine& );
+    friend void engineProcessingThread();
 
     public:
       class StackOperation;
@@ -61,7 +61,7 @@ namespace Regolith
       void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
 
       // Mutex-controlled rendering function. Turns surfaces into textures for a data handler.
-      void renderTextures( DataHandler* ) const;
+      void renderTextures( DataHandler* );
 
       // Start the engine running. In order to stop it the quit() function must be used.
       void run();

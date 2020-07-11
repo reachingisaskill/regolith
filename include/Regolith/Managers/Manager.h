@@ -130,8 +130,8 @@ namespace Regolith
       // Return a reference to the Scene builder
       SignalFactory& getSignalFactory() { return _signalFactory; }
 
-      // Get the pointer to the window
-      SDL_Renderer* getRendererPointer() { return _theRenderer; }
+//      // Get the pointer to the Renderer
+//      SDL_Renderer* getRendererPointer() { return _theRenderer; }
 
       // Get the pointer to the window
       Window& getWindow() { return _theWindow; }
@@ -165,7 +165,7 @@ namespace Regolith
       Context* getCurrentContext() { return _theEngine.currentContext(); }
 
       // Gives the DataHandler pointer the engine to allow it to render the loaded surfaces
-      void renderSurfaces( DataHandler* ) const;
+      void renderSurfaces( DataHandler* );
 
 
       ////////////////////////////////////////////////////////////////////////////////

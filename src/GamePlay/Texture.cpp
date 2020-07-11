@@ -78,7 +78,7 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////  
   // Texture Member function definitions
-c
+
   Texture::Texture() :
     _theTexture( nullptr ),
     _angle( 0.0 ),
@@ -204,9 +204,6 @@ c
 
   SDL_Surface* loadSurfaceFromString( std::string textureString, TTF_Font* font, const SDL_Color& color )
   {
-    SDL_Renderer* renderer = Manager::getInstance()->getRendererPointer();
-//    SDL_Texture* theTexture;
-
     SDL_Surface* textSurface = TTF_RenderText_Solid( font, textureString.c_str(), color );
     if ( textSurface == nullptr )
     {
@@ -217,34 +214,11 @@ c
     }
 
     return textSurface;
-
-//    // Create the texture from the surface
-//    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
-//    if ( loadedTexture == nullptr )
-//    {
-//      // Remove before we throw
-//      SDL_FreeSurface( textSurface );
-//      // Throw the exception
-//      Exception ex( "Scene::_addTextureFromText()", "Could not convert to texture", true );
-//      ex.addDetail( "Text string", textureString );
-//      ex.addDetail( "SDL_ttf error", TTF_GetError() );
-//      throw ex;
-//    }
-//
-//    // Fill the RawTexture object
-//    theTexture = SDL_CreateTextureFromSurface( renderer, textSurface );
-//
-//    // Remove the unneeded surface
-//    SDL_FreeSurface( textSurface );
-//
-//    return theTexture;
   }
 
 
   SDL_Surface* loadSurfaceFromFile( std::string path, const SDL_Color& key )
   {
-    Manager* man = Manager::getInstance();
-
     // Load the image into a surface
     SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
     if ( loadedSurface == nullptr )
@@ -261,23 +235,6 @@ c
     }
 
     return loadedSurface;
-
-//    // Create SDL_Texture
-//    SDL_Texture* theTexture = SDL_CreateTextureFromSurface( man->getRendererPointer(), loadedSurface );
-//    if ( theTexture == nullptr )
-//    {
-//      SDL_FreeSurface( loadedSurface );
-//      Exception ex( "Scene::addTextureFromFile()", "Could not convert to texture", false );
-//      ex.addDetail( "Image path", path );
-//      ex.addDetail( "SDL error", SDL_GetError() );
-//      throw ex;
-//    }
-//
-//    // Delete the surface data
-//    SDL_FreeSurface( loadedSurface );
-//
-//    // Return the SDL_Texture pointer
-//    return theTexture;
   }
 
 

@@ -9,7 +9,7 @@
 #include "Regolith/Utilities/ProxyMap.h"
 
 #include <string>
-#include <vector>
+#include <queue>
 #include <mutex>
 
 
@@ -50,7 +50,7 @@ namespace Regolith
 
     protected:
       // Returns true if there is a 
-      RawTexture* popRenderTexture() const;
+      RawTexture* popRenderTexture();
 
 
     public:

@@ -11,7 +11,7 @@ namespace Regolith
 
   // The thread that runs update/step/collisions etc.
   // Primary thread is for rendering ONLY
-  void engineProcessingThread( Engine& );
+  void engineProcessingThread();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Engine member function definitions
@@ -23,8 +23,8 @@ namespace Regolith
     _contextStack(),
     _frameTimer(),
     _pause( false ),
-    _textureRenderMutex(),
     _queueRenderRate( 1 ),
+    _renderQueueMutex(),
     _currentDataHandler( nullptr )
   {
   }
@@ -68,6 +68,7 @@ namespace Regolith
           frameSync.data = true;
           frameSync.variable.notify_all();
           frameLock.unlock();
+          DEBUG_LOG( "------ FRAME ------" );
 
           // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
           renderLock.lock();
@@ -94,6 +95,8 @@ namespace Regolith
           renderSync.variable.notify_all();
           renderLock.unlock();
 
+          DEBUG_LOG( "------ RENDER ------" );
+
 
           if ( queueLock.owns_lock() || queueLock.try_lock() )
           {
@@ -108,7 +111,7 @@ namespace Regolith
                 if ( rawTexture != nullptr )
                 {
                   // Perform the rendering
-                  rawTexture.renderTexture( _theRenderer );
+                  rawTexture->renderTexture( _theRenderer );
                 }
                 else
                 {
@@ -337,57 +340,54 @@ namespace Regolith
     try
     {
 
-      INFO_LOG( "Engine processing thread waiting for first command" );
+      INFO_LOG( "Engine processing thread waiting for first frame" );
+
       while ( ! quitFlag )
       {
         // Handle global events with no context
         engine._inputManager.handleEvents( nullptr );
+        frameSync.variable.wait( frameLock, [&]()->bool{ return quitFlag || frameSync.data; } );
+        if ( quitFlag ) break;
+        frameLock.unlock();
 
-        while ( ! _pause )
+
+        // Handle events globally and context-specific actions using the contexts input handler
+        engine._inputManager.handleEvents( engine._contextStack.front()->inputHandler() );
+
+
+
+        renderLock.lock();
+        renderSync.variable.wait( renderLock, [&]()->bool{ return quitFlag || renderSync.data; } );
+        if ( quitFlag ) break;
+        renderLock.unlock();
+
+
+
+        float time = (float)engine._frameTimer.lap(); // Only conversion from int to float happens here.
+
+        // Iterate through all the visible contexts and update as necessary
+        for ( ContextStack::reverse_iterator context_it = engine._visibleStackStart; context_it != engine._visibleStackEnd; ++context_it )
         {
-          frameSync.variable.wait( frameLock, [&]()->bool{ return quitFlag || frameSync.data; } );
-          if ( quitFlag ) break;
-          frameLock.unlock();
-
-
-          // Handle events globally and context-specific actions using the contexts input handler
-          engine._inputManager.handleEvents( _contextStack.front()->inputHandler() );
-
-
-
-          renderLock.lock();
-          renderSync.variable.wait( renderLock, [&]()->bool{ return quitFlag || renderSync.data; } );
-          if ( quitFlag ) break;
-          renderLock.unlock();
-
-
-
-          float time = (float)engine._frameTimer.lap(); // Only conversion from int to float happens here.
-
-          // Iterate through all the visible contexts and update as necessary
-          for ( ContextStack::reverse_iterator context_it = engine._visibleStackStart; context_it != engine._visibleStackEnd; ++context_it )
+          Context* this_context = (*context_it);
+          if ( ! this_context->isPaused() )
           {
-            Context* this_context = (*context_it);
-            if ( ! this_context->isPaused() )
-            {
-              this_context->update( time );
-              this_context->step( time );
-              this_context->resolveCollisions();
-            }
+            this_context->update( time );
+            this_context->step( time );
+            this_context->resolveCollisions();
           }
-
-
-
-          // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
-          if ( ! engine._stackOperationQueue.empty() )
-          {
-            engine.performStackOperations();
-          }
-
-
-
-          frameLock.lock();
         }
+
+
+
+        // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
+        if ( ! engine._stackOperationQueue.empty() )
+        {
+          engine.performStackOperations();
+        }
+
+
+
+        frameLock.lock();
       }
 
       frameLock.unlock();

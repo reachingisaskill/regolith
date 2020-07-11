@@ -4,6 +4,9 @@
 #include "Regolith/Managers/DataManager.h"
 #include "Regolith/Managers/Manager.h"
 
+#include <thread>
+#include <chrono>
+
 
 namespace Regolith
 {
@@ -59,7 +62,7 @@ namespace Regolith
       try
       {
         manager.loadRawTexture( name, it->second );
-        _surfaceRenderQueue.push_back( &it->second );
+        _surfaceRenderQueue.push( &it->second );
         DEBUG_STREAM << "Loaded Surface: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
       }
       catch( Exception& ex )
@@ -109,7 +112,7 @@ namespace Regolith
     // Block the current thread while we wait for the engine to render all the textures
     while ( ! _isRendered )
     {
-      std::this_thread::sleep( std::chrono::milliseconds( 10 ) )
+      std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
     }
 
     _isLoaded = true;
@@ -207,7 +210,7 @@ namespace Regolith
   }
 
 
-  RawTexture* DataHandler::popRenderTexture() const
+  RawTexture* DataHandler::popRenderTexture()
   {
     RawTexture* temp = nullptr;
 

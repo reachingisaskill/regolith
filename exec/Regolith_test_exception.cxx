@@ -35,7 +35,7 @@ int main( int, char** )
 
     ASSERT_EQUAL( what, "Test Error in TestFunc()" );
 
-    ASSERT_TRUE( ex.isRecoverable() );
+    ASSERT_FALSE( ex.isRecoverable() );
 
     ASSERT_EQUAL( ex.numberDetails(), (size_t)0 );
 
@@ -50,7 +50,7 @@ int main( int, char** )
 
     ASSERT_EQUAL( ex.numberDetails(), (size_t)4 );
 
-    std::string expected( "Recoverable exception occured: Test Error in TestFunc()\n   + var1 = 10\n   + var2 = 1\n   + var3 = 1\n   + var4 = hello\n" );
+    std::string expected( "Non-recoverable exception occured: Test Error in TestFunc()\n   + var1 = 10\n   + var2 = 1\n   + var3 = 1\n   + var4 = hello\n" );
 
     ASSERT_EQUAL( ex.elucidate(), expected );
   }
@@ -59,7 +59,7 @@ int main( int, char** )
 
   SECTION( "Throwing and catching" );
   {
-    std::string expected( "Non-recoverable exception occured: Test Error in TestFunc()\n   + var1 = 10\n   + var2 = 1\n   + var3 = 1\n   + var4 = hello\n" );
+    std::string expected( "Recoverable exception occured: Test Error in TestFunc()\n   + var1 = 10\n   + var2 = 1\n   + var3 = 1\n   + var4 = hello\n" );
 
     try
     {
@@ -70,7 +70,7 @@ int main( int, char** )
       ex.addDetail( "var4", "hello" );
       ASSERT_EQUAL( ex.numberDetails(), (size_t)4 );
       ASSERT_EQUAL( ex.elucidate(), expected );
-      ASSERT_FALSE( ex.isRecoverable() );
+      ASSERT_TRUE( ex.isRecoverable() );
     }
   }
 
@@ -117,6 +117,6 @@ void testFunc2()
 
 void testFunc3()
 {
-  throw Exception( "TestFunc()", "Test Error", false );
+  throw Exception( "TestFunc()", "Test Error", true );
 }
 

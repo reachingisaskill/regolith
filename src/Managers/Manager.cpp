@@ -204,6 +204,11 @@ namespace Regolith
   }
 
 
+  void Manager::renderSurfaces( DataHandler* handler )
+  {
+    _theEngine.renderTextures( handler );
+  }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure user events
 
