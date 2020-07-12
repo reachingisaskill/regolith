@@ -91,7 +91,7 @@ namespace Regolith
 
 
       // Render with the current renderer object
-      virtual void draw( SDL_Rect* );
+      virtual void draw( SDL_Rect*, SDL_Renderer* ) const;
 
 
       // Accessors

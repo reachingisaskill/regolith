@@ -42,7 +42,10 @@ namespace Regolith
 
 
       // Configure the window return the SDL renderer
-      SDL_Renderer* init( std::string, int, int );
+      void init( std::string, int, int );
+
+      // Return the SDL window pointer
+      SDL_Window* getSDLWindow() const { return _theWindow; }
 
 
       // Get the current window dimensions

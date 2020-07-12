@@ -50,13 +50,13 @@ namespace Regolith
       // Crucial objects for Regolith
       ThreadManager _theThreads;
       Window _theWindow;
+      bool _rendererExists;
       InputManager _theInput;
       AudioManager _theAudio;
       HardwareManager _theHardware;
       DataManager _theData;
       ContextManager _theContexts;
       Engine _theEngine;
-      SDL_Renderer* _theRenderer;
 
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
@@ -118,6 +118,10 @@ namespace Regolith
       void quit() { _theThreads.quit(); }
 
 
+      // Create and return the pointer to the Renderer - can only be called once!
+      SDL_Renderer* requestRenderer();
+
+
       ////////////////////////////////////////////////////////////////////////////////
       // Get the pointers to various managers and builders
 
@@ -129,9 +133,6 @@ namespace Regolith
 
       // Return a reference to the Scene builder
       SignalFactory& getSignalFactory() { return _signalFactory; }
-
-//      // Get the pointer to the Renderer
-//      SDL_Renderer* getRendererPointer() { return _theRenderer; }
 
       // Get the pointer to the window
       Window& getWindow() { return _theWindow; }

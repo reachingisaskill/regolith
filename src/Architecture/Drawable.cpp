@@ -7,8 +7,7 @@ namespace Regolith
 {
 
   Drawable::Drawable() :
-    PhysicalObject(),
-    _theRenderer( Manager::getInstance()->getRendererPointer() )
+    PhysicalObject()
   {
   }
 

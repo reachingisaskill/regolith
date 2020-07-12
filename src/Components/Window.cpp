@@ -35,7 +35,7 @@ namespace Regolith
   }
 
 
-  SDL_Renderer* Window::init( std::string title, int width, int height )
+  void Window::init( std::string title, int width, int height )
   {
     _title = title;
 
@@ -53,8 +53,6 @@ namespace Regolith
     _height = height;
     _resolutionWidth = width;
     _resolutionHeight = height;
-
-    return SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
   }
 
 

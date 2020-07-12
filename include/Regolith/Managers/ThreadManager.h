@@ -22,7 +22,7 @@ namespace Regolith
   void contextManagerLoadingThread();
 
   // Context Manager loading thread
-  void engineProcessingThread();
+  void engineRenderingThread();
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

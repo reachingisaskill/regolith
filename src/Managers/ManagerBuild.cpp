@@ -219,7 +219,7 @@ namespace Regolith
     std::string title = json_data["title"].asString();
 
     // Initialise the window
-    _theRenderer = _theWindow.init( title, screen_width, screen_height );
+    _theWindow.init( title, screen_width, screen_height );
     _theWindow.registerEvents( _theInput );
 
     // Set the default colour

@@ -22,7 +22,7 @@ namespace Regolith
 
   class Engine : public Component
   {
-    friend void engineProcessingThread();
+    friend void engineRenderingThread();
 
     public:
       class StackOperation;
@@ -31,7 +31,6 @@ namespace Regolith
       typedef std::queue< StackOperation > StackOperationQueue;
 
     private:
-      SDL_Renderer* _theRenderer;
       InputManager& _inputManager;
       SDL_Color& _defaultColor;
       ContextStack _contextStack;
@@ -43,8 +42,8 @@ namespace Regolith
       Timer _frameTimer;
       bool _pause;
 
-      unsigned _queueRenderRate;
       std::mutex _renderQueueMutex;
+      unsigned int _queueRenderRate;
       DataHandler* _currentDataHandler;
 
     protected:
@@ -56,9 +55,6 @@ namespace Regolith
 
       // Just in case I decided to inherit from here in the future...
       virtual ~Engine();
-
-      // Set the renderer pointer - now ready to run
-      void setRenderer( SDL_Renderer* rend ) { _theRenderer = rend; }
 
       // Mutex-controlled rendering function. Turns surfaces into textures for a data handler.
       void renderTextures( DataHandler* );

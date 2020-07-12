@@ -17,14 +17,13 @@ namespace Regolith
   // Engine member function definitions
 
   Engine::Engine( InputManager& input, SDL_Color& color ) :
-    _theRenderer( nullptr ),
     _inputManager( input ),
     _defaultColor( color ),
     _contextStack(),
     _frameTimer(),
     _pause( false ),
-    _queueRenderRate( 1 ),
     _renderQueueMutex(),
+    _queueRenderRate( 1 ),
     _currentDataHandler( nullptr )
   {
   }
@@ -37,12 +36,6 @@ namespace Regolith
 
   void Engine::run()
   {
-    if ( _theRenderer == nullptr )
-    {
-      Exception ex( "Engine::run()", "Renderer is not set" );
-      throw ex;
-    }
-
     // Reset the flags
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
     _pause = false;
@@ -52,111 +45,104 @@ namespace Regolith
     // Synchronise access to the contexts
     Condition<bool>& renderSync = Manager::getInstance()->getThreadManager().RenderSynchronisation;
 
-    std::unique_lock<std::mutex> frameLock( frameSync.mutex, std::defer_lock );
-    std::unique_lock<std::mutex> renderLock( renderSync.mutex, std::defer_lock );
+    std::unique_lock<std::mutex> frameLock( frameSync.mutex );
+    std::unique_lock<std::mutex> renderLock( renderSync.mutex );
     std::unique_lock<std::mutex> queueLock( _renderQueueMutex, std::defer_lock );
 
+    // Load the first context while the renderLock is held
+    performStackOperations();
+    renderLock.unlock();
 
-    while ( ! quitFlag )
+
+    try
     {
-      try
+      // Handler global events without a context
+      _inputManager.handleEvents( nullptr );
+
+      while ( ! quitFlag )
       {
+        // Reset the timer while paused
+        _frameTimer.lap();
+
         while ( ! _pause )
         {
-          // Notify the start of the frame
-          frameLock.lock();
-          frameSync.data = true;
-          frameSync.variable.notify_all();
-          frameLock.unlock();
-          DEBUG_LOG( "------ FRAME ------" );
-
-          // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
-          renderLock.lock();
+        frameSync.variable.wait( frameLock, [&]()->bool{ return quitFlag || frameSync.data; } );
+        frameSync.data = false;
+        if ( quitFlag ) break;
+        frameLock.unlock();
 
 
-          // Setup the rendering process
-          SDL_SetRenderDrawColor( _theRenderer, _defaultColor.r, _defaultColor.g, _defaultColor.b, _defaultColor.a );
-          SDL_RenderClear( _theRenderer );
+        // Handle events globally and context-specific actions using the contexts input handler
+        _inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
-          // Iterate through all the visible contexts and update as necessary
-          for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
+
+
+        renderLock.lock();
+        renderSync.variable.wait( renderLock, [&]()->bool{ return quitFlag || renderSync.data; } );
+        renderSync.data = false;
+        if ( quitFlag ) break;
+
+
+        // Hold the render lock while the context stack is updated
+
+        float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
+
+        // Iterate through all the visible contexts and update as necessary
+        for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
+        {
+          Context* this_context = (*context_it);
+          if ( ! this_context->isPaused() )
           {
-            // Draw everything to the back buffer
-            (*context_it)->render();
+            this_context->update( time );
+            this_context->step( time );
+            this_context->resolveCollisions();
           }
-
-          // Blits the back buffer to the front buffer
-          SDL_RenderPresent( _theRenderer );
+        }
 
 
+        // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
+        if ( ! _stackOperationQueue.empty() )
+        {
+          performStackOperations();
+        }
 
-          // Notify that the contexts can be updated
-          renderSync.data = true;
-          renderSync.variable.notify_all();
-          renderLock.unlock();
+        // Release the context stack
+        renderLock.unlock();
 
-          DEBUG_LOG( "------ RENDER ------" );
-
-
-          if ( queueLock.owns_lock() || queueLock.try_lock() )
-          {
-            if ( _currentDataHandler != nullptr )
-            {
-              // Render some of the texture queue for the remaing frame time
-              unsigned int counter = 0;
-              while ( ( counter < _queueRenderRate ) )
-              {
-                // Check if there are any surfaces to render
-                RawTexture* rawTexture = _currentDataHandler->popRenderTexture();
-                if ( rawTexture != nullptr )
-                {
-                  // Perform the rendering
-                  rawTexture->renderTexture( _theRenderer );
-                }
-                else
-                {
-                  // Remove the DataHandler pointer
-                  _currentDataHandler = nullptr;
-                  queueLock.unlock();
-                }
-              }
-            }
-            else
-            {
-              queueLock.unlock();
-            }
-          }
-
+        // Aquire the frame lock here so that we can pause the rendering thread when engine is paused
+        frameLock.lock();
         }
       }
-      catch ( Exception& ex )
+
+      frameLock.unlock();
+    }
+    catch ( Exception& ex )
+    {
+      Manager::getInstance()->getThreadManager().error();
+      if ( frameLock.owns_lock() )
       {
-        Manager::getInstance()->getThreadManager().error();
-        if ( frameLock.owns_lock() )
-        {
-          frameLock.unlock();
-        }
-        if ( renderLock.owns_lock() )
-        {
-          renderLock.unlock();
-        }
-        FAILURE_LOG( "Regolith Exception thrown from Engine Rendering Thread." );
-        std::cerr << ex.elucidate();
+        frameLock.unlock();
       }
-      catch ( std::exception& ex )
+      if ( renderLock.owns_lock() )
       {
-        Manager::getInstance()->getThreadManager().error();
-        if ( frameLock.owns_lock() )
-        {
-          frameLock.unlock();
-        }
-        if ( renderLock.owns_lock() )
-        {
-          renderLock.unlock();
-        }
-        FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
-        std::cerr << ex.what();
+        renderLock.unlock();
       }
+      FAILURE_LOG( "Regolith Exception thrown from Engine Rendering Thread." );
+      std::cerr << ex.elucidate();
+    }
+    catch ( std::exception& ex )
+    {
+      Manager::getInstance()->getThreadManager().error();
+      if ( frameLock.owns_lock() )
+      {
+        frameLock.unlock();
+      }
+      if ( renderLock.owns_lock() )
+      {
+        renderLock.unlock();
+      }
+      FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
+      std::cerr << ex.what();
     }
   }
 
@@ -300,7 +286,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Engine processing thread definition
 
-  void engineProcessingThread()
+  void engineRenderingThread()
   {
     INFO_LOG( "Engine processing thread start." );
 
@@ -313,10 +299,18 @@ namespace Regolith
       startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
     }
-    INFO_LOG( "Engine processing thread go." );
-
+    INFO_LOG( "Engine rendering thread go." );
 
     Engine& engine = Manager::getInstance()->getEngine();
+
+    // Get references to the required components
+    SDL_Renderer* renderer = Manager::getInstance()->requestRenderer();
+    SDL_Color& defaultColour = engine._defaultColor;
+    ContextStack& contextStack = engine._contextStack;
+    ContextStack::reverse_iterator& visibleStackStart = engine._visibleStackStart;
+    ContextStack::reverse_iterator& visibleStackEnd = engine._visibleStackEnd;
+    DataHandler*& currentDataHandler = engine._currentDataHandler;
+    unsigned int& queueRenderRate = engine._queueRenderRate;
 
     // Synchronise the start of the frame
     Condition<bool>& frameSync = Manager::getInstance()->getThreadManager().FrameSynchronisation;
@@ -327,67 +321,78 @@ namespace Regolith
     std::unique_lock<std::mutex> renderLock( renderSync.mutex );
 
 
-
-    // Reset the timer
-    engine._frameTimer.lap();
-
-    // Load the first context while the renderLock is held
-    engine.performStackOperations();
     renderLock.unlock();
-
 
 
     try
     {
 
-      INFO_LOG( "Engine processing thread waiting for first frame" );
-
       while ( ! quitFlag )
       {
-        // Handle global events with no context
-        engine._inputManager.handleEvents( nullptr );
-        frameSync.variable.wait( frameLock, [&]()->bool{ return quitFlag || frameSync.data; } );
-        if ( quitFlag ) break;
+        // Notify the start of the frame
+        frameLock.lock();
+        frameSync.data = true;
+        frameSync.variable.notify_all();
         frameLock.unlock();
+        DEBUG_LOG( "------ RENDER ------" );
 
 
-        // Handle events globally and context-specific actions using the contexts input handler
-        engine._inputManager.handleEvents( engine._contextStack.front()->inputHandler() );
-
-
-
+        // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
         renderLock.lock();
-        renderSync.variable.wait( renderLock, [&]()->bool{ return quitFlag || renderSync.data; } );
-        if ( quitFlag ) break;
-        renderLock.unlock();
 
-
-
-        float time = (float)engine._frameTimer.lap(); // Only conversion from int to float happens here.
+        // Setup the rendering process
+        SDL_SetRenderDrawColor( renderer, defaultColour.r, defaultColour.g, defaultColour.b, defaultColour.a );
+        SDL_RenderClear( renderer );
 
         // Iterate through all the visible contexts and update as necessary
-        for ( ContextStack::reverse_iterator context_it = engine._visibleStackStart; context_it != engine._visibleStackEnd; ++context_it )
+        for ( ContextStack::reverse_iterator context_it = visibleStackStart; context_it != visibleStackEnd; ++context_it )
         {
-          Context* this_context = (*context_it);
-          if ( ! this_context->isPaused() )
+          // Draw everything to the back buffer
+          (*context_it)->render();
+        }
+
+        // Blits the back buffer to the front buffer synchronised with monitor VSYNC
+        SDL_RenderPresent( renderer );
+
+
+
+        // Notify that the contexts can be updated
+        renderSync.data = true;
+        renderSync.variable.notify_all();
+        renderLock.unlock();
+
+        DEBUG_LOG( "------ FRAME ------" );
+
+
+        if ( queueLock.owns_lock() || queueLock.try_lock() )
+        {
+          if ( currentDataHandler != nullptr )
           {
-            this_context->update( time );
-            this_context->step( time );
-            this_context->resolveCollisions();
+            // Render some of the texture queue for the remaing frame time
+            unsigned int counter = 0;
+            while ( ( counter < queueRenderRate ) )
+            {
+              // Check if there are any surfaces to render
+              RawTexture* rawTexture = currentDataHandler->popRenderTexture();
+              if ( rawTexture != nullptr )
+              {
+                // Perform the rendering
+                rawTexture->renderTexture( renderer );
+              }
+              else
+              {
+                // Remove the DataHandler pointer
+                currentDataHandler = nullptr;
+                queueLock.unlock();
+              }
+            }
+          }
+          else
+          {
+            queueLock.unlock();
           }
         }
 
-
-
-        // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
-        if ( ! engine._stackOperationQueue.empty() )
-        {
-          engine.performStackOperations();
-        }
-
-
-
-        frameLock.lock();
       }
 
       frameLock.unlock();
@@ -421,7 +426,13 @@ namespace Regolith
       std::cerr << ex.what();
     }
 
-    INFO_LOG( "Engine Processing thread stopped." );
+
+    INFO_LOG( "Destroying the renderer" );
+    SDL_DestroyRenderer( renderer );
+    renderer = nullptr;
+
+
+    INFO_LOG( "Engine rendering thread stopped." );
   }
 
 }

@@ -15,7 +15,7 @@ namespace Regolith
   ThreadManager::ThreadManager() :
     _dataManagerThread( dataManagerLoadingThread ),
     _contextManagerThread( contextManagerLoadingThread ),
-    _engineProcessingThread( engineProcessingThread ),
+    _engineRenderingThread( engineRenderingThread ),
     DataUpdate( false ),
     ContextUpdate( false ),
     MusicUpdate( nullptr ),
@@ -93,7 +93,7 @@ namespace Regolith
     // Wait for all the threads to re-join
     _dataManagerThread.join();
     _contextManagerThread.join();
-    _engineProcessingThread.join();
+    _engineRenderingThread.join();
   }
 
 }

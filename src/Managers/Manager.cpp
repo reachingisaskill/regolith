@@ -30,13 +30,13 @@ namespace Regolith
   Manager::Manager() :
     _theThreads(),
     _theWindow(),
+    _rendererExists( false ),
     _theInput(),
     _theAudio(),
     _theHardware(),
     _theData(),
     _theContexts(),
     _theEngine( _theInput, _defaultColor ),
-    _theRenderer( nullptr ),
     _objectFactory(),
     _contextFactory(),
     _signalFactory(),
@@ -109,10 +109,6 @@ namespace Regolith
 
     _theAudio.clear();
 
-    INFO_LOG( "Destroying the renderer" );
-    SDL_DestroyRenderer( _theRenderer );
-    _theRenderer = nullptr;
-
     INFO_LOG( "Clearing hardware manager" );
     _theHardware.clear();
 
@@ -121,6 +117,19 @@ namespace Regolith
     Mix_Quit();
     IMG_Quit();
     SDL_Quit();
+  }
+
+
+  SDL_Renderer* Manager::requestRenderer()
+  {
+    if ( _rendererExists )
+    {
+      Exception ex( "Manager::requestRenderer()", "Renderer already exists - only one thread may own one." );
+      throw ex;
+    }
+    _rendererExists = true;
+
+    return SDL_CreateRenderer( _theWindow.getSDLWindow(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
   }
 
 

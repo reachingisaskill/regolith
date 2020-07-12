@@ -16,10 +16,6 @@ namespace Regolith
    */
   class Drawable : virtual public PhysicalObject
   {
-
-    private:
-      SDL_Renderer* _theRenderer;
-
     public:
       Drawable();
 
@@ -29,10 +25,6 @@ namespace Regolith
       virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override {}
 
 
-      // Get the Renderer pointer
-      SDL_Renderer* getRenderer() const { return _theRenderer; }
-
-
 
       // Specify the properties of the object. (Moving, animated, collision, etc)
       virtual bool hasTexture() const override { return true; }
@@ -40,7 +32,7 @@ namespace Regolith
 
 
       // Perform the steps to call SDL_RenderCopy, etc
-      virtual void render( const Camera& ) = 0;
+      virtual void render( const Camera&, SDL_Renderer* ) const = 0;
 
   };
 

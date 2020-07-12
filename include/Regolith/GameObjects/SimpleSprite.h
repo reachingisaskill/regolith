@@ -32,7 +32,7 @@ namespace Regolith
 
 
       // Render with the current renderer object
-      virtual void render( const Camera& ) override;
+      virtual void render( const Camera&, SDL_Renderer* ) const override;
 
 
       // Return a new clone of the current object. Transfers ownership of memory
