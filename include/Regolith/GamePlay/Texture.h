@@ -57,7 +57,7 @@ namespace Regolith
   {
     private:
       // Pointer to the raw sdl texture
-      RawTexture* _theTexture;
+      mutable RawTexture* _theTexture;
       float _angle;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
@@ -91,7 +91,7 @@ namespace Regolith
 
 
       // Render with the current renderer object
-      virtual void draw( SDL_Rect*, SDL_Renderer* ) const;
+      virtual void draw( SDL_Renderer*, SDL_Rect* ) const;
 
 
       // Accessors

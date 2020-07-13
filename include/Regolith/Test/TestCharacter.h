@@ -16,7 +16,7 @@ namespace Regolith
   {
     private :
       Texture _theTexture;
-      SDL_Rect _destination;
+      mutable SDL_Rect _destination;
       float _movementForce;
       float _jumpSpeed;
       RawSound* _jumpSound;
@@ -50,7 +50,7 @@ namespace Regolith
 
 
       // Required to be drawable
-      virtual void render( const Camera& ) override;
+      virtual void render( SDL_Renderer*, const Camera& ) const override;
 
 
       // Required to be animated

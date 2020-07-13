@@ -75,7 +75,6 @@ namespace Regolith
       // Configure the window
       this->_loadWindow( json_data["window"] );
       _theWindow.registerEvents( _theInput );
-      _theEngine.setRenderer( _theRenderer );
 
 
       //Load all the collision teams

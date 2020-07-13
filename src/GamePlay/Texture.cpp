@@ -96,7 +96,7 @@ namespace Regolith
   }
 
 
-  void Texture::draw( SDL_Rect* destination, SDL_Renderer* renderer ) const
+  void Texture::draw( SDL_Renderer* renderer, SDL_Rect* destination ) const
   {
     // Render it to the window
     SDL_RenderCopyEx( renderer, _theTexture->texture, &_clip, destination, _angle, nullptr, _flipFlag );

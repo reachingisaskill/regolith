@@ -23,7 +23,7 @@ namespace Regolith
 
   class DataHandler
   {
-    friend void Engine::run();
+    friend void engineRenderingThread();
 
     typedef std::queue< RawTexture* > SurfaceRenderQueue;
 

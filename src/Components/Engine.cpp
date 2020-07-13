@@ -45,9 +45,8 @@ namespace Regolith
     // Synchronise access to the contexts
     Condition<bool>& renderSync = Manager::getInstance()->getThreadManager().RenderSynchronisation;
 
-    std::unique_lock<std::mutex> frameLock( frameSync.mutex );
+    std::unique_lock<std::mutex> frameLock( frameSync.mutex, std::defer_lock );
     std::unique_lock<std::mutex> renderLock( renderSync.mutex );
-    std::unique_lock<std::mutex> queueLock( _renderQueueMutex, std::defer_lock );
 
     // Load the first context while the renderLock is held
     performStackOperations();
@@ -66,51 +65,52 @@ namespace Regolith
 
         while ( ! _pause )
         {
-        frameSync.variable.wait( frameLock, [&]()->bool{ return quitFlag || frameSync.data; } );
-        frameSync.data = false;
-        if ( quitFlag ) break;
-        frameLock.unlock();
+//          frameSync.variable.wait( frameLock, [&]()->bool{ return quitFlag || frameSync.data; } );
+//          frameSync.data = false;
+//          if ( quitFlag ) break;
+//          frameLock.unlock();
 
 
-        // Handle events globally and context-specific actions using the contexts input handler
-        _inputManager.handleEvents( _contextStack.front()->inputHandler() );
+          // Handle events globally and context-specific actions using the contexts input handler
+          _inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
 
 
-        renderLock.lock();
-        renderSync.variable.wait( renderLock, [&]()->bool{ return quitFlag || renderSync.data; } );
-        renderSync.data = false;
-        if ( quitFlag ) break;
+//          renderLock.lock();
+          while ( ! renderLock.try_lock() );
+//          renderSync.variable.wait( renderLock, [&]()->bool{ return quitFlag || renderSync.data; } );
+//          renderSync.data = false;
+//          if ( quitFlag ) break;
 
 
-        // Hold the render lock while the context stack is updated
+          // Hold the render lock while the context stack is updated
 
-        float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
+          float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
 
-        // Iterate through all the visible contexts and update as necessary
-        for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
-        {
-          Context* this_context = (*context_it);
-          if ( ! this_context->isPaused() )
+          // Iterate through all the visible contexts and update as necessary
+          for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
           {
-            this_context->update( time );
-            this_context->step( time );
-            this_context->resolveCollisions();
+            Context* this_context = (*context_it);
+            if ( ! this_context->isPaused() )
+            {
+              this_context->update( time );
+              this_context->step( time );
+              this_context->resolveCollisions();
+            }
           }
-        }
 
 
-        // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
-        if ( ! _stackOperationQueue.empty() )
-        {
-          performStackOperations();
-        }
+          // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
+          if ( ! _stackOperationQueue.empty() )
+          {
+            performStackOperations();
+          }
 
-        // Release the context stack
-        renderLock.unlock();
+          // Release the context stack
+          renderLock.unlock();
 
-        // Aquire the frame lock here so that we can pause the rendering thread when engine is paused
-        frameLock.lock();
+          // Aquire the frame lock here so that we can pause the rendering thread when engine is paused
+//          frameLock.lock();
         }
       }
 
@@ -163,6 +163,7 @@ namespace Regolith
       std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
     }
 
+    DEBUG_STREAM << "New data handler @ " << handler;
     _currentDataHandler = handler;
 
     lock.unlock();
@@ -306,7 +307,6 @@ namespace Regolith
     // Get references to the required components
     SDL_Renderer* renderer = Manager::getInstance()->requestRenderer();
     SDL_Color& defaultColour = engine._defaultColor;
-    ContextStack& contextStack = engine._contextStack;
     ContextStack::reverse_iterator& visibleStackStart = engine._visibleStackStart;
     ContextStack::reverse_iterator& visibleStackEnd = engine._visibleStackEnd;
     DataHandler*& currentDataHandler = engine._currentDataHandler;
@@ -314,15 +314,16 @@ namespace Regolith
 
     // Synchronise the start of the frame
     Condition<bool>& frameSync = Manager::getInstance()->getThreadManager().FrameSynchronisation;
-    std::unique_lock<std::mutex> frameLock( frameSync.mutex );
+    std::unique_lock<std::mutex> frameLock( frameSync.mutex, std::defer_lock );
 
     // Synchronise access to the contexts
     Condition<bool>& renderSync = Manager::getInstance()->getThreadManager().RenderSynchronisation;
     std::unique_lock<std::mutex> renderLock( renderSync.mutex );
 
+    // Control access to the DataHandler being loaded
+    std::unique_lock<std::mutex> queueLock( engine._renderQueueMutex, std::defer_lock );
 
     renderLock.unlock();
-
 
     try
     {
@@ -330,15 +331,18 @@ namespace Regolith
       while ( ! quitFlag )
       {
         // Notify the start of the frame
-        frameLock.lock();
-        frameSync.data = true;
-        frameSync.variable.notify_all();
-        frameLock.unlock();
-        DEBUG_LOG( "------ RENDER ------" );
+//        frameLock.lock();
+//        frameSync.data = true;
+//        frameLock.unlock();
+//        frameSync.variable.notify_all();
+
+
 
 
         // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
-        renderLock.lock();
+//        renderLock.lock();
+        while ( ! renderLock.try_lock() );
+        DEBUG_LOG( "------ RENDER ------" );
 
         // Setup the rendering process
         SDL_SetRenderDrawColor( renderer, defaultColour.r, defaultColour.g, defaultColour.b, defaultColour.a );
@@ -348,18 +352,17 @@ namespace Regolith
         for ( ContextStack::reverse_iterator context_it = visibleStackStart; context_it != visibleStackEnd; ++context_it )
         {
           // Draw everything to the back buffer
-          (*context_it)->render();
+          (*context_it)->render( renderer );
         }
 
         // Blits the back buffer to the front buffer synchronised with monitor VSYNC
         SDL_RenderPresent( renderer );
 
 
-
         // Notify that the contexts can be updated
-        renderSync.data = true;
-        renderSync.variable.notify_all();
+//        renderSync.data = true;
         renderLock.unlock();
+//        renderSync.variable.notify_all();
 
         DEBUG_LOG( "------ FRAME ------" );
 
@@ -370,9 +373,10 @@ namespace Regolith
           {
             // Render some of the texture queue for the remaing frame time
             unsigned int counter = 0;
-            while ( ( counter < queueRenderRate ) )
+            while ( counter < queueRenderRate )
             {
               // Check if there are any surfaces to render
+              DEBUG_STREAM << "------ TexRend @ " << currentDataHandler;
               RawTexture* rawTexture = currentDataHandler->popRenderTexture();
               if ( rawTexture != nullptr )
               {
@@ -384,6 +388,7 @@ namespace Regolith
                 // Remove the DataHandler pointer
                 currentDataHandler = nullptr;
                 queueLock.unlock();
+                break;
               }
             }
           }
@@ -395,7 +400,6 @@ namespace Regolith
 
       }
 
-      frameLock.unlock();
     }
     catch( Exception& ex )
     {
@@ -409,7 +413,8 @@ namespace Regolith
         renderLock.unlock();
       }
       FAILURE_LOG( "Regolith Exception thrown from Engine Processing Thread." );
-      std::cerr << ex.elucidate();
+      FAILURE_STREAM << ex.elucidate();
+      std::cerr << ex.elucidate() << std::endl;
     }
     catch( std::exception& ex )
     {
@@ -423,7 +428,8 @@ namespace Regolith
         renderLock.unlock();
       }
       FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
-      std::cerr << ex.what();
+      FAILURE_STREAM << ex.what();
+      std::cerr << ex.what() << std::endl;
     }
 
 

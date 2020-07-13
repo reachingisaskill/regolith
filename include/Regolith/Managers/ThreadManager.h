@@ -51,7 +51,7 @@ namespace Regolith
       std::thread _contextManagerThread;
 
       // Context manager thread container
-      std::thread _engineProcessingThread;
+      std::thread _engineRenderingThread;
 
     public:
       // Con/Destructors

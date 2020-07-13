@@ -40,7 +40,7 @@ namespace Regolith
   }
 
 
-  void SimpleButton::render( const Camera& camera )
+  void SimpleButton::render( SDL_Renderer* renderer, const Camera& camera ) const
   {
     // Place the object
     _destination.x = position().x();
@@ -52,7 +52,7 @@ namespace Regolith
     SDL_Rect destination = camera.place( _destination );
     DEBUG_STREAM << "BUTTON RENDER: Original: " << _destination.x << ", " << _destination.y << ", " <<  _destination.w << ", " << _destination.h << ", NEW: " << destination.x << ", " << destination.y << ", " << destination.w << ", " << destination.h;
 
-    _currentTexture->draw( &destination );
+    _currentTexture->draw( renderer, &destination );
   }
 
 

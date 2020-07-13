@@ -23,7 +23,7 @@ namespace Regolith
   }
 
 
-  void AnimatedSprite::render( const Camera& camera )
+  void AnimatedSprite::render( SDL_Renderer* renderer, const Camera& camera ) const
   {
     // Place the object
     _destination.x = position().x();
@@ -35,7 +35,7 @@ namespace Regolith
     SDL_Rect destination = camera.place( _destination );
     DEBUG_STREAM << "AN-SP RENDER: Original: " << _destination.w << ", " << _destination.h << ", NEW: " << destination.x << ", " << destination.y << ", " << destination.w << ", " << destination.h;
 
-    _texture.draw( &destination );
+    _texture.draw( renderer, &destination );
   }
 
 

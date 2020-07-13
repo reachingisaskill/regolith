@@ -118,7 +118,7 @@ namespace Regolith
   }
 
 
-  void Context::render()
+  void Context::render( SDL_Renderer* renderer )
   {
     DEBUG_LOG( "Context Render" );
     ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
@@ -139,7 +139,7 @@ namespace Regolith
         }
         else
         {
-          (*draw_it)->render( _theCamera );
+          (*draw_it)->render( renderer, _theCamera );
           ++draw_it;
         }
       }

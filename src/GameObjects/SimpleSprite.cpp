@@ -23,7 +23,7 @@ namespace Regolith
   }
 
 
-  void SimpleSprite::render( const Camera& camera, SDL_Renderer* renderer ) const
+  void SimpleSprite::render( SDL_Renderer* renderer, const Camera& camera ) const
   {
     // Place the object
     _destination.x = position().x();
@@ -35,7 +35,7 @@ namespace Regolith
     SDL_Rect destination = camera.place( _destination );
     DEBUG_STREAM << "RENDER: Original: " << _destination.w << ", " << _destination.h << ", NEW: " << destination.x << ", " << destination.y << ", " << destination.w << ", " << destination.h;
 
-    _texture.draw( &destination, renderer );
+    _texture.draw( renderer, &destination );
   }
 
 

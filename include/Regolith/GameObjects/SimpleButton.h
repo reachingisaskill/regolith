@@ -17,7 +17,7 @@ namespace Regolith
   {
     private :
       Texture _textures[Clickable::STATE_MAX];
-      SDL_Rect _destination;
+      mutable SDL_Rect _destination;
       Texture* _currentTexture;
 
     protected:
@@ -39,7 +39,7 @@ namespace Regolith
 
 
       // Render with the current renderer object
-      virtual void render( const Camera& ) override;
+      virtual void render( SDL_Renderer*, const Camera& ) const override;
 
 
       // Button click - trigger the interactions

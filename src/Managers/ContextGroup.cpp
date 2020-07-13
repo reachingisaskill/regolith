@@ -181,7 +181,7 @@ namespace Regolith
 
     for ( ProxyMap< DataHandler* >::iterator it = _dataHandlers.begin(); it != _dataHandlers.end(); ++it )
     {
-      DEBUG_STREAM << "Loading Data Handler : " << it->first;
+      DEBUG_STREAM << "Loading Data Handler : " << it->first << " @ " << it->second;
       it->second->load();
     }
 

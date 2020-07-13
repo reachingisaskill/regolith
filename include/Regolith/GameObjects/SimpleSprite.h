@@ -17,7 +17,7 @@ namespace Regolith
   {
     private:
       Texture _texture;
-      SDL_Rect _destination;
+      mutable SDL_Rect _destination;
 
     protected:
 
@@ -32,7 +32,7 @@ namespace Regolith
 
 
       // Render with the current renderer object
-      virtual void render( const Camera&, SDL_Renderer* ) const override;
+      virtual void render( SDL_Renderer*, const Camera& ) const override;
 
 
       // Return a new clone of the current object. Transfers ownership of memory

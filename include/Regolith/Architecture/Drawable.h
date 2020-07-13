@@ -32,7 +32,7 @@ namespace Regolith
 
 
       // Perform the steps to call SDL_RenderCopy, etc
-      virtual void render( const Camera&, SDL_Renderer* ) const = 0;
+      virtual void render( SDL_Renderer*, const Camera& ) const = 0;
 
   };
 

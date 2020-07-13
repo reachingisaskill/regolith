@@ -104,7 +104,7 @@ namespace Regolith
   }
 
 
-  void TestCharacter::render( const Camera& camera )
+  void TestCharacter::render( SDL_Renderer* renderer, const Camera& camera ) const
   {
     // Place the object
     _destination.x = position().x();
@@ -115,7 +115,7 @@ namespace Regolith
     // Move into the camera reference frame
     SDL_Rect destination = camera.place( _destination );
 
-    _theTexture.draw( &destination );
+    _theTexture.draw( renderer, &destination );
   }
 
 

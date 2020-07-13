@@ -124,7 +124,7 @@ namespace Regolith
 
 
       // Render all the objects
-      void render();
+      void render( SDL_Renderer* );
 
 
       // Render all the objects
