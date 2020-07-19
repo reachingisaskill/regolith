@@ -3,6 +3,7 @@
 #define REGOLITH_MANAGERS_THREAD_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Utilities/CircularSemaphore.h"
 
 #include <thread>
 #include <mutex>
@@ -94,11 +95,8 @@ namespace Regolith
       // Signals a change of song in the AudioManager
       Condition<Mix_Music*> MusicUpdate;
 
-      // Signals the start of a new frame 
-      Condition<bool> FrameSynchronisation;
-
-      // Signals the end of the context rendering (to avoid data races)
-      Condition<bool> RenderSynchronisation;
+      // Circularly latching semaphore for access to the context stack/renderable objects
+      Utilities::CircularSemaphore RenderSemaphore;
 
   };
 

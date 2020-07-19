@@ -19,8 +19,7 @@ namespace Regolith
     DataUpdate( false ),
     ContextUpdate( false ),
     MusicUpdate( nullptr ),
-    FrameSynchronisation( false ),
-    RenderSynchronisation( false )
+    RenderSemaphore( 2 )
   {
   }
 
@@ -38,8 +37,6 @@ namespace Regolith
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
-    FrameSynchronisation.variable.notify_all();
-    RenderSynchronisation.variable.notify_all();
   }
 
 
@@ -52,8 +49,6 @@ namespace Regolith
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
-    FrameSynchronisation.variable.notify_all();
-    RenderSynchronisation.variable.notify_all();
   }
 
 
@@ -67,8 +62,6 @@ namespace Regolith
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
-    FrameSynchronisation.variable.notify_all();
-    RenderSynchronisation.variable.notify_all();
   }
 
 

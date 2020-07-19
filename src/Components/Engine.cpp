@@ -2,6 +2,7 @@
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Utilities/CircularSemaphore.h"
 
 #include "logtastic.h"
 
@@ -40,17 +41,9 @@ namespace Regolith
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
     _pause = false;
 
-    // Synchronise the start of the frame
-    Condition<bool>& frameSync = Manager::getInstance()->getThreadManager().FrameSynchronisation;
     // Synchronise access to the contexts
-    Condition<bool>& renderSync = Manager::getInstance()->getThreadManager().RenderSynchronisation;
-
-    std::unique_lock<std::mutex> frameLock( frameSync.mutex, std::defer_lock );
-    std::unique_lock<std::mutex> renderLock( renderSync.mutex );
-
-    // Load the first context while the renderLock is held
-    performStackOperations();
-    renderLock.unlock();
+    Utilities::CircularSemaphore::Handle renderLatch = Manager::getInstance()->getThreadManager().RenderSemaphore.requestHandle( 1 );
+    DEBUG_LOG( "Process Handle Configured." );
 
 
     try
@@ -65,25 +58,16 @@ namespace Regolith
 
         while ( ! _pause )
         {
-//          frameSync.variable.wait( frameLock, [&]()->bool{ return quitFlag || frameSync.data; } );
-//          frameSync.data = false;
-//          if ( quitFlag ) break;
-//          frameLock.unlock();
-
 
           // Handle events globally and context-specific actions using the contexts input handler
           _inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
 
 
-//          renderLock.lock();
-          while ( ! renderLock.try_lock() );
-//          renderSync.variable.wait( renderLock, [&]()->bool{ return quitFlag || renderSync.data; } );
-//          renderSync.data = false;
-//          if ( quitFlag ) break;
+          // Lock access to the context stack for updating
+          renderLatch.lock();
 
 
-          // Hold the render lock while the context stack is updated
 
           float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
 
@@ -106,26 +90,20 @@ namespace Regolith
             performStackOperations();
           }
 
-          // Release the context stack
-          renderLock.unlock();
 
-          // Aquire the frame lock here so that we can pause the rendering thread when engine is paused
-//          frameLock.lock();
+
+          // Release the context stack
+          renderLatch.unlock();
         }
       }
 
-      frameLock.unlock();
     }
     catch ( Exception& ex )
     {
       Manager::getInstance()->getThreadManager().error();
-      if ( frameLock.owns_lock() )
+      if ( renderLatch.isLocked() )
       {
-        frameLock.unlock();
-      }
-      if ( renderLock.owns_lock() )
-      {
-        renderLock.unlock();
+        renderLatch.unlock();
       }
       FAILURE_LOG( "Regolith Exception thrown from Engine Rendering Thread." );
       std::cerr << ex.elucidate();
@@ -133,13 +111,9 @@ namespace Regolith
     catch ( std::exception& ex )
     {
       Manager::getInstance()->getThreadManager().error();
-      if ( frameLock.owns_lock() )
+      if ( renderLatch.isLocked() )
       {
-        frameLock.unlock();
-      }
-      if ( renderLock.owns_lock() )
-      {
-        renderLock.unlock();
+        renderLatch.unlock();
       }
       FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
       std::cerr << ex.what();
@@ -312,36 +286,20 @@ namespace Regolith
     DataHandler*& currentDataHandler = engine._currentDataHandler;
     unsigned int& queueRenderRate = engine._queueRenderRate;
 
-    // Synchronise the start of the frame
-    Condition<bool>& frameSync = Manager::getInstance()->getThreadManager().FrameSynchronisation;
-    std::unique_lock<std::mutex> frameLock( frameSync.mutex, std::defer_lock );
-
     // Synchronise access to the contexts
-    Condition<bool>& renderSync = Manager::getInstance()->getThreadManager().RenderSynchronisation;
-    std::unique_lock<std::mutex> renderLock( renderSync.mutex );
+    Utilities::CircularSemaphore::Handle renderLatch = Manager::getInstance()->getThreadManager().RenderSemaphore.requestHandle( 0 );
+    DEBUG_LOG( "Render Handle Configured." );
 
     // Control access to the DataHandler being loaded
     std::unique_lock<std::mutex> queueLock( engine._renderQueueMutex, std::defer_lock );
-
-    renderLock.unlock();
 
     try
     {
 
       while ( ! quitFlag )
       {
-        // Notify the start of the frame
-//        frameLock.lock();
-//        frameSync.data = true;
-//        frameLock.unlock();
-//        frameSync.variable.notify_all();
-
-
-
-
         // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
-//        renderLock.lock();
-        while ( ! renderLock.try_lock() );
+        renderLatch.lock();
         DEBUG_LOG( "------ RENDER ------" );
 
         // Setup the rendering process
@@ -359,10 +317,8 @@ namespace Regolith
         SDL_RenderPresent( renderer );
 
 
-        // Notify that the contexts can be updated
-//        renderSync.data = true;
-        renderLock.unlock();
-//        renderSync.variable.notify_all();
+        // Release acces to the context stack
+        renderLatch.unlock();
 
         DEBUG_LOG( "------ FRAME ------" );
 
@@ -404,13 +360,9 @@ namespace Regolith
     catch( Exception& ex )
     {
       Manager::getInstance()->getThreadManager().error();
-      if ( frameLock.owns_lock() )
+      if ( renderLatch.isLocked() )
       {
-        frameLock.unlock();
-      }
-      if ( renderLock.owns_lock() )
-      {
-        renderLock.unlock();
+        renderLatch.unlock();
       }
       FAILURE_LOG( "Regolith Exception thrown from Engine Processing Thread." );
       FAILURE_STREAM << ex.elucidate();
@@ -419,13 +371,9 @@ namespace Regolith
     catch( std::exception& ex )
     {
       Manager::getInstance()->getThreadManager().error();
-      if ( frameLock.owns_lock() )
+      if ( renderLatch.isLocked() )
       {
-        frameLock.unlock();
-      }
-      if ( renderLock.owns_lock() )
-      {
-        renderLock.unlock();
+        renderLatch.unlock();
       }
       FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
       FAILURE_STREAM << ex.what();
