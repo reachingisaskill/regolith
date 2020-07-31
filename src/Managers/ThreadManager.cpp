@@ -19,7 +19,7 @@ namespace Regolith
     DataUpdate( false ),
     ContextUpdate( false ),
     MusicUpdate( nullptr ),
-    RenderSemaphore( 2 )
+    RenderMutex()
   {
   }
 

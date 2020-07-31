@@ -3,7 +3,6 @@
 #define REGOLITH_MANAGERS_THREAD_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Utilities/CircularSemaphore.h"
 
 #include <thread>
 #include <mutex>
@@ -95,8 +94,8 @@ namespace Regolith
       // Signals a change of song in the AudioManager
       Condition<Mix_Music*> MusicUpdate;
 
-      // Circularly latching semaphore for access to the context stack/renderable objects
-      Utilities::CircularSemaphore RenderSemaphore;
+      // Mutex to control access to contexts
+      std::mutex RenderMutex;
 
   };
 
