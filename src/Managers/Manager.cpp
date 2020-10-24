@@ -185,7 +185,8 @@ namespace Regolith
 
 
     // Start the engine!
-    _theEngine.run();
+//    _theEngine.run();
+    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
 
     // Join all the threads

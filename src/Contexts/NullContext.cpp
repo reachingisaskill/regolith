@@ -8,6 +8,7 @@ namespace Regolith
   NullContext::NullContext() :
     Context()
   {
+    INFO_LOG( "Null Context Created" );
   }
 
 

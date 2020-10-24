@@ -31,6 +31,7 @@ namespace Regolith
     INFO_LOG( "Deleting Context Group" );
 
     if ( _isLoaded ) this->unload();
+    _contexts.clear();
   }
 
 
