@@ -52,15 +52,6 @@ namespace Regolith
     {
       Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING );
       _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->requestContext( json_data["load_screen"].asString() );
-
-      // Set the load screen pointer
-//      _loadScreen = dynamic_cast<LoadScreen*>( Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContext( json_data["load_screen"].asString() ) );
-//      if ( _loadScreen == nullptr )
-//      {
-//        Exception ex( "ContextGroup::configure()", "Could not find the requested LoadScreen. Is it the correct context type?" );
-//        ex.addDetail( "Context Name",  json_data["load_screen"].asString() );
-//        throw ex;
-//      }
     }
 
     // Load a space for every context
@@ -72,10 +63,9 @@ namespace Regolith
     }
 
 
-    // Set the default entry point
-    if ( ! _isGlobalGroup )
+    // Set the default entry point. Optional if this is the global context group
+    if ( Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING, (!_isGlobalGroup) ) )
     {
-      Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
       _entryPoint = requestContext( json_data["entry_point"].asString() );
     }
 
@@ -186,22 +176,6 @@ namespace Regolith
     }
 
     _isLoaded = true;
-
-//    Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
-//    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
-//
-//    for ( ProxyMap< DataHandler* >::iterator it = _dataHandlers.begin(); it != _dataHandlers.end(); ++it )
-//    {
-//      Manager::getInstance()->getDataManager().load( it->second );
-//    }
-//
-//    std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
-//    if ( dataUpdate.data ) // Still loading
-//    {
-//      // Wait for the data thread to load all the data objects
-//      dataUpdate.variable.wait( dataLock, [&]()->bool { return quitFlag || ! dataUpdate.data; } );
-//    }
-//    dataLock.unlock();
 
     DEBUG_LOG( "Context Group Loaded" );
   }

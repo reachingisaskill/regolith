@@ -1,0 +1,17 @@
+{
+  "load_screen" : null,
+
+  "entry_point" : "null_context",
+
+  "data_handlers" : 
+  {
+  },
+
+
+  "contexts" :
+  {
+    "null_context" : "test_data/integration_test/null_context.json"
+  }
+
+}
+

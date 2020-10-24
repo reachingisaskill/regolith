@@ -226,7 +226,6 @@ namespace Regolith
     INFO_LOG( "Configuring Context" );
     _owner = &handler;
 
-    Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "camera", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "collision_handling", Utilities::JSON_TYPE_OBJECT );
@@ -234,8 +233,11 @@ namespace Regolith
     // Configure the collision rules
     _theCollision.configure( json_data["collision_handling"] );
 
-    // Configure the input mapping
-    _theInput.configure( json_data["input_mapping"].asString() );
+    // Configure the input mapping if one is required
+    if ( Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      _theInput.configure( json_data["input_mapping"].asString() );
+    }
 
 
     // Pause behaviour

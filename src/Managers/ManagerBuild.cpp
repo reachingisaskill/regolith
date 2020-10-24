@@ -147,12 +147,7 @@ namespace Regolith
 
   void Manager::_loadFonts( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "default_font", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "font_list", Utilities::JSON_TYPE_ARRAY );
-
-
-    // Find out what the default font is called
-    std::string default_font = json_data["default_font"].asString();
 
     // Load the listed fonts
     Json::Value font_data = json_data["font_list"];
@@ -175,31 +170,39 @@ namespace Regolith
       TTF_Font* theFont = TTF_OpenFont( font_path.c_str(), font_size );
       if ( theFont == nullptr ) // Failed to open
       {
-        if ( font_name == default_font ) // Can't continue without the default font
-        {
-          FAILURE_LOG( "Manager::_loadFonts() : Failed to load the default font" );
-          Exception ex( "Manager::_loadFonts()", "Can not load default font", false );
-          ex.addDetail( "TTF Error", TTF_GetError() );
-          throw ex;
-        }
-        // Ignore the other fonts - use the default instead
-        ERROR_STREAM << "Could not load font: " << font_name;
+        FAILURE_STREAM << "Manager::_loadFonts() : Failed to load font : " << font_name;
+        Exception ex( "Manager::_loadFonts()", "Can not load font" );
+        ex.addDetail( "Font Name", font_name );
+        ex.addDetail( "Font Path", font_path );
+        ex.addDetail( "TTF Error", TTF_GetError() );
+        throw ex;
       }
       _fonts[ font_name ] = theFont;
       INFO_STREAM << "Added font: " << font_name;
     }
 
-    if ( _fonts.find( default_font ) == _fonts.end() ) // Default font must be loaded correctly
-    {
-      FAILURE_LOG( "Manager::_loadFonts() : The default font is not loaded by the config file" );
-      Exception ex( "Manager::_loadFonts()", "Default font not found", false );
-      ex.addDetail( "Font name", default_font );
-      throw ex;
-    }
 
-    // Set the default font pointer
-    _defaultFont = _fonts[ default_font ];
-    INFO_STREAM << "Default font, " << default_font << " identified " << _defaultFont;
+    if ( Utilities::validateJson( json_data, "default_font", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      // Find out what the default font is called
+      std::string default_font = json_data["default_font"].asString();
+
+      if ( _fonts.find( default_font ) == _fonts.end() ) // Default font must be loaded correctly
+      {
+        FAILURE_LOG( "Manager::_loadFonts() : The default font is not loaded by the config file" );
+        Exception ex( "Manager::_loadFonts()", "Default font not found" );
+        ex.addDetail( "Font name", default_font );
+        throw ex;
+      }
+
+      // Set the default font pointer
+      _defaultFont = _fonts[ default_font ];
+      INFO_STREAM << "Default font, " << default_font << " identified " << _defaultFont;
+    }
+    else
+    {
+      WARN_LOG( "No default font specified. Attempts to use will result in a segfault" );
+    }
   }
 
 

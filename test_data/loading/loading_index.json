@@ -1,0 +1,22 @@
+{
+  "fonts": 
+  {
+    "test_font": { "path": "test_data/loading/test_font.ttf", "size": 18 }
+  },
+  "sounds": 
+  {
+    
+  },
+  "music": 
+  {
+    
+  },
+  "strings": 
+  {
+    
+  },
+  "textures": 
+  {
+    "test_black_screen": { "path": "test_data/loading/test_black_screen.png", "width": 1024, "height": 768, "rows": 1, "columns": 1 }
+  }
+}

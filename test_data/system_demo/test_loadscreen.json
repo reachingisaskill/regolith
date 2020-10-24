@@ -1,0 +1,59 @@
+{
+  "type" : "load_screen",
+
+  "input_mapping" : "null",
+
+  "default_music" : null,
+
+  "collision_handling" :
+  {
+    "collision_rules" : [],
+    "container_rules" : []
+  },
+
+  "camera" :
+  {
+    "follow:" : null,
+    "lower_limit" : [ 0.0, 0.0 ],
+    "upper_limit" : [ 1024.0, 768.0 ]
+  },
+
+  "layers" : 
+  {
+    "the_layer" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024,
+      "height" : 768,
+      "movement_scale" : [ 0.0, 0.0 ],
+
+      "elements" :
+      [
+        {
+          "name" : "load_screen_background",
+          "position" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "load_screen_text",
+          "position" : [ 0.0, 0.0 ],
+          "alignment" : [ "center", "center" ]
+        }
+      ]
+    }
+  },
+
+  "game_objects" :
+  {
+    "load_screen_background" :
+    {
+      "type" : "simple_sprite",
+      "texture_name" : "black_screen"
+    },
+    "load_screen_text" :
+    {
+      "type" : "simple_sprite",
+      "texture_name" : "loading_text"
+    }
+  }
+
+}

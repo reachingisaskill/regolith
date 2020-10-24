@@ -1,10 +1,11 @@
 
 #include "Regolith.h"
+#include "Regolith/Test/TestCharacter.h"
 
 #include "logtastic.h"
 
 
-const char* test_config = "test_data/integration_test/config.json";
+const char* test_config = "test_data/test_config.json";
 
 
 using namespace Regolith;
@@ -23,6 +24,16 @@ int main( int, char** )
 
   try
   {
+    INFO_LOG( "Creating custom object builders" );
+    man->getObjectFactory().addBuilder< Regolith::TestCharacter >( "test_character" );
+
+    INFO_LOG( "Creating custom context builders" );
+//    man->getObjectFactory()->addBuilder( new TestContextBuilder() );
+
+//    INFO_LOG( "Adding teams" );
+//    man->addTeam( "environment", 0 );
+//    man->addTeam( "player", 1 );
+
     INFO_LOG( "Initialising the manager" );
     man->init( test_config );
 

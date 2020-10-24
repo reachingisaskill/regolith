@@ -99,7 +99,6 @@ namespace Regolith
   {
     Utilities::validateJson( json_data, "global", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING );
 
     // Load the global contexts and data first
     std::string global_file = json_data["global"].asString();
@@ -119,9 +118,16 @@ namespace Regolith
       _contextGroups.set( name, cg );
     }
 
-    // Find the starting context group and load it
-    std::string entry_point = json_data["entry_point"].asString();
-    _nextContextGroup = _contextGroups.get( entry_point );
+    if ( Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      // Find the starting context group and load it
+      std::string entry_point = json_data["entry_point"].asString();
+      _nextContextGroup = _contextGroups.get( entry_point );
+    }
+    else // Start with the global context group
+    {
+      _nextContextGroup = &_globalContextGroup;
+    }
   }
 
 

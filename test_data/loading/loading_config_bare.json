@@ -1,0 +1,99 @@
+{
+  "window" :
+  {
+    "screen_width" : 1024,
+    "screen_height" : 768,
+    "default_colour" : [ 150, 150, 500, 255 ],
+    "title" : "Regolith Loading Test"
+  },
+
+  "fonts" :
+  {
+    "default_font" : "default",
+    "font_list" :
+    [
+      {
+        "name" : "default",
+        "path" : "test_data/loading/loading_font.ttf",
+        "size" : 28
+      }
+    ]
+  },
+
+  "input_device" :
+  {
+    "require" : [ "keyboard" ],
+    "keymappings" :
+    [
+      {
+        "name" : "title",
+        "keymapping" :
+        [ 
+          {
+            "type" : "keyboard",
+            "mapping" :
+            {
+              "escape" : "cancel",
+              "return" : "select",
+              "tab" : "next",
+              "w"      : "prev",
+              "s"      : "next",
+              "a"      : "prev",
+              "d"      : "next",
+              "up"     : "prev",
+              "down"   : "next",
+              "left"   : "prev",
+              "right"  : "next"
+            }
+          }
+        ]
+      }
+    ]
+  },
+
+  "audio_device" :
+  {
+    "sample_frequency" : 22050,
+    "audio_channels" : 2,
+    "chunk_size" : 1024,
+    "music_volume" : 0.1,
+    "effect_volume" : 0.5,
+
+    "music_files" :
+    [
+    ],
+
+    "effect_files" :
+    [
+    ]
+  },
+
+
+  "collision_teams" :
+  {
+    "environment" : 0,
+    "player" : 1
+  },
+
+
+  "game_data" :
+  {
+    "resource_index_file" : "test_data/loading/loading_loading_index.json"
+  },
+
+  "contexts" :
+  {
+    "global" : "test_data/loading/loading_global_context_group.json",
+
+    "context_groups" : 
+    {
+      "group1" : "test_data/loading/loading_test_context_group.json",
+      "group2" : "test_data/loading/loading_test_context_group.json"
+    },
+
+    "entry_point" : "group1"
+
+  }
+
+}
+
