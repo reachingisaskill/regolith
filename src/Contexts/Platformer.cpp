@@ -2,8 +2,6 @@
 #include "Regolith/Contexts/Platformer.h"
 #include "Regolith/Managers/Manager.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {

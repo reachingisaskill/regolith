@@ -2,8 +2,6 @@
 #include "Regolith/Managers/HardwareManager.h"
 #include "Regolith/Managers/InputManager.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {

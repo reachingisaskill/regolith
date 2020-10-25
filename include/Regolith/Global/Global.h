@@ -2,6 +2,9 @@
 #ifndef REGOLITH_GLOBAL_GLOBAL_H_
 #define REGOLITH_GLOBAL_GLOBAL_H_
 
+#define LOGTASTIC_FUNCTION_NAME ""
+//#define LOGTASTIC_DEBUG_OFF
+#include "logtastic.h"
 
 #include "Regolith/Global/Version.h"
 #include "Regolith/Global/SDL.h"

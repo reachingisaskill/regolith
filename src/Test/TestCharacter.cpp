@@ -5,8 +5,6 @@
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {

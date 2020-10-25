@@ -28,7 +28,7 @@ namespace Regolith
 
   ContextGroup::~ContextGroup()
   {
-    INFO_LOG( "Deleting Context Group" );
+    INFO_LOG( "ContextGroup::~ContextGroup : Destructing" );
 
     if ( _isLoaded ) this->unload();
     _contexts.clear();
@@ -75,6 +75,13 @@ namespace Regolith
 
   void ContextGroup::load()
   {
+    if ( _isLoaded ) 
+    {
+      WARN_LOG( "ContextGroup::load : Attempting to load a context group that is already loaded" );
+      return;
+    }
+
+    DEBUG_LOG( "ContextGroup::load : Loading" );
     // Load Json Data
     Json::Value json_data;
     Utilities::loadJsonData( json_data, _fileName );
@@ -87,7 +94,7 @@ namespace Regolith
     {
       std::string handler_name = h_it.key().asString();
 
-      INFO_STREAM << "Building data handler: " << handler_name;
+      INFO_STREAM << "ContextGroup::load : Building data handler: " << handler_name;
       Json::Value objects;
 
       // Can load game objects from another file if the entry "file" is present
@@ -109,7 +116,7 @@ namespace Regolith
       for( Json::Value::iterator o_it = objects.begin(); o_it != objects.end(); ++o_it )
       {
         std::string obj_name = o_it.key().asString();
-        INFO_STREAM << "Building game object: " << obj_name;
+        INFO_STREAM << "ContextGroup::load : Building game object: " << obj_name;
 
         try
         {
@@ -133,7 +140,7 @@ namespace Regolith
     {
       std::string cont_name = c_it.key().asString();
 
-      INFO_STREAM << "Building context: " << cont_name;
+      INFO_STREAM << "ContextGroup::load : Building context: " << cont_name;
       Json::Value context_data;
 
       // Load the context data from another file if a string is provided
@@ -172,27 +179,27 @@ namespace Regolith
 
     for ( ProxyMap< DataHandler* >::iterator it = _dataHandlers.begin(); it != _dataHandlers.end(); ++it )
     {
-      DEBUG_STREAM << "Loading Data Handler : " << it->first << " @ " << it->second;
+      DEBUG_STREAM << "ContextGroup::load : Loading Data Handler : " << it->first << " @ " << it->second;
       it->second->load();
     }
 
     _isLoaded = true;
 
-    DEBUG_LOG( "Context Group Loaded" );
+    DEBUG_LOG( "ContextGroup::load : Complete" );
   }
 
 
   void ContextGroup::unload()
   {
     _isLoaded = false;
-    INFO_LOG( "Unloading Data" );
+    INFO_LOG( "ContextGroup::unload : Unloading Data" );
     for ( ProxyMap< DataHandler* >::iterator it = _dataHandlers.begin(); it != _dataHandlers.end(); ++it )
     {
       delete it->second;
     }
     _dataHandlers.clear();
 
-    INFO_LOG( "Unloading Contexts" );
+    INFO_LOG( "ContextGroup::unload : Unloading Contexts" );
     for ( ProxyMap< Context* >::iterator it = _contexts.begin(); it != _contexts.end(); ++it )
     {
       delete it->second;
@@ -200,14 +207,14 @@ namespace Regolith
     }
 //    _contexts.clear();
 
-    INFO_LOG( "Unloading Spawned Objects" );
+    INFO_LOG( "ContextGroup::unload : Unloading Spawned Objects" );
     for ( SpawnedList::iterator it = _spawnedObjects.begin(); it != _spawnedObjects.end(); ++it )
     {
       delete (*it);
     }
     _spawnedObjects.clear();
 
-    INFO_LOG( "Unloading Game Objects" );
+    INFO_LOG( "ContextGroup::unload : Unloading Game Objects" );
     for ( ProxyMap< GameObject* >::iterator it = _gameObjects.begin(); it != _gameObjects.end(); ++it )
     {
       delete it->second;

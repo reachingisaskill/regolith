@@ -1,12 +1,9 @@
-//#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/DataManager.h"
 #include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
-
-#include "logtastic.h"
 
 #include <mutex>
 #include <atomic>
@@ -32,13 +29,13 @@ namespace Regolith
 
   DataManager::~DataManager()
   {
-    INFO_LOG( "Destroying Data Manager." );
+    INFO_LOG( "DataManager::~DataManager : Destructing" );
   }
 
 
   void DataManager::clear()
   {
-    INFO_LOG( "Clearing Data Manager." );
+    INFO_LOG( "DataManager::clear : Clearing Data Manager." );
 
     _loadQueue.clear();
     _unloadQueue.clear();
@@ -55,7 +52,7 @@ namespace Regolith
 
   void DataManager::load( DataHandler* handler )
   {
-    DEBUG_STREAM << "DATA MANAGER LOAD";
+    DEBUG_LOG( "DataManager::load : Loading handler" );
     _loadQueue.push( handler );
 
     {
@@ -68,7 +65,7 @@ namespace Regolith
 
   void DataManager::unload( DataHandler* handler )
   {
-    DEBUG_STREAM << "DATA MANAGER UNLOAD";
+    DEBUG_LOG( "DataManager::unload : Unloading Handler" );
     _unloadQueue.push( handler );
 
     {
@@ -283,7 +280,7 @@ namespace Regolith
 
   void DataManager::configure( Json::Value& json_data )
   {
-    INFO_LOG( "Configuring the Data Manager." );
+    INFO_LOG( "DataManager::configure : Configuring the Data Manager." );
 
     // Load the json data
     Utilities::validateJson( json_data, "resource_index_file", Utilities::JSON_TYPE_STRING );
@@ -324,7 +321,7 @@ namespace Regolith
       }
       _assets.insert( { name, Asset( detail ) } );
 //      _assets[name] = Asset( detail );
-      DEBUG_STREAM << "ASSET Texture: " << name;
+      DEBUG_STREAM << "DataManager::configure : Asset Texture: " << name;
     }
 
     for ( Json::Value::iterator it = index_data["strings"].begin(); it != index_data["strings"].end(); ++it )
@@ -356,7 +353,7 @@ namespace Regolith
       SDL_FreeSurface( textSurface );
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
-      DEBUG_STREAM << "ASSET String: " << name;
+      DEBUG_STREAM << "DataManager::configure : Asset String: " << name;
     }
 
     for ( Json::Value::iterator it = index_data["music"].begin(); it != index_data["music"].end(); ++it )
@@ -368,7 +365,7 @@ namespace Regolith
       detail.filename = data["path"].asString();
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
-      DEBUG_STREAM << "ASSET Music: " << name;
+      DEBUG_STREAM << "DataManager::configure : Asset Music: " << name;
     }
 
 
@@ -381,7 +378,7 @@ namespace Regolith
       detail.filename = data["path"].asString();
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
-      DEBUG_STREAM << "ASSET Sound: " << name;
+      DEBUG_STREAM << "DataManager::configure : Asset Sound: " << name;
     }
 
 
@@ -409,18 +406,18 @@ namespace Regolith
 
   void dataManagerLoadingThread()
   {
-    INFO_LOG( "Data Manager loading thread start." );
+    INFO_LOG( "dataManagerLoadingThread : Start." );
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
 
-    INFO_LOG( "Data Manager loading thread initialised and waiting to start" );
+    INFO_LOG( "dataManagerLoadingThread : Initialised and waiting to start" );
     {
       Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
       std::unique_lock<std::mutex> lk( startCondition.mutex );
       startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
     }
-    INFO_LOG( "Data Manager loading thread go." );
+    INFO_LOG( "dataManagerLoadingThread : Go." );
 
     DataManager& manager = Manager::getInstance()->getDataManager();
     Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
@@ -429,7 +426,7 @@ namespace Regolith
     try
     {
 
-      INFO_LOG( "Loading thread waiting for first command" );
+      INFO_LOG( "dataManagerLoadingThread : Waiting for first command" );
       while( ! quitFlag )
       {
         dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
@@ -437,7 +434,7 @@ namespace Regolith
 
         manager.setLoading( true );
 
-        DEBUG_LOG( "DATA LOADING THREAD WORKING" );
+        DEBUG_LOG( "dataManagerLoadingThread : Working..." );
         do
         {
           dataUpdate.data = false;
@@ -450,7 +447,7 @@ namespace Regolith
           dataLock.lock();
 
         } while( dataUpdate.data == true );
-        DEBUG_LOG( "DATA LOADING THREAD FINISHED" );
+        DEBUG_LOG( "dataManagerLoadingThread : Finished" );
 
         dataUpdate.variable.notify_all();
       }
@@ -465,7 +462,7 @@ namespace Regolith
         dataUpdate.variable.notify_all();
         dataLock.unlock();
       }
-      FAILURE_LOG( "Regolith Exception thrown from Data Manager Thread." );
+      FAILURE_LOG( "dataManagerLoadingThread : Regolith Exception thrown" );
       std::cerr << ex.elucidate();
     }
     catch( const std::exception& ex )
@@ -476,7 +473,7 @@ namespace Regolith
         dataUpdate.variable.notify_all();
         dataLock.unlock();
       }
-      FAILURE_LOG( "Standard Exception thrown from Data Manager Thread." );
+      FAILURE_LOG( "dataManagerLoadingThread : Standard Exception thrown" );
       std::cerr << ex.what();
     }
 

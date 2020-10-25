@@ -4,8 +4,6 @@
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {

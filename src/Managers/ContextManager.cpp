@@ -29,7 +29,7 @@ namespace Regolith
 
   ContextManager::~ContextManager()
   {
-    INFO_LOG( "Destroying Context Manager" );
+    INFO_LOG( "ContextManager::~ContextManager : Destroying Context Manager" );
   }
 
 
@@ -97,14 +97,19 @@ namespace Regolith
 
   void ContextManager::configure( Json::Value& json_data )
   {
+    INFO_LOG( "ContextManager::configure : Configuring" );
+
     Utilities::validateJson( json_data, "global", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_OBJECT );
 
     // Load the global contexts and data first
+    INFO_LOG( "ContextManager::configure : Configuring Global Context Group" );
     std::string global_file = json_data["global"].asString();
     _globalContextGroup.configure( global_file, true );
+    INFO_LOG( "ContextManager::configure : Global Context Group Configured" );
 
     // Create all the context groups but don't load any information
+    INFO_LOG( "ContextManager::configure : Configuring Context Groups" );
     Json::Value& groups = json_data["context_groups"];
     for ( Json::Value::iterator it = groups.begin(); it != groups.end(); ++it )
     {
@@ -117,16 +122,21 @@ namespace Regolith
       cg->configure( file, false );
       _contextGroups.set( name, cg );
     }
+    INFO_LOG( "ContextManager::configure : Context Groups Configured" );
 
+
+    INFO_LOG( "ContextManager::configure : Locating entry point" );
     if ( Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING, false ) )
     {
       // Find the starting context group and load it
       std::string entry_point = json_data["entry_point"].asString();
       _nextContextGroup = _contextGroups.get( entry_point );
+      INFO_LOG( "ContextManager::configure : Entry Point Located" );
     }
     else // Start with the global context group
     {
       _nextContextGroup = &_globalContextGroup;
+      INFO_LOG( "ContextManager::configure : Entry point default to global context group" );
     }
   }
 
@@ -141,11 +151,11 @@ namespace Regolith
     _currentContextGroup = _nextContextGroup;
     _nextContextGroup = nullptr;
 
-    INFO_LOG( "Loading global context group" );
+    INFO_LOG( "ContextManager::loadEntryPoint : Loading global context group" );
     _globalContextGroup.load();
-    INFO_LOG( "Loading first context group" );
+    INFO_LOG( "ContextManager::loadEntryPoint : Loading first context group" );
     _currentContextGroup->load();
-    DEBUG_LOG( "Completed" );
+    DEBUG_LOG( "ContextManager::loadEntryPoint : Completed" );
   }
 
 
@@ -182,23 +192,25 @@ namespace Regolith
   }
 
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Loading thread
 
+
   void contextManagerLoadingThread()
   {
-    INFO_LOG( "Context Manager loading thread start." );
+    INFO_LOG( "ContextManagerLoadingThread : start." );
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
 
-    INFO_LOG( "Context Manager loading thread initialised and waiting to start" );
+    INFO_LOG( "ContextManagerLoadingThread : initialised and waiting to start" );
     {
       Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
       std::unique_lock<std::mutex> lk( startCondition.mutex );
       startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
     }
-    INFO_LOG( "Context Manager loading thread go." );
+    INFO_LOG( "ContextManagerLoadingThread : go." );
 
 
     ContextManager& manager = Manager::getInstance()->getContextManager();
@@ -208,13 +220,13 @@ namespace Regolith
     try
     {
 
-      INFO_LOG( "Loading thread waiting for first command" );
+      INFO_LOG( "ContextManagerLoadingThread : waiting for first command" );
       while( ! quitFlag )
       {
         contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
         if ( quitFlag ) break;
 
-        DEBUG_STREAM << "CONTEXT LOADING THREAD WORKING";
+        DEBUG_STREAM << "ContextManagerLoadingThread : WORKING";
 
         if ( manager._nextContextGroup != nullptr )
         {
@@ -243,7 +255,7 @@ namespace Regolith
         contextUpdate.variable.notify_all();
         contextLock.unlock();
       }
-      FAILURE_LOG( "Regolith Exception thrown from Context Manager Thread." );
+      FAILURE_LOG( "ContextManagerLoadingThread : Regolith Exception thrown." );
       std::cerr << ex.elucidate();
     }
     catch( std::exception& ex )
@@ -254,11 +266,11 @@ namespace Regolith
         contextUpdate.variable.notify_all();
         contextLock.unlock();
       }
-      FAILURE_LOG( "Standard Exception thrown from Context Manager Thread." );
+      FAILURE_LOG( "ContextManagerLoadingThread : Standard Exception thrown." );
       std::cerr << ex.what();
     }
 
-    INFO_LOG( "Context Manager loading thread stopped." );
+    INFO_LOG( "ContextManagerLoadingThread : stopped." );
   }
 
 }

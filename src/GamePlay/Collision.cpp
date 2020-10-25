@@ -1,10 +1,7 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Collision.h"
 #include "Regolith/Architecture/Collidable.h"
 #include "Regolith/Architecture/ContextLayer.h"
-
-#include "logtastic.h"
 
 
 namespace Regolith

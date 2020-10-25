@@ -9,6 +9,7 @@ namespace Regolith
 
   void Manager::init( std::string json_file )
   {
+    INFO_STREAM << "Manager::init : Initialising the manager using file : " << json_file;
     // Initialise the SDL subsystems
     if ( SDL_Init( SDL_INIT_EVERYTHING ) < 0 )
     {
@@ -117,7 +118,7 @@ namespace Regolith
   {
     try
     {
-      INFO_LOG( "Configuring the input manager" );
+      INFO_LOG( "Manager::_loadInput : Configuring the input manager" );
       _theInput.configure( json_data );
     }
     catch ( std::runtime_error& rt )
@@ -133,7 +134,7 @@ namespace Regolith
   {
     try
     {
-      INFO_LOG( "Configuring the audio manager" );
+      INFO_LOG( "Manager::_loadAudio : Configuring the audio manager" );
       _theAudio.configure( json_data );
     }
     catch ( std::runtime_error& rt )
@@ -201,7 +202,7 @@ namespace Regolith
     }
     else
     {
-      WARN_LOG( "No default font specified. Attempts to use will result in a segfault" );
+      WARN_LOG( "Manager::_loadFonts : No default font specified. Attempts to use will result in a segfault" );
     }
   }
 
@@ -248,7 +249,7 @@ namespace Regolith
 
   void Manager::_loadData( Json::Value& game_data )
   {
-    INFO_LOG( "Loading game data" );
+    INFO_LOG( "Manager::_loadData : Loading game data" );
 
     _theData.configure( game_data );
   }
@@ -256,7 +257,7 @@ namespace Regolith
 
   void Manager::_loadContexts( Json::Value& context_data )
   {
-    INFO_LOG( "Loading contexts" );
+    INFO_LOG( "Manager::_loadContexts : Loading contexts" );
 
     _theContexts.configure( context_data );
   }

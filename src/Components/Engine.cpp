@@ -3,8 +3,6 @@
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {
@@ -103,7 +101,7 @@ namespace Regolith
       {
         renderLock.unlock();
       }
-      FAILURE_LOG( "Regolith Exception thrown from Engine Rendering Thread." );
+      FAILURE_LOG( "Engine::run : Regolith Exception thrown from Engine Rendering Thread." );
       std::cerr << ex.elucidate();
     }
     catch ( std::exception& ex )
@@ -113,7 +111,7 @@ namespace Regolith
       {
         renderLock.unlock();
       }
-      FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
+      FAILURE_LOG( "Engine::run : Standard Exception thrown from Engine Processing Thread." );
       std::cerr << ex.what();
     }
   }
@@ -135,7 +133,7 @@ namespace Regolith
       std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
     }
 
-    DEBUG_STREAM << "New data handler @ " << handler;
+    DEBUG_STREAM << "Engine::renderTextures : New data handler @ " << handler;
     _currentDataHandler = handler;
 
     lock.unlock();
@@ -160,12 +158,12 @@ namespace Regolith
         break;
 
       case REGOLITH_EVENT_ENGINE_PAUSE :
-        INFO_LOG( "Pausing Engine" );
+        INFO_LOG( "Engine::eventAction : Pausing Engine" );
         _pause = true;
         break;
 
       case REGOLITH_EVENT_ENGINE_RESUME :
-        INFO_LOG( "Resuming Engine" );
+        INFO_LOG( "Engine::eventAction : Resuming Engine" );
         _pause = false;
         break;
 
@@ -179,13 +177,13 @@ namespace Regolith
   {
     while ( ! _stackOperationQueue.empty() )
     {
-      DEBUG_STREAM << _stackOperationQueue.size() << " Operations Remaining";
+      DEBUG_STREAM << "Engine::performStackOperations : " << _stackOperationQueue.size() << " Operations Remaining";
       StackOperation& sop = _stackOperationQueue.front();
 
       switch ( sop.operation )
       {
         case StackOperation::PUSH :
-          DEBUG_LOG( "Opening New Context" );
+          DEBUG_LOG( "Engine::performStackOperations : Opening New Context" );
           if ( ! _contextStack.empty() )
           {
             _contextStack.front()->pauseContext();
@@ -195,14 +193,14 @@ namespace Regolith
           break;
 
         case StackOperation::POP :
-          DEBUG_LOG( "Closing Current Context" );
+          DEBUG_LOG( "Engine::performStackOperations : Closing Current Context" );
           if ( ! _contextStack.empty() )
           {
             _contextStack.front()->stopContext();
             _contextStack.pop_front();
             if ( ! _contextStack.empty() )
             {
-              DEBUG_LOG( "Returning focus" );
+              DEBUG_LOG( "Engine::performStackOperations : Returning focus" );
               _contextStack.front()->resumeContext();
             }
           }
@@ -215,13 +213,13 @@ namespace Regolith
             _contextStack.front()->stopContext();
             _contextStack.pop_front();
           }
-          DEBUG_LOG( "Loading new base context" );
+          DEBUG_LOG( "Engine::performStackOperations : Loading new base context" );
           _contextStack.push_front( sop.context );
           _contextStack.front()->startContext();
           break;
 
         case StackOperation::TRANSFER :
-          DEBUG_LOG( "Transferring Context" );
+          DEBUG_LOG( "Engine::performStackOperations : Transferring Context" );
           if ( ! _contextStack.empty() )
           {
             _contextStack.front()->stopContext();
@@ -261,18 +259,18 @@ namespace Regolith
 
   void engineRenderingThread()
   {
-    INFO_LOG( "Engine processing thread start." );
+    INFO_LOG( "engineRederingThread : Start." );
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
 
-    INFO_LOG( "Engine processing thread initialised and waiting to start" );
+    INFO_LOG( "engineRenderingThread : Initialised and waiting" );
     {
       Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
       std::unique_lock<std::mutex> lk( startCondition.mutex );
       startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
     }
-    INFO_LOG( "Engine rendering thread go." );
+    INFO_LOG( "engineRenderingthread : Go." );
 
     Engine& engine = Manager::getInstance()->getEngine();
 
@@ -297,7 +295,7 @@ namespace Regolith
       {
         // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
         while( ! renderLock.try_lock() );
-        DEBUG_LOG( "------ RENDER ------" );
+        DEBUG_LOG( "engineRenderingThread : ------ RENDER ------" );
 
         // Setup the rendering process
         SDL_SetRenderDrawColor( renderer, defaultColour.r, defaultColour.g, defaultColour.b, defaultColour.a );
@@ -317,7 +315,7 @@ namespace Regolith
         // Release acces to the context stack
         renderLock.unlock();
 
-        DEBUG_LOG( "------ FRAME ------" );
+        DEBUG_LOG( "engineRenderingThread : ------ FRAME ------" );
 
 
         if ( queueLock.owns_lock() || queueLock.try_lock() )
@@ -329,7 +327,7 @@ namespace Regolith
             while ( counter < queueRenderRate )
             {
               // Check if there are any surfaces to render
-              DEBUG_STREAM << "------ TexRend @ " << currentDataHandler;
+              DEBUG_STREAM << "engineRenderingThread : ------ TexRend @ " << currentDataHandler;
               RawTexture* rawTexture = currentDataHandler->popRenderTexture();
               if ( rawTexture != nullptr )
               {
@@ -365,8 +363,8 @@ namespace Regolith
       {
         queueLock.unlock();
       }
-      FAILURE_LOG( "Regolith Exception thrown from Engine Processing Thread." );
-      FAILURE_STREAM << ex.elucidate();
+      FAILURE_LOG( "engineRenderingThread : Regolith Exception thrown" );
+      FAILURE_STREAM << "engineRenderingThread : " << ex.elucidate();
       std::cerr << ex.elucidate() << std::endl;
     }
     catch( std::exception& ex )
@@ -380,18 +378,18 @@ namespace Regolith
       {
         queueLock.unlock();
       }
-      FAILURE_LOG( "Standard Exception thrown from Engine Processing Thread." );
-      FAILURE_STREAM << ex.what();
+      FAILURE_LOG( "engineRenderingThread : Standard Exception thrown" );
+      FAILURE_STREAM << "engineRenderingThread : " << ex.what();
       std::cerr << ex.what() << std::endl;
     }
 
 
-    INFO_LOG( "Destroying the renderer" );
+    INFO_LOG( "engineRenderingThread : Destroying the renderer" );
     SDL_DestroyRenderer( renderer );
     renderer = nullptr;
 
 
-    INFO_LOG( "Engine rendering thread stopped." );
+    INFO_LOG( "engineRenderingThread : Stopped." );
   }
 
 }

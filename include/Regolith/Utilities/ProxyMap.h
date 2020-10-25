@@ -2,10 +2,10 @@
 #ifndef REGOLITH_UTILITIES_PROXY_MAP_H_
 #define REGOLITH_UTILITIES_PROXY_MAP_H_
 
+#include "Regolith/Global/Global.h"
+
 #include <map>
 #include <string>
-
-#include "logtastic.h"
 
 
 namespace Regolith

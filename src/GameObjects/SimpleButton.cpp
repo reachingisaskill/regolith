@@ -4,8 +4,6 @@
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/GamePlay/Camera.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {

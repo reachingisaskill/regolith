@@ -1,4 +1,3 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Engine.h"
@@ -18,8 +17,6 @@
 //#include "Regolith/Contexts/Menu.h"
 //#include "Regolith/Contexts/LoadScreen.h"
 //#include "Regolith/GamePlay/Signal.h"
-
-#include "logtastic.h"
 
 
 namespace Regolith
@@ -52,6 +49,7 @@ namespace Regolith
     _gravityConst( 0.0, 0.01 ),
     _dragConst( 0.005 )
   {
+    DEBUG_LOG( "Manager::Manager : Contruction" );
     // Set up signal handlers
     logtastic::registerSignalHandler( SIGABRT, deathSignals );
     logtastic::registerSignalHandler( SIGFPE, deathSignals );
@@ -95,13 +93,14 @@ namespace Regolith
 
   Manager::~Manager()
   {
+    DEBUG_LOG( "Manager::~Manager : Destruction" );
     // Close the threads first
     _theThreads.quit();
 
-    INFO_LOG( "Clearing team list" );
+    INFO_LOG( "Manager::~Manager : Clearing team list" );
     _teamNames.clear();
 
-    INFO_LOG( "Removing each of the fonts and clearing the map" );
+    INFO_LOG( "Manager::~Manager : Removing each of the fonts and clearing the map" );
     for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )
     {
       TTF_CloseFont( it->second );
@@ -114,10 +113,10 @@ namespace Regolith
 
     _theAudio.clear();
 
-    INFO_LOG( "Clearing hardware manager" );
+    INFO_LOG( "Manager::~Manager : Clearing hardware manager" );
     _theHardware.clear();
 
-    INFO_LOG( "Closing the SDL subsystems" );
+    INFO_LOG( "Manager::~Manager : Closing the SDL subsystems" );
     TTF_Quit();
     Mix_Quit();
     IMG_Quit();
@@ -143,28 +142,28 @@ namespace Regolith
 
   void Manager::openContext( Context* c )
   {
-    DEBUG_LOG( "Opening Context" );
+    DEBUG_LOG( "Manager::openContext : Opening Context" );
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, c ) );
   }
 
 
   void Manager::transferContext( Context* c )
   {
-    DEBUG_LOG( "Transferring Context" );
+    DEBUG_LOG( "Manager::transferContext : Transferring Context" );
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, c ) );
   }
 
 
   void Manager::closeContext()
   {
-    DEBUG_LOG( "Closing Current Context" );
+    DEBUG_LOG( "Manager::closeContext : Closing Current Context" );
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::POP ) );
   }
 
 
   void Manager::setContextStack( Context* c )
   {
-    DEBUG_STREAM << "Resetting Context Stack @ " << c;
+    DEBUG_STREAM << "Manager::setContextStack : Resetting Context Stack @ " << c;
     _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, c ) );
   }
 
@@ -175,21 +174,26 @@ namespace Regolith
   void Manager::run()
   {
     // Start all the waiting threads
+    INFO_LOG( "Manager::run : Starting worker threads" );
     _theThreads.startAll();
 
     // Load the first context group blocking this thread until completion
+    INFO_LOG( "Manager::run : Loading entry point" );
     _theContexts.loadEntryPoint();
 
     // Reset the stack to the first context
+    INFO_LOG( "Manager::run : Loading the first context" );
     setContextStack( _theContexts.getCurrentContextGroup()->getEntryPoint() );
 
 
     // Start the engine!
+    INFO_LOG( "Manager::run : Starting the engine." );
 //    _theEngine.run();
     std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
 
     // Join all the threads
+    INFO_LOG( "Manager::run : Stopping all worker threads" );
     _theThreads.stopAll();
   }
 
@@ -199,7 +203,7 @@ namespace Regolith
     FontMap::iterator find = _fonts.find( name );
     if ( find == _fonts.end() )
     {
-      ERROR_STREAM << "Could not find requested font : " << name;
+      ERROR_STREAM << "Manager::getFontPointer : Could not find requested font : " << name;
       return _defaultFont;
     }
     return find->second;
@@ -231,12 +235,12 @@ namespace Regolith
   {
     // Load user events, etc
     Uint32 start_num = SDL_RegisterEvents( REGOLITH_EVENT_TOTAL );
-    INFO_STREAM << "Registering " << REGOLITH_EVENT_TOTAL << " user events";
+    INFO_STREAM << "Manager::configureEvents : Registering " << REGOLITH_EVENT_TOTAL << " user events";
 
     if ( start_num == (unsigned int)-1 )
     {
       std::string error = SDL_GetError();
-      FAILURE_STREAM << "Could not create required user events : " << error;
+      FAILURE_STREAM << "Manager::configureEvents : Could not create required user events : " << error;
       Exception ex( "Manager::configureEvents()", "Could not create user events", true );
       ex.addDetail( "SDL Error", error );
       throw ex;
@@ -270,8 +274,8 @@ namespace Regolith
 
   void deathSignals( int signal )
   {
-    FAILURE_STREAM << "Regolith received signal: " << signal;
-    FAILURE_LOG( "Trying to die gracefully..." );
+    FAILURE_STREAM << "DEATHSIGNAL : Regolith received signal: " << signal;
+    FAILURE_LOG( "DEATHSIGNAL : Trying to die gracefully..." );
 
     ERROR_STREAM << "Last SDL Error : " << SDL_GetError();
     ERROR_STREAM << "Last IMG Error : " << IMG_GetError();

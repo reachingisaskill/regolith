@@ -1,12 +1,9 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Texture.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/RawObjectDetails.h"
 #include "Regolith/Utilities/JsonValidation.h"
-
-#include "logtastic.h"
 
 #include <cmath>
 

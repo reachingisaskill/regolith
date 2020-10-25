@@ -1,4 +1,3 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Signal.h"
 #include "Regolith/Architecture/Context.h"
@@ -8,8 +7,6 @@
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
-
-#include "logtastic.h"
 
 
 namespace Regolith

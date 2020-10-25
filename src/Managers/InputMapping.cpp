@@ -1,9 +1,6 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/Managers/InputMapping.h"
-
-#include "logtastic.h"
 
 
 namespace Regolith

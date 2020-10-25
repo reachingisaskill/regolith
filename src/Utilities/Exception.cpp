@@ -1,8 +1,6 @@
 
 #include "Regolith/Utilities/Exception.h"
 
-#include "logtastic.h"
-
 
 typedef std::vector< std::string > DetailVector;
       

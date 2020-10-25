@@ -1,10 +1,7 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GameObjects/SimpleSprite.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/GamePlay/Camera.h"
-
-#include "logtastic.h"
 
 
 namespace Regolith

@@ -2,12 +2,12 @@
 #ifndef REGOLITH_UTILITIES_EXCEPTION_H_
 #define REGOLITH_UTILITIES_EXCEPTION_H_
 
+#include "Regolith/Global/Global.h"
+
 #include <vector>
 #include <string>
 #include <sstream>
 #include <exception>
-
-#include "logtastic.h"
 
 
 namespace Regolith

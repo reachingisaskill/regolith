@@ -12,8 +12,6 @@
 #include "Regolith/Architecture/Animated.h"
 #include "Regolith/Managers/Manager.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {
@@ -42,7 +40,7 @@ namespace Regolith
 
   Context::~Context()
   {
-    INFO_LOG( "Destroying Context" );
+    INFO_LOG( "Context::~Context : Destroying Context" );
   }
 
 
@@ -70,7 +68,7 @@ namespace Regolith
 
   void Context::update( float time )
   {
-    DEBUG_LOG( "Context Update" );
+    DEBUG_LOG( "Context::update : Context Update" );
 
     // Update the camera first
     _theCamera.update( time );
@@ -94,7 +92,7 @@ namespace Regolith
 
   void Context::step( float time )
   {
-    DEBUG_LOG( "Context Step" );
+    DEBUG_LOG( "Context::step : Context Step" );
     ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
     for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
@@ -120,7 +118,7 @@ namespace Regolith
 
   void Context::render( SDL_Renderer* renderer )
   {
-    DEBUG_LOG( "Context Render" );
+    DEBUG_LOG( "Context::render : Context Render" );
     ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
     for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
@@ -149,7 +147,7 @@ namespace Regolith
 
   void Context::resolveCollisions()
   {
-    DEBUG_LOG( "Context Collisions" );
+    DEBUG_LOG( "Context::resolveCollisions : Context Collisions" );
 
     ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
     for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
@@ -178,7 +176,7 @@ namespace Regolith
         }
       }
 
-      DEBUG_LOG( " Starting Layer Containment" );
+      DEBUG_LOG( "Context::resolveCollisions :  Starting Layer Containment" );
       // Containing Objects
       end = _theCollision.containerEnd();
       for ( CollisionHandler::iterator it = _theCollision.containerBegin(); it != end; ++it )
@@ -202,7 +200,7 @@ namespace Regolith
       }
     }
 
-    DEBUG_LOG( "Context Collisions Resolved" );
+    DEBUG_LOG( "Context::resolveCollisions : Context Collisions Resolved" );
   }
 
 
@@ -223,7 +221,7 @@ namespace Regolith
 
   void Context::configure( Json::Value& json_data, ContextGroup& handler )
   {
-    INFO_LOG( "Configuring Context" );
+    INFO_LOG( "Context::configure : Configuring Context" );
     _owner = &handler;
 
     Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_OBJECT );
@@ -248,7 +246,7 @@ namespace Regolith
     }
 
 
-    DEBUG_LOG( "Building context layers" );
+    DEBUG_LOG( "Context::configure : Building context layers" );
     Json::Value& layers = json_data["layers"];
     for ( Json::Value::iterator layer_it = layers.begin(); layer_it != layers.end(); ++layer_it )
     {
@@ -381,7 +379,7 @@ namespace Regolith
 
   Vector placeInLayer( ContextLayer& layer, PhysicalObject* object, Json::Value& json_data )
   {
-    DEBUG_LOG( "Placing in Layer" );
+    DEBUG_LOG( "Context::placeInLayer : Placing in Layer" );
     Vector pos( 0.0 );
     Vector offset( 0.0 );
 

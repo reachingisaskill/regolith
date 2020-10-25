@@ -2,10 +2,9 @@
 #ifndef REGOLITH_ARCHITECTURE_FACTORY_BUILDER_H_
 #define REGOLITH_ARCHITECTURE_FACTORY_BUILDER_H_
 
+#include "Regolith/Global/Global.h"
 #include "Regolith/Global/Json.h"
 #include "Regolith/Architecture/MassProduceable.h"
-
-#include "logtastic.h"
 
 
 namespace Regolith

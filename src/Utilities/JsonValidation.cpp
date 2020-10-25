@@ -1,8 +1,6 @@
 
 #include "Regolith/Utilities/JsonValidation.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {
@@ -16,7 +14,7 @@ namespace Regolith
       {
         if ( isRequired )
         {
-          FAILURE_STREAM << "Json data failed validation. Expected key: " << name;
+          FAILURE_STREAM << "Utilities::validateJson : Json data failed validation. Expected key: " << name;
           Exception ex( "validateJson()", "Key not found", false );
           ex.addDetail( "Key name", name );
           throw ex;
@@ -77,7 +75,7 @@ namespace Regolith
             break;
         }
 
-        FAILURE_STREAM << "Json data failed validation. Could not resolve type ID: " << type;
+        FAILURE_STREAM << "Utilities::validateJson : Json data failed validation. Could not resolve type ID: " << type;
         Exception ex( "validateJson()", "Wong data type", false );
         ex.addDetail( "Type ID", type );
         throw ex;
@@ -89,7 +87,7 @@ namespace Regolith
     {
       if ( ! json_data.isArray() )
       {
-        FAILURE_LOG( "Json data failed validation. Expected array type" );
+        FAILURE_LOG( "Utilities::validateJsonArray : Json data failed validation. Expected array type" );
         Exception ex( "validateJsonArray()", "Json object is not an array", false );
         throw ex;
       }
@@ -97,7 +95,7 @@ namespace Regolith
       Json::ArrayIndex size = json_data.size();
       if ( size < length )
       {
-        FAILURE_STREAM << "Json data failed validation. Expected array of at least size : " << length << " Found size : " << size;
+        FAILURE_STREAM << "Utilities::validateJsonArray : Json data failed validation. Expected array of at least size : " << length << " Found size : " << size;
         Exception ex( "validateJsonArray()", "Array is incorrect size", false );
         ex.addDetail( "Expected", length );
         ex.addDetail( "Found", size );
@@ -141,7 +139,7 @@ namespace Regolith
 
       if ( ! success )
       {
-        FAILURE_STREAM << "Json data failed validation. Expected array of type: " << type;
+        FAILURE_STREAM << "Utilities::validateJsonArray : Json data failed validation. Expected array of type: " << type;
         Exception ex( "validateJsonArray()", "Wong data type", false );
         ex.addDetail( "Type ID", type );
         throw ex;
@@ -199,7 +197,7 @@ namespace Regolith
       }
 
       Vector vec( x, y );
-      INFO_STREAM << "Calculated object position to be: " << vec;
+      INFO_STREAM << "Utilities::jsonProcessPosition : Calculated object position to be: " << vec;
       object->setPosition( vec );
     }
     */
@@ -207,7 +205,7 @@ namespace Regolith
 
     void loadJsonData( Json::Value& json_data, std::string filename )
     {
-      INFO_STREAM << "Loading Json File: " << filename;
+      INFO_STREAM << "Utilities::loadJsonData : Loading Json File: " << filename;
       std::ifstream input( filename );
       Json::CharReaderBuilder reader_builder;
       Json::CharReader* reader = reader_builder.newCharReader();
@@ -215,7 +213,7 @@ namespace Regolith
       bool result = Json::parseFromStream( reader_builder, input, &json_data, &errors );
       if ( ! result )
       {
-        ERROR_STREAM << "loadJsonData() : Found errors parsing json file: " << filename;
+        ERROR_STREAM << "Utilties::loadJsonData() : Found errors parsing json file: " << filename;
         ERROR_STREAM << errors;
       }
       delete reader;

@@ -1,8 +1,6 @@
 
 #include "Regolith/Managers/ThreadManager.h"
 
-#include "logtastic.h"
-
 
 namespace Regolith
 {

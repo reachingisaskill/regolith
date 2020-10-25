@@ -4,8 +4,6 @@
 #include "Regolith/Utilities/Exception.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
-#include "logtastic.h"
-
 #include <cmath>
 
 

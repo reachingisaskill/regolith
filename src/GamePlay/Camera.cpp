@@ -1,11 +1,8 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/GamePlay/Camera.h"
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Window.h"
-
-#include "logtastic.h"
 
 
 namespace Regolith

@@ -1,9 +1,6 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Managers/Manager.h"
-
-#include "logtastic.h"
 
 
 namespace Regolith

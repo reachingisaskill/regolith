@@ -16,17 +16,16 @@ int main( int, char** )
   logtastic::addLogFile( "tests_integration.log" );
 
   // Create the manager first so that it can register signal handlers
-  INFO_LOG( "Initialising the manager" );
   Manager* man = Manager::createInstance();
 
   logtastic::start( "Regolith - Integration Test", REGOLITH_VERSION_NUMBER );
 
   try
   {
-    INFO_LOG( "Initialising the manager" );
+    INFO_LOG( "Main : Initialising the manager" );
     man->init( test_config );
 
-    INFO_LOG( "Starting Regolith" );
+    INFO_LOG( "Main : Starting Regolith" );
     man->run();
 
   }
@@ -37,7 +36,7 @@ int main( int, char** )
   }
   catch ( std::exception& ex )
   {
-    FAILURE_LOG( "Unexpected exception occured:" );
+    FAILURE_LOG( "Main : Unexpected exception occured:" );
     FAILURE_STREAM << ex.what();
   }
 

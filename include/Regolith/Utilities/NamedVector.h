@@ -2,9 +2,9 @@
 #ifndef REGOLITH_UTILITIES_NAMED_VECTOR_H_
 #define REGOLITH_UTILITIES_NAMED_VECTOR_H_
 
-#include "Regolith/Utilities/Exception.h"
+#include "Regolith/Global/Global.h"
 
-#include "logtastic.h"
+#include "Regolith/Utilities/Exception.h"
 
 #include <vector>
 #include <map>
