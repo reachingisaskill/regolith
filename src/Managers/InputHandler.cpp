@@ -22,13 +22,13 @@ namespace Regolith
   void InputHandler::configure( std::string mappingName )
   {
     _inputMaps = Manager::getInstance()->getInputManager().requestMapping( mappingName );
-    DEBUG_STREAM << "Requested Input Map Pointer: " << _inputMaps;
+    DEBUG_STREAM << "InputHandler::configure : Requested Input Map Pointer: " << _inputMaps;
   }
 
 
   void InputHandler::registerInputRequest( ControllableInterface* object, InputAction action )
   {
-    DEBUG_STREAM << "Registered input request for action: " << action << " " << object;
+    DEBUG_STREAM << "InputHandler::registerInputRequest : Registered input request for action: " << action << " " << object;
     _actionMaps[action].insert( object );
   }
 

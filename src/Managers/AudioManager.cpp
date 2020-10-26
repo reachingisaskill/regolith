@@ -33,7 +33,7 @@ namespace Regolith
 
   void AudioManager::clear()
   {
-    INFO_LOG( "Clearing the audio manager" );
+    INFO_LOG( "AudioManager::clear : Clearing the audio manager" );
     Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
 
     // Drop the hook in case something happens
@@ -52,7 +52,7 @@ namespace Regolith
     // Make sure it is within range
     if ( v > 1.0 || v < 0.0 )
     {
-      WARN_STREAM << "Music Volume: " << v << " is out of range [0,1]. It will be truncated.";
+      WARN_STREAM << "AudioManager::setVolumeMusic : Music Volume: " << v << " is out of range [0,1]. It will be truncated.";
       v = std::fabs( v );
       v = ( (v >1.0) ? 1.0 : v );
     }
@@ -70,7 +70,7 @@ namespace Regolith
     // Make sure it is within range
     if ( v > 1.0 || v < 0.0 )
     {
-      WARN_STREAM << "Effects Volume: " << v << " is out of range [0,1]. It will be truncated.";
+      WARN_STREAM << "AudioManager::setVolumeEffects : Effects Volume: " << v << " is out of range [0,1]. It will be truncated.";
       v = std::fabs( v );
       v = ( (v >1.0) ? 1.0 : v );
     }
@@ -115,7 +115,7 @@ namespace Regolith
       throw ex;
     }
 
-    INFO_STREAM << "Initialised Audio Device: " << _frequency << "Hz, " << _channels << " channels, " << _chunkSize << "byte chunks.";
+    INFO_STREAM << "AudioManager::configure : Initialised Audio Device: " << _frequency << "Hz, " << _channels << " channels, " << _chunkSize << "byte chunks.";
 
     _volumeMusic = json_data["music_volume"].asFloat();
     _volumeChunk = json_data["effect_volume"].asFloat();

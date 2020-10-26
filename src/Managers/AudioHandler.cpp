@@ -91,7 +91,7 @@ namespace Regolith
 
   void AudioHandler::pause()
   {
-    DEBUG_LOG( "Pausing audio handler" );
+    DEBUG_LOG( "AudioHandler::pause : Pausing audio handler" );
     switch( _state )
     {
       case MUSIC_STATE_STOPPED :
@@ -111,7 +111,7 @@ namespace Regolith
 
   void AudioHandler::play()
   {
-    DEBUG_LOG( "Playing audio handler" );
+    DEBUG_LOG( "AudioHandler::play : Playing audio handler" );
     switch( _state )
     {
       case MUSIC_STATE_STOPPED :
@@ -132,7 +132,7 @@ namespace Regolith
 
   void AudioHandler::stop()
   {
-    DEBUG_LOG( "Stopping audio handler" );
+    DEBUG_LOG( "AudioHandler::stop : Stopping audio handler" );
 
     switch( _state )
     {
@@ -203,7 +203,7 @@ namespace Regolith
     Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
     GuardLock lk( musicUpdate.mutex );
 
-    DEBUG_LOG( "Playing next track" );
+    DEBUG_LOG( "playNextTrack : Playing next track" );
     if ( musicUpdate.data != nullptr )
     {
       Mix_PlayMusic( musicUpdate.data, -1 );

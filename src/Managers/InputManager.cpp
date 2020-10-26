@@ -16,7 +16,7 @@ namespace Regolith
 
   InputManager::~InputManager()
   {
-    INFO_LOG( "Clearing the input mappings" );
+    INFO_LOG( "InputManager::~InputManager : Clearing the input mappings" );
     _inputMappers.clear();
   }
 
@@ -31,7 +31,7 @@ namespace Regolith
     ControllableSet::iterator end;
     ComponentSet::iterator components_end;
 
-    DEBUG_STREAM << "Handling events";
+    DEBUG_STREAM << "InputManager::handleEvents : Handling events";
 
     while ( SDL_PollEvent( &_theEvent ) != 0 )
     {
@@ -41,11 +41,11 @@ namespace Regolith
         // Input-type events
         case SDL_QUIT :
           event = REGOLITH_EVENT_QUIT;
-          DEBUG_STREAM << "  Regolith Quit Event";
+          DEBUG_STREAM << "InputManager::handleEvents : Regolith Quit Event";
           components_end = this->getRegisteredComponents( event ).end();
           for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
           {
-            DEBUG_STREAM << "  Propagating event : " << event;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating event : " << event;
             (*it)->eventAction( event, _theEvent );
           }
           break;
@@ -54,7 +54,7 @@ namespace Regolith
         case SDL_KEYUP :
           if ( handler == nullptr ) break;
 
-          DEBUG_LOG( "  Keyboard key-press type event" );
+          DEBUG_LOG( "InputManager::handleEvents : Keyboard key-press type event" );
           event_type = INPUT_TYPE_KEYBOARD;
           mapper = handler->_inputMaps->mapping[ event_type ];
           action = mapper->getAction( _theEvent );
@@ -63,7 +63,7 @@ namespace Regolith
           end = handler->getRegisteredObjects( action ).end();
           for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
           {
-            DEBUG_STREAM << "  Propagating action : " << action;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating action : " << action;
             mapper->propagate( (*it) );
           }
           break;
@@ -71,17 +71,17 @@ namespace Regolith
         case SDL_MOUSEMOTION :
           if ( handler == nullptr ) break;
 
-          DEBUG_STREAM << "MOUSE MOTION : " << handler << ", " << handler->_inputMaps;
+          DEBUG_STREAM << "InputManager::handleEvents : MOUSE MOTION : " << handler << ", " << handler->_inputMaps;
 
           event_type = INPUT_TYPE_MOUSE_MOVE;
           mapper = handler->_inputMaps->mapping[ event_type ];
           action = mapper->getAction( _theEvent );
-          DEBUG_STREAM << "  Regolith Mouse Motion Event";
+          DEBUG_STREAM << "InputManager::handleEvents : Regolith Mouse Motion Event";
 
           end = handler->getRegisteredObjects( action ).end();
           for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
           {
-            DEBUG_STREAM << "  Propagating action : " << action;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating action : " << action;
             mapper->propagate( (*it) );
           }
           break;
@@ -93,7 +93,7 @@ namespace Regolith
         case SDL_MOUSEBUTTONUP :
           if ( handler == nullptr ) break;
 
-          DEBUG_LOG( "  Mouse button-press type event" );
+          DEBUG_LOG( "InputManager::handleEvents : Mouse button-press type event" );
           event_type = INPUT_TYPE_MOUSE_BUTTON;
           mapper = handler->_inputMaps->mapping[ event_type ];
           action = mapper->getAction( _theEvent );
@@ -102,7 +102,7 @@ namespace Regolith
           end = handler->getRegisteredObjects( action ).end();
           for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
           {
-            DEBUG_STREAM << "  Propagating action : " << action;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating action : " << action;
             mapper->propagate( (*it) );
           }
           break;
@@ -111,7 +111,7 @@ namespace Regolith
         case SDL_CONTROLLERAXISMOTION :
           if ( handler == nullptr ) break;
 
-          DEBUG_LOG( " Controller Axis Motion Event" );
+          DEBUG_LOG( "InputManager::handleEvents : Controller Axis Motion Event" );
           event_type = INPUT_TYPE_CONTROLLER_AXIS;
           mapper = handler->_inputMaps->mapping[ event_type ];
           action = mapper->getAction( _theEvent );
@@ -120,7 +120,7 @@ namespace Regolith
           end = handler->getRegisteredObjects( action ).end();
           for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
           {
-            DEBUG_STREAM << "  Propagating action : " << action;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating action : " << action;
             mapper->propagate( (*it) );
           }
           break;
@@ -129,7 +129,7 @@ namespace Regolith
         case SDL_CONTROLLERBUTTONUP :
           if ( handler == nullptr ) break;
 
-          DEBUG_LOG( " Controller Button Event" );
+          DEBUG_LOG( "InputManager::handleEvents : Controller Button Event" );
           event_type = INPUT_TYPE_BUTTON;
           mapper = handler->_inputMaps->mapping[ event_type ];
           action = mapper->getAction( _theEvent );
@@ -138,7 +138,7 @@ namespace Regolith
           end = handler->getRegisteredObjects( action ).end();
           for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
           {
-            DEBUG_STREAM << "  Propagating action : " << action;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating action : " << action;
             mapper->propagate( (*it) );
           }
           break;
@@ -157,11 +157,11 @@ namespace Regolith
 
         case SDL_WINDOWEVENT :
           event = REGOLITH_EVENT_WINDOW;
-          DEBUG_STREAM << "  Regolith Window Event";
+          DEBUG_STREAM << "InputManager::handleEvents : Regolith Window Event";
           components_end = this->getRegisteredComponents( event ).end();
           for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
           {
-            DEBUG_STREAM << "  Propagating event : " << event;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating event : " << event;
             (*it)->eventAction( event, _theEvent );
           }
           break;
@@ -169,13 +169,13 @@ namespace Regolith
 
         case SDL_USEREVENT :
           event = (RegolithEvent)_theEvent.user.code;
-          DEBUG_STREAM << "  Regolith User Event " << event;
+          DEBUG_STREAM << "InputManager::handleEvents : Regolith User Event " << event;
 
           if ( event == REGOLITH_EVENT_NULL ) break;
           components_end = this->getRegisteredComponents( event ).end();
           for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
           {
-            DEBUG_STREAM << "  Propagating event : " << event;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating event : " << event;
             (*it)->eventAction( event, _theEvent );
           }
           break;
@@ -187,12 +187,12 @@ namespace Regolith
         case SDL_JOYDEVICEADDED :
         case SDL_JOYDEVICEREMOVED :
           event = REGOLITH_EVENT_JOYSTICK_HARDWARE;
-          DEBUG_STREAM << "  Regolith joystick hardware Event " << event;
+          DEBUG_STREAM << "InputManager::handleEvents : Regolith joystick hardware Event " << event;
 
           components_end = this->getRegisteredComponents( event ).end();
           for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
           {
-            DEBUG_STREAM << "  Propagating event : " << event;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating event : " << event;
             (*it)->eventAction( event, _theEvent );
           }
           break;
@@ -201,12 +201,12 @@ namespace Regolith
         case SDL_CONTROLLERDEVICEREMOVED :
         case SDL_CONTROLLERDEVICEREMAPPED :
           event = REGOLITH_EVENT_CONTROLLER_HARDWARE;
-          DEBUG_STREAM << "  Regolith controller hardware Event " << event;
+          DEBUG_STREAM << "InputManager::handleEvents : Regolith controller hardware Event " << event;
 
           components_end = this->getRegisteredComponents( event ).end();
           for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
           {
-            DEBUG_STREAM << "  Propagating event : " << event;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating event : " << event;
             (*it)->eventAction( event, _theEvent );
           }
           break;
@@ -214,12 +214,12 @@ namespace Regolith
         case SDL_AUDIODEVICEADDED :
         case SDL_AUDIODEVICEREMOVED :
           event = REGOLITH_EVENT_AUDIO_HARDWARE;
-          DEBUG_STREAM << "  Regolith audio hardware Event " << event;
+          DEBUG_STREAM << "InputManager::handleEvents : Regolith audio hardware Event " << event;
 
           components_end = this->getRegisteredComponents( event ).end();
           for ( ComponentSet::iterator it = this->getRegisteredComponents( event ).begin(); it != components_end; ++it )
           {
-            DEBUG_STREAM << "  Propagating event : " << event;
+            DEBUG_STREAM << "InputManager::handleEvents : Propagating event : " << event;
             (*it)->eventAction( event, _theEvent );
           }
           break;
@@ -252,7 +252,7 @@ namespace Regolith
 
   void InputManager::registerEventRequest( Component* object, RegolithEvent event )
   {
-    DEBUG_STREAM << "Registered input request for event: " << event << " " << object;
+    DEBUG_STREAM << "InputManager::registerEventRequest : Registered input request for event: " << event << " " << object;
     _eventMaps[event].insert( object );
   }
 
@@ -279,7 +279,7 @@ namespace Regolith
   {
     if ( ! _inputMappers.exists( name ) ) 
     {
-      DEBUG_STREAM << "Creating new input mapping set: " << name;
+      DEBUG_STREAM << "InputManager::requestMapping : Creating new input mapping set: " << name;
       _inputMappers.addObject( new InputMappingSet(), name );
     }
 
@@ -289,13 +289,13 @@ namespace Regolith
 
   void InputManager::simulateInputAction( InputHandler* handler, InputAction action )
   {
-    DEBUG_LOG( "Simulating Input Action" );
+    DEBUG_LOG( "InputManager::simulateInputAction : Simulating Input Action" );
     if ( action == INPUT_ACTION_NULL ) return;
 
     ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
     for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
     {
-      DEBUG_STREAM << "  Propagating action : " << action;
+      DEBUG_STREAM << "InputManager::simulateInputAction : Propagating action : " << action;
       (*it)->inputAction( action );
     }
   }
@@ -303,13 +303,13 @@ namespace Regolith
 
   void InputManager::simulateBooleanAction( InputHandler* handler, InputAction action, bool val )
   {
-    DEBUG_LOG( "Simulating Boolean Action" );
+    DEBUG_LOG( "InputManager::simulateBooleanAction : Simulating Boolean Action" );
     if ( action == INPUT_ACTION_NULL ) return;
 
     ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
     for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
     {
-      DEBUG_STREAM << "  Propagating action : " << action;
+      DEBUG_STREAM << "InputManager::simulateBooleanAction : Propagating action : " << action;
       (*it)->booleanAction( action, val );
     }
   }
@@ -317,13 +317,13 @@ namespace Regolith
 
   void InputManager::simulateFloatAction( InputHandler* handler, InputAction action, float val )
   {
-    DEBUG_LOG( "Simulating Float Action" );
+    DEBUG_LOG( "InputManager::simulateFloatAction : Simulating Float Action" );
     if ( action == INPUT_ACTION_NULL ) return;
 
     ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
     for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
     {
-      DEBUG_STREAM << "  Propagating action : " << action;
+      DEBUG_STREAM << "InputManager::simulateFloatAction : Propagating action : " << action;
       (*it)->floatAction( action, val );
     }
   }
@@ -331,13 +331,13 @@ namespace Regolith
 
   void InputManager::simulateVectorAction( InputHandler* handler, InputAction action, const Vector& val )
   {
-    DEBUG_LOG( "Simulating Vector Action" );
+    DEBUG_LOG( "InputManager::simulateVectorAction : Simulating Vector Action" );
     if ( action == INPUT_ACTION_NULL ) return;
 
     ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
     for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
     {
-      DEBUG_STREAM << "  Propagating action : " << action;
+      DEBUG_STREAM << "InputManager::simulateVectorAction : Propagating action : " << action;
       (*it)->vectorAction( action, val );
     }
   }
@@ -345,13 +345,13 @@ namespace Regolith
 
   void InputManager::simulateMouseAction( InputHandler* handler, InputAction action, bool click, const Vector& vec )
   {
-    DEBUG_LOG( "Simulating Mouse Action" );
+    DEBUG_LOG( "InputManager::simulateMouseAction : Simulating Mouse Action" );
     if ( action == INPUT_ACTION_NULL ) return;
 
     ControllableSet::iterator end = handler->getRegisteredObjects( action ).end();
     for ( ControllableSet::iterator it = handler->getRegisteredObjects( action ).begin(); it != end; ++it )
     {
-      DEBUG_STREAM << "  Propagating action : " << action;
+      DEBUG_STREAM << "InputManager::simulateMouseAction : Propagating action : " << action;
       (*it)->mouseAction( action, click, vec );
     }
   }
@@ -408,7 +408,7 @@ namespace Regolith
     {
       if ( required[i].asString() == "joystick" )
       {
-        WARN_LOG( "Joystick is not yet supported!" );
+        WARN_LOG( "InputManager::configure : Joystick is not yet supported!" );
       }
     }
 
@@ -422,7 +422,7 @@ namespace Regolith
       std::string mapping_name = keymaps[i]["name"].asString();
       Json::Value keymapping = keymaps[i]["keymapping"];
 
-      INFO_STREAM << "Bulding key mapping: " << mapping_name;
+      INFO_STREAM << "InputManager::configure : Bulding key mapping: " << mapping_name;
 
       // Create the an empty mapping object
       requestMapping( mapping_name );
@@ -439,7 +439,7 @@ namespace Regolith
 
         if ( type == "keyboard" )
         {
-          INFO_LOG( "Loading Keyboard Mapping." );
+          INFO_LOG( "InputManager::configure : Loading Keyboard Mapping." );
 
           Json::Value::const_iterator keys_end = keys.end();
           for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
@@ -447,14 +447,14 @@ namespace Regolith
             SDL_Scancode code = getScancodeID( it.key().asString() );
             InputAction action = getActionID( it->asString() );
             registerInputAction( mapping_name, INPUT_TYPE_KEYBOARD, code, action );
-            INFO_STREAM << "Key Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+            INFO_STREAM << "InputManager::configure : Key Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
-          INFO_LOG( "Loaded keyboard" );
+          INFO_LOG( "InputManager::configure : Loaded keyboard" );
         }
 
         else if ( type == "mouse_buttons" )
         {
-          INFO_LOG( "Loading Mouse Button Mapping." );
+          INFO_LOG( "InputManager::configure : Loading Mouse Button Mapping." );
 
           Json::Value::const_iterator keys_end = keys.end();
           for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
@@ -462,14 +462,14 @@ namespace Regolith
             MouseButton code = getMouseButtonID( it.key().asString() );
             InputAction action = getActionID( it->asString() );
             registerInputAction( mapping_name, INPUT_TYPE_MOUSE_BUTTON, code, action );
-            INFO_STREAM << "Mouse Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+            INFO_STREAM << "InputManager::configure : Mouse Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
-          INFO_LOG( "Loaded mouse buttons" );
+          INFO_LOG( "InputManager::configure : Loaded mouse buttons" );
         }
 
         else if ( type == "mouse_movement" )
         {
-          INFO_LOG( "Loading Mouse Movement." );
+          INFO_LOG( "InputManager::configure : Loading Mouse Movement." );
 
           // Only require the movement input - it must be present if a mouse movement mapping is provided
           Utilities::validateJson( keys, "movement", Utilities::JSON_TYPE_STRING );
@@ -477,13 +477,13 @@ namespace Regolith
           unsigned code = 0; // Dummy variable - only one thing to map with mouse movement!
           InputAction action = getActionID( keys["movement"].asString() );
           registerInputAction( mapping_name, INPUT_TYPE_MOUSE_MOVE, code, action );
-          INFO_STREAM << "Registered : mouse movement as action to map: " << mapping_name << " -- " << keys["movement"].asString() << "(" << action << ")";
-          INFO_LOG( "Loaded mouse movement" );
+          INFO_STREAM << "InputManager::configure : Registered : mouse movement as action to map: " << mapping_name << " -- " << keys["movement"].asString() << "(" << action << ")";
+          INFO_LOG( "InputManager::configure : Loaded mouse movement" );
         }
 
         else if ( type == "controller_buttons" )
         {
-          INFO_LOG( "Loading controller button mapping" );
+          INFO_LOG( "InputManager::configure : Loading controller button mapping" );
 
           Json::Value::const_iterator keys_end = keys.end();
           for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
@@ -491,14 +491,14 @@ namespace Regolith
             SDL_GameControllerButton code = getButtonID( it.key().asString() );
             InputAction action = getActionID( it->asString() );
             registerInputAction( mapping_name, INPUT_TYPE_BUTTON, code, action );
-            INFO_STREAM << "Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+            INFO_STREAM << "InputManager::configure : Button Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
-          INFO_LOG( "Loaded controller buttons" );
+          INFO_LOG( "InputManager::configure : Loaded controller buttons" );
         }
 
         else if ( type == "controller_axes" )
         {
-          INFO_LOG( "Loading controller axis mapping" );
+          INFO_LOG( "InputManager::configure : Loading controller axis mapping" );
 
           Json::Value::const_iterator keys_end = keys.end();
           for ( Json::Value::const_iterator it = keys.begin(); it != keys_end; ++it )
@@ -506,18 +506,18 @@ namespace Regolith
             SDL_GameControllerAxis code = getAxisID( it.key().asString() );
             InputAction action = getActionID( it->asString() );
             registerInputAction( mapping_name, INPUT_TYPE_CONTROLLER_AXIS, code, action );
-            INFO_STREAM << "Axis Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
+            INFO_STREAM << "InputManager::configure : Axis Registered to map: " << mapping_name << " -- " << it.key().asString() << "(" << code << ")" << " as action : " << it->asString() << "(" << action << ")";
           }
-          INFO_LOG( "Loaded controller axes" );
+          INFO_LOG( "InputManager::configure : Loaded controller axes" );
         }
         else
         {
-          WARN_LOG( "Key mapping specified for an unsupported interface." );
-          WARN_LOG( "Please try again with a future version." );
+          WARN_LOG( "InputManager::configure : Key mapping specified for an unsupported interface." );
+          WARN_LOG( "InputManager::configure : Please try again with a future version." );
         }
       }
     }
-    INFO_LOG( "Input Manager Configured" );
+    INFO_LOG( "InputManager::configure : Input Manager Configured" );
   }
 }
 

@@ -49,11 +49,16 @@ namespace Regolith
 
       while ( ! quitFlag )
       {
+        // For testing - only do a single loop
+        quitFlag = true;
+
         // Reset the timer while paused
         _frameTimer.lap();
 
         while ( ! _pause )
         {
+          // For testing - only do a single loop
+          _pause = true;
 
           // Handle events globally and context-specific actions using the contexts input handler
           _inputManager.handleEvents( _contextStack.front()->inputHandler() );
