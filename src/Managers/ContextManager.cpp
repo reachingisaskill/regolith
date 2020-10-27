@@ -199,28 +199,47 @@ namespace Regolith
 
   void contextManagerLoadingThread()
   {
-    INFO_LOG( "ContextManagerLoadingThread : start." );
+    INFO_LOG( "ContextManagerLoadingThread : Start" );
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+    Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().ContextManagerStatus;
 
-    INFO_LOG( "ContextManagerLoadingThread : initialised and waiting to start" );
+    // Update the thread status
+    std::unique_lock<std::mutex> statusLock( threadStatus.mutex );
+    threadStatus.data = ThreadStatus::Waiting;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
+    INFO_LOG( "ContextManagerLoadingThread : Waiting" );
     {
       Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
       std::unique_lock<std::mutex> lk( startCondition.mutex );
       startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
     }
-    INFO_LOG( "ContextManagerLoadingThread : go." );
 
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Initialising;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
+    INFO_LOG( "ContextManagerLoadingThread : Initialising" );
 
     ContextManager& manager = Manager::getInstance()->getContextManager();
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
     std::unique_lock<std::mutex> contextLock( contextUpdate.mutex );
 
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Running;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
     try
     {
+      INFO_LOG( "ContextManagerLoadingThread : Running" );
 
-      INFO_LOG( "ContextManagerLoadingThread : waiting for first command" );
       while( ! quitFlag )
       {
         contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
@@ -270,7 +289,25 @@ namespace Regolith
       std::cerr << ex.what();
     }
 
-    INFO_LOG( "ContextManagerLoadingThread : stopped." );
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Running;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
+    INFO_LOG( "ContextManagerLoadingThread : Closing" );
+
+
+    // Do any closing operatins here
+
+
+    INFO_LOG( "ContextManagerLoadingThread : Stopped" );
+
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Null;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
   }
 
 }

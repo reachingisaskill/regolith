@@ -12,6 +12,7 @@ namespace Regolith
 {
 
   Window::Window() :
+    _exists( false ),
     _theWindow( nullptr ),
     _title(),
     _width( 0 ),
@@ -30,29 +31,52 @@ namespace Regolith
 
   Window::~Window()
   {
-    SDL_DestroyWindow( _theWindow );
-    _theWindow = nullptr;
+    if ( _exists )
+    {
+      SDL_DestroyWindow( _theWindow );
+      _theWindow = nullptr;
+    }
   }
 
 
-  void Window::init( std::string title, int width, int height )
+  void Window::configure( std::string title, int width, int height )
   {
     _title = title;
-
-    _theWindow = SDL_CreateWindow( _title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
-    if ( _theWindow == nullptr )
-    {
-      Exception ex( "Window::init()", "Could not create window", false );
-      ex.addDetail( "Window title", _title );
-      ex.addDetail( "Window width", width );
-      ex.addDetail( "Window height", height );
-      throw ex;
-    }
 
     _width = width;
     _height = height;
     _resolutionWidth = width;
     _resolutionHeight = height;
+  }
+
+
+  SDL_Renderer* Window::create()
+  {
+    if ( _exists )
+    {
+      Exception ex( "Window::create()", "Window already exists - only one thread may have access to the renderer." );
+      throw ex;
+    }
+    _exists = true;
+
+    _theWindow = SDL_CreateWindow( _title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
+    if ( _theWindow == nullptr )
+    {
+      Exception ex( "Window::create()", "Could not create window" );
+      ex.addDetail( "Window title", _title );
+      ex.addDetail( "Window width", _width );
+      ex.addDetail( "Window height", _height );
+      throw ex;
+    }
+
+    SDL_Renderer* renderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+    if ( renderer == nullptr )
+    {
+      Exception ex( "Window::create()", "Could not create SDL Renderer" );
+      throw ex;
+    }
+
+    return renderer;
   }
 
 

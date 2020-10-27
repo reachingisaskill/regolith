@@ -126,14 +126,8 @@ namespace Regolith
 
   SDL_Renderer* Manager::requestRenderer()
   {
-    if ( _rendererExists )
-    {
-      Exception ex( "Manager::requestRenderer()", "Renderer already exists - only one thread may own one." );
-      throw ex;
-    }
-    _rendererExists = true;
-
-    return SDL_CreateRenderer( _theWindow.getSDLWindow(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+//    return SDL_CreateRenderer( _theWindow.getSDLWindow(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+    return _theWindow.create();
   }
 
 
@@ -189,7 +183,7 @@ namespace Regolith
     // Start the engine!
     INFO_LOG( "Manager::run : Starting the engine." );
     _theEngine.run();
-//    std::this_thread::sleep_for( std::chrono::seconds( 20 ) );
+//    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
 
     // Join all the threads

@@ -39,6 +39,13 @@ namespace Regolith
     explicit Condition( DATA d ) : data( d ) {}
   };
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Status enum for thread behvaiour
+
+  enum class ThreadStatus { Null, Waiting, Initialising, Running, Closing };
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Manager Class
   class ThreadManager
@@ -53,6 +60,9 @@ namespace Regolith
       // Context manager thread container
       std::thread _engineRenderingThread;
 
+
+      void waitThreadStatus( ThreadStatus );
+
     public:
       // Con/Destructors
       ThreadManager();
@@ -60,15 +70,15 @@ namespace Regolith
       ~ThreadManager();
 
       // Signal everything!
-      void quit();
+      void quit() { QuitFlag = true; }
 
-      // Signal everything!
+      // Stop the threads with error signals
       void error();
 
       // Send the start signals
       void startAll();
 
-      // Send the stop signals and call join
+      // Send the stop signals
       void stopAll();
 
 
@@ -83,6 +93,12 @@ namespace Regolith
 
       // Every thread that sees this flag MUST end
       static std::atomic<bool> ErrorFlag;
+
+
+      // Current thread status variables to observe thread behaviour
+      static Condition<ThreadStatus> DataManagerStatus;
+      static Condition<ThreadStatus> ContextManagerStatus;
+      static Condition<ThreadStatus> EngineRenderingStatus;
 
 
       // Signals data in the DataManager Queue

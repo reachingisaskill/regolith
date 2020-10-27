@@ -42,6 +42,9 @@ namespace Regolith
     std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex, std::defer_lock );
 
 
+    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+
+
     try
     {
       // Handler global events without a context
@@ -264,18 +267,31 @@ namespace Regolith
 
   void engineRenderingThread()
   {
-    INFO_LOG( "engineRederingThread : Start." );
+    INFO_LOG( "engineRederingThread : Start" );
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+    Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().EngineRenderingStatus;
 
-    INFO_LOG( "engineRenderingThread : Initialised and waiting" );
+    // Update the thread status
+    std::unique_lock<std::mutex> statusLock( threadStatus.mutex );
+    threadStatus.data = ThreadStatus::Waiting;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
+    INFO_LOG( "engineRenderingThread : Waiting" );
     {
       Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
       std::unique_lock<std::mutex> lk( startCondition.mutex );
       startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
     }
-    INFO_LOG( "engineRenderingthread : Go." );
+    INFO_LOG( "engineRenderingThread : Initialising" );
+
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Initialising;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
 
     Engine& engine = Manager::getInstance()->getEngine();
 
@@ -292,6 +308,16 @@ namespace Regolith
 
     // Control access to the DataHandler being loaded
     std::unique_lock<std::mutex> queueLock( engine._renderQueueMutex, std::defer_lock );
+
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Running;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
+
+    // Now its running!
+    INFO_LOG( "engineRenderingthread : Running" );
 
     try
     {
@@ -388,13 +414,26 @@ namespace Regolith
       std::cerr << ex.what() << std::endl;
     }
 
+    INFO_LOG( "engineRenderingThread : Closing" );
+
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Closing;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
 
     INFO_LOG( "engineRenderingThread : Destroying the renderer" );
     SDL_DestroyRenderer( renderer );
     renderer = nullptr;
 
 
-    INFO_LOG( "engineRenderingThread : Stopped." );
+    INFO_LOG( "engineRenderingThread : Stopped" );
+
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Null;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
   }
 
 }

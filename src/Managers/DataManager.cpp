@@ -406,27 +406,45 @@ namespace Regolith
 
   void dataManagerLoadingThread()
   {
-    INFO_LOG( "dataManagerLoadingThread : Start." );
+    INFO_LOG( "dataManagerLoadingThread : Start" );
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+    Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().DataManagerStatus;
 
-    INFO_LOG( "dataManagerLoadingThread : Initialised and waiting to start" );
+    // Update the thread status
+    std::unique_lock<std::mutex> statusLock( threadStatus.mutex );
+    threadStatus.data = ThreadStatus::Waiting;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
+    INFO_LOG( "dataManagerLoadingThread : Waiting" );
     {
       Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
       std::unique_lock<std::mutex> lk( startCondition.mutex );
       startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
     }
-    INFO_LOG( "dataManagerLoadingThread : Go." );
+    INFO_LOG( "dataManagerLoadingThread : Initialising." );
+
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Initialising;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
 
     DataManager& manager = Manager::getInstance()->getDataManager();
     Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
     std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
 
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Running;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
     try
     {
-
-      INFO_LOG( "dataManagerLoadingThread : Waiting for first command" );
+      INFO_LOG( "dataManagerLoadingThread : Running." );
       while( ! quitFlag )
       {
         dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
@@ -477,7 +495,25 @@ namespace Regolith
       std::cerr << ex.what();
     }
 
-    INFO_LOG( "Data Manager loading thread stopped." );
+    INFO_LOG( "dataManagerLoadingThread : Closing" );
+
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Closing;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
+
+    // Do any closing operations here
+
+
+    INFO_LOG( "dataManagerLoadingThread : Stopped" );
+
+    // Update the thread status
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Null;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
   }
 
 

@@ -17,6 +17,7 @@ namespace Regolith
   class Window : public Component
   {
     private:
+      bool _exists;
       SDL_Window* _theWindow;
       std::string _title;
       int _width;
@@ -41,11 +42,14 @@ namespace Regolith
       virtual ~Window();
 
 
-      // Configure the window return the SDL renderer
-      void init( std::string, int, int );
+      // Configure the window
+      void configure( std::string, int, int );
 
-      // Return the SDL window pointer
-      SDL_Window* getSDLWindow() const { return _theWindow; }
+//      // Return the SDL window pointer
+//      SDL_Window* getSDLWindow() const { return _theWindow; }
+
+      // Create the window and return the SDL_Renderer
+      SDL_Renderer* create();
 
 
       // Get the current window dimensions
