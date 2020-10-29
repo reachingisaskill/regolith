@@ -4,6 +4,7 @@
 #include "Regolith/Components/Window.h"
 
 #include "Regolith/Contexts/NullContext.h"
+#include "Regolith/GameObjects/NullObject.h"
 
 //#include "Regolith/GameObjects/MusicTrack.h"
 //#include "Regolith/GameObjects/SimpleSprite.h"
@@ -58,7 +59,7 @@ namespace Regolith
     logtastic::registerSignalHandler( SIGSEGV, deathSignals );
     logtastic::registerSignalHandler( SIGTERM, deathSignals );
 
-//    _objectFactory.addBuilder<NullObject>( "null" );
+    _objectFactory.addBuilder<NullObject>( "null" );
     _contextFactory.addBuilder<NullContext>( "null" );
 //    _signalFactory.addBuilder<NullSignal>( "null" );
 

@@ -42,8 +42,9 @@ namespace Regolith
     std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex, std::defer_lock );
 
 
-    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
+//    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
 
+    DEBUG_LOG( "Engine::run : Engine now running" );
 
     try
     {
@@ -52,25 +53,36 @@ namespace Regolith
 
       while ( ! quitFlag )
       {
-        // For testing - only do a single loop
-        quitFlag = true;
+//        // For testing - only do a single loop
+//        quitFlag = true;
 
         // Reset the timer while paused
         _frameTimer.lap();
 
         while ( ! _pause )
         {
-          // For testing - only do a single loop
-          _pause = true;
+//          // For testing - only do a single loop
+//          _pause = true;
 
+          DEBUG_LOG( "Engine::run : ------ EVENTS   ------" );
           // Handle events globally and context-specific actions using the contexts input handler
           _inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
 
 
           // Lock access to the context stack for updating
-          while( ! renderLock.try_lock() );
 
+//          renderLock.lock();
+          while( ! renderLock.try_lock() );
+#ifdef REGOLITH_VALGRIND_BUILD
+        DEBUG_LOG( "THERE" );
+//          renderLock.lock();
+#else
+        DEBUG_LOG( "NOT THERE" );
+//          while( ! renderLock.try_lock() );
+#endif
+
+          DEBUG_LOG( "Engine::run : ------ CONTEXTS ------" );
 
 
           float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
@@ -325,7 +337,16 @@ namespace Regolith
       while ( ! quitFlag )
       {
         // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
+//        renderLock.lock();
         while( ! renderLock.try_lock() );
+#ifdef REGOLITH_VALGRIND_BUILD
+        DEBUG_LOG( "HERE" );
+//        renderLock.lock();
+#else
+        DEBUG_LOG( "NOT HERE" );
+//        while( ! renderLock.try_lock() );
+#endif
+
         DEBUG_LOG( "engineRenderingThread : ------ RENDER ------" );
 
         // Setup the rendering process

@@ -77,6 +77,9 @@ namespace Regolith
       // Return a reference to the audio handler
       AudioHandler& getAudioHandler() { return _theAudio; }
 
+      // Return a pointer to a specific data handler within this context group
+      DataHandler* getDataHandler( std::string name ) const { return _dataHandlers.get( name ); }
+
       // Load all the contexts and relevant data
       void load();
 

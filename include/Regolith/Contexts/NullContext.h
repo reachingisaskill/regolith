@@ -16,9 +16,10 @@ namespace Regolith
   class NullContext : public Context
   {
     private:
+      DataHandler* _testHandler;
 
     protected:
-      virtual void onStart() override {}
+      virtual void onStart() override;
       virtual void onStop() override {}
       virtual void onPause() override {}
       virtual void onResume() override {}
