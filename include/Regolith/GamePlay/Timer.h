@@ -11,17 +11,16 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Stopwatch class
 
-  enum StopwatchState
-  {
-    TIMER_STOPPED,
-    TIMER_STARTED,
-    TIMER_PAUSED,
-  };
-  const int TIMER_TOTAL = 4;
-
-
   class Stopwatch
   {
+    public :
+      enum StopwatchState
+      {
+        STOPPED,
+        STARTED,
+        PAUSED,
+      };
+
     private:
       Uint32 _startTime;
       Uint32 _pauseTime;

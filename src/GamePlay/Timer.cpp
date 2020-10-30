@@ -7,7 +7,7 @@ namespace Regolith
   Stopwatch::Stopwatch():
     _startTime( 0 ),
     _pausedCount( 0 ),
-    _currentState( TIMER_STOPPED )
+    _currentState( Stopwatch::STOPPED )
   {
   }
 
@@ -18,19 +18,19 @@ namespace Regolith
 
     switch( _currentState )
     {
-      case TIMER_STOPPED :
+      case Stopwatch::STOPPED :
         _startTime = ticks;
         break;
 
-      case TIMER_STARTED : // Do nothing
+      case Stopwatch::STARTED : // Do nothing
         break;
 
-      case TIMER_PAUSED :
+      case Stopwatch::PAUSED :
         _pausedCount += ticks - _pauseTime;
         break;
     }
     
-    _currentState = TIMER_STARTED;
+    _currentState = Stopwatch::STARTED;
   }
 
 
@@ -39,15 +39,15 @@ namespace Regolith
     Uint32 ticks = SDL_GetTicks();
     switch( _currentState )
     {
-      case TIMER_STOPPED : // Do nothing
+      case Stopwatch::STOPPED : // Do nothing
         break;
 
-      case TIMER_STARTED:
+      case Stopwatch::STARTED:
         _pauseTime = ticks;
-        _currentState = TIMER_PAUSED;
+        _currentState = Stopwatch::PAUSED;
         break;
 
-      case TIMER_PAUSED : // Do Nothing
+      case Stopwatch::PAUSED : // Do Nothing
         break;
     }
   }
@@ -57,7 +57,7 @@ namespace Regolith
   {
     Uint32 time = this->time();
 
-    _currentState = TIMER_STOPPED;
+    _currentState = Stopwatch::STOPPED;
     return time;
   }
 
@@ -76,15 +76,15 @@ namespace Regolith
 
     switch( _currentState )
     {
-      case TIMER_STOPPED :
+      case Stopwatch::STOPPED :
         return 0;
         break;
 
-      case TIMER_PAUSED :
+      case Stopwatch::PAUSED :
         return ( ticks - _startTime ) - (_pausedCount + (ticks - _pauseTime));
         break;
 
-      case TIMER_STARTED :
+      case Stopwatch::STARTED :
         return ( ticks - _startTime ) - _pausedCount;
         break;
     }

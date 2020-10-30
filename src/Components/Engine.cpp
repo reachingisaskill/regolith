@@ -42,17 +42,16 @@ namespace Regolith
     std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex, std::defer_lock );
 
 
-//    std::this_thread::sleep_for( std::chrono::seconds( 1 ) );
-
     DEBUG_LOG( "Engine::run : Engine now running" );
 
     try
     {
-      // Handler global events without a context
-      _inputManager.handleEvents( nullptr );
-
       while ( ! quitFlag )
       {
+
+        // Handler global events without a context
+        _inputManager.handleEvents( nullptr );
+
 
         // Reset the timer while paused
         _frameTimer.lap();
@@ -185,84 +184,94 @@ namespace Regolith
   }
 
 
-  void Engine::performStackOperations()
+  bool Engine::performStackOperations()
   {
-    while ( ! _stackOperationQueue.empty() )
+    if ( ! _stackOperationQueue.empty() )
     {
-      DEBUG_STREAM << "Engine::performStackOperations : " << _stackOperationQueue.size() << " Operations Remaining";
-      StackOperation& sop = _stackOperationQueue.front();
 
-      switch ( sop.operation )
+      while ( ! _stackOperationQueue.empty() )
       {
-        case StackOperation::PUSH :
-          DEBUG_LOG( "Engine::performStackOperations : Opening New Context" );
-          if ( ! _contextStack.empty() )
-          {
-            _contextStack.front()->pauseContext();
-          }
-          _contextStack.push_front( sop.context );
-          _contextStack.front()->startContext();
-          break;
+        DEBUG_STREAM << "Engine::performStackOperations : " << _stackOperationQueue.size() << " Operations Remaining";
+        StackOperation& sop = _stackOperationQueue.front();
 
-        case StackOperation::POP :
-          DEBUG_LOG( "Engine::performStackOperations : Closing Current Context" );
-          if ( ! _contextStack.empty() )
-          {
-            _contextStack.front()->stopContext();
-            _contextStack.pop_front();
+        switch ( sop.operation )
+        {
+          case StackOperation::PUSH :
+            DEBUG_LOG( "Engine::performStackOperations : Opening New Context" );
             if ( ! _contextStack.empty() )
             {
-              DEBUG_LOG( "Engine::performStackOperations : Returning focus" );
-              _contextStack.front()->resumeContext();
+              _contextStack.front()->pauseContext();
             }
-          }
-          break;
+            _contextStack.push_front( sop.context );
+            _contextStack.front()->startContext();
+            break;
 
-        case StackOperation::RESET :
-          while ( ! _contextStack.empty() )
-          {
-            _contextStack.front()->resumeContext();
-            _contextStack.front()->stopContext();
-            _contextStack.pop_front();
-          }
-          DEBUG_LOG( "Engine::performStackOperations : Loading new base context" );
-          _contextStack.push_front( sop.context );
-          _contextStack.front()->startContext();
-          break;
+          case StackOperation::POP :
+            DEBUG_LOG( "Engine::performStackOperations : Closing Current Context" );
+            if ( ! _contextStack.empty() )
+            {
+              _contextStack.front()->stopContext();
+              _contextStack.pop_front();
+              if ( ! _contextStack.empty() )
+              {
+                DEBUG_LOG( "Engine::performStackOperations : Returning focus" );
+                _contextStack.front()->resumeContext();
+              }
+            }
+            break;
 
-        case StackOperation::TRANSFER :
-          DEBUG_LOG( "Engine::performStackOperations : Transferring Context" );
-          if ( ! _contextStack.empty() )
-          {
-            _contextStack.front()->stopContext();
-            _contextStack.pop_front();
-          }
-          _contextStack.push_front( sop.context );
-          _contextStack.front()->startContext();
-          break;
+          case StackOperation::RESET :
+            while ( ! _contextStack.empty() )
+            {
+              _contextStack.front()->resumeContext();
+              _contextStack.front()->stopContext();
+              _contextStack.pop_front();
+            }
+            DEBUG_LOG( "Engine::performStackOperations : Loading new base context" );
+            _contextStack.push_front( sop.context );
+            _contextStack.front()->startContext();
+            break;
+
+          case StackOperation::TRANSFER :
+            DEBUG_LOG( "Engine::performStackOperations : Transferring Context" );
+            if ( ! _contextStack.empty() )
+            {
+              _contextStack.front()->stopContext();
+              _contextStack.pop_front();
+            }
+            _contextStack.push_front( sop.context );
+            _contextStack.front()->startContext();
+            break;
+        }
+
+        _stackOperationQueue.pop();
       }
 
-      _stackOperationQueue.pop();
+      // Set the visiblility start pointer. 
+      // Start at the end and work backwards until either:
+      //  - We hit the beginning of the stack, OR
+      //  - One of the contexts overrides all the previous ones.
+      _visibleStackStart = --_contextStack.rend();
+      while ( ( _visibleStackStart != _contextStack.rbegin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
+      {
+        --_visibleStackStart;
+      }
+
+      // Set the end iterator
+      _visibleStackEnd = _contextStack.rend();
     }
+
 
     if ( _contextStack.empty() )
     {
-      Manager::getInstance()->quit();
-      return;
+      Manager::getInstance()->raiseEvent( REGOLITH_EVENT_QUIT );
+      _pause = true;
+      return false;
     }
-
-    // Set the visiblility start pointer. 
-    // Start at the end and work backwards until either:
-    //  - We hit the beginning of the stack, OR
-    //  - One of the contexts overrides all the previous ones.
-    _visibleStackStart = --_contextStack.rend();
-    while ( ( _visibleStackStart != _contextStack.rbegin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
+    else
     {
-      --_visibleStackStart;
+      return true;
     }
-
-    // Set the end iterator
-    _visibleStackEnd = _contextStack.rend();
   }
 
 

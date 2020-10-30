@@ -53,6 +53,9 @@ namespace Regolith
       // Camera for the context
       Camera _theCamera;
 
+      // Flag to indicate that this context is now closed and may be popped from the context stack.
+      bool _closed;
+
       // Flag to indicate whether the context is advancing
       bool _paused;
 
@@ -61,6 +64,11 @@ namespace Regolith
 
       // Named vector of all the layers owned by the current context
       ProxyMap< ContextLayer > _layers;
+
+
+      // Only the base class has access to this. No funny business!
+      // Sets the closed flag for the engine to pop it from the context stack.
+      void setClosed( bool status ) { _closed = status; }
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -73,10 +81,10 @@ namespace Regolith
       virtual void onStop() = 0;
       virtual void onPause() = 0;
       virtual void onResume() = 0;
+      virtual void onClose() {}
 
       // Called during the update loop for frame-dependent context actions
       virtual void updateContext( float ) {}
-
 
 //////////////////////////////////////////////////////////////////////////////// 
     public:
@@ -97,12 +105,15 @@ namespace Regolith
 //////////////////////////////////////////////////////////////////////////////// 
       // Context Stack functions
 
+      // When this function returns true this context is flagged for removal from the context stack.
+      bool closed() const { return _closed; }
+
       // Return the state of the pause flag
       bool isPaused() const { return _paused; }
 
       // Interface for context stack
-      void startContext() { this->onStart(); }
-      void stopContext() { this->onStop(); }
+      void startContext() { this->onStart(); this->setClosed( false ); }
+      void stopContext() { this->onStop(); this->setClosed( true ); }
       void pauseContext();
       void resumeContext();
 

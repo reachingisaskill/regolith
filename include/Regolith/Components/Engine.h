@@ -46,7 +46,7 @@ namespace Regolith
       DataHandler* _currentDataHandler;
 
     protected:
-      void performStackOperations();
+      bool performStackOperations();
 
     public:
       // Create the engine with the required references in place

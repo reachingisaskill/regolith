@@ -31,6 +31,7 @@ namespace Regolith
     _theFocus(),
     _theCollision(),
     _theCamera(),
+    _closed( false ),
     _paused( false ),
     _pauseable( false ),
     _layers( "Context Layers" )
