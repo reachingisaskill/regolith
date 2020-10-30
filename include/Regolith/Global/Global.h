@@ -13,8 +13,8 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Global macro definitions
 
-// Uncomment this to tell components that it will be running inside valgrind (more reliable thread management).
-#define REGOLITH_VALGRIND_BUILD
+// Uncomment this to tell components that it will be running inside valgrind (more reliable - but slower - thread management).
+#define REGOLITH_VALGRIND_BUILD 1
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

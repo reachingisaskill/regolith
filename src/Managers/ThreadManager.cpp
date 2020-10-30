@@ -78,6 +78,7 @@ namespace Regolith
   void ThreadManager::startAll()
   {
     // Wait for all the threads to be in a Waiting state
+    INFO_LOG( "ThreadManager::startAll : Waiting for threads to be intialised." );
     waitThreadStatus( ThreadStatus::Waiting );
 
     if ( ErrorFlag )
@@ -87,14 +88,17 @@ namespace Regolith
     }
 
     // Set the start condition under lock
+    INFO_LOG( "ThreadManager::startAll : Setting the start condition variable" );
     {
       std::lock_guard<std::mutex> lk( StartCondition.mutex );
       StartCondition.data = true;
     }
 
-    // Notify the start
+    // Notify the start and pause briefly. Seems to help the locks become aquired in a reliable way
     StartCondition.variable.notify_all();
+    std::this_thread::sleep_for( std::chrono::milliseconds( 5 ) );
 
+    INFO_LOG( "ThreadManager::startAll : Waiting for all threads to be in the running state" );
     // Only return once all the threads are running (or broken!)
     waitThreadStatus( ThreadStatus::Running );
   }
