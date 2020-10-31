@@ -66,22 +66,22 @@ namespace Regolith
       ProxyMap< ContextLayer > _layers;
 
 
-      // Only the base class has access to this. No funny business!
-      // Sets the closed flag for the engine to pop it from the context stack.
-      void setClosed( bool status ) { _closed = status; }
-
-
 //////////////////////////////////////////////////////////////////////////////// 
     protected:
       // Set the pauseable flag
       void setPauseable( bool p ) { _pauseable = p; }
 
       // Hooks for context state changes
-      virtual void onStart() = 0;
-      virtual void onStop() = 0;
+      virtual void onStart() { this->setClosed( false ); }
+      virtual void onStop() { this->setClosed( true ); }
       virtual void onPause() = 0;
       virtual void onResume() = 0;
       virtual void onClose() {}
+
+
+      // Sets the closed flag for the engine to pop it from the context stack.
+      // Once this is set to true the context MUST be in state to be deleted. Otherwise data will be lost.
+      void setClosed( bool status ) { _closed = status; }
 
       // Called during the update loop for frame-dependent context actions
       virtual void updateContext( float ) {}
@@ -112,8 +112,8 @@ namespace Regolith
       bool isPaused() const { return _paused; }
 
       // Interface for context stack
-      void startContext() { this->onStart(); this->setClosed( false ); }
-      void stopContext() { this->onStop(); this->setClosed( true ); }
+      void startContext() { this->onStart(); }
+      void stopContext() { this->onStop(); }
       void pauseContext();
       void resumeContext();
 

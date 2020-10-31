@@ -31,6 +31,8 @@ namespace Regolith
   {
   }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Running control functions
 
   void Engine::run()
   {
@@ -39,7 +41,7 @@ namespace Regolith
     _pause = false;
 
     // Synchronise access to the contexts
-    std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex, std::defer_lock );
+    std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex );
 
 
     DEBUG_LOG( "Engine::run : Engine now running" );
@@ -49,20 +51,22 @@ namespace Regolith
       while ( ! quitFlag )
       {
 
-        // Handler global events without a context
+        // Handler global events without a context. Required to be able to leave the pause state.
         _inputManager.handleEvents( nullptr );
 
 
         // Reset the timer while paused
         _frameTimer.lap();
 
-        while ( ! _pause )
+        while ( (! _pause) && performStackOperations() )
         {
+          // Release the context stack
+          renderLock.unlock();
+
 
           DEBUG_LOG( "Engine::run : ------ EVENTS   ------" );
           // Handle events globally and context-specific actions using the contexts input handler
           _inputManager.handleEvents( _contextStack.front()->inputHandler() );
-
 
 
           // Lock access to the context stack for updating
@@ -74,8 +78,6 @@ namespace Regolith
 #endif
 
           DEBUG_LOG( "Engine::run : ------ CONTEXTS ------" );
-
-
           float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
 
           // Iterate through all the visible contexts and update as necessary
@@ -89,18 +91,6 @@ namespace Regolith
               this_context->resolveCollisions();
             }
           }
-
-
-          // Stack operations must happen separately to the update loop so that the context stack pointers are never invalidated.
-          if ( ! _stackOperationQueue.empty() )
-          {
-            performStackOperations();
-          }
-
-
-
-          // Release the context stack
-          renderLock.unlock();
         }
       }
 
@@ -124,62 +114,6 @@ namespace Regolith
       }
       FAILURE_LOG( "Engine::run : Standard Exception thrown from Engine Processing Thread." );
       std::cerr << ex.what();
-    }
-  }
-
-
-  void Engine::renderTextures( DataHandler* handler )
-  {
-    // Block current thread while the an existing DataHandler is rendered
-    UniqueLock lock( _renderQueueMutex, std::defer_lock );
-    while ( true )
-    {
-      lock.lock();
-      if ( _currentDataHandler == nullptr )
-      {
-        break;
-      }
-      lock.unlock();
-
-      std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
-    }
-
-    DEBUG_STREAM << "Engine::renderTextures : New data handler @ " << handler;
-    _currentDataHandler = handler;
-
-    lock.unlock();
-  }
-
-
-  void Engine::registerEvents( InputManager& manager )
-  {
-    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
-    manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
-    manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_RESUME );
-  }
-
-
-  void Engine::eventAction( const RegolithEvent& event, const SDL_Event& )
-  {
-    switch( event )
-    {
-      case REGOLITH_EVENT_QUIT :
-        _pause = true;
-        Manager::getInstance()->quit();
-        break;
-
-      case REGOLITH_EVENT_ENGINE_PAUSE :
-        INFO_LOG( "Engine::eventAction : Pausing Engine" );
-        _pause = true;
-        break;
-
-      case REGOLITH_EVENT_ENGINE_RESUME :
-        INFO_LOG( "Engine::eventAction : Resuming Engine" );
-        _pause = false;
-        break;
-
-      default :
-        break;
     }
   }
 
@@ -271,6 +205,65 @@ namespace Regolith
     else
     {
       return true;
+    }
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////V
+
+
+  void Engine::renderTextures( DataHandler* handler )
+  {
+    // Block current thread while the an existing DataHandler is rendered
+    UniqueLock lock( _renderQueueMutex, std::defer_lock );
+    while ( true )
+    {
+      lock.lock();
+      if ( _currentDataHandler == nullptr )
+      {
+        break;
+      }
+      lock.unlock();
+
+      std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
+    }
+
+    DEBUG_STREAM << "Engine::renderTextures : New data handler @ " << handler;
+    _currentDataHandler = handler;
+
+    lock.unlock();
+  }
+
+
+  void Engine::registerEvents( InputManager& manager )
+  {
+    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
+    manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
+    manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_RESUME );
+  }
+
+
+  void Engine::eventAction( const RegolithEvent& event, const SDL_Event& )
+  {
+    switch( event )
+    {
+      case REGOLITH_EVENT_QUIT :
+        _pause = true;
+        Manager::getInstance()->quit();
+        break;
+
+      case REGOLITH_EVENT_ENGINE_PAUSE :
+        INFO_LOG( "Engine::eventAction : Pausing Engine" );
+        _pause = true;
+        break;
+
+      case REGOLITH_EVENT_ENGINE_RESUME :
+        INFO_LOG( "Engine::eventAction : Resuming Engine" );
+        _pause = false;
+        break;
+
+      default :
+        break;
     }
   }
 

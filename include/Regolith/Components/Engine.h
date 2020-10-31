@@ -6,6 +6,7 @@
 #include "Regolith/Architecture/Component.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/GamePlay/Timer.h"
+#include "Regolith/Utilities/Condition.h"
 
 #include <mutex>
 
@@ -21,14 +22,21 @@ namespace Regolith
 
   class Engine : public Component
   {
+////////////////////////////////////////////////////////////////////////////////
+    // Friend declarations
     friend void engineRenderingThread();
 
+////////////////////////////////////////////////////////////////////////////////
+    // Sub classes and types
     public:
       class StackOperation;
 
     private:
       typedef std::queue< StackOperation > StackOperationQueue;
 
+
+////////////////////////////////////////////////////////////////////////////////
+    // Class members
     private:
       InputManager& _inputManager;
       SDL_Color& _defaultColor;
@@ -39,6 +47,7 @@ namespace Regolith
       ContextStack::reverse_iterator _visibleStackStart;
       ContextStack::reverse_iterator _visibleStackEnd;
       Timer _frameTimer;
+
       bool _pause;
 
       std::mutex _renderQueueMutex;
@@ -46,6 +55,7 @@ namespace Regolith
       DataHandler* _currentDataHandler;
 
     protected:
+      // Function which checks the current context stack and performs the queued operations
       bool performStackOperations();
 
     public:

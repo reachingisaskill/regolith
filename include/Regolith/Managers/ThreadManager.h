@@ -4,10 +4,11 @@
 
 #include "Regolith/Global/Global.h"
 
+#include "Regolith/Utilities/Condition.h"
+
 #include <thread>
 #include <mutex>
 #include <atomic>
-#include <condition_variable>
 
 
 namespace Regolith
@@ -23,21 +24,6 @@ namespace Regolith
 
   // Context Manager loading thread
   void engineRenderingThread();
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Condition structure for storing condition variables
-
-  template < class DATA >
-  struct Condition
-  {
-    std::condition_variable variable;
-    std::mutex mutex;
-    DATA data;
-
-    Condition() {}
-    explicit Condition( DATA d ) : data( d ) {}
-  };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
