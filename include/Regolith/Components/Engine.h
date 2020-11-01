@@ -42,7 +42,8 @@ namespace Regolith
       SDL_Color& _defaultColor;
       ContextStack _contextStack;
 
-      StackOperationQueue _stackOperationQueue;
+      Context* _openContext;
+      Context* _openContextGroup;
 
       ContextStack::reverse_iterator _visibleStackStart;
       ContextStack::reverse_iterator _visibleStackEnd;
@@ -75,8 +76,11 @@ namespace Regolith
       // Returns a pointer to the current context with focus
       Context* currentContext() { return _contextStack.front(); }
 
-      // Pushes a stack operation to the queue to be excecuted after the window has been renderered.
-      void stackOperation( StackOperation op ) { _stackOperationQueue.push( op ); }
+      // Tells the engine to push the context pointer to the top of the stack
+      void openContext( Context* c ) { _openContext = c; }
+
+      // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
+      void openContextGroup( Context* c ) { _openContextGroup = c; }
 
 
       // Fulfill the interface for a component
@@ -86,31 +90,33 @@ namespace Regolith
       // Interfaces for input
       virtual void eventAction( const RegolithEvent&, const SDL_Event& );
 
-
-
-      /*
-       * Stack operation class.
-       * This allows a queue of operations to be created in parallel to the update/render loop.
-       * The operations are cached until they can be safely performed without accidentally invalidating the
-       * stack iterators.
-       */
-      struct StackOperation
-      {
-        enum Operation : char
-        {
-          POP,
-          PUSH,
-          RESET,
-          TRANSFER
-        };
-
-        Context* context;
-        Operation operation;
-
-        StackOperation( Operation op, Context* c = nullptr ) : context( c ), operation( op ) {}
-      };
   };
   
+
+
+
+//      /*
+//       * Stack operation class.
+//       * This allows a queue of operations to be created in parallel to the update/render loop.
+//       * The operations are cached until they can be safely performed without accidentally invalidating the
+//       * stack iterators.
+//       */
+//      struct StackOperation
+//      {
+//        enum Operation : char
+//        {
+//          POP,
+//          PUSH,
+//          RESET,
+//          TRANSFER
+//        };
+//
+//        Context* context;
+//        Operation operation;
+//
+//        StackOperation( Operation op, Context* c = nullptr ) : context( c ), operation( op ) {}
+//      };
+
 }
 
 #endif // REGOLITH_COMPONENTS_ENGINE_H_

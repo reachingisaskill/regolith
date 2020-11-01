@@ -218,6 +218,24 @@ namespace Regolith
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
+  // Regoith Event Handling
+
+  void Context::registerEvents( InputManager& manager )
+  {
+    INFO_LOG( "Context::registerEvents : Base context class registering quit event" );
+    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
+  }
+
+
+  void Context::eventAction( const RegolithEvent& , const SDL_Event& )
+  {
+    INFO_LOG( "Context::eventAction : Base context class quit received" );
+    // Only registered one event - we know its time to quit!
+    this->stopContext();
+  }
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////// 
   // Context configuration
 
   void Context::configure( Json::Value& json_data, ContextGroup& handler )

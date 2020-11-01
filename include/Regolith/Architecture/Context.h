@@ -76,7 +76,6 @@ namespace Regolith
       virtual void onStop() { this->setClosed( true ); }
       virtual void onPause() = 0;
       virtual void onResume() = 0;
-      virtual void onClose() {}
 
 
       // Sets the closed flag for the engine to pop it from the context stack.
@@ -150,6 +149,16 @@ namespace Regolith
 
       // Return a layer proxy so that it may be referenced when spawining objects
       ContextLayer& getLayer( std::string );
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Component interface - handle global regolith events
+
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager& ) override;
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override;
 
   };
 

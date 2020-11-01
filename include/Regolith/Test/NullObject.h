@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_GAMEOBJECTS_NULL_OBJECT_H_
-#define REGOLITH_GAMEOBJECTS_NULL_OBJECT_H_
+#ifndef REGOLITH_TEST_NULL_OBJECT_H_
+#define REGOLITH_TEST_NULL_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
@@ -30,5 +30,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_GAMEOBJECTS_NULL_OBJECT_H_
+#endif // REGOLITH_TEST_NULL_OBJECT_H_
 

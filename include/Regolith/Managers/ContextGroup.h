@@ -15,7 +15,6 @@
 
 namespace Regolith
 {
-  class LoadScreen;
   class PhysicalObject;
   class Context;
 
@@ -43,7 +42,7 @@ namespace Regolith
       std::string _fileName;
 
       // Pointer to the load screen
-      Proxy<LoadScreen*> _loadScreen;
+      Proxy< Context* > _loadScreen;
 
       // List of the contexts controlled by this handler
       ProxyMap< Context* > _contexts;
@@ -87,7 +86,7 @@ namespace Regolith
       void unload();
 
       // Return the ID of the load screen
-      LoadScreen* getLoadScreen() const { return *_loadScreen; }
+      Context* getLoadScreen() const { return *_loadScreen; }
 
       // Set the entry point when this context group loads
       void setEntryPoint( Proxy<Context*> c ) { _entryPoint = c; }

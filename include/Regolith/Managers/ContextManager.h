@@ -68,14 +68,12 @@ namespace Regolith
       // Return a pointer to a specific context group
       Proxy<ContextGroup*> requestContextGroup( std::string name ) { return _contextGroups.request( name ); }
 
-      // Set a specific context group to load - Signals should ONLY use this interface!
+      // Set a specific context group to load
       void setNextContextGroup( ContextGroup* );
 
       // Signal the manager to start the loading process. Should only be called by a global context!
       void loadNextContextGroup();
 
-      // Tell the context manager that the loadscreen is finished and the first context in the new group can start
-      void startContextGroup();
 
       // Return a pointer to the currently loaded context group
       ContextGroup* getCurrentContextGroup() { return _currentContextGroup; }

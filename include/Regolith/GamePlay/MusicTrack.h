@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_GAME_OBJECTS_MUSIC_TRACK_H_
-#define REGOLITH_GAME_OBJECTS_MUSIC_TRACK_H_
+#ifndef REGOLITH_GAMEPLAY_MUSIC_TRACK_H_
+#define REGOLITH_GAMEPLAY_MUSIC_TRACK_H_
 
 #include "Regolith/Architecture/GameObject.h"
 #include "Regolith/GamePlay/Noises.h"
@@ -30,5 +30,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_GAME_OBJECTS_MUSIC_TRACK_H_
+#endif // REGOLITH_GAMEPLAY_MUSIC_TRACK_H_
 

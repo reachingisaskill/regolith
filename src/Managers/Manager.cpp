@@ -3,8 +3,8 @@
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Components/Window.h"
 
-#include "Regolith/Contexts/NullContext.h"
-#include "Regolith/GameObjects/NullObject.h"
+#include "Regolith/Test/NullContext.h"
+#include "Regolith/Test/NullObject.h"
 
 //#include "Regolith/GameObjects/MusicTrack.h"
 //#include "Regolith/GameObjects/SimpleSprite.h"
@@ -138,28 +138,19 @@ namespace Regolith
   void Manager::openContext( Context* c )
   {
     DEBUG_LOG( "Manager::openContext : Opening Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::PUSH, c ) );
+    _theEngine.openContext( c );
   }
 
 
-  void Manager::transferContext( Context* c )
+  void Manager::openContextGroup( ContextGroup* cg )
   {
-    DEBUG_LOG( "Manager::transferContext : Transferring Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::TRANSFER, c ) );
-  }
+    DEBUG_LOG( "Manager::openContextGroup : Opening Context Group" );
 
+    // Prepare the context manager
+    _theContexts.setNextContextGroup( cg );
 
-  void Manager::closeContext()
-  {
-    DEBUG_LOG( "Manager::closeContext : Closing Current Context" );
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::POP ) );
-  }
-
-
-  void Manager::setContextStack( Context* c )
-  {
-    DEBUG_STREAM << "Manager::setContextStack : Resetting Context Stack @ " << c;
-    _theEngine.stackOperation( Engine::StackOperation( Engine::StackOperation::RESET, c ) );
+    // Tell the engine to queue the load screen for the context group
+    _theEngine.openContextGroup( (Context*)cg->getLoadScreen() );
   }
 
 
@@ -178,7 +169,7 @@ namespace Regolith
 
     // Reset the stack to the first context
     INFO_LOG( "Manager::run : Loading the first context" );
-    setContextStack( _theContexts.getCurrentContextGroup()->getEntryPoint() );
+    this->openContext( _theContexts.getCurrentContextGroup()->getEntryPoint() );
 
 
     // Start the engine!

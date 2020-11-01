@@ -1,10 +1,9 @@
 
-#ifndef REGOLITH_CONTEXTS_NULL_H_
-#define REGOLITH_CONTEXTS_NULL_H_
+#ifndef REGOLITH_TEST_NULL_H_
+#define REGOLITH_TEST_NULL_H_
 
 #include "Regolith/Architecture/Context.h"
 #include "Regolith/Architecture/Interactable.h"
-#include "Regolith/GameObjects/MusicTrack.h"
 
 
 namespace Regolith
@@ -20,7 +19,7 @@ namespace Regolith
 
     protected:
       virtual void onStart() override;
-      virtual void onStop() override {}
+      virtual void onStop() override;
       virtual void onPause() override {}
       virtual void onResume() override {}
 
@@ -63,14 +62,14 @@ namespace Regolith
       // Requirements for a component - event handling
 
       // Register game-wide events with the manager
-      virtual void registerEvents( InputManager& ) override {}
+//      virtual void registerEvents( InputManager& ) override;
 
       // Regolith events
-      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
+//      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override;
 
   };
 
 }
 
-#endif // REGOLITH_CONTEXTS_NULL_H_
+#endif // REGOLITH_TEST_NULL_H_
 

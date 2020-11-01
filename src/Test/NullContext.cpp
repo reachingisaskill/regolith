@@ -1,5 +1,5 @@
 
-#include "Regolith/Contexts/NullContext.h"
+#include "Regolith/Test/NullContext.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -40,6 +40,9 @@ namespace Regolith
 
   void NullContext::onStart()
   {
+    // Make sure this context stays open
+    this->setClosed( false );
+
     if ( _testHandler != nullptr )
     {
       INFO_LOG( "NullContext::onStart : Reloading test data handler" );
@@ -47,6 +50,14 @@ namespace Regolith
       Manager::getInstance()->getDataManager().load( _testHandler );
     }
   }
+
+
+  void NullContext::onStop()
+  {
+    // This context is now closed
+    this->setClosed( true );
+  }
+
 
 }
 

@@ -194,16 +194,15 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Change Signal
 
-  class ChangeContextSignal : public Signal
+  class OpenContextSignal : public Signal
   {
     private:
       Proxy<Context*> _theContext;
-      Engine::StackOperation::Operation _operation;
 
     public :
       // Con/Destruction
-      ChangeContextSignal();
-      virtual ~ChangeContextSignal() {}
+      OpenContextSignal();
+      virtual ~OpenContextSignal() {}
 
       void trigger() const;
 
@@ -211,22 +210,22 @@ namespace Regolith
 
       virtual void validate() const override;
 
-      virtual Signal* clone() const override { return new ChangeContextSignal( *this ); }
+      virtual Signal* clone() const override { return new OpenContextSignal( *this ); }
   };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Group Change Signal
 
-  class ChangeContextGroupSignal : public Signal
+  class OpenContextGroupSignal : public Signal
   {
     private:
       Proxy<ContextGroup*> _theContextGroup;
 
     public :
       // Con/Destruction
-      ChangeContextGroupSignal();
-      virtual ~ChangeContextGroupSignal() {}
+      OpenContextGroupSignal();
+      virtual ~OpenContextGroupSignal() {}
 
       void trigger() const;
 
@@ -234,7 +233,7 @@ namespace Regolith
 
       virtual void validate() const override;
 
-      virtual Signal* clone() const override { return new ChangeContextGroupSignal( *this ); }
+      virtual Signal* clone() const override { return new OpenContextGroupSignal( *this ); }
   };
 
 

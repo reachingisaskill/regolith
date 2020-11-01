@@ -210,13 +210,7 @@ namespace Regolith
       void openContext( Context* );
 
       // Open a new context in place of the current one
-      void transferContext( Context* );
-
-      // Closes and then pops the context on the top of the stack
-      void closeContext();
-
-      // Resets the context stack to the provided context
-      void setContextStack( Context* );
+      void openContextGroup( ContextGroup* );
 
 
       ////////////////////////////////////////////////////////////////////////////////

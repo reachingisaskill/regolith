@@ -2,7 +2,6 @@
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
-#include "Regolith/Contexts/LoadScreen.h"
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/Noisy.h"
 
@@ -156,6 +155,7 @@ namespace Regolith
       try
       {
         Context* cont = cont_factory.build( context_data, *this );
+        cont->registerEvents( Manager::getInstance()->getInputManager() );
         _contexts.set( cont_name, cont );
       }
       catch ( Exception& ex )

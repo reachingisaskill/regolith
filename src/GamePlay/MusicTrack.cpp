@@ -1,5 +1,5 @@
 
-#include "Regolith/GameObjects/MusicTrack.h"
+#include "Regolith/GamePlay/MusicTrack.h"
 #include "Regolith/Utilities/JsonValidation.h"
 #include "Regolith/Managers/DataHandler.h"
 

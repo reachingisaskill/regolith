@@ -1,5 +1,5 @@
 
-#include "Regolith/GameObjects/NullObject.h"
+#include "Regolith/Test/NullObject.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/GamePlay/Camera.h"
 

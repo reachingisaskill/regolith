@@ -165,11 +165,6 @@ namespace Regolith
     setProgress( 0.0 );
 
     _nextContextGroup = cg;
-
-    Context* load_screen = (Context*)_nextContextGroup->getLoadScreen();
-
-    DEBUG_STREAM << "Load screen start @ " << load_screen;
-    Manager::getInstance()->setContextStack( load_screen );
   }
 
 
@@ -184,13 +179,6 @@ namespace Regolith
 
     contextUpdate.variable.notify_all();
   }
-
-
-  void ContextManager::startContextGroup()
-  {
-    Manager::getInstance()->setContextStack( _currentContextGroup->getEntryPoint() );
-  }
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

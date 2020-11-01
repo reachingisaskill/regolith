@@ -206,76 +206,33 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Change Signal
 
-  ChangeContextSignal::ChangeContextSignal() :
-    _theContext(),
-    _operation()
+  OpenContextSignal::OpenContextSignal() :
+    _theContext()
   {
   }
 
 
-  void ChangeContextSignal::trigger() const
+  void OpenContextSignal::trigger() const
   {
-    switch ( _operation )
-    {
-      case Engine::StackOperation::POP :
-        Manager::getInstance()->closeContext();
-        break;
-
-      case Engine::StackOperation::PUSH :
-        Manager::getInstance()->openContext( *_theContext );
-        break;
-
-      case Engine::StackOperation::RESET :
-        Manager::getInstance()->setContextStack( *_theContext );
-        break;
-
-      case Engine::StackOperation::TRANSFER :
-        Manager::getInstance()->transferContext( *_theContext );
-        break;
-    }
+    DEBUG_LOG( "OpenContextSignal::trigger : Opening context" );
+    Manager::getInstance()->openContext( *_theContext );
   }
 
 
-  void ChangeContextSignal::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& )
+  void OpenContextSignal::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& )
   {
-    INFO_LOG( " Change Context Signal" );
     Utilities::validateJson( json_data, "context_name", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "operation", Utilities::JSON_TYPE_STRING );
+    _theContext = cg.requestContext( json_data["context_name"].asString() );
 
-    Engine::StackOperation::Operation op;
-    Proxy<Context*> context;
-
-    if ( json_data["operation"].asString() == "open" )
-    {
-      op = Engine::StackOperation::PUSH;
-      context = cg.requestContext( json_data["context_name"].asString() );
-    }
-    if ( json_data["operation"].asString() == "close" )
-    {
-      op = Engine::StackOperation::POP;
-      // No context name needed.
-    }
-    if ( json_data["operation"].asString() == "transfer" )
-    {
-      op = Engine::StackOperation::TRANSFER;
-      context = cg.requestContext( json_data["context_name"].asString() );
-    }
-    if ( json_data["operation"].asString() == "reset" )
-    {
-      op = Engine::StackOperation::RESET;
-      context = cg.requestContext( json_data["context_name"].asString() );
-    }
-
-    _operation = op;
-    _theContext = context;
+    INFO_STREAM << "OpenContextSignal::configure : Registered context with name: " << json_data["context_name"].asString();
   }
 
 
-  void ChangeContextSignal::validate() const
+  void OpenContextSignal::validate() const
   {
     if ( ! _theContext || ( (*_theContext) == nullptr ) )
     {
-      Exception ex( "ChangeContextSignal::validate() const", "Specified context was not configured." );
+      Exception ex( "OpenContextSignal::validate() const", "Specified context was not configured." );
       ex.addDetail( "Context Name", _theContext.getName() );
       throw ex;
     }
@@ -285,33 +242,33 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Group Change Signal
 
-  ChangeContextGroupSignal::ChangeContextGroupSignal() :
+  OpenContextGroupSignal::OpenContextGroupSignal() :
     _theContextGroup()
   {
   }
 
 
-  void ChangeContextGroupSignal::trigger() const
+  void OpenContextGroupSignal::trigger() const
   {
-    DEBUG_STREAM << "CHANGE CONTEXT GROUP : " << _theContextGroup.getName() << " @ " << *_theContextGroup;
+    DEBUG_LOG( "OpenContextGroupSignal::trigger : Opening context group" );
     Manager::getInstance()->getContextManager().setNextContextGroup( *_theContextGroup );
   }
 
 
-  void ChangeContextGroupSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
+  void OpenContextGroupSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
-    INFO_LOG( " Change Context Group Signal" );
     Utilities::validateJson( json_data, "context_group", Utilities::JSON_TYPE_STRING );
-
     _theContextGroup = Manager::getInstance()->getContextManager().requestContextGroup( json_data["context_group"].asString() );
+
+    INFO_STREAM << "OpenContextGroupSignal::configure : Registered context group with name : " << json_data["context_group"].asString();
   }
 
 
-  void ChangeContextGroupSignal::validate() const
+  void OpenContextGroupSignal::validate() const
   {
     if ( ! _theContextGroup || ( (*_theContextGroup) == nullptr ) )
     {
-      Exception ex( "ChangeContextGroupSignal::validate() const", "Specified context group was not configured." );
+      Exception ex( "OpenContextGroupSignal::validate() const", "Specified context group was not configured." );
       ex.addDetail( "Context Group Name", _theContextGroup.getName() );
       throw ex;
     }

@@ -18,6 +18,8 @@ namespace Regolith
     _inputManager( input ),
     _defaultColor( color ),
     _contextStack(),
+    _openContext( nullptr ),
+    _openContextGroup( nullptr ),
     _frameTimer(),
     _pause( false ),
     _renderQueueMutex(),
@@ -48,52 +50,62 @@ namespace Regolith
 
     try
     {
-      while ( ! quitFlag )
+
+      // Handler global events without a context.
+      _inputManager.handleEvents( nullptr );
+
+      while ( performStackOperations() )
       {
+        // Release the context stack
+        renderLock.unlock();
 
-        // Handler global events without a context. Required to be able to leave the pause state.
-        _inputManager.handleEvents( nullptr );
+
+        DEBUG_LOG( "Engine::run : ------ EVENTS   ------" );
+        // Handle events globally and context-specific actions using the contexts input handler
+        _inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
 
-        // Reset the timer while paused
-        _frameTimer.lap();
-
-        while ( (! _pause) && performStackOperations() )
+        // Stop updating things while we're paused
+        // Doesn't block the rendering thread so we can still load stuff and draw the window.
+        while ( _pause )
         {
-          // Release the context stack
-          renderLock.unlock();
+          // Put it to sleep. No point doing nothing really fast!
+          std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
+
+          // Handler global events without a context. Required to be able to leave the pause state.
+          _inputManager.handleEvents( nullptr );
+
+          // Reset the timer while paused
+          _frameTimer.lap();
+        }
 
 
-          DEBUG_LOG( "Engine::run : ------ EVENTS   ------" );
-          // Handle events globally and context-specific actions using the contexts input handler
-          _inputManager.handleEvents( _contextStack.front()->inputHandler() );
-
-
-          // Lock access to the context stack for updating
+        // Lock access to the context stack for updating
 #ifdef REGOLITH_VALGRIND_BUILD
-          std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
-          renderLock.lock();
+        std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+        renderLock.lock();
 #else
-          while( ! renderLock.try_lock() );
+        while( ! renderLock.try_lock() );
 #endif
 
-          DEBUG_LOG( "Engine::run : ------ CONTEXTS ------" );
-          float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
+        DEBUG_LOG( "Engine::run : ------ CONTEXTS ------" );
+        float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
 
-          // Iterate through all the visible contexts and update as necessary
-          for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
+        // Iterate through all the visible contexts and update as necessary
+        for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
+        {
+          Context* this_context = (*context_it);
+          if ( ! this_context->isPaused() )
           {
-            Context* this_context = (*context_it);
-            if ( ! this_context->isPaused() )
-            {
-              this_context->update( time );
-              this_context->step( time );
-              this_context->resolveCollisions();
-            }
+            this_context->update( time );
+            this_context->step( time );
+            this_context->resolveCollisions();
           }
         }
       }
 
+      // Release the context stack
+      renderLock.unlock();
     }
     catch ( Exception& ex )
     {
@@ -120,92 +132,79 @@ namespace Regolith
 
   bool Engine::performStackOperations()
   {
-    if ( ! _stackOperationQueue.empty() )
+    // Flag that we need to update the visible stack pointers
+    bool modified = false;
+
+
+    while ( ( ! _contextStack.empty() ) && _contextStack.front()->closed() )
     {
+      modified = true;
 
-      while ( ! _stackOperationQueue.empty() )
+      DEBUG_LOG( "Engine::performStackOperations : Popping closed context" );
+      // Pop the context
+      _contextStack.pop_front();
+    }
+
+
+    // If the stack is empty and a new group is queued, we load that.
+    if ( _contextStack.empty() && _openContextGroup != nullptr )
+    {
+      modified = true;
+
+      DEBUG_LOG( "Engine::performStackOperations : Push context from new context group" );
+      // Push context pointer onto the empty stack
+      _contextStack.push_front( _openContextGroup );
+      _openContextGroup = nullptr;
+
+      // Trigger the on start hooks
+      _contextStack.front()->startContext();
+    }
+
+
+    // This is a loop because contexts can open children as soon as they are started.
+    while ( _openContext != nullptr )
+    {
+      modified = true;
+
+      DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
+      // Push onto stack
+      _contextStack.push_front( _openContext );
+      _openContext = nullptr;
+      // Trigger the start hooks
+      _contextStack.front()->startContext();
+    }
+
+
+    if ( ! _contextStack.empty() )
+    {
+      if ( modified ) // Reset the visible stack pointers
       {
-        DEBUG_STREAM << "Engine::performStackOperations : " << _stackOperationQueue.size() << " Operations Remaining";
-        StackOperation& sop = _stackOperationQueue.front();
-
-        switch ( sop.operation )
+        DEBUG_LOG( "Engine::performStackOperations : Resetting visible stack iterators" );
+        // Set the visiblility start pointer. 
+        // Start at the end and work backwards until either:
+        //  - We hit the beginning of the stack, OR
+        //  - One of the contexts overrides all the previous ones.
+        _visibleStackStart = --_contextStack.rend();
+        while ( ( _visibleStackStart != _contextStack.rbegin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
         {
-          case StackOperation::PUSH :
-            DEBUG_LOG( "Engine::performStackOperations : Opening New Context" );
-            if ( ! _contextStack.empty() )
-            {
-              _contextStack.front()->pauseContext();
-            }
-            _contextStack.push_front( sop.context );
-            _contextStack.front()->startContext();
-            break;
-
-          case StackOperation::POP :
-            DEBUG_LOG( "Engine::performStackOperations : Closing Current Context" );
-            if ( ! _contextStack.empty() )
-            {
-              _contextStack.front()->stopContext();
-              _contextStack.pop_front();
-              if ( ! _contextStack.empty() )
-              {
-                DEBUG_LOG( "Engine::performStackOperations : Returning focus" );
-                _contextStack.front()->resumeContext();
-              }
-            }
-            break;
-
-          case StackOperation::RESET :
-            while ( ! _contextStack.empty() )
-            {
-              _contextStack.front()->resumeContext();
-              _contextStack.front()->stopContext();
-              _contextStack.pop_front();
-            }
-            DEBUG_LOG( "Engine::performStackOperations : Loading new base context" );
-            _contextStack.push_front( sop.context );
-            _contextStack.front()->startContext();
-            break;
-
-          case StackOperation::TRANSFER :
-            DEBUG_LOG( "Engine::performStackOperations : Transferring Context" );
-            if ( ! _contextStack.empty() )
-            {
-              _contextStack.front()->stopContext();
-              _contextStack.pop_front();
-            }
-            _contextStack.push_front( sop.context );
-            _contextStack.front()->startContext();
-            break;
+          --_visibleStackStart;
         }
 
-        _stackOperationQueue.pop();
+        // Set the end iterator
+        _visibleStackEnd = _contextStack.rend();
+
       }
 
-      // Set the visiblility start pointer. 
-      // Start at the end and work backwards until either:
-      //  - We hit the beginning of the stack, OR
-      //  - One of the contexts overrides all the previous ones.
-      _visibleStackStart = --_contextStack.rend();
-      while ( ( _visibleStackStart != _contextStack.rbegin() ) && ( ! (*_visibleStackStart)->overridesPreviousContext() ) )
-      {
-        --_visibleStackStart;
-      }
-
-      // Set the end iterator
-      _visibleStackEnd = _contextStack.rend();
-    }
-
-
-    if ( _contextStack.empty() )
-    {
-      Manager::getInstance()->raiseEvent( REGOLITH_EVENT_QUIT );
-      _pause = true;
-      return false;
-    }
-    else
-    {
       return true;
     }
+    else // Stack is empty! Time to abandon ship
+    {
+      // Reset these anyway so the rendering thread doesnt fall over.
+      _visibleStackStart = _contextStack.rbegin();
+      _visibleStackEnd = _contextStack.rend();
+      return false;
+    }
+
   }
 
 
@@ -237,7 +236,7 @@ namespace Regolith
 
   void Engine::registerEvents( InputManager& manager )
   {
-    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
+//    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
     manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
     manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_RESUME );
   }
@@ -247,10 +246,10 @@ namespace Regolith
   {
     switch( event )
     {
-      case REGOLITH_EVENT_QUIT :
-        _pause = true;
-        Manager::getInstance()->quit();
-        break;
+//      case REGOLITH_EVENT_QUIT :
+//        _pause = true;
+//        Manager::getInstance()->quit();
+//        break;
 
       case REGOLITH_EVENT_ENGINE_PAUSE :
         INFO_LOG( "Engine::eventAction : Pausing Engine" );
