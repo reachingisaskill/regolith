@@ -228,17 +228,6 @@ namespace Regolith
   }
 
 
-  void OpenContextSignal::validate() const
-  {
-    if ( ! _theContext || ( (*_theContext) == nullptr ) )
-    {
-      Exception ex( "OpenContextSignal::validate() const", "Specified context was not configured." );
-      ex.addDetail( "Context Name", _theContext.getName() );
-      throw ex;
-    }
-  }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Group Change Signal
 
@@ -261,17 +250,6 @@ namespace Regolith
     _theContextGroup = Manager::getInstance()->getContextManager().requestContextGroup( json_data["context_group"].asString() );
 
     INFO_STREAM << "OpenContextGroupSignal::configure : Registered context group with name : " << json_data["context_group"].asString();
-  }
-
-
-  void OpenContextGroupSignal::validate() const
-  {
-    if ( ! _theContextGroup || ( (*_theContextGroup) == nullptr ) )
-    {
-      Exception ex( "OpenContextGroupSignal::validate() const", "Specified context group was not configured." );
-      ex.addDetail( "Context Group Name", _theContextGroup.getName() );
-      throw ex;
-    }
   }
 
 }

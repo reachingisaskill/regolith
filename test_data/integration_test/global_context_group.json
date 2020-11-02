@@ -1,7 +1,7 @@
 {
   "load_screen" : null,
 
-  "entry_point" : "null_context",
+  "entry_point" : "context_0",
 
   "data_handlers" : 
   {
@@ -17,7 +17,9 @@
 
   "contexts" :
   {
-    "null_context" : "test_data/integration_test/null_context.json"
+    "context_0" : "test_data/integration_test/context_0.json",
+    "context_child" : "test_data/integration_test/context_child.json",
+    "load_screen" : "test_data/integration_test/load_screen.json"
   }
 
 }

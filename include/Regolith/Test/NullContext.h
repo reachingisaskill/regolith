@@ -16,6 +16,9 @@ namespace Regolith
   {
     private:
       DataHandler* _testHandler;
+      float _cg_load_delay;
+      Proxy< ContextGroup* > _cg_load;
+      float _timer;
 
     protected:
       virtual void onStart() override;
@@ -23,7 +26,7 @@ namespace Regolith
       virtual void onPause() override {}
       virtual void onResume() override {}
 
-      virtual void updateContext( float ) override {}
+      virtual void updateContext( float ) override;
 
     public:
       // Trivial Constructor
@@ -35,8 +38,6 @@ namespace Regolith
 
       // Trivial configure - call the base-class variant
       virtual void configure( Json::Value&, ContextGroup& ) override;
-
-      virtual void validate() const override {}
 
 
       // Title Scenes take ownership of the display.

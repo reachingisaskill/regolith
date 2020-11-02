@@ -47,9 +47,6 @@ namespace Regolith
       // Set up the actions
       virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
-      // Validate the signals
-      virtual void validate() const override;
-
 
       // Signify that this class is Interactable
       virtual bool hasInteraction() const override { return true; }

@@ -224,13 +224,14 @@ namespace Regolith
   {
     INFO_LOG( "Context::registerEvents : Base context class registering quit event" );
     manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
+    manager.registerEventRequest( this, REGOLITH_EVENT_CLOSE_CONTEXTS );
   }
 
 
   void Context::eventAction( const RegolithEvent& , const SDL_Event& )
   {
     INFO_LOG( "Context::eventAction : Base context class quit received" );
-    // Only registered one event - we know its time to quit!
+    // Only registered two events - we know its time to quit!
     this->stopContext();
   }
 

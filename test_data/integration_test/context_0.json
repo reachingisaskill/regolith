@@ -1,0 +1,31 @@
+{
+  "type" : "null",
+
+  "input_mapping" : "empty",
+
+  "collision_handling" :
+  {
+    "collision_rules" : [],
+    "container_rules" : []
+  },
+
+  "layers" : {},
+  
+  "camera" :
+  {
+    "follow:" : null,
+    "lower_limit" : [ 0.0, 0.0 ],
+    "upper_limit" : [ 1024.0, 768.0 ]
+  },
+
+  "tests" :
+  {
+    "data_handler_loading" : "test_handler",
+    "context_group_loading" :
+    {
+      "wait_for" : 5,
+      "context_group" : "test_context_group"
+    }
+  }
+}
+

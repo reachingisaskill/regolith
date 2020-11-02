@@ -119,19 +119,31 @@ namespace Regolith
 
   void ThreadManager::waitThreadStatus( ThreadStatus status )
   {
+    // Use an extra if statement here because I believe valgrind can cause some the notification signals to get interpretted out of order.
+    // Hence we get stuck here indefinitely...
+
     // Wait on the DataManager thread
     std::unique_lock<std::mutex> dataManagerLock( DataManagerStatus.mutex );
-    DataManagerStatus.variable.wait( dataManagerLock, [&]()->bool{ return ErrorFlag || QuitFlag || (DataManagerStatus.data == status); } );
+    if ( ! (DataManagerStatus.data == status) )
+    {
+      DataManagerStatus.variable.wait( dataManagerLock, [&]()->bool{ return ErrorFlag || QuitFlag || (DataManagerStatus.data == status); } );
+    }
     dataManagerLock.unlock();
 
     // Wait on the ContextManager thread
     std::unique_lock<std::mutex> contextManagerLock( ContextManagerStatus.mutex );
-    DataManagerStatus.variable.wait( contextManagerLock, [&]()->bool{ return ErrorFlag || QuitFlag || (ContextManagerStatus.data == status); } );
+    if ( ! (ContextManagerStatus.data == status) )
+    {
+      DataManagerStatus.variable.wait( contextManagerLock, [&]()->bool{ return ErrorFlag || QuitFlag || (ContextManagerStatus.data == status); } );
+    }
     contextManagerLock.unlock();
 
     // Wait on the Engine Rendering thread
     std::unique_lock<std::mutex> engineRenderingLock( EngineRenderingStatus.mutex );
-    EngineRenderingStatus.variable.wait( engineRenderingLock, [&]()->bool{ return ErrorFlag || QuitFlag || (EngineRenderingStatus.data == status); } );
+    if ( ! (EngineRenderingStatus.data == status) )
+    {
+      EngineRenderingStatus.variable.wait( engineRenderingLock, [&]()->bool{ return ErrorFlag || QuitFlag || (EngineRenderingStatus.data == status); } );
+    }
     engineRenderingLock.unlock();
   }
 

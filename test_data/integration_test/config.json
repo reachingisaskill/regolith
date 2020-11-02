@@ -55,10 +55,10 @@
 
     "context_groups" : 
     {
+      "test_context_group" : "test_data/integration_test/test_context_group.json"
     },
 
     "entry_point" : null
-
   }
 
 }

@@ -208,8 +208,6 @@ namespace Regolith
 
       virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
-      virtual void validate() const override;
-
       virtual Signal* clone() const override { return new OpenContextSignal( *this ); }
   };
 
@@ -230,8 +228,6 @@ namespace Regolith
       void trigger() const;
 
       virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
-
-      virtual void validate() const override;
 
       virtual Signal* clone() const override { return new OpenContextGroupSignal( *this ); }
   };

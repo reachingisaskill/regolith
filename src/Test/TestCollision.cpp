@@ -44,9 +44,5 @@ namespace Regolith
 //    Collidable::configure( json_data, handler );
   }
 
-  void TestCollision::validate() const
-  {
-  }
-
 }
 

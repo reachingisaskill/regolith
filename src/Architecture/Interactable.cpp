@@ -91,14 +91,5 @@ namespace Regolith
 
   }
 
-
-  void Interactable::validate() const
-  {
-    for ( SignalVector::const_iterator it = _actions.begin(); it != _actions.end(); ++it )
-    {
-      (*it)->validate();
-    }
-  }
-
 }
 

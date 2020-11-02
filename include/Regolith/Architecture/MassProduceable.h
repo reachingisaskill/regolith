@@ -26,7 +26,7 @@ namespace Regolith
 
       // Guaranteed to be called after all objects have been created and stored by the manager.
       // Override this function to validate all pointers and references now that objects are in memory
-      virtual void validate() const {}
+//      virtual void validate() const {}
   };
 
 }
