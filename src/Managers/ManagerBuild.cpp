@@ -104,13 +104,6 @@ namespace Regolith
     }
 
     this->configureEvents();
-
-    // Last configuration operation - validating the mass produced objects
-    // Validate all the game objects
-    _theData.validate();
-
-    // Validate all the contexts
-    _theContexts.validate();
   }
 
 

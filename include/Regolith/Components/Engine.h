@@ -77,10 +77,10 @@ namespace Regolith
       Context* currentContext() { return _contextStack.front(); }
 
       // Tells the engine to push the context pointer to the top of the stack
-      void openContext( Context* c ) { _openContext = c; }
+      void openContext( Context* );
 
       // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
-      void openContextGroup( Context* c ) { _openContextGroup = c; }
+      void openContextGroup( Context* );
 
 
       // Fulfill the interface for a component

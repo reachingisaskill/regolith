@@ -34,7 +34,7 @@ namespace Regolith
    * The standard rendering interface is still to use the current scene, and let the scene
    * call the rendering function for the current context.
    */
-  class Context : public MassProduceable<ContextGroup&>, public ControllableInterface, public Component
+  class Context : public MassProduceable<ContextGroup&>, public ControllableInterface
   {
     // Contexts should not be copyable
     Context( const Context& ) = delete;
@@ -149,16 +149,6 @@ namespace Regolith
 
       // Return a layer proxy so that it may be referenced when spawining objects
       ContextLayer& getLayer( std::string );
-
-
-////////////////////////////////////////////////////////////////////////////////
-      // Component interface - handle global regolith events
-
-      // Register game-wide events with the manager
-      virtual void registerEvents( InputManager& ) override;
-
-      // Regolith events
-      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override;
 
   };
 

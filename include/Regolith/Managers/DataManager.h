@@ -76,9 +76,6 @@ namespace Regolith
       // Basic configuration of object and build the global objects
       void configure( Json::Value& );
 
-      // Validate the game objects
-      void validate() const;
-
 
 ////////////////////////////////////////////////////////////////////////////////
       // Dynamic loading/unloading

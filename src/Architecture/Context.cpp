@@ -25,7 +25,6 @@ namespace Regolith
   Context::Context() :
     MassProduceable(),
     ControllableInterface(),
-    Component(),
     _owner( nullptr ),
     _theInput(),
     _theFocus(),
@@ -214,25 +213,6 @@ namespace Regolith
   ContextLayer& Context::getLayer( std::string name )
   {
     return _layers.get( name );
-  }
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////// 
-  // Regoith Event Handling
-
-  void Context::registerEvents( InputManager& manager )
-  {
-    INFO_LOG( "Context::registerEvents : Base context class registering quit event" );
-    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
-    manager.registerEventRequest( this, REGOLITH_EVENT_CLOSE_CONTEXTS );
-  }
-
-
-  void Context::eventAction( const RegolithEvent& , const SDL_Event& )
-  {
-    INFO_LOG( "Context::eventAction : Base context class quit received" );
-    // Only registered two events - we know its time to quit!
-    this->stopContext();
   }
 
 

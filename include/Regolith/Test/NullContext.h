@@ -19,6 +19,7 @@ namespace Regolith
       float _cg_load_delay;
       Proxy< ContextGroup* > _cg_load;
       float _timer;
+      bool _isLoadScreen;
 
     protected:
       virtual void onStart() override;

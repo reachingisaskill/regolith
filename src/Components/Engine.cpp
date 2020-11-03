@@ -56,6 +56,9 @@ namespace Regolith
 
       while ( performStackOperations() )
       {
+        // If there's an error in another thread, we abandon ship
+        if ( quitFlag ) break;
+
         // Release the context stack
         renderLock.unlock();
 
@@ -209,7 +212,35 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////V
+  // Context and context group opreations
 
+  // Tells the engine to push the context pointer to the top of the stack
+  void Engine::openContext( Context* c )
+  {
+    _openContext = c;
+  }
+
+
+  // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
+  void Engine::openContextGroup( Context* c )
+  {
+    // Set the pointer
+    _openContextGroup = c;
+
+    // Tell everything that is running to stop
+    for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
+    {
+      (*it)->stopContext();
+    }
+
+    // Opening a context group takes priority so clear up this
+    _openContext = nullptr;
+
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////V
+  // Useful functions for external communication
 
   void Engine::renderTextures( DataHandler* handler )
   {
@@ -236,7 +267,7 @@ namespace Regolith
 
   void Engine::registerEvents( InputManager& manager )
   {
-//    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
+    manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
     manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
     manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_RESUME );
   }
@@ -246,10 +277,14 @@ namespace Regolith
   {
     switch( event )
     {
-//      case REGOLITH_EVENT_QUIT :
-//        _pause = true;
+      case REGOLITH_EVENT_QUIT :
+        _pause = false;
 //        Manager::getInstance()->quit();
-//        break;
+        for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
+        {
+          (*it)->stopContext();
+        }
+        break;
 
       case REGOLITH_EVENT_ENGINE_PAUSE :
         INFO_LOG( "Engine::eventAction : Pausing Engine" );

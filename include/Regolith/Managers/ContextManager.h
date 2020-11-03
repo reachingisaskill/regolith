@@ -52,9 +52,6 @@ namespace Regolith
       // Configure the manager
       void configure( Json::Value& );
 
-      // Validate the created contexts
-      void validate() const;
-
       // Destroy everything and join the thread
       void clear();
 

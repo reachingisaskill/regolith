@@ -155,7 +155,6 @@ namespace Regolith
       try
       {
         Context* cont = cont_factory.build( context_data, *this );
-        cont->registerEvents( Manager::getInstance()->getInputManager() );
         _contexts.set( cont_name, cont );
       }
       catch ( Exception& ex )

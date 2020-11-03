@@ -39,6 +39,8 @@ namespace Regolith
       operator Proxy<OTHER*>() const { return Proxy<OTHER*>( reinterpret_cast<OTHER**>( data ), name ); }
 
       operator bool() const { return data != nullptr; }
+
+      Proxy<DATA>& operator=( DATA* other ) { this->data = other; return *this; }
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -141,11 +141,6 @@ namespace Regolith
   }
 
 
-  void ContextManager::validate() const
-  {
-  }
-
-
   void ContextManager::loadEntryPoint()
   {
     _currentContextGroup = _nextContextGroup;
