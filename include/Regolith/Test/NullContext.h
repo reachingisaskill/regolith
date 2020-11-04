@@ -15,6 +15,7 @@ namespace Regolith
   class NullContext : public Context
   {
     private:
+      std::string _name;
       DataHandler* _testHandler;
       float _cg_load_delay;
       Proxy< ContextGroup* > _cg_load;

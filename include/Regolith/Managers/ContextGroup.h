@@ -98,6 +98,10 @@ namespace Regolith
       bool isLoaded() const { return _isLoaded; }
 
 
+      // Flag to indicate this is the global context group. Don't unload accidentally!
+      bool isGlobal() const { return _isGlobalGroup; }
+
+
 ////////////////////////////////////////////////////////////////////////////////
       // Context functions
 

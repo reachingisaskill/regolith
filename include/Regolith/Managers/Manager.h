@@ -206,6 +206,9 @@ namespace Regolith
       // Context stact Interface.
       // Pushed context stack operations to the engine
 
+      // Opens the entry point of the current context group
+      void openEntryPoint();
+
       // Open a new context on top of the stack
       void openContext( Context* );
 

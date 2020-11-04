@@ -20,7 +20,7 @@
 
   "tests" :
   {
-    "data_handler_loading" : "test_handler"
+    "name" : "context_child"
   }
 }
 

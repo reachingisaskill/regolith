@@ -1,4 +1,3 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/ContextManager.h"
 #include "Regolith/Managers/ThreadManager.h"
@@ -158,6 +157,7 @@ namespace Regolith
   {
     setLoaded( false );
     setProgress( 0.0 );
+    DEBUG_LOG( "ContextManager::setNextContextGroup : Setting next context group." );
 
     _nextContextGroup = cg;
   }
@@ -171,6 +171,7 @@ namespace Regolith
     contextUpdate.data = true;
 
     lock.unlock();
+    DEBUG_LOG( "ContextManager::loadNextContextGroup : Triggering condition variable." );
 
     contextUpdate.variable.notify_all();
   }
@@ -233,7 +234,10 @@ namespace Regolith
         if ( manager._nextContextGroup != nullptr )
         {
           // Update and load the current context group pointer
-          manager._currentContextGroup->unload();
+          if ( ! manager._currentContextGroup->isGlobal() )
+          {
+            manager._currentContextGroup->unload();
+          }
           manager._currentContextGroup = manager._nextContextGroup;
           manager._nextContextGroup = nullptr;
           manager._currentContextGroup->load();

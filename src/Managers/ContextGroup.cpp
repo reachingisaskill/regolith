@@ -66,6 +66,7 @@ namespace Regolith
     // Set the default entry point. Optional if this is the global context group
     if ( Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING, (!_isGlobalGroup) ) )
     {
+      // DOESNT THROW AND ERROR FOR A NULL POINTER!!!!!!!
       _entryPoint = requestContext( json_data["entry_point"].asString() );
     }
 

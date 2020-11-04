@@ -1,7 +1,7 @@
 {
   "load_screen" : "load_screen",
 
-  "entry_point" : "context_0",
+  "entry_point" : "context_1",
 
   "data_handlers" : 
   {

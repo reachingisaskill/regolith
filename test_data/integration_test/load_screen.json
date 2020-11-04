@@ -20,8 +20,8 @@
 
   "tests" :
   {
-    "data_handler_loading" : "test_handler",
-    "is_load_screen" : true
+    "name" : "load_screen",
+    "load_screen" : true
   }
 }
 

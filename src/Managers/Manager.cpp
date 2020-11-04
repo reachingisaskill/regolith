@@ -135,6 +135,13 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Stack manipulation
 
+  void Manager::openEntryPoint()
+  {
+    DEBUG_LOG( "Manager::openEntryPoint : Opening Entry Point" );
+    _theEngine.openContext( _theContexts.getCurrentContextGroup()->getEntryPoint() );
+  }
+
+
   void Manager::openContext( Context* c )
   {
     DEBUG_LOG( "Manager::openContext : Opening Context" );
@@ -151,6 +158,9 @@ namespace Regolith
 
     // Tell the engine to queue the load screen for the context group
     _theEngine.openContextGroup( (Context*)cg->getLoadScreen() );
+
+    // Tell the context manager that we can trigger the load thread
+    _theContexts.loadNextContextGroup();
   }
 
 
@@ -169,7 +179,7 @@ namespace Regolith
 
     // Reset the stack to the first context
     INFO_LOG( "Manager::run : Loading the first context" );
-    this->openContext( _theContexts.getCurrentContextGroup()->getEntryPoint() );
+    this->openEntryPoint();
 
 
     // Start the engine!

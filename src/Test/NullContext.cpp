@@ -32,6 +32,10 @@ namespace Regolith
     Utilities::validateJson( json_data, "tests", Utilities::JSON_TYPE_OBJECT );
     Json::Value& tests = json_data["tests"];
 
+    // Load the name of this context
+    Utilities::validateJson( tests, "name", Utilities::JSON_TYPE_STRING );
+    _name = tests["name"].asString();
+
     // Find a data handler to unload, load and unload again.
     if ( Utilities::validateJson( tests, "data_handler_loading", Utilities::JSON_TYPE_STRING, false ) )
     {
@@ -64,13 +68,13 @@ namespace Regolith
     // Make sure this context stays open
     this->setClosed( false );
 
-    std::cout << "OPENING NULL CONTEXT!" << std::endl;
+    INFO_STREAM << "NullContext::onStart " << _name << " : Starting test context.";
 
     _timer = 0.0;
 
     if ( _testHandler != nullptr )
     {
-      INFO_LOG( "NullContext::onStart : Reloading test data handler" );
+      INFO_STREAM << "NullContext::onStart " << _name << " : Reloading test data handler";
       Manager::getInstance()->getDataManager().unload( _testHandler );
       Manager::getInstance()->getDataManager().load( _testHandler );
     }
@@ -81,6 +85,7 @@ namespace Regolith
   {
     // This context is now closed
     this->setClosed( true );
+    INFO_STREAM << "NullContext::onStop " << _name << " : Stopping test context.";
   }
 
 
@@ -94,8 +99,8 @@ namespace Regolith
 
       if ( _timer > _cg_load_delay )
       {
-        DEBUG_LOG( "NullContext::updateContext : Opening new context group" );
-        Manager::getInstance()->getContextManager().setNextContextGroup( *_cg_load );
+        DEBUG_STREAM << "NullContext::updateContext " << _name << " : Opening new context group";
+        Manager::getInstance()->openContextGroup( *_cg_load );
         _cg_load = nullptr;
         _timer = 0.0;
       }
@@ -105,7 +110,8 @@ namespace Regolith
     {
       if ( manager->getContextManager().isLoaded() )
       {
-        manager->openContext( _cg_load->getEntryPoint() );
+        DEBUG_STREAM <<  "NullContext::updateContext " << _name << " : Load screen complete.";
+        manager->openEntryPoint();
         this->stopContext();
       }
 

@@ -20,14 +20,8 @@
 
   "tests" :
   {
-    "name" : "context_0",
-    "data_handler_loading" : "test_handler",
-    "context_group_loading" :
-    {
-      "wait_for" : 1000,
-      "context_group" : "test_context_group"
-    }
-
+    "name" : "context_1",
+    "child" : "context_child"
   }
 }
 
