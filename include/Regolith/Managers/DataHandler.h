@@ -49,7 +49,6 @@ namespace Regolith
       mutable std::mutex _loadingMutex;
 
     protected:
-      // Returns true if there is a 
       RawTexture* popRenderTexture();
 
 
