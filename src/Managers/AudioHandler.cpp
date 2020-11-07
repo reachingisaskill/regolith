@@ -1,7 +1,6 @@
 //#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/AudioHandler.h"
-#include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/ThreadManager.h"
 
 
@@ -13,7 +12,8 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  AudioHandler::AudioHandler() :
+  AudioHandler::AudioHandler( AudioManager& manager ) :
+    _manager( manager ),
     _state( MUSIC_STATE_STOPPED ),
     _channelPauses()
   {
@@ -150,36 +150,21 @@ namespace Regolith
   }
 
 
-  void AudioHandler::setSong( RawMusic* music )
+  void AudioHandler::playSong( RawMusic* music, unsigned int N )
   {
-    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
+    _manager.playTrack( music->music, N );
+  }
 
-    if ( Mix_PlayingMusic() == 1 )
-    {
-      GuardLock lk( musicUpdate.mutex );
 
-      musicUpdate.data = music->music;
-
-      Mix_HookMusicFinished( playNextTrack );
-      Mix_FadeOutMusic( Manager::getInstance()->getAudioManager().getFadeTime() );
-    }
-    else
-    {
-      GuardLock lk( musicUpdate.mutex );
-      Mix_PlayMusic( music->music, -1 );
-    }
+  void AudioHandler::queueSong( RawMusic* music, unsigned int N )
+  {
+    _manager.queueTrack( music->music, N );
   }
 
 
   void AudioHandler::stopSong()
   {
-    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
-    GuardLock lk( musicUpdate.mutex );
-
-    if ( Mix_PlayingMusic() == 1 )
-    {
-      Mix_FadeOutMusic( Manager::getInstance()->getAudioManager().getFadeTime() );
-    }
+    _manager.stopTrack();
   }
 
 
@@ -192,23 +177,6 @@ namespace Regolith
 
     // Play the chunk exactly once on the first free channel
     Mix_PlayChannel( sound->channel, sound->sound, 0 );
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // "Asynchronous" play next function
-
-  void playNextTrack()
-  {
-    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
-    GuardLock lk( musicUpdate.mutex );
-
-    DEBUG_LOG( "playNextTrack : Playing next track" );
-    if ( musicUpdate.data != nullptr )
-    {
-      Mix_PlayMusic( musicUpdate.data, -1 );
-      musicUpdate.data = nullptr;
-    }
   }
 
 }

@@ -21,8 +21,13 @@ namespace Regolith
   {
     typedef std::vector<int> ChannelPauses;
     private:
+      // Reference to the manager
+      AudioManager& _manager;
+
+      // Rememeber the current handler state
       MusicState _state;
 
+      // Vector to rememeber the individual channel statuses
       ChannelPauses _channelPauses;
 
     protected:
@@ -32,7 +37,7 @@ namespace Regolith
 
     public:
       // Constructor
-      AudioHandler();
+      AudioHandler( AudioManager& );
 
       // Destructor
       ~AudioHandler();
@@ -45,11 +50,15 @@ namespace Regolith
       void requestChannel( RawSound* );
 
 
-      // Set the scene-music using the manager
-      void setSong( RawMusic* );
+      // Play a track immediately
+      void playSong( RawMusic*, unsigned int N = 0 );
+
+      // Queue a track to play next
+      void queueSong( RawMusic*, unsigned int N = 0 );
 
       // Stop the music playing
       void stopSong();
+
 
       // Play a sound effect in the local context
       void playSound( RawSound* );

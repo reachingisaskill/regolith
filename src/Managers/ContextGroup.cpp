@@ -11,7 +11,7 @@ namespace Regolith
 
   ContextGroup::ContextGroup() :
     _isGlobalGroup( false ),
-    _theAudio(),
+    _theAudio( Manager::getInstance()->getAudioManager() ),
     _dataHandlers( "Data Handlers" ),
     _fileName(),
     _loadScreen(),

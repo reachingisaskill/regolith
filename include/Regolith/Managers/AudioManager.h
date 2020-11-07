@@ -4,7 +4,9 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/GamePlay/Noises.h"
+#include "Regolith/Utilities/MutexedBuffer.h"
 
+#include <utility>
 
 namespace Regolith
 {
@@ -24,6 +26,13 @@ namespace Regolith
    */
   class AudioManager
   {
+    // Typedefs for the music queuing system
+    typedef std::pair< Mix_Music*, unsigned int > QueueElement;
+    typedef MutexedBuffer< QueueElement > MusicQueue;
+
+    // Make the play-next function a friend
+    friend void playNextTrack();
+
     private :
       unsigned int _frequency;
       Uint16 _format;
@@ -34,6 +43,10 @@ namespace Regolith
 
       float _volumeMusic;
       float _volumeChunk;
+
+      // Queue of upcoming music tracks
+      static MusicQueue _musicQueue;
+      static Mix_Music* _currentTrack;
 
     public :
       // Contstructor
@@ -61,6 +74,13 @@ namespace Regolith
       int getFadeTime() const { return _fadeTime; }
       void setFadeTime( int t ) { _fadeTime = t; }
 
+
+      // Music interface
+      void queueTrack( Mix_Music*, unsigned int );
+      void playTrack( Mix_Music*, unsigned int );
+      void clearQueue();
+      void stopTrack();
+      void stopNextTrack();
   };
 
 }

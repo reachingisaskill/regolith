@@ -1,6 +1,5 @@
 
 #include "Regolith/Managers/AudioManager.h"
-#include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/Exception.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -9,6 +8,15 @@
 
 namespace Regolith
 {
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Forward declaration
+  void playNextTrack();
+
+  // Static member variables
+  AudioManager::MusicQueue AudioManager::_musicQueue;
+  Mix_Music* AudioManager::_currentTrack = nullptr;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Audio Manager member functions
@@ -34,18 +42,16 @@ namespace Regolith
   void AudioManager::clear()
   {
     INFO_LOG( "AudioManager::clear : Clearing the audio manager" );
-    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
 
-    // Drop the hook in case something happens
-    {
-      GuardLock lk( musicUpdate.mutex );
-      Mix_HookMusicFinished( nullptr );
-      musicUpdate.data = nullptr;
-    }
+    Mix_HookMusicFinished( nullptr );
+    _musicQueue.clear();
 
     Mix_CloseAudio();
   }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Volume functions
 
   void AudioManager::setVolumeMusic( float v )
   {
@@ -80,6 +86,55 @@ namespace Regolith
 
     // Set the member variable
     _volumeChunk = v;
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Music interface
+
+  void AudioManager::queueTrack( Mix_Music* music, unsigned int N )
+  {
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      _musicQueue.push( std::make_pair( music, N ) );
+    }
+    else
+    {
+      Mix_PlayMusic( music, (signed int)N );
+    }
+
+    Mix_HookMusicFinished( playNextTrack );
+  }
+
+
+  void AudioManager::playTrack( Mix_Music* music, unsigned int N )
+  {
+    // Stop if playing
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      Mix_HaltMusic();
+    }
+
+    // Jump the queue and play this
+    Mix_PlayMusic( music, (signed int)N );
+  }
+
+
+  void AudioManager::clearQueue()
+  {
+    _musicQueue.clear();
+  }
+
+
+  void AudioManager::stopTrack()
+  {
+    Mix_FadeOutMusic( _fadeTime );
+    Mix_HookMusicFinished( nullptr );
+  }
+
+
+  void AudioManager::stopNextTrack()
+  {
   }
 
 
@@ -120,6 +175,43 @@ namespace Regolith
     _volumeMusic = json_data["music_volume"].asFloat();
     _volumeChunk = json_data["effect_volume"].asFloat();
   }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // "Asynchronous" play next function
+
+  void playNextTrack()
+  {
+    // Static reference to the music queue
+    static AudioManager::MusicQueue& queue = AudioManager::_musicQueue;
+    static Mix_Music*& current = AudioManager::_currentTrack;
+    AudioManager::QueueElement element;
+
+    if ( queue.empty() )
+    {
+      Mix_PlayMusic( current, 0 );
+    }
+    else
+    {
+      queue.pop( element );
+      current = element.first;
+      Mix_PlayMusic( current, (signed int)element.second );
+    }
+
+  }
+
+
+//    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
+//    GuardLock lk( musicUpdate.mutex );
+//
+//    DEBUG_LOG( "playNextTrack : Playing next track" );
+//    if ( musicUpdate.data != nullptr )
+//    {
+//      Mix_PlayMusic( musicUpdate.data, -1 );
+//      musicUpdate.data = nullptr;
+//    }
+//  }
+
 
 }
 
