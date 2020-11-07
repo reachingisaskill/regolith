@@ -19,7 +19,7 @@ namespace Regolith
    * This allows the "name" of each object to be given a unique identifier allowing 
    * fast access to the actual object list.
    * This is extremely useful for parsing Json data into enumerated lists of heap-allocated objects
-   * This class owns all the stored memory and will delete it on destruction
+   * This class is configured to own the stored memory using a boolean template type.
    */
   template < class DATA, bool OWNS_MEMORY >
   class NamedVector

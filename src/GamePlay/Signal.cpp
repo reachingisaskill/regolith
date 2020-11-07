@@ -232,7 +232,7 @@ namespace Regolith
   // Context Group Change Signal
 
   OpenContextGroupSignal::OpenContextGroupSignal() :
-    _theContextGroup()
+    _theContextGroup( nullptr )
   {
   }
 
@@ -240,14 +240,14 @@ namespace Regolith
   void OpenContextGroupSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextGroupSignal::trigger : Opening context group" );
-    Manager::getInstance()->getContextManager().setNextContextGroup( *_theContextGroup );
+    Manager::getInstance()->getContextManager().setNextContextGroup( _theContextGroup );
   }
 
 
   void OpenContextGroupSignal::configure( Json::Value& json_data, ContextGroup&, DataHandler& )
   {
     Utilities::validateJson( json_data, "context_group", Utilities::JSON_TYPE_STRING );
-    _theContextGroup = Manager::getInstance()->getContextManager().requestContextGroup( json_data["context_group"].asString() );
+    _theContextGroup = Manager::getInstance()->getContextManager().getContextGroup( json_data["context_group"].asString() );
 
     INFO_STREAM << "OpenContextGroupSignal::configure : Registered context group with name : " << json_data["context_group"].asString();
   }

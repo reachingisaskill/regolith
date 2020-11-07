@@ -218,7 +218,7 @@ namespace Regolith
   class OpenContextGroupSignal : public Signal
   {
     private:
-      Proxy<ContextGroup*> _theContextGroup;
+      ContextGroup* _theContextGroup;
 
     public :
       // Con/Destruction

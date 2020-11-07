@@ -10,6 +10,8 @@ namespace Regolith
   NullContext::NullContext() :
     Context(),
     _testHandler( nullptr ),
+    _cg_load_delay( 0.0 ),
+    _cg_load( nullptr ),
     _timer( 0.0 ),
     _isLoadScreen( false )
   {
@@ -53,7 +55,7 @@ namespace Regolith
       INFO_STREAM << "NullContext::configure : Testing the context group loading functionality, Context Group : " << cg_loading_data["context_group"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " seconds.";
 
       _cg_load_delay = cg_loading_data["wait_for"].asFloat();
-      _cg_load = Manager::getInstance()->getContextManager().requestContextGroup( cg_loading_data["context_group"].asString() );
+      _cg_load = Manager::getInstance()->getContextManager().getContextGroup( cg_loading_data["context_group"].asString() );
     }
 
     // If this iteration is acting as a load_screen
@@ -100,7 +102,7 @@ namespace Regolith
       if ( _timer > _cg_load_delay )
       {
         DEBUG_STREAM << "NullContext::updateContext " << _name << " : Opening new context group";
-        Manager::getInstance()->openContextGroup( *_cg_load );
+        Manager::getInstance()->openContextGroup( _cg_load );
         _cg_load = nullptr;
         _timer = 0.0;
       }

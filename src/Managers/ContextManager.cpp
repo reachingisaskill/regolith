@@ -19,7 +19,7 @@ namespace Regolith
     _loaded( false ),
     _progress( 0.0 ),
     _globalContextGroup(),
-    _contextGroups( "Context Groups" ),
+    _contextGroups(),
     _currentContextGroup( nullptr ),
     _nextContextGroup( nullptr )
   {
@@ -39,7 +39,7 @@ namespace Regolith
     std::unique_lock<std::mutex> lock( contextUpdate.mutex );
 
     // Unload and then delete all the context groups
-    for ( ProxyMap< ContextGroup* >::iterator it = _contextGroups.begin(); it != _contextGroups.end(); ++it )
+    for ( ContextGroupMap::iterator it = _contextGroups.begin(); it != _contextGroups.end(); ++it )
     {
       if ( it->second->isLoaded() )
       {
@@ -119,7 +119,7 @@ namespace Regolith
 
       ContextGroup* cg = new ContextGroup();
       cg->configure( file, false );
-      _contextGroups.set( name, cg );
+      _contextGroups[ name ] = cg;
     }
     INFO_LOG( "ContextManager::configure : Context Groups Configured" );
 
@@ -129,7 +129,7 @@ namespace Regolith
     {
       // Find the starting context group and load it
       std::string entry_point = json_data["entry_point"].asString();
-      _nextContextGroup = _contextGroups.get( entry_point );
+      _nextContextGroup = this->getContextGroup( entry_point );
       INFO_LOG( "ContextManager::configure : Entry Point Located" );
     }
     else // Start with the global context group
@@ -150,6 +150,21 @@ namespace Regolith
     INFO_LOG( "ContextManager::loadEntryPoint : Loading first context group" );
     _currentContextGroup->load();
     DEBUG_LOG( "ContextManager::loadEntryPoint : Completed" );
+  }
+
+
+  ContextGroup* ContextManager::getContextGroup( std::string name )
+  {
+    ContextGroupMap::iterator found = _contextGroups.find( name );
+
+    if ( found == _contextGroups.end() )
+    {
+      Exception ex( "ContextManager::getContextGroup()", "Could not find context group name in map" );
+      ex.addDetail( "Name", name );
+      throw ex;
+    }
+
+    return found->second;
   }
 
 
