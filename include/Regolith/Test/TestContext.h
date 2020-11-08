@@ -1,9 +1,10 @@
 
-#ifndef REGOLITH_TEST_NULL_H_
-#define REGOLITH_TEST_NULL_H_
+#ifndef REGOLITH_TEST_TEST_CONTEXT_H_
+#define REGOLITH_TEST_TEST_CONTEXT_H_
 
 #include "Regolith/Architecture/Context.h"
 #include "Regolith/Architecture/Interactable.h"
+#include "Regolith/GamePlay/Timers.h"
 
 
 namespace Regolith
@@ -12,14 +13,13 @@ namespace Regolith
   /*
    * Provides a context that does nothing for the integration test to use
    */
-  class NullContext : public Context
+  class TestContext : public Context
   {
     private:
       std::string _name;
       DataHandler* _testHandler;
-      float _cg_load_delay;
       ContextGroup* _cg_load;
-      float _timer;
+      CountdownTimer _timer;
       bool _isLoadScreen;
 
     protected:
@@ -32,10 +32,10 @@ namespace Regolith
 
     public:
       // Trivial Constructor
-      NullContext();
+      TestContext();
 
       // Trivial Destructor
-      ~NullContext();
+      ~TestContext();
 
 
       // Trivial configure - call the base-class variant
@@ -74,5 +74,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_TEST_NULL_H_
+#endif // REGOLITH_TEST_TEST_CONTEXT_H_
 

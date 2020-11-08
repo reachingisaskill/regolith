@@ -1,5 +1,7 @@
 
 #include "Regolith.h"
+#include "Regolith/Test/TestContext.h"
+#include "Regolith/Test/TestObject.h"
 
 #include "logtastic.h"
 
@@ -19,6 +21,10 @@ int main( int, char** )
   Manager* man = Manager::createInstance();
 
   logtastic::start( "Regolith - Integration Test", REGOLITH_VERSION_NUMBER );
+
+  INFO_LOG( "Main : Creating test builders" );
+  man->getObjectFactory().addBuilder< TestObject >( "null" );
+  man->getContextFactory().addBuilder< TestContext >( "null" );
 
   try
   {

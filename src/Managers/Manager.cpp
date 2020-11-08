@@ -3,22 +3,6 @@
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Components/Window.h"
 
-#include "Regolith/Test/NullContext.h"
-#include "Regolith/Test/NullObject.h"
-
-//#include "Regolith/GameObjects/MusicTrack.h"
-//#include "Regolith/GameObjects/SimpleSprite.h"
-//#include "Regolith/GameObjects/CollidableSprite.h"
-//#include "Regolith/GameObjects/AnimatedSprite.h"
-//#include "Regolith/GameObjects/SimpleButton.h"
-//#include "Regolith/GameObjects/Trigger.h"
-//#include "Regolith/GameObjects/Region.h"
-//#include "Regolith/Contexts/TitleScene.h"
-//#include "Regolith/Contexts/Platformer.h"
-//#include "Regolith/Contexts/Menu.h"
-//#include "Regolith/Contexts/LoadScreen.h"
-//#include "Regolith/GamePlay/Signal.h"
-
 
 namespace Regolith
 {
@@ -58,37 +42,6 @@ namespace Regolith
     logtastic::registerSignalHandler( SIGINT, deathSignals );
     logtastic::registerSignalHandler( SIGSEGV, deathSignals );
     logtastic::registerSignalHandler( SIGTERM, deathSignals );
-
-    _objectFactory.addBuilder<NullObject>( "null" );
-    _contextFactory.addBuilder<NullContext>( "null" );
-//    _signalFactory.addBuilder<NullSignal>( "null" );
-
-    /* // Specific builders should not be part of Regolith. They are game specific!
-    // Set up the object factory
-//    _objectFactory.addBuilder<FPSString>( "fps_string" );
-    _objectFactory.addBuilder<MusicTrack>( "music_track" );
-    _objectFactory.addBuilder<SimpleSprite>( "simple_sprite" );
-    _objectFactory.addBuilder<CollidableSprite>( "collidable_sprite" );
-    _objectFactory.addBuilder<AnimatedSprite>( "animated_sprite" );
-    _objectFactory.addBuilder<SimpleButton>( "simple_button" );
-    _objectFactory.addBuilder<Trigger>( "event_trigger" );
-    _objectFactory.addBuilder<Region>( "region" );
-
-    // Set up the context factory
-    _contextFactory.addBuilder<LoadScreen>( "load_screen" );
-    _contextFactory.addBuilder<TitleScene>( "title_scene" );
-    _contextFactory.addBuilder<MenuContext>( "menu" );
-    _contextFactory.addBuilder<Platformer>( "platformer" );
-
-    // Set up the signal factory
-    _signalFactory.addBuilder<InputActionSignal>( "input_action" );
-    _signalFactory.addBuilder<InputBooleanSignal>( "input_boolean" );
-    _signalFactory.addBuilder<InputFloatSignal>( "input_float" );
-    _signalFactory.addBuilder<InputVectorSignal>( "input_vector" );
-    _signalFactory.addBuilder<GameEventSignal>( "game_event" );
-    _signalFactory.addBuilder<ChangeContextSignal>( "context_change" );
-    _signalFactory.addBuilder<ChangeContextGroupSignal>( "context_group_change" );
-    */
   }
 
 

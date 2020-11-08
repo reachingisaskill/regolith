@@ -1,5 +1,5 @@
 
-#include "Regolith/GamePlay/Timer.h"
+#include "Regolith/GamePlay/Timers.h"
 
 namespace Regolith
 {
@@ -92,23 +92,69 @@ namespace Regolith
     return 0;
   }
 
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Minimal timer class
 
-
-  Timer::Timer() :
+  FrameTimer::FrameTimer() :
     _startTime( SDL_GetTicks() )
   {
   }
 
 
-  Uint32 Timer::lap()
+  Uint32 FrameTimer::lap()
   {
     Uint32 ticks = SDL_GetTicks();
     Uint32 time = ticks - _startTime;
     _startTime = ticks;
     return time;
   }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Countdown timer
+
+  CountdownTimer::CountdownTimer() :
+    _repeatLimit( 0 ),
+    _repeatCount( 0 ),
+    _target( 0.0 ),
+    _time( 0.0 )
+  {
+  }
+
+
+  void CountdownTimer::configure( float time, unsigned int R )
+  {
+    _target = time;
+    _time = _target;
+    _repeatLimit = R;
+    _repeatCount = 0;
+  }
+
+
+  bool CountdownTimer::trigger( float delta_t )
+  {
+    if ( _repeatCount >= _repeatLimit ) return false;
+
+    _time -= delta_t;
+
+    if ( _time < 0.0 )
+    {
+      _repeatCount += 1;
+      _time += _target; // Precise timing!
+      return true;
+    }
+
+    return false;
+  }
+
+
+  void CountdownTimer::reset()
+  {
+    _time = _target;
+    _repeatCount = 0;
+  }
+
 
 }
 

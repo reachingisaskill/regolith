@@ -5,7 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
 #include "Regolith/Managers/InputManager.h"
-#include "Regolith/GamePlay/Timer.h"
+#include "Regolith/GamePlay/Timers.h"
 #include "Regolith/Utilities/Condition.h"
 
 #include <mutex>
@@ -47,7 +47,7 @@ namespace Regolith
 
       ContextStack::reverse_iterator _visibleStackStart;
       ContextStack::reverse_iterator _visibleStackEnd;
-      Timer _frameTimer;
+      FrameTimer _frameTimer;
 
       bool _pause;
 

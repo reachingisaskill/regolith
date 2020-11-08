@@ -1,5 +1,5 @@
 
-#include "Regolith/Test/NullContext.h"
+#include "Regolith/Test/TestContext.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -7,25 +7,24 @@
 namespace Regolith
 {
 
-  NullContext::NullContext() :
+  TestContext::TestContext() :
     Context(),
     _testHandler( nullptr ),
-    _cg_load_delay( 0.0 ),
     _cg_load( nullptr ),
-    _timer( 0.0 ),
+    _timer(),
     _isLoadScreen( false )
   {
-    INFO_LOG( "NullContext::NullContext : Null Context Created" );
+    INFO_LOG( "TestContext::TestContext : Null Context Created" );
   }
 
 
-  NullContext::~NullContext()
+  TestContext::~TestContext()
   {
-    INFO_LOG( "NullContext::~NullContext : Null Context Destroyed" );
+    INFO_LOG( "TestContext::~TestContext : Null Context Destroyed" );
   }
 
 
-  void NullContext::configure( Json::Value& json_data, ContextGroup& group )
+  void TestContext::configure( Json::Value& json_data, ContextGroup& group )
   {
     // Call the base class variant first
     Context::configure( json_data, group );
@@ -41,7 +40,7 @@ namespace Regolith
     // Find a data handler to unload, load and unload again.
     if ( Utilities::validateJson( tests, "data_handler_loading", Utilities::JSON_TYPE_STRING, false ) )
     {
-      INFO_STREAM << "NullContext::configure : Testing the multithreaded loading using data handler: " << tests["data_handler_loading"].asString();
+      INFO_STREAM << "TestContext::configure : Testing the multithreaded loading using data handler: " << tests["data_handler_loading"].asString();
       _testHandler = group.getDataHandler( tests["data_handler_loading"].asString() );
     }
 
@@ -52,9 +51,9 @@ namespace Regolith
       Utilities::validateJson( cg_loading_data, "wait_for", Utilities::JSON_TYPE_INTEGER );
       Utilities::validateJson( cg_loading_data, "context_group", Utilities::JSON_TYPE_STRING );
 
-      INFO_STREAM << "NullContext::configure : Testing the context group loading functionality, Context Group : " << cg_loading_data["context_group"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " seconds.";
+      INFO_STREAM << "TestContext::configure : Testing the context group loading functionality, Context Group : " << cg_loading_data["context_group"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " seconds.";
 
-      _cg_load_delay = cg_loading_data["wait_for"].asFloat();
+      _timer.configure( cg_loading_data["wait_for"].asFloat(), 1 );
       _cg_load = Manager::getInstance()->getContextManager().getContextGroup( cg_loading_data["context_group"].asString() );
     }
 
@@ -65,54 +64,48 @@ namespace Regolith
     }
   }
 
-  void NullContext::onStart()
+
+  void TestContext::onStart()
   {
     // Make sure this context stays open
     this->setClosed( false );
 
-    INFO_STREAM << "NullContext::onStart " << _name << " : Starting test context.";
+    INFO_STREAM << "TestContext::onStart " << _name << " : Starting test context.";
 
-    _timer = 0.0;
+    _timer.reset();
 
     if ( _testHandler != nullptr )
     {
-      INFO_STREAM << "NullContext::onStart " << _name << " : Reloading test data handler";
+      INFO_STREAM << "TestContext::onStart " << _name << " : Reloading test data handler";
       Manager::getInstance()->getDataManager().unload( _testHandler );
       Manager::getInstance()->getDataManager().load( _testHandler );
     }
   }
 
 
-  void NullContext::onStop()
+  void TestContext::onStop()
   {
     // This context is now closed
     this->setClosed( true );
-    INFO_STREAM << "NullContext::onStop " << _name << " : Stopping test context.";
+    INFO_STREAM << "TestContext::onStop " << _name << " : Stopping test context.";
   }
 
 
-  void NullContext::updateContext( float timestep )
+  void TestContext::updateContext( float timestep )
   {
     static Manager* manager = Manager::getInstance();
 
-    if ( _cg_load )
+    if ( _timer.trigger( timestep ) )
     {
-      _timer += timestep;
-
-      if ( _timer > _cg_load_delay )
-      {
-        DEBUG_STREAM << "NullContext::updateContext " << _name << " : Opening new context group";
-        Manager::getInstance()->openContextGroup( _cg_load );
-        _cg_load = nullptr;
-        _timer = 0.0;
-      }
+      DEBUG_STREAM << "TestContext::updateContext " << _name << " : Opening new context group";
+      Manager::getInstance()->openContextGroup( _cg_load );
     }
 
     if ( _isLoadScreen )
     {
       if ( manager->getContextManager().isLoaded() )
       {
-        DEBUG_STREAM <<  "NullContext::updateContext " << _name << " : Load screen complete.";
+        DEBUG_STREAM <<  "TestContext::updateContext " << _name << " : Load screen complete.";
         manager->openEntryPoint();
         this->stopContext();
       }
