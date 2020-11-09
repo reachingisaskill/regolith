@@ -1,7 +1,8 @@
 
 #include "Regolith/GamePlay/Collision.h"
+
 #include "Regolith/Architecture/Collidable.h"
-#include "Regolith/Architecture/ContextLayer.h"
+#include "Regolith/GamePlay/ContextLayer.h"
 
 
 namespace Regolith

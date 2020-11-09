@@ -2,8 +2,7 @@
 #ifndef REGOLITH_TEST_TEST_CONTEXT_H_
 #define REGOLITH_TEST_TEST_CONTEXT_H_
 
-#include "Regolith/Architecture/Context.h"
-#include "Regolith/Architecture/Interactable.h"
+#include "Regolith/GamePlay/Context.h"
 #include "Regolith/GamePlay/Timers.h"
 
 

@@ -1,7 +1,6 @@
-#define LOGTASTIC_DEBUG_OFF
 
-#include "Regolith/Architecture/Context.h"
-#include "Regolith/Architecture/ContextLayer.h"
+#include "Regolith/GamePlay/Context.h"
+
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/Noisy.h"
 #include "Regolith/Architecture/Interactable.h"
@@ -10,6 +9,7 @@
 #include "Regolith/Architecture/Moveable.h"
 #include "Regolith/Architecture/Collidable.h"
 #include "Regolith/Architecture/Animated.h"
+#include "Regolith/GamePlay/ContextLayer.h"
 #include "Regolith/Managers/Manager.h"
 
 

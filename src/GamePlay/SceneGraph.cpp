@@ -1,6 +1,6 @@
 
-#include "Regolith/Architecture/ContextLayer.h"
-#include "Regolith/Architecture/Context.h"
+#include "Regolith/GamePlay/SceneGraph.h"
+
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/Noisy.h"
 #include "Regolith/Architecture/Interactable.h"
@@ -9,12 +9,13 @@
 #include "Regolith/Architecture/Moveable.h"
 #include "Regolith/Architecture/Collidable.h"
 #include "Regolith/Architecture/Animated.h"
+#include "Regolith/GamePlay/Context.h"
 
 
 namespace Regolith
 {
 
-  ContextLayer::ContextLayer() :
+  SceneGraph::SceneGraph() :
     _owner( nullptr ),
     _position( 0.0 ),
     _movementScale( 0.0 ),
@@ -29,7 +30,7 @@ namespace Regolith
   }
 
 
-  ContextLayer::~ContextLayer()
+  SceneGraph::~SceneGraph()
   {
     drawables.clear();
 
@@ -47,7 +48,7 @@ namespace Regolith
   }
 
 
-  void ContextLayer::configure( Context* owner, Vector pos, Vector move_scale, float width, float height )
+  void SceneGraph::configure( Context* owner, Vector pos, Vector move_scale, float width, float height )
   {
     _owner = owner;
     _position = pos;
@@ -60,14 +61,14 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Object spawning, placing and caching
 
-  void ContextLayer::spawn( PhysicalObject* obj, const Vector& position )
+  void SceneGraph::spawn( PhysicalObject* obj, const Vector& position )
   {
     PhysicalObject* object = _owner->_owner->spawn( obj, position );
     cacheObject( object );
   }
 
 
-  void ContextLayer::cacheObject( GameObject* object )
+  void SceneGraph::cacheObject( GameObject* object )
   {
     if ( object->hasInput() )
     {

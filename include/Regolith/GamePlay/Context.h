@@ -6,13 +6,13 @@
 #include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/Architecture/Component.h"
-#include "Regolith/Architecture/ContextLayer.h"
 #include "Regolith/Managers/InputHandler.h"
 #include "Regolith/Managers/FocusHandler.h"
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/ContextGroup.h"
-#include "Regolith/Utilities/ProxyMap.h"
+#include "Regolith/GamePlay/ContextLayer.h"
 #include "Regolith/GamePlay/Camera.h"
+#include "Regolith/Utilities/ProxyMap.h"
 
 #include <list>
 

@@ -1,7 +1,7 @@
 
 #include "Regolith/GamePlay/Signal.h"
-#include "Regolith/Architecture/Context.h"
-#include "Regolith/Components/Engine.h"
+
+#include "Regolith/GamePlay/Context.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"

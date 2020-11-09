@@ -3,9 +3,9 @@
 #define REGOLITH_MANAGERS_CONTEXT_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/Context.h"
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/GamePlay/Context.h"
 #include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
