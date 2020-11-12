@@ -34,17 +34,16 @@ namespace Regolith
   class Drawable;
   class Animated;
   class Moveable;
-  class Collidable;
   class Clickable;
+  class PhysicalObject;
 
-  typedef unsigned int TeamID;
-  typedef size_t IDNumber;
+  typedef unsigned int CollisionTeam;
+  typedef unsigned int CollisionType;
 
   typedef std::list< Drawable* > DrawableList;
   typedef std::list< Moveable* > MoveableList;
-  typedef std::list< Collidable* > CollidableList;
   typedef std::list< Animated* > AnimatedList;
-  typedef std::map< TeamID, CollidableList > TeamMap;
+  typedef std::map< std::string, PhysicalObject* > PhysicalObjectMap;
   typedef std::set< Clickable* > ClickableSet;
 
   typedef std::map< std::string, RawTexture > RawTextureMap;
@@ -81,17 +80,6 @@ namespace Regolith
     MUSIC_STATE_STOPPED,
     MUSIC_STATE_PLAYING,
     MUSIC_STATE_PAUSED
-  };
-
-
-  enum DefaultTeams : unsigned char
-  {
-    DEFAULT_TEAM_HUD = 0,
-    DEFAULT_TEAM_ENVIRONMENT = 1,
-    DEFAULT_TEAM_NPC = 2,
-    DEFAULT_TEAM_PLAYER = 3,
-    DEFAULT_TEAM_ENEMIES = 4,
-    DEFAULT_TEAM_MAX = 255
   };
 
 

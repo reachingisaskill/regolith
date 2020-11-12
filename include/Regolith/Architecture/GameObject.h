@@ -16,7 +16,6 @@ namespace Regolith
    * Audio => Noisy
    * Input => Controllable
    * Animation => Animated
-   * Collision => Collidable
    * Texture => Drawable
    * Interaction => Interactable
    * Movement => Movable
@@ -30,7 +29,6 @@ namespace Regolith
       virtual bool hasAudio() const { return false; }
       virtual bool hasInput() const { return false; }
       virtual bool hasAnimation() const { return false; }
-      virtual bool hasCollision() const { return false; }
       virtual bool hasTexture() const { return false; }
       virtual bool hasInteraction() const { return false; }
       virtual bool hasMovement() const { return false; }
