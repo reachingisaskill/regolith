@@ -7,11 +7,6 @@
 namespace Regolith
 {
 
-  // This function takes the next track stored in the audio manager and plays it when the previous one has finished
-  void playNextTrack();
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
   AudioHandler::AudioHandler( AudioManager& manager ) :
     _manager( manager ),
     _state( MUSIC_STATE_STOPPED ),

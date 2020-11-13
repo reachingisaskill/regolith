@@ -14,7 +14,7 @@ namespace Regolith
    * Class which defines the interface for gameobjects that are animated.
    * This is any object, visible or not, that requires a call to void update( timestep ) on every frame
    */
-  class Animated : virtual public AnimatedInterface, virtual public GameObject
+  class Animated : public AnimatedInterface, virtual public GameObject
   {
     public:
       virtual ~Animated() {}

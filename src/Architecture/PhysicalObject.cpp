@@ -18,6 +18,8 @@ namespace Regolith
     _inverseMass( 0.0 ),
     _width( 0.0 ),
     _height( 0.0 ),
+    _velocity(),
+    _forces(),
     _collisionTeam( 0 ),
     _collisionType( 0 ),
     _children()
@@ -34,6 +36,8 @@ namespace Regolith
     _inverseMass( other._inverseMass ),
     _width( other._width ),
     _height( other._height ),
+    _velocity( other._velocity ),
+    _forces(),
     _collisionTeam( other._collisionTeam ),
     _collisionType( other._collisionType ),
     _children()
@@ -81,6 +85,15 @@ namespace Regolith
     if ( Utilities::validateJson( json_data, "rotation", Utilities::JSON_TYPE_FLOAT, false ) )
     {
       _rotation =  json_data["rotation"].asFloat();
+    }
+
+    // Set the initial velocity
+    if ( Utilities::validateJson( json_data, "velocity", Utilities::JSON_TYPE_ARRAY, false ) )
+    {
+      Utilities::validateJsonArray( json_data["velocity"], 2, Utilities::JSON_TYPE_FLOAT );
+      float vx = json_data["velocity"][0].asFloat();
+      float vy = json_data["velocity"][1].asFloat();
+      setVelocity( Vector( vx, vy ) );
     }
 
     // Set the collision properties
@@ -137,6 +150,46 @@ namespace Regolith
   {
     _collisionTeam = team;
     _collisionType = type;
+  }
+
+
+  void PhysicalObject::renderThis( SDL_Renderer*, const Camera* ) const
+  {
+  }
+
+
+  void PhysicalObject::stepThis( float time )
+  {
+    // Starting with Euler Step algorithm.
+    // Might move to leap-frog/Runge-Kutta later
+    Vector accel = _inverseMass * _forces;
+
+    DEBUG_STREAM << "Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
+
+    _velocity += ( accel * timestep );
+
+    _position += ( _velocity * timestep );
+
+    // Update complete - reset forces
+    _forces.zero();
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Functions that distribute calls to the children
+
+  void PhysicalObject::render( SDL_Renderer* render, const Camera& camera ) const
+  {
+  }
+
+
+  void PhysicalObject::step( float time ) const
+  {
+  }
+
+
+  void PhysicalObject::collides( PhysicalObject* other )
+  {
   }
 
 }

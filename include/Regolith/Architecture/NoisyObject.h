@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_ARCHITECTURE_NOISY_H_
-#define REGOLITH_ARCHITECTURE_NOISY_H_
+#ifndef REGOLITH_ARCHITECTURE_NOISY_INTERFACE_H_
+#define REGOLITH_ARCHITECTURE_NOISY_INTERFACE_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
@@ -15,7 +15,7 @@ namespace Regolith
   /*
    * Defines the intferface for classes that can trigger sounds effects to be played.
    */
-  class Noisy : virtual public GameObject
+  class NoisyInterface : virtual public GameObject
   {
     private:
       AudioHandler* _handler;
@@ -26,18 +26,10 @@ namespace Regolith
 
     public:
       // Simple contructor
-      Noisy();
+      NoisyInterface();
 
       // Make the destructor virtual
-      virtual ~Noisy() {}
-
-
-      // Configure the object
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override {}
-
-
-      // Tells the context that this class can be Noisy
-      virtual bool hasAudio() const override { return true; }
+      virtual ~NoisyInterface() {}
 
 
       // Interface used to trigger the above function. Ensures the handler pointer is recorded
@@ -51,5 +43,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_NOISY_H_
+#endif // REGOLITH_NOISY_INTERFACE_H_
 

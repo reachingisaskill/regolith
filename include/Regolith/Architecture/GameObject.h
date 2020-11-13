@@ -17,9 +17,7 @@ namespace Regolith
    * Input => Controllable
    * Animation => Animated
    * Texture => Drawable
-   * Interaction => Interactable
    * Movement => Movable
-   * Click => Clickable
    */
   class GameObject : public MassProduceable< ContextGroup&, DataHandler& >
   {
@@ -30,9 +28,7 @@ namespace Regolith
       virtual bool hasInput() const { return false; }
       virtual bool hasAnimation() const { return false; }
       virtual bool hasTexture() const { return false; }
-      virtual bool hasInteraction() const { return false; }
       virtual bool hasMovement() const { return false; }
-      virtual bool hasClick() const { return false; }
       virtual bool isPhysical() const { return false; }
   };
 
