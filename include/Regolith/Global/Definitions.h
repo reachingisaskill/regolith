@@ -44,6 +44,7 @@ namespace Regolith
   typedef std::list< Moveable* > MoveableList;
   typedef std::list< Animated* > AnimatedList;
   typedef std::map< std::string, PhysicalObject* > PhysicalObjectMap;
+  typedef std::vector< PhysicalObject* > PhysicalObjectVector;
   typedef std::set< Clickable* > ClickableSet;
 
   typedef std::map< std::string, RawTexture > RawTextureMap;

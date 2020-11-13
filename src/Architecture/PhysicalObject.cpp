@@ -22,7 +22,9 @@ namespace Regolith
     _forces(),
     _collisionTeam( 0 ),
     _collisionType( 0 ),
-    _children()
+    _children(),
+    _stateMap( 1 ),
+    _currentState( _stateMap[0] )
   {
   }
 
@@ -40,7 +42,9 @@ namespace Regolith
     _forces(),
     _collisionTeam( other._collisionTeam ),
     _collisionType( other._collisionType ),
-    _children()
+    _children(),
+    _stateMap( 1 ),
+    _currentState( _stateMap[0] )
   {
     for ( PhysicalObjectMap::iterator it = other._children.begin(); it != other._children.end(); ++it )
     {
@@ -85,6 +89,7 @@ namespace Regolith
     if ( Utilities::validateJson( json_data, "rotation", Utilities::JSON_TYPE_FLOAT, false ) )
     {
       _rotation =  json_data["rotation"].asFloat();
+      WARN_LOG( "PhysicalObject::configure() : Rotations are not currently fully supported for collision detection." );
     }
 
     // Set the initial velocity
@@ -112,7 +117,7 @@ namespace Regolith
       std::string collision_team = json_data["collision_team"].asString();
       std::string collision_type = json_data["collision_type"].asString();
 
-      INFO_STREAM << "Configuring collidable object with type: " << collision_type << " and team: " << collision_team;
+      INFO_STREAM << "PhysicalObject::configure() : Configuring collidable object with type: " << collision_type << " and team: " << collision_team;
 
       _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
       _collisionType = Manager::getInstance()->getCollisionType( collision_type );
@@ -126,10 +131,25 @@ namespace Regolith
       for( Json::Value::iterator c_it = children.begin(); c_it != children.end(); ++c_it )
       {
         std::string child_name = c_it.key().asString();
-        _children.set( cont_name, nullptr );
+        _children.[ cont_name ] = nullptr;
+
+
+        // Use the builder to create child objects
       }
     }
 
+    // Controlling the states and their respective children
+    if ( Utilities::validateJson( json_data, "states", Utilities::JSON_TYPE_OBJECT, false ) )
+    {
+
+
+
+
+
+    }
+    else // Only the single default state is used
+    {
+    }
   }
 
 
@@ -164,14 +184,18 @@ namespace Regolith
     // Might move to leap-frog/Runge-Kutta later
     Vector accel = _inverseMass * _forces;
 
-    DEBUG_STREAM << "Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
-
     _velocity += ( accel * timestep );
-
     _position += ( _velocity * timestep );
 
     // Update complete - reset forces
     _forces.zero();
+    DEBUG_STREAM << "PhysicalObject::stepThis() : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
+  }
+
+
+  bool PhysicalObject::collidesThis( PhysicalObject* /*other*/ )
+  {
+    return false;
   }
 
 
@@ -180,16 +204,35 @@ namespace Regolith
 
   void PhysicalObject::render( SDL_Renderer* render, const Camera& camera ) const
   {
+    this->renderThis( render, camera );
+
+    for ( PhysicalObjectVector::iterator it = _currentChildren.begin(); it != _currentChildren.end(); ++it )
+    {
+      it->render( render, camera );
+    }
   }
 
 
   void PhysicalObject::step( float time ) const
   {
+    this->stepThis( time );
+
+    for ( PhysicalObjectVector::iterator it = _currentChildren.begin(); it != _currentChildren.end(); ++it )
+    {
+      it->step( time );
+    }
   }
 
 
   void PhysicalObject::collides( PhysicalObject* other )
   {
+    if ( this->collidesThis( other ) )
+    {
+      for ( PhysicalObjectVector::iterator it = _currentChildren.begin(); it != _currentChildren.end(); ++it )
+      {
+        it->collides( other );
+      }
+    }
   }
 
 }

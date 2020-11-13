@@ -14,6 +14,22 @@ namespace Regolith
    */
   class PhysicalObject : virtual public GameObject
   {
+////////////////////////////////////////////////////////////////////////////////
+    // Info required for each state
+    public:
+      struct StateDetails
+      {
+        unsigned int id;
+        Texture texture;
+        PhysicalObjectVector children;
+
+        StateDetails() : id( 0 ), texture(), children() {}
+      };
+
+      typedef std::map< std::string, StateDetails > > StateMap;
+
+
+////////////////////////////////////////////////////////////////////////////////
     private:
       // Flag that this object is to be removed from the scene
       bool _destroyMe;
@@ -41,22 +57,16 @@ namespace Regolith
       // Map of all the children
       PhysicalObjectMap _children;
 
-      // Current state of the object. States allow different subsets of children to be interogated at a time
-      unsigned int _state;
+      // Map of all the possible states
+      StateMap _stateMap;
 
-      // Vector of vectors of different subsets of children. One for each state.
-      StateVector _stateSubSets;
-
-      // Vector of children active in the current state
-      PhysicalObjectVector& _currentChildren;
+      // Reference to the current state
+      StateDetails& _currentState;
 
 
     protected :
       // Copy constructor - protected so only way to duplicate objects is through the "clone" function
       PhysicalObject( const PhysicalObject& );
-
-      // Return the vector of children used in the current state
-      PhysicalObjectVector& getChildren() { return _currentChildren; }
 
 ////////////////////////////////////////////////////////////////////////////////
       // Property modifiers
@@ -82,6 +92,19 @@ namespace Regolith
 
       // Step this object
       void stepThis( float );
+
+      // Collision detection for this object
+      bool collidesThis( PhysicalObject* );
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // State interface functions
+
+      // Sets the current state of the object
+      void setState( unsigned int s ) { _state = s; _currentChildren = _stateSubsets[ _state ]; }
+
+      // Return the vector of children used in the current state
+      PhysicalObjectVector& getChildren() { return _currentChildren; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,6 +176,9 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////
       // Object property accessors and modifiers
+
+      // Return the current state of the object
+      unsigned int getState() const { return _state; }
 
       // Mass variable accessors.
       const float& getMass() const { return _mass; }
