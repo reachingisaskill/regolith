@@ -85,26 +85,16 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
-      // Frame update functions
-
-      // Draw this object
-      void renderThis( SDL_Renderer*, const Camera& ) const;
-
-      // Step this object
-      void stepThis( float );
-
-      // Collision detection for this object
-      bool collidesThis( PhysicalObject* );
-
-
-////////////////////////////////////////////////////////////////////////////////
       // State interface functions
 
       // Sets the current state of the object
-      void setState( unsigned int s ) { _state = s; _currentChildren = _stateSubsets[ _state ]; }
+      void setState( unsigned int s ) { _currentState = _stateSubsets[ _state ]; }
 
       // Return the vector of children used in the current state
-      PhysicalObjectVector& getChildren() { return _currentChildren; }
+      PhysicalObjectVector& getChildren() { return _currentState.children; }
+
+      // Return the texture being used in the current state
+      Texture& getTexture() { return _currentState.texture; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -123,6 +113,7 @@ namespace Regolith
 
 
       // Function to create to an copied instance at the specified position
+      // ALL derived classes my override this function with the copy-constructor for that class!
       virtual PhysicalObject* clone() const { return new PhysicalObject( *this ); }
 
 
@@ -132,9 +123,6 @@ namespace Regolith
       // Perform the basic configuration
       void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
-
-////////////////////////////////////////////////////////////////////////////////
-      // Properties of this class
 
       // Tells the caller that derived classes come from a physical object.
       // Warning: overriding this function change the value may prevent items from being added to context layers
@@ -158,19 +146,22 @@ namespace Regolith
       void destroy() { _destroyMe = true; }
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
-      // Specifc functions for rendering and integrating the object.
+      // Specifc functions for enabling physics and rendering on the object
 
-      // Perform the steps to render the object and all children
-      virtual void render( SDL_Renderer*, const Camera& ) const;
+      // Returns the vector of children that are active for the current state
+      const PhysicalObjectVector& getChildren() const { return _currentState.children; }
 
 
-      // Perform the time integration for movement of this object and all children
+      // For the camera to request the current renderable texture
+      const Texture& getTexture() const { return _currentState.texture; }
+
+
+      // Perform the time integration for movement of this object
       virtual void step( float );
 
 
-      // Perform collision resolution
+      // Perform collision resolution on this object
       virtual bool collides( PhysicalObject* );
 
 

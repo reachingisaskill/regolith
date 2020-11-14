@@ -17,9 +17,8 @@ namespace Regolith
   {
     private:
       Vector _position;
-      Vector _lowerLimit;
-      Vector _upperLimit;
       // TBD
+      // Need a mechanism for confining camera positions to viewable area
 //      float _zoom;
 
       // Details when following
@@ -30,11 +29,6 @@ namespace Regolith
       const float& _scaleX;
       const float& _scaleY;
 
-      // Position within the current layer
-      Vector _layerPosition;
-
-    protected:
-      inline void checkPosition();
 
     public:
       // Create invalid instance
@@ -44,26 +38,31 @@ namespace Regolith
       virtual ~Camera() {}
 
 
-      // Configure the camera using layer width/height and movement scale
-      void configure( Vector, Vector );
-
+      /*
+       * TODO:
+       * - Merge the update function into the set position function. Context tells the camera where it should be, then the camera tries to get there
+       * - Camera performs the searching children logic in the scene graph
+       * - Remove the AnimatedInterface inheritance?
+       */
 
       // Set the position of the camera
       void setPosition( Vector );
+
+
+      // Performs the rendering operation of the provided layer
+      void render( ContextLayer* ) const;
 
 
 
       // Function to update the camera's behaviour on every frame
       virtual void update( float ) override;
 
-      const Vector& getPosition() const { return _position; }
+      // Return the current position of the camera
+      const Vector& position() const { return _position; }
 
 
 
-      // Set the current layer
-      void setLayer( ContextLayer* layer );
-
-      // Places the object's rectang inside the window
+      // Places the object's rectangle inside the window
       SDL_Rect place( const SDL_Rect& ) const;
 
 

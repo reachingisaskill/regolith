@@ -10,8 +10,6 @@ namespace Regolith
 
   Camera::Camera() :
     _position( 0.0 ),
-    _lowerLimit( 0.0 ),
-    _upperLimit( 0.0 ),
     _theObject( nullptr ),
     _offset( 0.0 ),
     _scaleX( Manager::getInstance()->getWindow().renderScaleX() ),
@@ -20,36 +18,22 @@ namespace Regolith
   }
 
 
-  void Camera::configure( Vector lower, Vector upper )
-  {
-    _lowerLimit = lower;
-    _upperLimit = upper - Vector( Manager::getInstance()->getWindow().getResolutionWidth(),
-                                  Manager::getInstance()->getWindow().getResolutionHeight() );
-
-    INFO_STREAM << "Camera configured. Limits: " << _lowerLimit << " -> " << _upperLimit  << ", Pos: " << _position;
-  }
-
-
   void Camera::setPosition( Vector pos )
   {
     _position = pos;
-    checkPosition();
   }
 
 
-  void Camera::checkPosition()
+  void Camera::render( ContextLayer* layer )
   {
-    if ( _position.x() > _upperLimit.x() ) _position.x() = _upperLimit.x();
-    else if ( _position.x() < _lowerLimit.x() ) _position.x() = _lowerLimit.x();
-
-    if ( _position.y() > _upperLimit.y() ) _position.y() = _upperLimit.y();
-    else if ( _position.y() < _lowerLimit.y() ) _position.y() = _lowerLimit.y();
-  }
+    Vector layerPosition = layer->_position + (layer->_movementScale % _position);
 
 
-  void Camera::setLayer( ContextLayer* layer )
-  {
-    _layerPosition = layer->_position + (layer->_movementScale % _position);
+
+    // This is where the magic happens!
+
+
+
   }
 
 
@@ -73,9 +57,6 @@ namespace Regolith
     // Update the current position
     _position =  _theObject->getPosition() - _offset;
     DEBUG_STREAM << "CAMERA : " << _theObject->getPosition()  << ", " << _position << ", " << _offset;
-
-    // Validate
-    this->checkPosition();
   }
 
 

@@ -150,6 +150,9 @@ namespace Regolith
     else // Only the single default state is used
     {
     }
+
+
+    // Need to scan children to determine the correct property flags
   }
 
 
@@ -173,12 +176,11 @@ namespace Regolith
   }
 
 
-  void PhysicalObject::renderThis( SDL_Renderer*, const Camera* ) const
-  {
-  }
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Functions that enable physics
 
 
-  void PhysicalObject::stepThis( float time )
+  void PhysicalObject::step( float time ) const
   {
     // Starting with Euler Step algorithm.
     // Might move to leap-frog/Runge-Kutta later
@@ -189,50 +191,13 @@ namespace Regolith
 
     // Update complete - reset forces
     _forces.zero();
-    DEBUG_STREAM << "PhysicalObject::stepThis() : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
+    DEBUG_STREAM << "PhysicalObject::step() : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
   }
 
 
-  bool PhysicalObject::collidesThis( PhysicalObject* /*other*/ )
+  bool PhysicalObject::collides( PhysicalObject* other )
   {
     return false;
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Functions that distribute calls to the children
-
-  void PhysicalObject::render( SDL_Renderer* render, const Camera& camera ) const
-  {
-    this->renderThis( render, camera );
-
-    for ( PhysicalObjectVector::iterator it = _currentChildren.begin(); it != _currentChildren.end(); ++it )
-    {
-      it->render( render, camera );
-    }
-  }
-
-
-  void PhysicalObject::step( float time ) const
-  {
-    this->stepThis( time );
-
-    for ( PhysicalObjectVector::iterator it = _currentChildren.begin(); it != _currentChildren.end(); ++it )
-    {
-      it->step( time );
-    }
-  }
-
-
-  void PhysicalObject::collides( PhysicalObject* other )
-  {
-    if ( this->collidesThis( other ) )
-    {
-      for ( PhysicalObjectVector::iterator it = _currentChildren.begin(); it != _currentChildren.end(); ++it )
-      {
-        it->collides( other );
-      }
-    }
   }
 
 }
