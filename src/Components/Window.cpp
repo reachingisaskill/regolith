@@ -14,6 +14,7 @@ namespace Regolith
   Window::Window() :
     _exists( false ),
     _theWindow( nullptr ),
+    _theRenderer( nullptr ),
     _title(),
     _width( 0 ),
     _height( 0 ),
@@ -24,7 +25,8 @@ namespace Regolith
     _minimized( false ),
     _fullscreen( false ),
     _scaleX( 1.0 ),
-    _scaleY( 1.0 )
+    _scaleY( 1.0 ),
+    _camera( _theRenderer, _resolutionWidth, _resolutionHeight, _scaleX, _scaleY )
   {
   }
 
@@ -50,7 +52,7 @@ namespace Regolith
   }
 
 
-  SDL_Renderer* Window::create()
+  Camera& Window::create()
   {
     if ( _exists )
     {
@@ -69,14 +71,14 @@ namespace Regolith
       throw ex;
     }
 
-    SDL_Renderer* renderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
-    if ( renderer == nullptr )
+    _theRenderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+    if ( _theRenderer == nullptr )
     {
       Exception ex( "Window::create()", "Could not create SDL Renderer" );
       throw ex;
     }
 
-    return renderer;
+    return _theCamera;
   }
 
 

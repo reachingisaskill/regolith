@@ -3,6 +3,8 @@
 #define REGOLITH_MANAGERS_CONTEXT_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/GamePlay/Context.h"
@@ -15,8 +17,6 @@
 
 namespace Regolith
 {
-  class PhysicalObject;
-  class Context;
 
   class ContextGroup
   {

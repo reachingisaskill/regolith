@@ -234,7 +234,7 @@ namespace Regolith
     for ( Json::Value::const_iterator it = json_data.begin(); it != data_end; ++it )
     {
       std::string team_name = it.key().asString();
-      TeamID id = (TeamID) it->asInt();
+      CollisionTeam id = (CollisionTeam) it->asInt();
       addTeam( team_name, id );
     }
   }

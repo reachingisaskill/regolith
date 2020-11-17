@@ -31,21 +31,17 @@ namespace Regolith
   class RawSound;
   class RawMusic;
 
-  class Drawable;
-  class Animated;
-  class Moveable;
-  class Clickable;
+  class AnimatedObject;
   class PhysicalObject;
 
   typedef unsigned int CollisionTeam;
   typedef unsigned int CollisionType;
 
-  typedef std::list< Drawable* > DrawableList;
-  typedef std::list< Moveable* > MoveableList;
-  typedef std::list< Animated* > AnimatedList;
-  typedef std::map< std::string, PhysicalObject* > PhysicalObjectMap;
+  typedef std::list< PhysicalObject* > PhysicalObjectList;
   typedef std::vector< PhysicalObject* > PhysicalObjectVector;
-  typedef std::set< Clickable* > ClickableSet;
+  typedef std::set< PhysicalObject* > PhysicalObjectSet;
+  typedef std::map< std::string, PhysicalObject* > PhysicalObjectMap;
+  typedef std::map< CollisionTeam, CollisionTeam > TeamMap;
 
   typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::map< std::string, RawSound > RawSoundMap;

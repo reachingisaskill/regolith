@@ -4,10 +4,6 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/Drawable.h"
-#include "Regolith/Architecture/Moveable.h"
-#include "Regolith/Architecture/Collidable.h"
-#include "Regolith/Architecture/Clickable.h"
 
 #include <list>
 #include <set>
@@ -45,19 +41,19 @@ namespace Regolith
       // Caches
 
       // List of all drawable objects
-      DrawableList drawables;
+      PhysicalObjectList drawables;
 
       // List of all moveable objects
-      MoveableList moveables;
+      PhysicalObjectList moveables;
 
       // Map of all teams.
       TeamMap teams;
 
       // Set of all the objects that are "clickable"
-      ClickableSet clickables;
+      PhysicalObjectSet clickables;
 
       // Cache of all objects that are animated
-      AnimatedList animated;
+      PhysicalObjectList animated;
 
 
 ////////////////////////////////////////////////////////////////////////////////

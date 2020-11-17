@@ -3,7 +3,7 @@
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/Noisy.h"
+#include "Regolith/Architecture/NoisyObject.h"
 
 
 namespace Regolith
@@ -228,10 +228,12 @@ namespace Regolith
 
   PhysicalObject* ContextGroup::spawn( std::string name, const Vector& pos )
   {
-    PhysicalObject* new_obj = getPhysicalObject( name )->clone( pos );
+    PhysicalObject* new_obj = getPhysicalObject( name )->clone();
+    new_obj->setPosition( pos );
+
     if ( new_obj->hasAudio() )
     {
-      dynamic_cast<Noisy*>( new_obj )->registerSounds( &_theAudio );
+      dynamic_cast<NoisyObject*>( new_obj )->registerSounds( &_theAudio );
     }
 
     _spawnedObjects.push_back( new_obj );
@@ -241,10 +243,12 @@ namespace Regolith
 
   PhysicalObject* ContextGroup::spawn( PhysicalObject* obj, const Vector& pos )
   {
-    PhysicalObject* new_obj = obj->clone( pos );
+    PhysicalObject* new_obj = obj->clone();
+    new_obj->setPosition( pos );
+
     if ( new_obj->hasAudio() )
     {
-      dynamic_cast<Noisy*>( new_obj )->registerSounds( &_theAudio );
+      dynamic_cast<NoisyObject*>( new_obj )->registerSounds( &_theAudio );
     }
 
     _spawnedObjects.push_back( new_obj );

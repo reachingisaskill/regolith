@@ -8,6 +8,39 @@
 namespace Regolith
 {
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Collision class member functions
+
+  Collision::Collision() :
+    _collisionFrames(),
+    _currentCollision( 0 )
+  {
+  }
+
+
+//  void Collision::configure( )
+//  {
+//  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Something?
+
+
   void callback( Collidable* obj1, Collidable* obj2, const Vector& normal, const float overlap )
   {
     float invM1 = obj1->getInverseMass();
@@ -294,91 +327,6 @@ namespace Regolith
 
     return false;
   }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Collision class member functions
-
-  Collision::Collision() :
-    _position(),
-    _width(),
-    _height()
-  {
-  }
-
-
-  void Collision::configure( Vector pos, float width, float height )
-  {
-    _position = pos;
-    _width = width;
-    _height = height;
-  }
-
-
-  Collision::~Collision()
-  {
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//  // Contact class member functions
-//
-//  Contact::Contact() :
-//    _overlap1(),
-//    _overlap2(),
-//    _object1( nullptr ),
-//    _object2( nullptr )
-//  {
-//  }
-//
-//
-//  void Contact::set( Collidable* obj1, Collidable* obj2, Vector norm, float overlap )
-//  {
-//    _object1 = obj1;
-//    _object2 = obj2;
-//    _overlap1 = (-overlap) * norm;
-//    _overlap2 =   overlap  * norm;
-//  }
-//
-//
-//  void Contact::applyContact()
-//  {
-//    _object1->onCollision( _overlap1, _object2 );
-//    _object2->onCollision( _overlap2, _object1 );
-//  }
-//
-//  /*
-//  void Contact::applyContact()
-//  {
-//    static Manager* man = Manager::getInstance();
-//    float invM1 = _object1->getInverseMass();
-//    float invM2 = _object2->getInverseMass();
-//    float totalInvM = invM1 + invM2;
-//
-//    if ( totalInvM < epsilon ) return; // Both immovable objects!
-//
-//    // Move objects out of collision weighted by their inverse mass
-//    Vector overlapVector = _normal*_overlap;
-//    _object1->move( -overlapVector * (invM1 / totalInvM) );
-//    _object2->move( overlapVector * (invM2 / totalInvM) );
-//
-//    // Nullify relevant forces
-//    _object1->applyForce( man->getGravity()%_normal );
-//    _object2->applyForce( -man->getGravity()%_normal );
-//
-//    // Remove velocity component
-//    float perp_velocity = -_object1->getVelocity() * _normal;
-//    _object1->addVelocity( perp_velocity * _normal );
-//
-//    perp_velocity = _object2->getVelocity() * _normal;
-//    _object2->addVelocity( perp_velocity * _normal );
-//
-//    DEBUG_STREAM << "Ov:" << overlapVector << ", TotIM: " << totalInvM << ", kick:" << overlapVector * (invM1 / totalInvM) << ", Force: " << man->getGravity()%_normal << ", newVel: " << _object1->getVelocity();
-//
-//    _object1->onCollision( _object2->getTeam(), -overlapVector );
-//    _object2->onCollision( _object1->getTeam(), overlapVector );
-//  }
-//  */
 
 }
 

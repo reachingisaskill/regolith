@@ -17,7 +17,7 @@ namespace Regolith
   }
 
 
-  void CollisionHandler::addCollisionPair( TeamID team1, TeamID team2 )
+  void CollisionHandler::addCollisionPair( CollisionTeam team1, CollisionTeam team2 )
   {
     CollisionPairList::iterator end = _pairings.end();
     for ( CollisionPairList::iterator it = _pairings.begin(); it != end; ++it )
@@ -44,7 +44,7 @@ namespace Regolith
   }
 
 
-  void CollisionHandler::addContainerPair( TeamID team1, TeamID team2 )
+  void CollisionHandler::addContainerPair( CollisionTeam team1, CollisionTeam team2 )
   {
     CollisionPairList::iterator end = _pairings.end();
     for ( CollisionPairList::iterator it = _pairings.begin(); it != end; ++it )
@@ -87,8 +87,8 @@ namespace Regolith
       std::string team_name1 = collision_rules[i][0].asString();
       std::string team_name2 = collision_rules[i][1].asString();
 
-      TeamID team1 = Manager::getInstance()->getTeamID( team_name1 );
-      TeamID team2 = Manager::getInstance()->getTeamID( team_name2 );
+      CollisionTeam team1 = Manager::getInstance()->getCollisionTeam( team_name1 );
+      CollisionTeam team2 = Manager::getInstance()->getCollisionTeam( team_name2 );
 
       addCollisionPair( team1, team2 );
       INFO_STREAM << "Added Collision Rule: " << team_name1 << " vs " << team_name2;
@@ -108,8 +108,8 @@ namespace Regolith
       std::string team_name1 = container_rules[i][0].asString();
       std::string team_name2 = container_rules[i][1].asString();
 
-      TeamID team1 = Manager::getInstance()->getTeamID( team_name1 );
-      TeamID team2 = Manager::getInstance()->getTeamID( team_name2 );
+      CollisionTeam team1 = Manager::getInstance()->getCollisionTeam( team_name1 );
+      CollisionTeam team2 = Manager::getInstance()->getCollisionTeam( team_name2 );
 
       addContainerPair( team1, team2 );
       INFO_STREAM << "Added Container Rule: " << team_name1 << " <- " << team_name2;

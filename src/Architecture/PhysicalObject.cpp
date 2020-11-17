@@ -7,6 +7,44 @@
 
 namespace Regolith
 {
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//// State details class////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Construction
+
+  PhysicalObject::StateDetails::StateDetails() :
+    _updatePeriod( 0.0 ),
+    _count( 0.0 ),
+    _numberFrames( 0 )
+  {
+  }
+
+
+  // Update the current frame number
+  void PhysicalObject::StateDetails::update( float timestep )
+  {
+    // Update the timer
+    _count += timestep;
+
+    // Determine how many frames have elapsed in the animation
+    currentFrame += _count / _updatePeriod;
+    currentFrame = currentFrame % _numberFrames;
+
+    // Reset the timer based on the update period
+    _count = std::fmod( _count, _updatePeriod );
+
+    // Update the texture and collision objects
+    texture.setFrameNumber( currentFrame );
+    collision.setFrameNumber( currentFrame );
+
+    DEBUG_STREAM << "StateDetails::update : _count : " << _count << ", frame No. : " << currentFrame << " of " << _numberFrames << ", update rate : " << _updatePeriod;
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//// Physical object class//////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Construction & destruction
 
@@ -21,10 +59,9 @@ namespace Regolith
     _velocity(),
     _forces(),
     _collisionTeam( 0 ),
-    _collisionType( 0 ),
     _children(),
-    _stateMap( 1 ),
-    _currentState( _stateMap[0] )
+    _stateMap(),
+    _currentState( _stateMap.begin()->second ) // This is invalid until configure is called!
   {
   }
 
@@ -41,14 +78,13 @@ namespace Regolith
     _velocity( other._velocity ),
     _forces(),
     _collisionTeam( other._collisionTeam ),
-    _collisionType( other._collisionType ),
     _children(),
-    _stateMap( 1 ),
-    _currentState( _stateMap[0] )
+    _stateMap( other._stateMap ),
+    _currentState( _stateMap.begin()->second )
   {
-    for ( PhysicalObjectMap::iterator it = other._children.begin(); it != other._children.end(); ++it )
+    for ( PhysicalObjectMap::const_iterator it = other._children.begin(); it != other._children.end(); ++it )
     {
-      this->_children[ it->first ] = it->second.clone();
+      this->_children[ it->first ] = it->second->clone();
     }
   }
 
@@ -119,8 +155,9 @@ namespace Regolith
 
       INFO_STREAM << "PhysicalObject::configure() : Configuring collidable object with type: " << collision_type << " and team: " << collision_team;
 
-      _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
-      _collisionType = Manager::getInstance()->getCollisionType( collision_type );
+      // TODO : best way to assign collision teams, etc
+//      _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
+//      _collisionType = Manager::getInstance()->getCollisionType( collision_type );
     }
 
     // If children are present, configure them too
@@ -131,7 +168,7 @@ namespace Regolith
       for( Json::Value::iterator c_it = children.begin(); c_it != children.end(); ++c_it )
       {
         std::string child_name = c_it.key().asString();
-        _children.[ cont_name ] = nullptr;
+        _children[ child_name ] = nullptr;
 
 
         // Use the builder to create child objects
@@ -169,25 +206,18 @@ namespace Regolith
   }
 
 
-  void PhysicalObject::setCollision( CollisionTeam team, CollisionType type )
-  {
-    _collisionTeam = team;
-    _collisionType = type;
-  }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Functions that enable physics
 
 
-  void PhysicalObject::step( float time ) const
+  void PhysicalObject::step( float time )
   {
     // Starting with Euler Step algorithm.
     // Might move to leap-frog/Runge-Kutta later
     Vector accel = _inverseMass * _forces;
 
-    _velocity += ( accel * timestep );
-    _position += ( _velocity * timestep );
+    _velocity += ( accel * time );
+    _position += ( _velocity * time );
 
     // Update complete - reset forces
     _forces.zero();
@@ -195,7 +225,13 @@ namespace Regolith
   }
 
 
-  bool PhysicalObject::collides( PhysicalObject* other )
+  void PhysicalObject::update( float time )
+  {
+    _currentState.update( time );
+  }
+
+
+  bool PhysicalObject::collides( PhysicalObject* )
   {
     return false;
   }

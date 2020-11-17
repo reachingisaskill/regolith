@@ -16,25 +16,45 @@ namespace Regolith
    */
   class Window : public Component
   {
+    // Camera is a friend of the window
+    friend class Camera;
+
     private:
+//////////////////////////////////////////////////////////////////////////////// 
+      // Member variables
+      // Keep track of whether a renderer already exists
       bool _exists;
+
+      // SDL Window pointer
       SDL_Window* _theWindow;
+      SDL_Renderer* _theRenderer;
+
+      // Basic details
       std::string _title;
       int _width;
       int _height;
       int _resolutionWidth;
       int _resolutionHeight;
+
+      // Flags to track the window status
       bool _mouseFocus;
       bool _keyboardFocus;
       bool _minimized;
       bool _fullscreen;
 
+      // Windowed mode scaling due to resize.
       float _scaleX;
       float _scaleY;
+
+      // The camera object - The interface for rendering
+      Camera _camera;
 
     protected:
 
     public:
+//////////////////////////////////////////////////////////////////////////////// 
+      // Con/Destruction
+
       // Empty private initialisation
       Window();
 
@@ -42,15 +62,21 @@ namespace Regolith
       virtual ~Window();
 
 
+//////////////////////////////////////////////////////////////////////////////// 
+      // Configuration
+
       // Configure the window
       void configure( std::string, int, int );
 
 //      // Return the SDL window pointer
 //      SDL_Window* getSDLWindow() const { return _theWindow; }
 
-      // Create the window and return the SDL_Renderer
-      SDL_Renderer* create();
+      // Create the window and return the camera
+      Camera& create();
 
+
+//////////////////////////////////////////////////////////////////////////////// 
+      // Accessors and modifiers
 
       // Get the current window dimensions
       int getWidth() const { return _width; }
@@ -60,7 +86,13 @@ namespace Regolith
       int getResolutionWidth() const { return _width; }
       int getResolutionHeight() const { return _height; }
 
+      // Get the current window scaling factors
+      float getScaleX() { return _scaleX; }
+      float getScaleY() { return _scaleY; }
 
+
+//////////////////////////////////////////////////////////////////////////////// 
+      // Window state accessors
 
       // Boolean functions to interrogate the current window state
       bool hasMouseFocus() const { return _mouseFocus; }
@@ -69,6 +101,8 @@ namespace Regolith
       void toggleFullScreen();
 
 
+//////////////////////////////////////////////////////////////////////////////// 
+      // Event handling for Regolith Components
 
       // Component event handling functionality
       // Register game-wide events with the manager
@@ -76,11 +110,6 @@ namespace Regolith
 
       // Regolith events
       virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override;
-
-
-      // Static member functions to return the current scale factors for rendering
-      const float& renderScaleX() { return _scaleX; }
-      const float& renderScaleY() { return _scaleY; }
   };
 
 }

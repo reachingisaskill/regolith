@@ -46,33 +46,6 @@ namespace Regolith
   }
 
 
-  void RawTexture::renderTexture( SDL_Renderer* renderer )
-  {
-    // If it's already renderered
-    if ( this->texture != nullptr )
-    {
-      return;
-    }
-
-    // Create the texture
-    this->texture = SDL_CreateTextureFromSurface( renderer, this->surface );
-
-    // Check that it worked
-    if ( this->texture == nullptr )
-    {
-      SDL_FreeSurface( this->surface );
-      this->surface = nullptr;
-      Exception ex( "RawTexture::renderTexture", "Could not convert surface to texture" );
-      ex.addDetail( "SDL error", SDL_GetError() );
-      throw ex;
-    }
-
-    // Delete the surface data
-    SDL_FreeSurface( this->surface );
-    this->surface = nullptr;
-  }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////  
   // Texture Member function definitions
 
@@ -81,9 +54,7 @@ namespace Regolith
     _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
     _clip( { 0, 0, 0, 0 } ),
-    _currentSprite( 0 ),
-    _updatePeriod( 0 ),
-    _count( 0 )
+    _currentSprite( 0 )
   {
   }
 
@@ -136,7 +107,7 @@ namespace Regolith
   }
 
 
-  void Texture::setSpriteNumber( int num )
+  void Texture::setFrameNumber( unsigned int num )
   {
     _currentSprite = num;
     int sprite_x = (_currentSprite % _theTexture->columns) * _clip.w;
@@ -149,21 +120,6 @@ namespace Regolith
   }
 
 
-  void Texture::update( float timestep )
-  {
-    _count += timestep;
-
-    int frame_number = _currentSprite;
-
-    frame_number += _count / _updatePeriod;
-    frame_number = frame_number % _theTexture->cells;
-    this->setSpriteNumber( frame_number );
-    _count = std::fmod( _count, _updatePeriod );
-
-    DEBUG_STREAM << "Sprite Animation : _count : " << _count << ", frame No. : " << frame_number << " of " << _theTexture->cells << ", update rate : " << _updatePeriod;
-  }
-
-
   void Texture::configure( Json::Value& json_data, DataHandler& handler )
   {
     Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
@@ -172,18 +128,13 @@ namespace Regolith
     _theTexture = handler.getRawTexture( texture_name );
     DEBUG_STREAM << "Found texture: " << texture_name << " : " << _theTexture;
 
-    if ( json_data.isMember( "update_period" ) )
-    {
-      _updatePeriod = json_data["update_period"].asFloat();
-    }
-
     if ( json_data.isMember( "start_number" ) )
     {
-      setSpriteNumber( json_data["start_number"].asInt() );
+      setFrameNumber( json_data["start_number"].asInt() );
     }
     else
     {
-      setSpriteNumber( 0 );
+      setFrameNumber( 0 );
     }
 
     _clip.x = 0;
@@ -191,7 +142,7 @@ namespace Regolith
     _clip.w = _theTexture->width / _theTexture->columns;
     _clip.h = _theTexture->height / _theTexture->rows;
 
-    DEBUG_STREAM << "Configuring texture: " << _theTexture->rows << "x" << _theTexture->columns << " -> " << _theTexture->cells << " T = " << _updatePeriod << " start: " << _currentSprite;
+    DEBUG_STREAM << "Configuring texture: " << _theTexture->rows << "x" << _theTexture->columns << " -> " << _theTexture->cells << " start: " << _currentSprite;
   }
 
 
@@ -232,148 +183,6 @@ namespace Regolith
 
     return loadedSurface;
   }
-
-
-  /*
-
-  RawTexture makeTextureFromFile( const RawTextureDetail& detail )
-  {
-    DEBUG_LOG( "Creating file-based texture." );
-
-    // If there is a colour key, apply it
-    if ( detail.colourkey.a > 0 )
-    {
-      return makeTextureFromFile( detail.filename, detail.colourkey, detail.rows, detail.columns );
-    }
-    else
-    {
-      return makeTextureFromFile( detail.filename, detail.rows, detail.columns );
-    }
-  }
-
-
-  RawTexture makeTextureFromText( const RawStringDetail& detail )
-  {
-    Manager* man = Manager::getInstance();
-
-    DEBUG_LOG( "Creating string-based texture." );
-
-    // Find the specified font
-    TTF_Font* font = man->getFontPointer( detail.font );
-    DEBUG_STREAM << "Creating text using font: " << detail.font;
-
-    return makeTextureFromText( font, detail.text, detail.colour );
-  }
-
-
-  RawTexture makeTextureFromFile( std::string path, SDL_Color key, unsigned short rows, unsigned short cols )
-  {
-    Manager* man = Manager::getInstance();
-
-    // Load the image into a surface
-    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
-    if ( loadedSurface == nullptr )
-    {
-      Exception ex( "Scene::addTextureFromFile()", "Could not load image data", false );
-      ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL_img error", IMG_GetError() );
-      throw ex;
-    }
-
-    SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key.r, key.g, key.b ) );
-
-    // Create SDL_Texture
-    SDL_Texture* loadedTexture = SDL_CreateTextureFromSurface( man->getRendererPointer(), loadedSurface );
-    if ( loadedTexture == nullptr )
-    {
-      SDL_FreeSurface( loadedSurface );
-      Exception ex( "Scene::addTextureFromFile()", "Could not convert to texture", false );
-      ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL error", SDL_GetError() );
-      throw ex;
-    }
-
-    RawTexture theTexture( loadedTexture, loadedSurface->w, loadedSurface->h, rows, cols );
-    SDL_FreeSurface( loadedSurface );
-
-    return theTexture;
-  }
-
-
-//  RawTexture makeTexture( Json::Value& json_data )
-//  {
-//    Manager* man = Manager::getInstance();
-//
-//    Utilities::validateJson( json_data, "type", Utilities::JSON_TYPE_STRING );
-//
-//    DEBUG_STREAM << "Creating texture of type: " << json_data["type"];
-//
-//    if ( json_data["type"] == "file" )
-//    {
-//      Utilities::validateJson( json_data, "path", Utilities::JSON_TYPE_STRING );
-//      std::string path = json_data["path"].asString();
-//
-//      // If there is a colour key, apply it
-//      if ( Utilities::validateJson( json_data, "colour_key", Utilities::JSON_TYPE_ARRAY, false ) )
-//      {
-//        Utilities::validateJsonArray( json_data["colour_key"], 3, Utilities::JSON_TYPE_INTEGER );
-//
-//        Uint8 key_red = json_data["colour_key"][0].asInt();
-//        Uint8 key_green = json_data["colour_key"][1].asInt();
-//        Uint8 key_blue = json_data["colour_key"][2].asInt();
-//        SDL_Color key = { key_red, key_green, key_blue, 0 };
-//
-//        return makeTextureFromFile( path, key );
-//      }
-//      else
-//      {
-//        return makeTextureFromFile( path );
-//      }
-//
-//    }
-//    else if ( json_data["type"] == "text" )
-//    {
-//      Utilities::validateJson( json_data, "text", Utilities::JSON_TYPE_STRING );
-//      std::string text_string = json_data["text"].asString();
-//
-//      // Define the text colour
-//      SDL_Color color;
-//      if ( Utilities::validateJson( json_data, "colour", Utilities::JSON_TYPE_ARRAY, false ) )
-//      {
-//        Utilities::validateJsonArray( json_data["colour"], 4, Utilities::JSON_TYPE_INTEGER );
-//
-//        color.r = json_data["colour"][0].asInt();
-//        color.g = json_data["colour"][1].asInt();
-//        color.b = json_data["colour"][2].asInt();
-//        color.a = json_data["colour"][3].asInt();
-//      }
-//      else
-//      {
-//        color = man->getDefaultColour();
-//      }
-//
-//      // Find the specified font
-//      TTF_Font* font = nullptr;
-//      if ( Utilities::validateJson( json_data, "font", Utilities::JSON_TYPE_STRING, false ) )
-//      {
-//        font = man->getFontPointer( json_data["font"].asString() );
-//        DEBUG_STREAM << "Creating text using font: " << json_data["font"].asString();
-//      }
-//      else
-//      {
-//        font = man->getDefaultFont();
-//        DEBUG_LOG( "Using default font" );
-//      }
-//
-//      return makeTextureFromText( font, text_string, color );
-//    }
-//
-//    Exception ex( "makeTexture()", "Unknown texture type. Must be either \"file\" or \"text\"" );
-//    ex.addDetail( "Type", json_data["type"].asString() );
-//    throw ex;
-//  }
-  */
-
 
 }
 

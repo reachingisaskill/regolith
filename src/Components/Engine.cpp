@@ -336,7 +336,7 @@ namespace Regolith
     Engine& engine = Manager::getInstance()->getEngine();
 
     // Get references to the required components
-    SDL_Renderer* renderer = Manager::getInstance()->requestRenderer();
+    Camera& camera = Manager::getInstance()->requestCamera();
     SDL_Color& defaultColour = engine._defaultColor;
     ContextStack::reverse_iterator& visibleStackStart = engine._visibleStackStart;
     ContextStack::reverse_iterator& visibleStackEnd = engine._visibleStackEnd;
@@ -374,22 +374,21 @@ namespace Regolith
         DEBUG_LOG( "engineRenderingThread : ------ RENDER ------" );
 
         // Setup the rendering process
-        SDL_SetRenderDrawColor( renderer, defaultColour.r, defaultColour.g, defaultColour.b, defaultColour.a );
-        SDL_RenderClear( renderer );
+        camera.resetRender();
 
         // Iterate through all the visible contexts and update as necessary
         for ( ContextStack::reverse_iterator context_it = visibleStackStart; context_it != visibleStackEnd; ++context_it )
         {
           // Draw everything to the back buffer
-          (*context_it)->render( renderer );
+          (*context_it)->render( camera );
         }
 
         // Blits the back buffer to the front buffer synchronised with monitor VSYNC
-        SDL_RenderPresent( renderer );
-
+        camera.draw();
 
         // Release acces to the context stack
         renderLock.unlock();
+
 
         DEBUG_LOG( "engineRenderingThread : ------ FRAME ------" );
 
@@ -408,7 +407,7 @@ namespace Regolith
               if ( rawTexture != nullptr )
               {
                 // Perform the rendering
-                rawTexture->renderTexture( renderer );
+                camera.renderRawTexture( rawTexture );
               }
               else
               {
@@ -467,10 +466,8 @@ namespace Regolith
     statusLock.unlock();
     threadStatus.variable.notify_all();
 
-    INFO_LOG( "engineRenderingThread : Destroying the renderer" );
-    SDL_DestroyRenderer( renderer );
-    renderer = nullptr;
-
+    INFO_LOG( "engineRenderingThread : Clearing camera" );
+    camera.clear();
 
     INFO_LOG( "engineRenderingThread : Stopped" );
 

@@ -2,13 +2,7 @@
 #include "Regolith/GamePlay/ContextLayer.h"
 
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/Noisy.h"
-#include "Regolith/Architecture/Interactable.h"
-#include "Regolith/Architecture/Controllable.h"
-#include "Regolith/Architecture/Drawable.h"
-#include "Regolith/Architecture/Moveable.h"
-#include "Regolith/Architecture/Collidable.h"
-#include "Regolith/Architecture/Animated.h"
+#include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/GamePlay/Context.h"
 
 

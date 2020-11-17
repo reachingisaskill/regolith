@@ -20,7 +20,6 @@
 namespace Regolith
 {
 
-  class Animated;
   class PhysicalObject;
   class ContextGroup;
 
@@ -50,8 +49,9 @@ namespace Regolith
       FocusHandler _theFocus;
       CollisionHandler _theCollision;
 
-      // Camera for the context
-      Camera _theCamera;
+      // Details for using the camera
+      Vector _cameraPosition;
+      Vector _cameraOffset;
 
       // Flag to indicate that this context is now closed and may be popped from the context stack.
       bool _closed;
@@ -134,7 +134,7 @@ namespace Regolith
 
 
       // Render all the objects
-      void render( SDL_Renderer* );
+      void render( Camera& );
 
 
       // Render all the objects

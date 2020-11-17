@@ -15,6 +15,7 @@ namespace Regolith
    *
    * Audio => Noisy
    * Input => Controllable
+   * Button => Focusable
    * Animation => Animated
    * Texture => Drawable
    * Movement => Movable
@@ -26,6 +27,7 @@ namespace Regolith
 
       virtual bool hasAudio() const { return false; }
       virtual bool hasInput() const { return false; }
+      virtual bool hasButton() const { return false; }
       virtual bool hasAnimation() const { return false; }
       virtual bool hasTexture() const { return false; }
       virtual bool hasMovement() const { return false; }

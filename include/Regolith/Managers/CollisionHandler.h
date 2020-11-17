@@ -17,7 +17,7 @@ namespace Regolith
    */
   class CollisionHandler
   {
-    typedef std::vector< std::pair< TeamID, TeamID > > CollisionPairList;
+    typedef std::vector< std::pair< CollisionTeam, CollisionTeam > > CollisionPairList;
 
     private:
       CollisionPairList _pairings;
@@ -35,10 +35,10 @@ namespace Regolith
       void configure( Json::Value& );
 
       // Manually add a pairing
-      void addCollisionPair( TeamID, TeamID );
+      void addCollisionPair( CollisionTeam, CollisionTeam );
 
       // Manually add a containment pairing
-      void addContainerPair( TeamID, TeamID );
+      void addContainerPair( CollisionTeam, CollisionTeam );
 
       // Basic iterator interface
       iterator collisionBegin() const { return _pairings.begin(); }

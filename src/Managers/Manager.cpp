@@ -158,12 +158,12 @@ namespace Regolith
   }
 
 
-  TeamID Manager::getTeamID( std::string name )
+  CollisionTeam Manager::getCollisionTeam( std::string name )
   {
     TeamNameMap::iterator found = _teamNames.find( name );
     if ( found == _teamNames.end() )
     {
-      Exception ex( "Manager::getTeamID()", "Could not find requested team name. Cannot load object." );
+      Exception ex( "Manager::getCollisionTeam()", "Could not find requested team name. Cannot load object." );
       ex.addDetail( "Team Name", name );
       throw ex;
     }

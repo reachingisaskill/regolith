@@ -4,6 +4,8 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
+#include "Regolith/GamePlay/Texture.h"
+#include "Regolith/GamePlay/Collision.h"
 
 namespace Regolith
 {
@@ -17,16 +19,30 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
     // Info required for each state
     public:
-      struct StateDetails
+      class StateDetails
       {
-        unsigned int id;
-        Texture texture;
-        PhysicalObjectVector children;
+        private:
+          float _updatePeriod;
+          float _count;
+          unsigned int _numberFrames;
 
-        StateDetails() : id( 0 ), texture(), children() {}
+        public:
+          // Public member variables
+          unsigned int id;
+          Texture texture;
+          Collision collision;
+          unsigned int currentFrame;
+          PhysicalObjectVector children;
+
+          // Constructor
+          StateDetails();
+
+          // Update the frame number
+          void update( float );
+
       };
 
-      typedef std::map< std::string, StateDetails > > StateMap;
+      typedef std::map< std::string, StateDetails > StateMap;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -42,7 +58,7 @@ namespace Regolith
       float _mass;
       float _inverseMass;
 
-      // Bounding box dimensions
+      // Defines the size of the drawable area for the object. Should ALWAYS contain all the collision boxes.
       float _width;
       float _height;
 
@@ -52,7 +68,6 @@ namespace Regolith
 
       // Used to configure the collision logic
       CollisionTeam _collisionTeam;
-      CollisionType _collisionType;
 
       // Map of all the children
       PhysicalObjectMap _children;
@@ -74,9 +89,6 @@ namespace Regolith
       // For derived classes to update the mass. Sets both mass and it's inverse
       void setMass( float );
 
-      // For derived classes to configure the collision properties
-      void setCollision( CollisionTeam, CollisionType );
-
       // For derived classes to set the velocity
       void setVelocity( Vector v ) { _velocity = v; }
 
@@ -87,8 +99,11 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // State interface functions
 
-      // Sets the current state of the object
-      void setState( unsigned int s ) { _currentState = _stateSubsets[ _state ]; }
+      // Gets a reference to a state
+      StateDetails& getState( std::string name ) { return _stateMap[ name ]; }
+
+      // Sets the current state to the reference
+      void setState( StateDetails& state ) { _currentState = state; }
 
       // Return the vector of children used in the current state
       PhysicalObjectVector& getChildren() { return _currentState.children; }
@@ -135,6 +150,9 @@ namespace Regolith
       // Tells the caller that the object can be rendered.
       virtual bool hasTexture() const override { return false; }
 
+      // Tells the caller that the is animated for every frame
+      virtual bool hasAnimation() const override { return false; }
+
 
 ////////////////////////////////////////////////////////////////////////////////
       // Controlling object permanence within the context
@@ -160,6 +178,8 @@ namespace Regolith
       // Perform the time integration for movement of this object
       virtual void step( float );
 
+      // Perform an update to all the animations
+      virtual void update( float );
 
       // Perform collision resolution on this object
       virtual bool collides( PhysicalObject* );
@@ -169,7 +189,7 @@ namespace Regolith
       // Object property accessors and modifiers
 
       // Return the current state of the object
-      unsigned int getState() const { return _state; }
+      unsigned int getState() const { return _currentState.id; }
 
       // Mass variable accessors.
       const float& getMass() const { return _mass; }

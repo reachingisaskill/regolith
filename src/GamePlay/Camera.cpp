@@ -8,33 +8,61 @@
 namespace Regolith
 {
 
-  Camera::Camera() :
-    _position( 0.0 ),
-    _theObject( nullptr ),
-    _offset( 0.0 ),
-    _scaleX( Manager::getInstance()->getWindow().renderScaleX() ),
-    _scaleY( Manager::getInstance()->getWindow().renderScaleY() )
+  Camera::Camera( SDL_Renderer*& renderer, const int& width, const int& height, const float& scalex, const float& scaley ) :
+    _theRenderer( renderer ),
+    _width( width ),
+    _height( height ),
+    _scaleX( scalex ),
+    _scaleY( scaley )
   {
   }
 
 
-  void Camera::setPosition( Vector pos )
+  void Camera::resetRender() const
   {
-    _position = pos;
+    SDL_SetRenderDrawColor( _theRenderer, defaultColour.r, defaultColour.g, defaultColour.b, defaultColour.a );
+    SDL_RenderClear( _theRenderer );
   }
 
 
-  void Camera::render( ContextLayer* layer )
+  void Camera::draw() const
   {
-    Vector layerPosition = layer->_position + (layer->_movementScale % _position);
-
-
-
-    // This is where the magic happens!
-
-
-
+    SDL_RenderPresent( renderer );
   }
+
+
+  void Camera::clear()
+  {
+    SDL_DestroyRenderer( _theRenderer );
+  }
+
+
+  void Camera::renderRawTexture( RawTexture* texture )
+  {
+    // If it's already renderered
+    if ( texture->texture != nullptr )
+    {
+      return;
+    }
+
+    // Create the texture
+    texture->texture = SDL_CreateTextureFromSurface( _theRenderer, texture->surface );
+
+    // Check that it worked
+    if ( texture->texture == nullptr )
+    {
+      SDL_FreeSurface( texture->surface );
+      texture->surface = nullptr;
+      Exception ex( "RawTexture::renderTexture", "Could not convert surface to texture" );
+      ex.addDetail( "SDL error", SDL_GetError() );
+      throw ex;
+    }
+
+    // Delete the surface data
+    SDL_FreeSurface( texture->surface );
+    texture->surface = nullptr;
+  }
+
 
 
   SDL_Rect Camera::place( const SDL_Rect& rect ) const
@@ -45,26 +73,6 @@ namespace Regolith
     newRect.w = rect.w * _scaleX;
     newRect.h = rect.h * _scaleY;
     return newRect;
-  }
-
-
-  void Camera::update( float )
-  {
-    DEBUG_LOG( "Updating Camera" );
-    // If there's nothing to follow, don't move
-    if ( _theObject == nullptr ) return;
-
-    // Update the current position
-    _position =  _theObject->getPosition() - _offset;
-    DEBUG_STREAM << "CAMERA : " << _theObject->getPosition()  << ", " << _position << ", " << _offset;
-  }
-
-
-  void Camera::followMe( PhysicalObject* object )
-  {
-    _theObject = object;
-    _offset.x() = 0.5*Manager::getInstance()->getWindow().getResolutionWidth() - 0.5*object->getWidth();
-    _offset.y() = 0.5*Manager::getInstance()->getWindow().getResolutionHeight() - 0.5*object->getHeight();
   }
 
 }

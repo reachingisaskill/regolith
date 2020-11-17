@@ -2,13 +2,8 @@
 #include "Regolith/GamePlay/Context.h"
 
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/Noisy.h"
-#include "Regolith/Architecture/Interactable.h"
-#include "Regolith/Architecture/Controllable.h"
-#include "Regolith/Architecture/Drawable.h"
-#include "Regolith/Architecture/Moveable.h"
-#include "Regolith/Architecture/Collidable.h"
-#include "Regolith/Architecture/Animated.h"
+#include "Regolith/Architecture/NoisyObject.h"
+#include "Regolith/Architecture/ButtonObject.h"
 #include "Regolith/GamePlay/ContextLayer.h"
 #include "Regolith/Managers/Manager.h"
 
@@ -77,8 +72,8 @@ namespace Regolith
     ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
     for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      AnimatedList::iterator anim_it = layer_it->second.animated.begin();
-      AnimatedList::iterator anim_end = layer_it->second.animated.end();
+      PhysicalObjectList::iterator anim_it = layer_it->second.animated.begin();
+      PhysicalObjectList::iterator anim_end = layer_it->second.animated.end();
       while ( anim_it != anim_end )
       {
         (*anim_it)->update( time );
@@ -96,10 +91,10 @@ namespace Regolith
     ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
     for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      MoveableList& moveables = layer_it->second.moveables;
+      PhysicalObjectList& moveables = layer_it->second.moveables;
       DEBUG_STREAM << " Stepping : " << moveables.size();
-      MoveableList::iterator move_it = moveables.begin();
-      MoveableList::iterator move_end = moveables.end();
+      PhysicalObjectList::iterator move_it = moveables.begin();
+      PhysicalObjectList::iterator move_end = moveables.end();
       while ( move_it != move_end )
       {
         if ( (*move_it)->isDestroyed() )
@@ -116,21 +111,23 @@ namespace Regolith
   }
 
 
-  void Context::render( SDL_Renderer* renderer )
+  void Context::render( Camera& camera )
   {
     DEBUG_LOG( "Context::render : Context Render" );
     ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
     for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      _theCamera.setLayer( &(layer_it->second) );
 
-      DEBUG_STREAM << " Rendering layer. " << layer_it->second.drawables.size() << " Elements";
+      Vector layerPosition = layer._position + (layer._movementScale % _position);
 
-      DrawableList& drawables = layer_it->second.drawables;
-      DrawableList::iterator draw_it = drawables.begin();
-      DrawableList::iterator draw_end = drawables.end();
+
+      DEBUG_STREAM << "Context::render : Rendering layer. " << layer.drawables.size() << " Elements";
+
+      PhysicalObjectList::iterator draw_it = layer.drawables.begin();
+      PhysicalObjectList::iterator draw_end = layer.drawables.end();
       while ( draw_it != draw_end )
       {
+        /*
         if ( (*draw_it)->isDestroyed() )
         {
           drawables.erase( draw_it++ );
@@ -140,7 +137,9 @@ namespace Regolith
           (*draw_it)->render( renderer, _theCamera );
           ++draw_it;
         }
+        */
       }
+
     }
   }
 
@@ -149,6 +148,7 @@ namespace Regolith
   {
     DEBUG_LOG( "Context::resolveCollisions : Context Collisions" );
 
+    /*
     ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
     for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
@@ -200,8 +200,21 @@ namespace Regolith
       }
     }
 
+    */
     DEBUG_LOG( "Context::resolveCollisions : Context Collisions Resolved" );
   }
+
+
+
+  void Camera::followMe( PhysicalObject* object )
+  {
+    _theObject = object;
+    _offset.x() = 0.5*Manager::getInstance()->getWindow().getResolutionWidth() - 0.5*object->getWidth();
+    _offset.y() = 0.5*Manager::getInstance()->getWindow().getResolutionHeight() - 0.5*object->getHeight();
+  }
+
+
+
 
 
   Proxy<ContextLayer> Context::requestLayer( std::string name )
@@ -345,9 +358,6 @@ namespace Regolith
     Utilities::validateJsonArray( camera_data["lower_limit"], 2, Utilities::JSON_TYPE_FLOAT );
     Utilities::validateJsonArray( camera_data["upper_limit"], 2, Utilities::JSON_TYPE_FLOAT );
 
-    _theCamera.configure( Vector( camera_data["lower_limit"][0].asFloat(), camera_data["lower_limit"][1].asFloat() ),
-                          Vector( camera_data["upper_limit"][0].asFloat(), camera_data["upper_limit"][1].asFloat() ) );
-
     // Set the camera follow if provided
     if ( ( ! camera_data["follow"].isNull() ) && Utilities::validateJson( camera_data, "follow", Utilities::JSON_TYPE_STRING, false ) )
     {
@@ -367,8 +377,8 @@ namespace Regolith
       }
     }
 
-    // Let the focus handler register input actions
-    _theFocus.registerActions( _theInput );
+//    // Let the focus handler register input actions
+//    _theFocus.registerActions( _theInput );
 
     // Finall call the overriden function for the context
     this->registerActions( _theInput );
