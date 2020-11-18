@@ -26,19 +26,13 @@ namespace Regolith
 
   ContextLayer::~ContextLayer()
   {
-    drawables.clear();
+    _sceneGraph.clear();
 
-    moveables.clear();
-
-    for ( TeamMap::iterator it = teams.begin(); it != teams.end(); ++it )
+    for ( TeamMap::iterator it = _teams.begin(); it != _teams.end(); ++it )
     {
       it->second.clear();
     }
-    teams.clear();
-
-    clickables.clear();
-
-    animated.clear();
+    _teams.clear();
   }
 
 
@@ -53,52 +47,83 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Frame update functions
+
+  void ContextLayer::update( float time )
+  {
+    for ( PhysicalObjectList::iterator it = _sceneGraph.begin(); it != _sceneGraph.end(); ++it )
+    {
+      // If object is marked for destruction, remove it from the scene graph
+      if ( (*it)->isDestroyed() )
+      {
+        _sceneGraph.erase( it );
+        continue;
+      }
+
+      // If object can be moved, do the physics integration
+      if ( (*it)->hasMovement() )
+      {
+        (*it)->step( time );
+      }
+
+      // If the object is animated, update the animation
+      if ( (*it)->hasAnimation() )
+      {
+        (*it)->update( time );
+      }
+    }
+
+
+    // RESOLVE COLLISIONS HERE!
+
+
+    DEBUG_STREAM << " Starting Layer Collision: " << layer_it->second.teams.size();
+
+    // Colliding objects
+    CollisionHandler::iterator end = _theCollision.collisionEnd();
+    for ( CollisionHandler::iterator it = _theCollision.collisionBegin(); it != end; ++it )
+    {
+      CollidableList& team1 = layer_it->second.teams[ it->first ];
+      CollidableList& team2 = layer_it->second.teams[ it->second ];
+
+      CollidableList::iterator end1 = team1.end();
+      CollidableList::iterator end2 = team2.end();
+
+      for ( CollidableList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
+      {
+        if ( ! (*it1)->collisionActive() ) continue;
+        for ( CollidableList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
+        {
+          if ( ! (*it2)->collisionActive() ) continue;
+
+          collides( (*it1), (*it2) );
+        }
+      }
+    }
+  }
+
+
+  void ContextLayer::render( Camera& camera )
+  {
+    for ( PhysicalObjectList::iterator it = _sceneGraph.begin(); it != _sceneGraph.end(); ++it )
+    {
+      // If the object can be drawn, render it to the back buffer
+      if ( (*it)->hasTexture() )
+      {
+        (*it)->render( camera );
+      }
+    }
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
   // Object spawning, placing and caching
 
   void ContextLayer::spawn( PhysicalObject* obj, const Vector& position )
   {
     PhysicalObject* object = _owner->_owner->spawn( obj, position );
-    cacheObject( object );
+    _sceneGraph.push_back( object );
   }
-
-
-  void ContextLayer::cacheObject( GameObject* object )
-  {
-    if ( object->hasInput() )
-    {
-      dynamic_cast<Controllable*>( object )->registerActions( _owner->_theInput );
-    }
-    if ( object->hasClick() )
-    {
-      _owner->_theFocus.addObject( dynamic_cast<Clickable*>( object ) );
-    }
-    if ( object->hasTexture() )
-    {
-      drawables.push_back( dynamic_cast<Drawable*>( object ) );
-    }
-    if ( object->hasMovement() )
-    {
-      moveables.push_back( dynamic_cast<Moveable*>( object ) );
-    }
-    if ( object->hasCollision() )
-    {
-      Collidable* temp = dynamic_cast<Collidable*>( object );
-      teams[ temp->getTeam() ].push_back( temp );
-    }
-    if ( object->hasAnimation() )
-    {
-      animated.push_back( dynamic_cast<Animated*>( object ) );
-    }
-//    if ( object->hasAudio() ) // This is handled by the context group
-//    {
-//      dynamic_cast<Noisy*>( object )->registerSounds( &_theAudio );
-//    }
-//    if ( object->hasInteraction() )
-//    {
-//       // Nothing to do for this one
-//    }
-  }
-
 
 }
 

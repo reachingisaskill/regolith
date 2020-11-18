@@ -14,9 +14,8 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Engine member function definitions
 
-  Engine::Engine( InputManager& input, SDL_Color& color ) :
+  Engine::Engine( InputManager& input ) :
     _inputManager( input ),
-    _defaultColor( color ),
     _contextStack(),
     _openContext( nullptr ),
     _openContextGroup( nullptr ),
@@ -101,8 +100,8 @@ namespace Regolith
           if ( ! this_context->isPaused() )
           {
             this_context->update( time );
-            this_context->step( time );
-            this_context->resolveCollisions();
+//            this_context->step( time );
+//            this_context->resolveCollisions();
           }
         }
       }
@@ -337,7 +336,6 @@ namespace Regolith
 
     // Get references to the required components
     Camera& camera = Manager::getInstance()->requestCamera();
-    SDL_Color& defaultColour = engine._defaultColor;
     ContextStack::reverse_iterator& visibleStackStart = engine._visibleStackStart;
     ContextStack::reverse_iterator& visibleStackEnd = engine._visibleStackEnd;
     DataHandler*& currentDataHandler = engine._currentDataHandler;

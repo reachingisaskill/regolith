@@ -27,6 +27,16 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
+      // Caches
+
+      // List of all objects in the scene
+      PhysicalObjectList _sceneGraph;
+
+      // Map of all teams.
+      TeamMap _teams;
+
+
+////////////////////////////////////////////////////////////////////////////////
     public:
       // Constuct
       ContextLayer();
@@ -38,22 +48,13 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
-      // Caches
+      // Frame update functions
 
-      // List of all drawable objects
-      PhysicalObjectList drawables;
+      // Apply physics processes and collision
+      void update( float );
 
-      // List of all moveable objects
-      PhysicalObjectList moveables;
-
-      // Map of all teams.
-      TeamMap teams;
-
-      // Set of all the objects that are "clickable"
-      PhysicalObjectSet clickables;
-
-      // Cache of all objects that are animated
-      PhysicalObjectList animated;
+      // Recursively render the scene
+      void render( Camera& );
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -71,13 +72,10 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
-      // Object spawning and caching
+      // Object spawning
 
       // Spawn a copy of the provided object at the requested position 
       void spawn( PhysicalObject*, const Vector& );
-
-      // Cache an object in this layer
-      virtual void cacheObject( GameObject* );
 
   };
 

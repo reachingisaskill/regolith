@@ -1,5 +1,6 @@
 
-#include "Regolith/GamePlay/Camera.h"
+#include "Regolith/Components/Camera.h"
+
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Window.h"
@@ -20,14 +21,14 @@ namespace Regolith
 
   void Camera::resetRender() const
   {
-    SDL_SetRenderDrawColor( _theRenderer, defaultColour.r, defaultColour.g, defaultColour.b, defaultColour.a );
+    SDL_SetRenderDrawColor( _theRenderer, 0, 0, 0, 255 );
     SDL_RenderClear( _theRenderer );
   }
 
 
   void Camera::draw() const
   {
-    SDL_RenderPresent( renderer );
+    SDL_RenderPresent( _theRenderer );
   }
 
 
@@ -37,7 +38,7 @@ namespace Regolith
   }
 
 
-  void Camera::renderRawTexture( RawTexture* texture )
+  void Camera::renderRawTexture( RawTexture* texture ) const
   {
     // If it's already renderered
     if ( texture->texture != nullptr )
@@ -68,10 +69,10 @@ namespace Regolith
   SDL_Rect Camera::place( const SDL_Rect& rect ) const
   {
     SDL_Rect newRect;
-    newRect.x = (rect.x - _layerPosition.x()) * _scaleX;
-    newRect.y = (rect.y - _layerPosition.y()) * _scaleY;
-    newRect.w = rect.w * _scaleX;
-    newRect.h = rect.h * _scaleY;
+//    newRect.x = (rect.x - _layerPosition.x()) * _scaleX;
+//    newRect.y = (rect.y - _layerPosition.y()) * _scaleY;
+//    newRect.w = rect.w * _scaleX;
+//    newRect.h = rect.h * _scaleY;
     return newRect;
   }
 

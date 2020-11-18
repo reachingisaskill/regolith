@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_GAMEPLAY_CAMERA_H_
-#define REGOLITH_GAMEPLAY_CAMERA_H_
+#ifndef REGOLITH_COMPONENTS_CAMERA_H_
+#define REGOLITH_COMPONENTS_CAMERA_H_
 
 #include "Regolith/Global/Global.h"
 
@@ -34,6 +34,8 @@ namespace Regolith
       // Destructor
       virtual ~Camera() {}
 
+      // Clears the SDL renderer. Makes the camera invalid
+      void clear();
 
       // Places the object's rectangle inside the window
       SDL_Rect place( const SDL_Rect& ) const;
@@ -53,5 +55,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_GAMEPLAY_CAMERA_H_
+#endif // REGOLITH_COMPONENTS_CAMERA_H_
 

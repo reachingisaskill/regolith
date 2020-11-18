@@ -20,7 +20,7 @@ namespace Regolith
     _theHardware(),
     _theData(),
     _theContexts(),
-    _theEngine( _theInput, _defaultColor ),
+    _theEngine( _theInput ),
     _objectFactory(),
     _contextFactory(),
     _signalFactory(),
@@ -78,9 +78,8 @@ namespace Regolith
   }
 
 
-  SDL_Renderer* Manager::requestRenderer()
+  Camera& Manager::requestCamera()
   {
-//    return SDL_CreateRenderer( _theWindow.getSDLWindow(), -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
     return _theWindow.create();
   }
 

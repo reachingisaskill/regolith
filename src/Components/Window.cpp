@@ -78,7 +78,7 @@ namespace Regolith
       throw ex;
     }
 
-    return _theCamera;
+    return _camera;
   }
 
 

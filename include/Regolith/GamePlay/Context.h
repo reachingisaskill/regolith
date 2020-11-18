@@ -11,7 +11,6 @@
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/GamePlay/ContextLayer.h"
-#include "Regolith/GamePlay/Camera.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
 #include <list>
@@ -20,8 +19,11 @@
 namespace Regolith
 {
 
+////////////////////////////////////////////////////////////////////////////////
+  // Forward declarations
   class PhysicalObject;
   class ContextGroup;
+  class Camera;
 
   /*
    * Defines a context interface.
@@ -39,7 +41,7 @@ namespace Regolith
     Context( const Context& ) = delete;
     Context& operator=( const Context& ) = delete;
 
-    friend class ContextLayer;
+    typedef std::map< ContextLayer > ContextLayerMap;
 
 //////////////////////////////////////////////////////////////////////////////// 
     private:
@@ -63,7 +65,7 @@ namespace Regolith
       bool _pauseable;
 
       // Named vector of all the layers owned by the current context
-      ProxyMap< ContextLayer > _layers;
+      ContextLayerMap _layers;
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -129,23 +131,12 @@ namespace Regolith
       void update( float );
 
 
-      // Update the moveable objects
-      void step( float );
-
-
       // Render all the objects
       void render( Camera& );
 
 
-      // Render all the objects
-      void resolveCollisions();
-
-
 ////////////////////////////////////////////////////////////////////////////////
       // Object and layer interface
-
-      // Return a layer proxy so that it may be referenced when spawining objects
-      Proxy<ContextLayer> requestLayer( std::string );
 
       // Return a layer proxy so that it may be referenced when spawining objects
       ContextLayer& getLayer( std::string );

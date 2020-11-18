@@ -4,8 +4,9 @@
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/NoisyObject.h"
 #include "Regolith/Architecture/ButtonObject.h"
-#include "Regolith/GamePlay/ContextLayer.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Components/Camera.h"
+#include "Regolith/GamePlay/ContextLayer.h"
 
 
 namespace Regolith
@@ -28,7 +29,7 @@ namespace Regolith
     _closed( false ),
     _paused( false ),
     _pauseable( false ),
-    _layers( "Context Layers" )
+    _layers()
   {
   }
 
@@ -69,144 +70,28 @@ namespace Regolith
     _theCamera.update( time );
 
     // Update all the animated objects
-    ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
-    for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    ContextLayerMap::iterator layer_end = _layers.end();
+    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      PhysicalObjectList::iterator anim_it = layer_it->second.animated.begin();
-      PhysicalObjectList::iterator anim_end = layer_it->second.animated.end();
-      while ( anim_it != anim_end )
-      {
-        (*anim_it)->update( time );
-        ++anim_it;
-      }
+      layer_it->second.update( time );
     }
 
     updateContext( time );
   }
 
 
-  void Context::step( float time )
-  {
-    DEBUG_LOG( "Context::step : Context Step" );
-    ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
-    for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
-    {
-      PhysicalObjectList& moveables = layer_it->second.moveables;
-      DEBUG_STREAM << " Stepping : " << moveables.size();
-      PhysicalObjectList::iterator move_it = moveables.begin();
-      PhysicalObjectList::iterator move_end = moveables.end();
-      while ( move_it != move_end )
-      {
-        if ( (*move_it)->isDestroyed() )
-        {
-          moveables.erase( move_it++ );
-        }
-        else
-        {
-          (*move_it)->step( time );
-          ++move_it;
-        }
-      }
-    }
-  }
-
-
   void Context::render( Camera& camera )
   {
     DEBUG_LOG( "Context::render : Context Render" );
-    ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
-    for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    ContextLayerMap::iterator layer_end = _layers.end();
+    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-
-      Vector layerPosition = layer._position + (layer._movementScale % _position);
-
-
-      DEBUG_STREAM << "Context::render : Rendering layer. " << layer.drawables.size() << " Elements";
-
-      PhysicalObjectList::iterator draw_it = layer.drawables.begin();
-      PhysicalObjectList::iterator draw_end = layer.drawables.end();
-      while ( draw_it != draw_end )
-      {
-        /*
-        if ( (*draw_it)->isDestroyed() )
-        {
-          drawables.erase( draw_it++ );
-        }
-        else
-        {
-          (*draw_it)->render( renderer, _theCamera );
-          ++draw_it;
-        }
-        */
-      }
-
+      layer_it->second.render( camera );
     }
   }
 
 
-  void Context::resolveCollisions()
-  {
-    DEBUG_LOG( "Context::resolveCollisions : Context Collisions" );
-
-    /*
-    ProxyMap<ContextLayer>::iterator layer_end = _layers.end();
-    for ( ProxyMap<ContextLayer>::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
-    {
-      DEBUG_STREAM << " Starting Layer Collision: " << layer_it->second.teams.size();
-
-      // Colliding objects
-      CollisionHandler::iterator end = _theCollision.collisionEnd();
-      for ( CollisionHandler::iterator it = _theCollision.collisionBegin(); it != end; ++it )
-      {
-        CollidableList& team1 = layer_it->second.teams[ it->first ];
-        CollidableList& team2 = layer_it->second.teams[ it->second ];
-
-        CollidableList::iterator end1 = team1.end();
-        CollidableList::iterator end2 = team2.end();
-
-        for ( CollidableList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
-        {
-          if ( ! (*it1)->collisionActive() ) continue;
-          for ( CollidableList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
-          {
-            if ( ! (*it2)->collisionActive() ) continue;
-
-            collides( (*it1), (*it2) );
-          }
-        }
-      }
-
-      DEBUG_LOG( "Context::resolveCollisions :  Starting Layer Containment" );
-      // Containing Objects
-      end = _theCollision.containerEnd();
-      for ( CollisionHandler::iterator it = _theCollision.containerBegin(); it != end; ++it )
-      {
-        CollidableList& team1 = layer_it->second.teams[ it->first ];
-        CollidableList& team2 = layer_it->second.teams[ it->second ];
-
-        CollidableList::iterator end1 = team1.end();
-        CollidableList::iterator end2 = team2.end();
-
-        for ( CollidableList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
-        {
-          if ( ! (*it1)->collisionActive() ) continue;
-          for ( CollidableList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
-          {
-            if ( ! (*it2)->collisionActive() ) continue;
-
-            contains( (*it1), (*it2) );
-          }
-        }
-      }
-    }
-
-    */
-    DEBUG_LOG( "Context::resolveCollisions : Context Collisions Resolved" );
-  }
-
-
-
-  void Camera::followMe( PhysicalObject* object )
+  void Context::followMe( PhysicalObject* object )
   {
     _theObject = object;
     _offset.x() = 0.5*Manager::getInstance()->getWindow().getResolutionWidth() - 0.5*object->getWidth();
@@ -214,18 +99,13 @@ namespace Regolith
   }
 
 
-
-
-
-  Proxy<ContextLayer> Context::requestLayer( std::string name )
-  {
-    return _layers.request( name );
-  }
-
-
   ContextLayer& Context::getLayer( std::string name )
   {
-    return _layers.get( name );
+    ContextLayerMap::iterator found = _layers.find( name );
+    if ( found == _layers.end() )
+    {
+    }
+    return found->second;
   }
 
 

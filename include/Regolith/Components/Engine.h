@@ -39,7 +39,6 @@ namespace Regolith
     // Class members
     private:
       InputManager& _inputManager;
-      SDL_Color& _defaultColor;
       ContextStack _contextStack;
 
       Context* _openContext;
@@ -61,7 +60,7 @@ namespace Regolith
 
     public:
       // Create the engine with the required references in place
-      Engine( InputManager&, SDL_Color& );
+      Engine( InputManager& );
 
       // Just in case I decided to inherit from here in the future...
       virtual ~Engine();

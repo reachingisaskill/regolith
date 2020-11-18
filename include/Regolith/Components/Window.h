@@ -4,6 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
+#include "Regolith/Components/Camera.h"
 
 #include <string>
 

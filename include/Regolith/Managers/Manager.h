@@ -117,7 +117,7 @@ namespace Regolith
 
 
       // Create and return the pointer to the Renderer - can only be called once!
-      SDL_Renderer* requestRenderer();
+      Camera& requestCamera();
 
 
       ////////////////////////////////////////////////////////////////////////////////
