@@ -17,6 +17,8 @@ namespace Regolith
   {
     friend class Camera;
 
+    typedef std::map< CollisionTeam, PhysicalObjectList > LayerGraph;
+
 ////////////////////////////////////////////////////////////////////////////////
     private:
       Context* _owner;
@@ -29,11 +31,8 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Caches
 
-      // List of all objects in the scene
-      PhysicalObjectList _sceneGraph;
-
-      // Map of all teams.
-      TeamMap _teams;
+      // Map all objects organised by collision team
+      LayerGraph _sceneGraph;
 
 
 ////////////////////////////////////////////////////////////////////////////////

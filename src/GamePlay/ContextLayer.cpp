@@ -83,19 +83,16 @@ namespace Regolith
     CollisionHandler::iterator end = _theCollision.collisionEnd();
     for ( CollisionHandler::iterator it = _theCollision.collisionBegin(); it != end; ++it )
     {
-      CollidableList& team1 = layer_it->second.teams[ it->first ];
-      CollidableList& team2 = layer_it->second.teams[ it->second ];
+      PhysicalObjectList& team1 = layer_it->second.teams[ it->first ];
+      PhysicalObjectList& team2 = layer_it->second.teams[ it->second ];
 
-      CollidableList::iterator end1 = team1.end();
-      CollidableList::iterator end2 = team2.end();
+      PhysicalObjectList::iterator end1 = team1.end();
+      PhysicalObjectList::iterator end2 = team2.end();
 
       for ( CollidableList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
       {
-        if ( ! (*it1)->collisionActive() ) continue;
         for ( CollidableList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
         {
-          if ( ! (*it2)->collisionActive() ) continue;
-
           collides( (*it1), (*it2) );
         }
       }

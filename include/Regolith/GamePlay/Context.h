@@ -11,9 +11,8 @@
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/GamePlay/ContextLayer.h"
-#include "Regolith/Utilities/ProxyMap.h"
 
-#include <list>
+#include <map>
 
 
 namespace Regolith
@@ -41,7 +40,7 @@ namespace Regolith
     Context( const Context& ) = delete;
     Context& operator=( const Context& ) = delete;
 
-    typedef std::map< ContextLayer > ContextLayerMap;
+    typedef std::map< std::string, ContextLayer > ContextLayerMap;
 
 //////////////////////////////////////////////////////////////////////////////// 
     private:
@@ -102,6 +101,8 @@ namespace Regolith
       // Return the input handler for this context
       InputHandler* inputHandler() { return &_theInput; }
 
+      // Return a reference to a specific context layer
+      ContextLayer& getLayer( std::string );
 
 //////////////////////////////////////////////////////////////////////////////// 
       // Context Stack functions
@@ -133,13 +134,6 @@ namespace Regolith
 
       // Render all the objects
       void render( Camera& );
-
-
-////////////////////////////////////////////////////////////////////////////////
-      // Object and layer interface
-
-      // Return a layer proxy so that it may be referenced when spawining objects
-      ContextLayer& getLayer( std::string );
 
   };
 

@@ -104,6 +104,9 @@ namespace Regolith
     ContextLayerMap::iterator found = _layers.find( name );
     if ( found == _layers.end() )
     {
+      Exception ex( "Context::getLayer()", "Requested context layer not found" );
+      ex.addDetail( "Name", name );
+      throw ex;
     }
     return found->second;
   }
