@@ -25,7 +25,6 @@ namespace Regolith
     _theInput(),
     _theFocus(),
     _theCollision(),
-    _theCamera(),
     _closed( false ),
     _paused( false ),
     _pauseable( false ),
@@ -39,6 +38,24 @@ namespace Regolith
     INFO_LOG( "Context::~Context : Destroying Context" );
   }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Accessors and modifiers
+
+  ContextLayer& Context::getLayer( std::string name )
+  {
+    ContextLayerMap::iterator found = _layers.find( name );
+    if ( found == _layers.end() )
+    {
+      Exception ex( "Context::getLayer()", "Requested context layer not found" );
+      ex.addDetail( "Name", name );
+      throw ex;
+    }
+    return found->second;
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Context stack call back functions
 
   void Context::pauseContext()
   {
@@ -62,21 +79,70 @@ namespace Regolith
   }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Frame update functions
+
   void Context::update( float time )
   {
     DEBUG_LOG( "Context::update : Context Update" );
-
-    // Update the camera first
-    _theCamera.update( time );
 
     // Update all the animated objects
     ContextLayerMap::iterator layer_end = _layers.end();
     for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      layer_it->second.update( time );
+      for ( LayerGraph::iterator team_it = layer_it->second.layerGraph.begin(); team_it != layer_it->second.layerGraph.end(); ++team_it )
+      {
+        for ( PhysicalObjectList::iterator it = team_it->second.begin(); it != team_it->second.end(); ++it )
+        {
+          // If object is marked for destruction, remove it from the scene graph
+          if ( (*it)->isDestroyed() )
+          {
+            team_it->second.erase( it );
+            continue;
+          }
+
+          // If object can be moved, do the physics integration
+          if ( (*it)->hasMovement() )
+          {
+            (*it)->step( time );
+          }
+
+          // If the object is animated, update the animation
+          if ( (*it)->hasAnimation() )
+          {
+            (*it)->update( time );
+          }
+        }
+      }
     }
 
+    // Update the context state
     updateContext( time );
+
+    // Update the camera position
+    _cameraPosition = updateCamera( time );
+
+
+//    DEBUG_STREAM << "ContextLayer::update : Starting Layer Collision";
+//
+//    // Colliding objects
+//    CollisionHandler::iterator end = _theCollision.collisionEnd();
+//    for ( CollisionHandler::iterator it = _theCollision.collisionBegin(); it != end; ++it )
+//    {
+//      PhysicalObjectList& team1 = _layerGraph[ it->first ];
+//      PhysicalObjectList& team2 = _layerGraph[ it->second ];
+//
+//      PhysicalObjectList::iterator end1 = team1.end();
+//      PhysicalObjectList::iterator end2 = team2.end();
+//
+//      for ( CollidableList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
+//      {
+//        for ( CollidableList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
+//        {
+//          collides( (*it1), (*it2) );
+//        }
+//      }
+//    }
   }
 
 
@@ -86,31 +152,19 @@ namespace Regolith
     ContextLayerMap::iterator layer_end = _layers.end();
     for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      layer_it->second.render( camera );
+      for ( LayerGraph::iterator team_it = layer_it->second.layerGraph.begin(); team_it != layer_it->second.layerGraph.end(); ++team_it )
+      {
+        for ( PhysicalObjectList::iterator it = team_it->second.begin(); it != team_it->second.end(); ++it )
+        {
+          // If the object can be drawn, render it to the back buffer
+          if ( (*it)->hasTexture() )
+          {
+            (*it)->getTexture(). render( camera );
+          }
+        }
+      }
     }
   }
-
-
-  void Context::followMe( PhysicalObject* object )
-  {
-    _theObject = object;
-    _offset.x() = 0.5*Manager::getInstance()->getWindow().getResolutionWidth() - 0.5*object->getWidth();
-    _offset.y() = 0.5*Manager::getInstance()->getWindow().getResolutionHeight() - 0.5*object->getHeight();
-  }
-
-
-  ContextLayer& Context::getLayer( std::string name )
-  {
-    ContextLayerMap::iterator found = _layers.find( name );
-    if ( found == _layers.end() )
-    {
-      Exception ex( "Context::getLayer()", "Requested context layer not found" );
-      ex.addDetail( "Name", name );
-      throw ex;
-    }
-    return found->second;
-  }
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 
   // Context configuration
@@ -169,8 +223,7 @@ namespace Regolith
 
 
       // Creates it if it doesn't already exist
-      ContextLayer& current_layer = _layers.create( layer_name );
-      current_layer.configure( this, Vector( x, y ), Vector( dx, dy ), w, h );
+      _layers[ layer_name ].configure( this, Vector( x, y ), Vector( dx, dy ), w, h );
 
 
       // Find and place all the requested elements
@@ -183,16 +236,16 @@ namespace Regolith
         std::string object_name = element_data[j]["name"].asString();
         INFO_STREAM << "Adding game object into context layer: " << object_name;
 
-        GameObject* object;
+        PhysicalObject* object;
 
         // If a global object is requested
         if ( Utilities::validateJson( element_data[j], "global", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["global"].asBool() )
         {
-          object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getGameObject( object_name );
+          object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getPhysicalObject( object_name );
         }
         else
         {
-          object = _owner->getGameObject( object_name );
+          object = _owner->getPhysicalObject( object_name );
         }
 
         if ( object == nullptr )
@@ -203,37 +256,15 @@ namespace Regolith
           throw ex;
         }
 
-        // If a copy is required (make sure its physical)
-        if ( Utilities::validateJson( element_data[j], "spawn", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["spawn"].asBool() )
-        {
-          if ( ! object->isPhysical() )
-          {
-            Exception ex( "Context::configure()", "A non-physical object is requesting spawning behaviour." );
-            ex.addDetail( "Object Name", object_name );
-            ex.addDetail( "Layer Name", layer_name );
-            throw ex;
-          }
+        Vector object_pos = placeInLayer( _layers[ layer_name ], object, element_data[j] );
+        object->setPosition( object_pos );
 
-          PhysicalObject* phys_obj = dynamic_cast<PhysicalObject*>( object );
-          Vector object_pos = placeInLayer( current_layer, phys_obj, element_data[j] );
-
-          current_layer.spawn( phys_obj, object_pos );
-        }
-        else
-        {
-          if ( object->isPhysical() )
-          {
-            PhysicalObject* phys_obj = dynamic_cast<PhysicalObject*>( object );
-            Vector object_pos = placeInLayer( current_layer, phys_obj, element_data[j] );
-            phys_obj->setPosition( object_pos );
-          }
-
-          current_layer.cacheObject( object );
-        }
+        _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
       }
     }
 
 
+    /*
     // Configure the camera
     Json::Value camera_data = json_data["camera"];
     Utilities::validateJson( camera_data, "lower_limit", Utilities::JSON_TYPE_ARRAY );
@@ -259,6 +290,9 @@ namespace Regolith
         _theCamera.followMe( followee );
       }
     }
+    */
+
+
 
 //    // Let the focus handler register input actions
 //    _theFocus.registerActions( _theInput );

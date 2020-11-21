@@ -36,9 +36,6 @@ namespace Regolith
 //  bool contains( Collidable*, Collidable* );
   void contains( Collidable*, Collidable* );
 
-  // Function that returns true if the layer contains the object
-  bool contains( ContextLayer&, Collidable* );
-
   // Function that returns true if the object contains point
   bool contains( Collidable*, const Vector& );
   */
@@ -85,7 +82,7 @@ namespace Regolith
       Collision();
 //      ~Collision();
 
-//      void configure( Vector, float, float );
+      void configure( Json::Value& );
 
       // If this is an animated collision, update accordingly
       void setFrameNumber( unsigned int frame ) { _currentCollision = frame; }

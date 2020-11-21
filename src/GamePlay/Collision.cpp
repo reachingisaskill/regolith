@@ -1,9 +1,6 @@
 
 #include "Regolith/GamePlay/Collision.h"
 
-#include "Regolith/Architecture/Collidable.h"
-#include "Regolith/GamePlay/ContextLayer.h"
-
 
 namespace Regolith
 {
@@ -19,9 +16,10 @@ namespace Regolith
   }
 
 
-//  void Collision::configure( )
-//  {
-//  }
+  void Collision::configure( Json::Value& )
+  {
+    // Configure me senpai...
+  }
 
 
 
@@ -41,153 +39,153 @@ namespace Regolith
   // Something?
 
 
-  void callback( Collidable* obj1, Collidable* obj2, const Vector& normal, const float overlap )
-  {
-    float invM1 = obj1->getInverseMass();
-    float invM2 = obj2->getInverseMass();
-    float totalInvM = invM1 + invM2;
-
-    if ( totalInvM < epsilon )
-    {
-      obj1->onCollision( -normal, 0.0, obj2 );
-      obj2->onCollision(  normal, 0.0, obj1 );
-    }
-    else 
-    {
-      obj1->onCollision( -normal, (invM1*overlap/totalInvM), obj2 );
-      obj2->onCollision(  normal, (invM2*overlap/totalInvM), obj1 );
-    }
-  }
+//  void callback( Collidable* obj1, Collidable* obj2, const Vector& normal, const float overlap )
+//  {
+//    float invM1 = obj1->getInverseMass();
+//    float invM2 = obj2->getInverseMass();
+//    float totalInvM = invM1 + invM2;
+//
+//    if ( totalInvM < epsilon )
+//    {
+//      obj1->onCollision( -normal, 0.0, obj2 );
+//      obj2->onCollision(  normal, 0.0, obj1 );
+//    }
+//    else 
+//    {
+//      obj1->onCollision( -normal, (invM1*overlap/totalInvM), obj2 );
+//      obj2->onCollision(  normal, (invM2*overlap/totalInvM), obj1 );
+//    }
+//  }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Collides functions
 
-  void collides( Collidable* object1, Collidable* object2 )
-  {
-    DEBUG_LOG( "Checking Collision" );
-
-    const Collision& collision1 = object1->getCollision();
-    const Collision& collision2 = object2->getCollision();
-
-    Vector pos1 = object1->position() + collision1.position(); // Move into global coordinate system
-    Vector pos2 = object2->position() + collision2.position(); // Move into global coordinate system
-
-    DEBUG_STREAM << " Global Pos1 : " << pos1 << " W = " << collision1.width() << " H = " << collision1.height();
-    DEBUG_STREAM << " Global Pos2 : " << pos2 << " W = " << collision2.width() << " H = " << collision2.height();
-
-
-    // X Axis
-    float diff_x = pos2.x() - pos1.x();
-
-    ////////////////////////////////////////////////// 
-    // IF OBJ2 IN FRONT OBJ1 - X
-    if ( diff_x > 0.0 ) 
-    {
-      float overlap_x = collision1.width() - diff_x;
-      DEBUG_STREAM << " Diff_x = " << diff_x << ", Overlap = " << overlap_x;
-
-      if ( overlap_x > 0.0 )
-      {
-        // Y Axis
-        float diff_y = pos2.y() - pos1.y();
-
-        ////////////////////////////////////////////////// 
-        // IF OBJ2 IN FRONT OBJ1 - Y
-        if ( diff_y >= 0.0 )
-        {
-          float overlap_y = collision1.height() - diff_y;
-
-          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
-
-          if ( overlap_y > 0.0 )
-          {
-            // Both X & Y overlap - set the reference contact object
-            if ( overlap_x >= overlap_y )
-            {
-              callback( object1, object2, unitVector_y, overlap_y );
-            }
-            else
-            {
-              callback( object1, object2, unitVector_x, overlap_x );
-            }
-          }
-        }
-        ////////////////////////////////////////////////// 
-        // IF OBJ2 BEHIND OBJ1 - Y
-        else
-        {
-          float overlap_y = collision2.height() + diff_y;
-
-          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
-          if ( overlap_y > 0.0 )
-          {
-            // Both X & Y overlap - set the reference contact object
-            if ( overlap_x >= overlap_y )
-            {
-              callback( object1, object2, -unitVector_y, overlap_y );
-            }
-            else
-            {
-              callback( object1, object2, unitVector_x, overlap_x );
-            }
-          }
-        }
-      }
-    }
-    ////////////////////////////////////////////////// 
-    // IF OBJ2 BEHIND OBJ1 - X
-    else
-    {
-      float overlap_x = collision2.width() + diff_x;
-      DEBUG_STREAM << " Diff_x = " << diff_x << ", Overlap = " << overlap_x;
-
-      if ( overlap_x > 0.0 )
-      {
-        // Y Axis
-        float diff_y = pos2.y() - pos1.y();
-        ////////////////////////////////////////////////// 
-        // IF OBJ2 IN FRONT OBJ1 - Y
-        if ( diff_y >= 0.0 )
-        {
-          float overlap_y = collision1.height() - diff_y;
-
-          DEBUG_STREAM << "   Diff_y = " << diff_y << ", Overlap = " << overlap_y;
-          if ( overlap_y > 0.0 )
-          {
-            // Both X & Y overlap - set the reference contact object
-            if ( overlap_x >= overlap_y )
-            {
-              callback( object1, object2, unitVector_y, overlap_y );
-            }
-            else
-            {
-              callback( object1, object2, -unitVector_x, overlap_x );
-            }
-          }
-        }
-        ////////////////////////////////////////////////// 
-        // IF OBJ2 BEHIND OBJ1 - Y
-        else
-        {
-          float overlap_y = collision2.height() + diff_y;
-
-          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
-          if ( overlap_y > 0.0 )
-          {
-            // Both X & Y overlap - set the reference contact object
-            if ( overlap_x >= overlap_y )
-            {
-              callback( object1, object2, -unitVector_y, overlap_y );
-            }
-            else
-            {
-              callback( object1, object2, -unitVector_x, overlap_x );
-            }
-          }
-        }
-      }
-    }
-  }
+//  void collides( Collidable* object1, Collidable* object2 )
+//  {
+//    DEBUG_LOG( "Checking Collision" );
+//
+//    const Collision& collision1 = object1->getCollision();
+//    const Collision& collision2 = object2->getCollision();
+//
+//    Vector pos1 = object1->position() + collision1.position(); // Move into global coordinate system
+//    Vector pos2 = object2->position() + collision2.position(); // Move into global coordinate system
+//
+//    DEBUG_STREAM << " Global Pos1 : " << pos1 << " W = " << collision1.width() << " H = " << collision1.height();
+//    DEBUG_STREAM << " Global Pos2 : " << pos2 << " W = " << collision2.width() << " H = " << collision2.height();
+//
+//
+//    // X Axis
+//    float diff_x = pos2.x() - pos1.x();
+//
+//    ////////////////////////////////////////////////// 
+//    // IF OBJ2 IN FRONT OBJ1 - X
+//    if ( diff_x > 0.0 ) 
+//    {
+//      float overlap_x = collision1.width() - diff_x;
+//      DEBUG_STREAM << " Diff_x = " << diff_x << ", Overlap = " << overlap_x;
+//
+//      if ( overlap_x > 0.0 )
+//      {
+//        // Y Axis
+//        float diff_y = pos2.y() - pos1.y();
+//
+//        ////////////////////////////////////////////////// 
+//        // IF OBJ2 IN FRONT OBJ1 - Y
+//        if ( diff_y >= 0.0 )
+//        {
+//          float overlap_y = collision1.height() - diff_y;
+//
+//          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
+//
+//          if ( overlap_y > 0.0 )
+//          {
+//            // Both X & Y overlap - set the reference contact object
+//            if ( overlap_x >= overlap_y )
+//            {
+//              callback( object1, object2, unitVector_y, overlap_y );
+//            }
+//            else
+//            {
+//              callback( object1, object2, unitVector_x, overlap_x );
+//            }
+//          }
+//        }
+//        ////////////////////////////////////////////////// 
+//        // IF OBJ2 BEHIND OBJ1 - Y
+//        else
+//        {
+//          float overlap_y = collision2.height() + diff_y;
+//
+//          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
+//          if ( overlap_y > 0.0 )
+//          {
+//            // Both X & Y overlap - set the reference contact object
+//            if ( overlap_x >= overlap_y )
+//            {
+//              callback( object1, object2, -unitVector_y, overlap_y );
+//            }
+//            else
+//            {
+//              callback( object1, object2, unitVector_x, overlap_x );
+//            }
+//          }
+//        }
+//      }
+//    }
+//    ////////////////////////////////////////////////// 
+//    // IF OBJ2 BEHIND OBJ1 - X
+//    else
+//    {
+//      float overlap_x = collision2.width() + diff_x;
+//      DEBUG_STREAM << " Diff_x = " << diff_x << ", Overlap = " << overlap_x;
+//
+//      if ( overlap_x > 0.0 )
+//      {
+//        // Y Axis
+//        float diff_y = pos2.y() - pos1.y();
+//        ////////////////////////////////////////////////// 
+//        // IF OBJ2 IN FRONT OBJ1 - Y
+//        if ( diff_y >= 0.0 )
+//        {
+//          float overlap_y = collision1.height() - diff_y;
+//
+//          DEBUG_STREAM << "   Diff_y = " << diff_y << ", Overlap = " << overlap_y;
+//          if ( overlap_y > 0.0 )
+//          {
+//            // Both X & Y overlap - set the reference contact object
+//            if ( overlap_x >= overlap_y )
+//            {
+//              callback( object1, object2, unitVector_y, overlap_y );
+//            }
+//            else
+//            {
+//              callback( object1, object2, -unitVector_x, overlap_x );
+//            }
+//          }
+//        }
+//        ////////////////////////////////////////////////// 
+//        // IF OBJ2 BEHIND OBJ1 - Y
+//        else
+//        {
+//          float overlap_y = collision2.height() + diff_y;
+//
+//          DEBUG_STREAM << " Diff_y = " << diff_y << ", Overlap = " << overlap_y;
+//          if ( overlap_y > 0.0 )
+//          {
+//            // Both X & Y overlap - set the reference contact object
+//            if ( overlap_x >= overlap_y )
+//            {
+//              callback( object1, object2, -unitVector_y, overlap_y );
+//            }
+//            else
+//            {
+//              callback( object1, object2, -unitVector_x, overlap_x );
+//            }
+//          }
+//        }
+//      }
+//    }
+//  }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -230,103 +228,103 @@ namespace Regolith
 
 
 
-  void contains( Collidable* parent, Collidable* child )
-  {
-    DEBUG_LOG( "Checking Containment" );
-
-    const Collision& parent_coll = parent->getCollision();
-    const Collision& child_coll = child->getCollision();
-
-    Vector parent_pos;
-    Vector child_pos;
-
-    parent_pos = parent->position() + parent_coll.position(); // Move into global coordinate system
-    DEBUG_STREAM << " Global Pos1 : " << parent_pos << " W = " << parent_coll.width() << " H = " << parent_coll.height();
-
-    child_pos = child->position() + child_coll.position(); // Move into global coordinate system
-    DEBUG_STREAM << " Global Pos2 : " << child_pos << " W = " << child_coll.width() << " H = " << child_coll.height();
-
-
-    // X Axis
-    float diff_x = child_pos.x() - parent_pos.x();
-    float diff_y = child_pos.y() - parent_pos.y();
-
-    if ( ( diff_x >= 0.0 ) && ( ( diff_x + child_coll.width()) <= parent_coll.width() ) )
-      if ( ( diff_y >= 0.0 ) && ( ( diff_y + child_coll.height()) <= parent_coll.height() ) )
-        return; // Contained
-
-    if ( diff_x > 0.0 )
-    {
-      diff_x += child_coll.width() - parent_coll.width();
-      if ( diff_x < 0.0 ) diff_x = 0.0;
-    }
-
-    if ( diff_y > 0.0 )
-    {
-      diff_y += child_coll.height() - parent_coll.height();
-      if ( diff_y < 0.0 ) diff_y = 0.0;
-    }
-
-    Vector normal( diff_x, diff_y );
-    float length = normal.mod();
-
-    DEBUG_STREAM << "DIFF_X = " << diff_x << " ,  DIFF_Y = " << diff_y << " L = " << length;
-
-
-    callback( child, parent, (normal /= length), length );
-  }
-
-
-  bool contains( ContextLayer& layer, Collidable* object )
-  {
-    DEBUG_LOG( "Checking Layer Containement" );
-
-    const Collision& object_coll = object->getCollision();
-
-    const Vector& layer_pos = layer.getPosition();
-    Vector object_pos;
-
-    object_pos = object->position() + object_coll.position(); // Move into global coordinate system
-    DEBUG_STREAM << "   Global Pos2 : " << object_pos << " W = " << object_coll.width() << " H = " << object_coll.height();
+//  void contains( Collidable* parent, Collidable* child )
+//  {
+//    DEBUG_LOG( "Checking Containment" );
+//
+//    const Collision& parent_coll = parent->getCollision();
+//    const Collision& child_coll = child->getCollision();
+//
+//    Vector parent_pos;
+//    Vector child_pos;
+//
+//    parent_pos = parent->position() + parent_coll.position(); // Move into global coordinate system
+//    DEBUG_STREAM << " Global Pos1 : " << parent_pos << " W = " << parent_coll.width() << " H = " << parent_coll.height();
+//
+//    child_pos = child->position() + child_coll.position(); // Move into global coordinate system
+//    DEBUG_STREAM << " Global Pos2 : " << child_pos << " W = " << child_coll.width() << " H = " << child_coll.height();
+//
+//
+//    // X Axis
+//    float diff_x = child_pos.x() - parent_pos.x();
+//    float diff_y = child_pos.y() - parent_pos.y();
+//
+//    if ( ( diff_x >= 0.0 ) && ( ( diff_x + child_coll.width()) <= parent_coll.width() ) )
+//      if ( ( diff_y >= 0.0 ) && ( ( diff_y + child_coll.height()) <= parent_coll.height() ) )
+//        return; // Contained
+//
+//    if ( diff_x > 0.0 )
+//    {
+//      diff_x += child_coll.width() - parent_coll.width();
+//      if ( diff_x < 0.0 ) diff_x = 0.0;
+//    }
+//
+//    if ( diff_y > 0.0 )
+//    {
+//      diff_y += child_coll.height() - parent_coll.height();
+//      if ( diff_y < 0.0 ) diff_y = 0.0;
+//    }
+//
+//    Vector normal( diff_x, diff_y );
+//    float length = normal.mod();
+//
+//    DEBUG_STREAM << "DIFF_X = " << diff_x << " ,  DIFF_Y = " << diff_y << " L = " << length;
+//
+//
+//    callback( child, parent, (normal /= length), length );
+//  }
 
 
-    // X Axis
-    float diff_x = object_pos.x() - layer_pos.x();
-    if ( ( diff_x > -object_coll.width() ) && ( diff_x < layer.getWidth() ) ) 
-    {
-      // Y Axis
-      float diff_y = object_pos.y() - layer_pos.y();
-      if ( ( diff_y > object_coll.height() ) && ( diff_y < layer.getHeight() ) )
-      {
-        return true;
-      }
-    }
+//  bool contains( ContextLayer& layer, Collidable* object )
+//  {
+//    DEBUG_LOG( "Checking Layer Containement" );
+//
+//    const Collision& object_coll = object->getCollision();
+//
+//    const Vector& layer_pos = layer.getPosition();
+//    Vector object_pos;
+//
+//    object_pos = object->position() + object_coll.position(); // Move into global coordinate system
+//    DEBUG_STREAM << "   Global Pos2 : " << object_pos << " W = " << object_coll.width() << " H = " << object_coll.height();
+//
+//
+//    // X Axis
+//    float diff_x = object_pos.x() - layer_pos.x();
+//    if ( ( diff_x > -object_coll.width() ) && ( diff_x < layer.getWidth() ) ) 
+//    {
+//      // Y Axis
+//      float diff_y = object_pos.y() - layer_pos.y();
+//      if ( ( diff_y > object_coll.height() ) && ( diff_y < layer.getHeight() ) )
+//      {
+//        return true;
+//      }
+//    }
+//
+//    return false;
+//  }
 
-    return false;
-  }
 
-
-  bool contains( Collidable* object, const Vector& point )
-  {
-    DEBUG_LOG( "Checking Point Containment" );
-
-    const Collision& collision = object->getCollision();
-    Vector pos = object->position() + collision.position(); // Move into global coordinate system
-    DEBUG_STREAM << " Global Pos1 : " << pos << " W = " << collision.width() << " H = " << collision.height();
-
-    // X Axis
-    float diff_x = point.x() - pos.x();
-    if ( ( diff_x > 0.0 ) && ( diff_x < collision.width() ) )
-    {
-      float diff_y = point.y() - pos.y();
-      if ( ( diff_y > 0.0 ) && ( diff_y < collision.height() ) ) 
-      {
-        return true;
-      }
-    }
-
-    return false;
-  }
+//  bool contains( Collidable* object, const Vector& point )
+//  {
+//    DEBUG_LOG( "Checking Point Containment" );
+//
+//    const Collision& collision = object->getCollision();
+//    Vector pos = object->position() + collision.position(); // Move into global coordinate system
+//    DEBUG_STREAM << " Global Pos1 : " << pos << " W = " << collision.width() << " H = " << collision.height();
+//
+//    // X Axis
+//    float diff_x = point.x() - pos.x();
+//    if ( ( diff_x > 0.0 ) && ( diff_x < collision.width() ) )
+//    {
+//      float diff_y = point.y() - pos.y();
+//      if ( ( diff_y > 0.0 ) && ( diff_y < collision.height() ) ) 
+//      {
+//        return true;
+//      }
+//    }
+//
+//    return false;
+//  }
 
 }
 

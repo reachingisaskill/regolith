@@ -22,17 +22,17 @@ namespace Regolith
       class StateDetails
       {
         private:
-          float _updatePeriod;
           float _count;
           unsigned int _numberFrames;
 
         public:
           // Public member variables
           unsigned int id;
+          float updatePeriod;
           Texture texture;
           Collision collision;
           unsigned int currentFrame;
-          PhysicalObjectVector children;
+//          PhysicalObjectVector children;
 
           // Constructor
           StateDetails();
@@ -69,14 +69,17 @@ namespace Regolith
       // Used to configure the collision logic
       CollisionTeam _collisionTeam;
 
-      // Map of all the children
-      PhysicalObjectMap _children;
+//      // Map of all the children
+//      PhysicalObjectMap _children;
 
       // Map of all the possible states
       StateMap _stateMap;
 
       // Reference to the current state
       StateDetails& _currentState;
+
+      // When reset is called return to this state
+      StateDetails& _startState;
 
 
     protected :
@@ -105,8 +108,8 @@ namespace Regolith
       // Sets the current state to the reference
       void setState( StateDetails& state ) { _currentState = state; }
 
-      // Return the vector of children used in the current state
-      PhysicalObjectVector& getChildren() { return _currentState.children; }
+//      // Return the vector of children used in the current state
+//      PhysicalObjectVector& getChildren() { return _currentState.children; }
 
       // Return the texture being used in the current state
       Texture& getTexture() { return _currentState.texture; }
@@ -138,6 +141,9 @@ namespace Regolith
       // Perform the basic configuration
       void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
 
+      // Resets the object to it's initial configuration to allow reusing of objects
+      virtual void reset();
+
 
       // Tells the caller that derived classes come from a physical object.
       // Warning: overriding this function change the value may prevent items from being added to context layers
@@ -167,8 +173,8 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Specifc functions for enabling physics and rendering on the object
 
-      // Returns the vector of children that are active for the current state
-      const PhysicalObjectVector& getChildren() const { return _currentState.children; }
+//      // Returns the vector of children that are active for the current state
+//      const PhysicalObjectVector& getChildren() const { return _currentState.children; }
 
 
       // For the camera to request the current renderable texture
@@ -190,6 +196,10 @@ namespace Regolith
 
       // Return the current state of the object
       unsigned int getState() const { return _currentState.id; }
+      
+      // Return the assigned collision team
+      CollisionTeam getCollisionTeam() const { return _collisionTeam; }
+
 
       // Mass variable accessors.
       const float& getMass() const { return _mass; }

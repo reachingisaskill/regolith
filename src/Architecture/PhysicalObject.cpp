@@ -1,5 +1,6 @@
 
 #include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
@@ -15,9 +16,13 @@ namespace Regolith
   // Construction
 
   PhysicalObject::StateDetails::StateDetails() :
-    _updatePeriod( 0.0 ),
     _count( 0.0 ),
-    _numberFrames( 0 )
+    _numberFrames( 0 ),
+    id( 0 ),
+    updatePeriod( 0.0 ),
+    texture(),
+    collision(),
+    currentFrame( 0 )
   {
   }
 
@@ -29,17 +34,17 @@ namespace Regolith
     _count += timestep;
 
     // Determine how many frames have elapsed in the animation
-    currentFrame += _count / _updatePeriod;
+    currentFrame += _count / updatePeriod;
     currentFrame = currentFrame % _numberFrames;
 
     // Reset the timer based on the update period
-    _count = std::fmod( _count, _updatePeriod );
+    _count = std::fmod( _count, updatePeriod );
 
     // Update the texture and collision objects
     texture.setFrameNumber( currentFrame );
     collision.setFrameNumber( currentFrame );
 
-    DEBUG_STREAM << "StateDetails::update : _count : " << _count << ", frame No. : " << currentFrame << " of " << _numberFrames << ", update rate : " << _updatePeriod;
+    DEBUG_STREAM << "StateDetails::update : _count : " << _count << ", frame No. : " << currentFrame << " of " << _numberFrames << ", update rate : " << updatePeriod;
   }
 
 
@@ -59,9 +64,10 @@ namespace Regolith
     _velocity(),
     _forces(),
     _collisionTeam( 0 ),
-    _children(),
+//    _children(),
     _stateMap(),
-    _currentState( _stateMap.begin()->second ) // This is invalid until configure is called!
+    _currentState( _stateMap.begin()->second ), // This is invalid until configure is called!
+    _startState( _stateMap.begin()->second ) // This is invalid until configure is called!
   {
   }
 
@@ -78,25 +84,26 @@ namespace Regolith
     _velocity( other._velocity ),
     _forces(),
     _collisionTeam( other._collisionTeam ),
-    _children(),
+//    _children(),
     _stateMap( other._stateMap ),
-    _currentState( _stateMap.begin()->second )
+    _currentState( _stateMap.begin()->second ),
+    _startState( _stateMap.begin()->second )
   {
-    for ( PhysicalObjectMap::const_iterator it = other._children.begin(); it != other._children.end(); ++it )
-    {
-      this->_children[ it->first ] = it->second->clone();
-    }
+//    for ( PhysicalObjectMap::const_iterator it = other._children.begin(); it != other._children.end(); ++it )
+//    {
+//      this->_children[ it->first ] = it->second->clone();
+//    }
   }
 
 
   // Destroy the children
   PhysicalObject::~PhysicalObject()
   {
-    for ( PhysicalObjectMap::iterator it = _children.begin(); it != _children.end(); ++it )
-    {
-      delete it->second;
-    }
-    _children.clear();
+//    for ( PhysicalObjectMap::iterator it = _children.begin(); it != _children.end(); ++it )
+//    {
+//      delete it->second;
+//    }
+//    _children.clear();
   }
 
 
@@ -151,45 +158,72 @@ namespace Regolith
       _height = collision_data["position"][1].asFloat();
 
       std::string collision_team = json_data["collision_team"].asString();
-      std::string collision_type = json_data["collision_type"].asString();
+      _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
 
-      INFO_STREAM << "PhysicalObject::configure() : Configuring collidable object with type: " << collision_type << " and team: " << collision_team;
-
-      // TODO : best way to assign collision teams, etc
-//      _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
-//      _collisionType = Manager::getInstance()->getCollisionType( collision_type );
+      INFO_STREAM << "PhysicalObject::configure : Configuring collidable object with type: " << collision_team;
     }
 
-    // If children are present, configure them too
-    if ( Utilities::validateJson( json_data, "children", Utilities::JSON_TYPE_OBJECT, false ) )
+//    // If children are present, configure them too
+//    if ( Utilities::validateJson( json_data, "children", Utilities::JSON_TYPE_OBJECT, false ) )
+//    {
+//      Json::Value& children = json_data["children"];
+//
+//      for( Json::Value::iterator c_it = children.begin(); c_it != children.end(); ++c_it )
+//      {
+//        std::string child_name = c_it.key().asString();
+//        _children[ child_name ] = nullptr;
+//
+//
+//        // Use the builder to create child objects
+//      }
+//    }
+
+    // Controlling the states
+    if ( Utilities::validateJson( json_data, "states", Utilities::JSON_TYPE_OBJECT, false ) )
     {
-      Json::Value& children = json_data["children"];
+      Json::Value& states = json_data["states"];
 
-      for( Json::Value::iterator c_it = children.begin(); c_it != children.end(); ++c_it )
+      for( Json::Value::iterator s_it = states.begin(); s_it != states.end(); ++s_it )
       {
-        std::string child_name = c_it.key().asString();
-        _children[ child_name ] = nullptr;
+        std::string state_name = s_it.key().asString();
+        Json::Value& state_data = (*s_it);
 
+        _stateMap.emplace( std::make_pair( state_name, StateDetails() ) );
 
-        // Use the builder to create child objects
+        // Texture details
+        if ( Utilities::validateJson( state_data, "texture", Utilities::JSON_TYPE_OBJECT, false ) )
+        {
+          _stateMap[ state_name ].texture.configure( state_data["texture"], handler );
+        }
+        
+        // Hitbox details
+        if ( Utilities::validateJson( state_data, "collision", Utilities::JSON_TYPE_OBJECT, false ) )
+        {
+          _stateMap[ state_name ].collision.configure( state_data["collision"] );
+        }
+
+        // Animation details
+        if ( Utilities::validateJson( state_data, "update_period", Utilities::JSON_TYPE_FLOAT, false ) )
+        {
+          _stateMap[ state_name ].updatePeriod = state_data[ "update_period" ].asFloat();
+        }
       }
     }
 
-    // Controlling the states and their respective children
-    if ( Utilities::validateJson( json_data, "states", Utilities::JSON_TYPE_OBJECT, false ) )
+    // Store the reset state if given
+    if ( Utilities::validateJson( json_data, "start_state", Utilities::JSON_TYPE_STRING, false ) )
     {
-
-
-
-
-
-    }
-    else // Only the single default state is used
-    {
+      _startState = _stateMap[ json_data["start_state"].asString() ];
     }
 
+  }
 
-    // Need to scan children to determine the correct property flags
+
+  void PhysicalObject::reset()
+  {
+    _velocity.zero();
+    _forces.zero();
+    _currentState = _startState;
   }
 
 

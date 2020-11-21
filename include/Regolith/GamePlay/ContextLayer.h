@@ -17,8 +17,6 @@ namespace Regolith
   {
     friend class Camera;
 
-    typedef std::map< CollisionTeam, PhysicalObjectList > LayerGraph;
-
 ////////////////////////////////////////////////////////////////////////////////
     private:
       Context* _owner;
@@ -26,13 +24,6 @@ namespace Regolith
       Vector _movementScale; // Movement wrt the camera position
       float _width;
       float _height;
-
-
-////////////////////////////////////////////////////////////////////////////////
-      // Caches
-
-      // Map all objects organised by collision team
-      LayerGraph _sceneGraph;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -46,35 +37,22 @@ namespace Regolith
       void configure( Context*, Vector, Vector, float, float );
 
 
-////////////////////////////////////////////////////////////////////////////////
-      // Frame update functions
-
-      // Apply physics processes and collision
-      void update( float );
-
-      // Recursively render the scene
-      void render( Camera& );
+      // Map all objects organised by collision team
+      LayerGraph layerGraph;
 
 
 ////////////////////////////////////////////////////////////////////////////////
       // Layer details
 
       // Return the position of the layer
-      const Vector& getPosition() const { return _position; }
+      constexpr const Vector& getPosition() const { return _position; }
 
       // Return movement speed wrt camera
-      const Vector& getMovementScale() const { return _movementScale; }
+      constexpr const Vector& getMovementScale() const { return _movementScale; }
 
       // Return width & height
-      const float& getWidth() const { return _width; }
-      const float& getHeight() const { return _height; }
-
-
-////////////////////////////////////////////////////////////////////////////////
-      // Object spawning
-
-      // Spawn a copy of the provided object at the requested position 
-      void spawn( PhysicalObject*, const Vector& );
+      constexpr const float& getWidth() const { return _width; }
+      constexpr const float& getHeight() const { return _height; }
 
   };
 

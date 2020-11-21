@@ -41,7 +41,7 @@ namespace Regolith
   typedef std::vector< PhysicalObject* > PhysicalObjectVector;
   typedef std::set< PhysicalObject* > PhysicalObjectSet;
   typedef std::map< std::string, PhysicalObject* > PhysicalObjectMap;
-  typedef std::map< CollisionTeam, PhysicalObjectList > TeamMap;
+  typedef std::map< CollisionTeam, PhysicalObjectList > LayerGraph;
 
   typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::map< std::string, RawSound > RawSoundMap;

@@ -86,6 +86,9 @@ namespace Regolith
       // Called during the update loop for frame-dependent context actions
       virtual void updateContext( float ) {}
 
+      // Called after the physics processes to update the current position that the camera renders from
+      virtual Vector updateCamera( float ) const = 0;
+
 //////////////////////////////////////////////////////////////////////////////// 
     public:
       // Con/De-structor
