@@ -14,7 +14,8 @@ namespace Regolith
     _width( width ),
     _height( height ),
     _scaleX( scalex ),
-    _scaleY( scaley )
+    _scaleY( scaley ),
+    _targetRect( {0, 0, 0, 0} )
   {
   }
 
@@ -65,16 +66,28 @@ namespace Regolith
   }
 
 
-
-  SDL_Rect Camera::place( const SDL_Rect& rect ) const
+  void Camera::renderPhysicalObject( PhysicalObject* object, Vector& camera_position ) const
   {
-    SDL_Rect newRect;
-//    newRect.x = (rect.x - _layerPosition.x()) * _scaleX;
-//    newRect.y = (rect.y - _layerPosition.y()) * _scaleY;
-//    newRect.w = rect.w * _scaleX;
-//    newRect.h = rect.h * _scaleY;
-    return newRect;
+    _targetRect.x = ( object->getPosition().x() - camera_position.x() ) * _scaleX;
+    _targetRect.y = ( object->getPosition().y() - camera_position.y() ) * _scaleY;
+    _targetRect.w = object->getWidth() * _scaleX;
+    _targetRect.h = object->getHeight() * _scaleY;
+
+    const Texture& texture = object->getTexture();
+
+    SDL_RenderCopyEx( _theRenderer, texture._theTexture->texture, &texture._clip, &_targetRect, object->getRotation(), nullptr, texture._flipFlag );
   }
+
+
+//  SDL_Rect Camera::place( const SDL_Rect& rect ) const
+//  {
+//    SDL_Rect newRect;
+////    newRect.x = (rect.x - _layerPosition.x()) * _scaleX;
+////    newRect.y = (rect.y - _layerPosition.y()) * _scaleY;
+////    newRect.w = rect.w * _scaleX;
+////    newRect.h = rect.h * _scaleY;
+//    return newRect;
+//  }
 
 }
 

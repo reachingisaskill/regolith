@@ -46,10 +46,12 @@ namespace Regolith
 
   class Texture
   {
+    // Make the camera a friend
+    friend class Camera;
+
     private:
       // Pointer to the raw sdl texture
       mutable RawTexture* _theTexture;
-      float _angle;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
 
@@ -74,17 +76,13 @@ namespace Regolith
       void configure( Json::Value&, DataHandler& );
 
 
-      // Render with the current renderer object
-      virtual void draw( SDL_Renderer*, SDL_Rect* ) const;
+//      // Render with the current renderer object
+//      virtual void draw( SDL_Renderer*, SDL_Rect* ) const;
 
 
       // Accessors
       int getWidth() const { return _clip.w; }
       int getHeight() const { return _clip.h; }
-      virtual float getAngle() const { return _angle; }
-
-
-      SDL_Rect getClip() { return _clip; }
 
 
       // Colour Modulation
@@ -101,6 +99,12 @@ namespace Regolith
 
       // Flip the image
       void setFlip( SDL_RendererFlip );
+
+      // Flip vertically
+      void flipVertical();
+
+      // Flip horizontally
+      void flipHorizontal();
 
 
       // Update which cell of the sprite sheet should be displayed

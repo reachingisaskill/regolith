@@ -152,6 +152,12 @@ namespace Regolith
     ContextLayerMap::iterator layer_end = _layers.end();
     for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
+      const Vector& layer_position = layer_it->second.getPosition();
+      const Vector& movement_scale = layer_it->second.getMovementScale();
+
+      // % - Directional dot-product
+      Vector camera_position = ( _cameraPosition - layer_position ) % movement_scale;
+
       for ( LayerGraph::iterator team_it = layer_it->second.layerGraph.begin(); team_it != layer_it->second.layerGraph.end(); ++team_it )
       {
         for ( PhysicalObjectList::iterator it = team_it->second.begin(); it != team_it->second.end(); ++it )
@@ -159,7 +165,7 @@ namespace Regolith
           // If the object can be drawn, render it to the back buffer
           if ( (*it)->hasTexture() )
           {
-            (*it)->getTexture(). render( camera );
+            camera.renderPhysicalObject( (*it), camera_position );
           }
         }
       }

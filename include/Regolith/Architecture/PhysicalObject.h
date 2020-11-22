@@ -112,7 +112,7 @@ namespace Regolith
 //      PhysicalObjectVector& getChildren() { return _currentState.children; }
 
       // Return the texture being used in the current state
-      Texture& getTexture() { return _currentState.texture; }
+//      Texture& getTexture() { return _currentState.texture; }
 
 
 ////////////////////////////////////////////////////////////////////////////////

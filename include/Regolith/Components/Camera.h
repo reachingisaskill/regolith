@@ -8,8 +8,6 @@
 namespace Regolith
 {
   class PhysicalObject;
-  class ContextLayer;
-
 
   class Camera
   {
@@ -25,6 +23,9 @@ namespace Regolith
       const float& _scaleX;
       const float& _scaleY;
 
+      // Store this as a class member to make the stack frame smaller
+      mutable SDL_Rect _targetRect;
+
     protected:
 
     public:
@@ -37,8 +38,8 @@ namespace Regolith
       // Clears the SDL renderer. Makes the camera invalid
       void clear();
 
-      // Places the object's rectangle inside the window
-      SDL_Rect place( const SDL_Rect& ) const;
+//      // Places the object's rectangle inside the window
+//      SDL_Rect place( const SDL_Rect& ) const;
 
 
       // Resets the rendering state for the next frame
@@ -51,6 +52,10 @@ namespace Regolith
 
       // Render a specific raw texture
       void renderRawTexture( RawTexture* ) const;
+
+
+      // Render a physical object
+      void renderPhysicalObject( PhysicalObject*, Vector& ) const;
   };
 
 }

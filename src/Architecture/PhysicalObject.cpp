@@ -110,7 +110,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configuration
 
-  void PhysicalObject::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& handler )
+  void PhysicalObject::configure( Json::Value& json_data, ContextGroup& /*cg*/, DataHandler& handler )
   {
     // Set the mass properties - Determine if an object can even be moved
     if ( Utilities::validateJson( json_data, "mass", Utilities::JSON_TYPE_FLOAT, false ) )

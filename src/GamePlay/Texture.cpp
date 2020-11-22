@@ -51,7 +51,6 @@ namespace Regolith
 
   Texture::Texture() :
     _theTexture( nullptr ),
-    _angle( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
     _clip( { 0, 0, 0, 0 } ),
     _currentSprite( 0 )
@@ -64,11 +63,11 @@ namespace Regolith
   }
 
 
-  void Texture::draw( SDL_Renderer* renderer, SDL_Rect* destination ) const
-  {
-    // Render it to the window
-    SDL_RenderCopyEx( renderer, _theTexture->texture, &_clip, destination, _angle, nullptr, _flipFlag );
-  }
+//  void Texture::draw( SDL_Renderer* renderer, SDL_Rect* destination ) const
+//  {
+//    // Render it to the window
+//    SDL_RenderCopyEx( renderer, _theTexture->texture, &_clip, destination, _angle, nullptr, _flipFlag );
+//  }
 
 
   void Texture::setClip( SDL_Rect c )
@@ -95,15 +94,21 @@ namespace Regolith
   }
 
 
-  void Texture::setRotation( double angle )
-  {
-    _angle = angle;
-  }
-
-
   void Texture::setFlip( SDL_RendererFlip flip )
   {
     _flipFlag = flip;
+  }
+
+
+  void Texture::flipVertical()
+  {
+    _flipFlag = (SDL_RendererFlip) (_flipFlag ^ SDL_FLIP_VERTICAL);
+  }
+
+
+  void Texture::flipHorizontal()
+  {
+    _flipFlag = (SDL_RendererFlip) (_flipFlag ^ SDL_FLIP_HORIZONTAL);
   }
 
 
@@ -142,7 +147,7 @@ namespace Regolith
     _clip.w = _theTexture->width / _theTexture->columns;
     _clip.h = _theTexture->height / _theTexture->rows;
 
-    DEBUG_STREAM << "Configuring texture: " << _theTexture->rows << "x" << _theTexture->columns << " -> " << _theTexture->cells << " start: " << _currentSprite;
+    DEBUG_STREAM << "Texture::configure : " << _theTexture->rows << "x" << _theTexture->columns << " -> " << _theTexture->cells << " start: " << _currentSprite;
   }
 
 
