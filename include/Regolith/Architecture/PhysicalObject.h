@@ -49,6 +49,13 @@ namespace Regolith
     private:
       // Flag that this object is to be removed from the scene
       bool _destroyMe;
+      // Flag to indicate this object can be moved by physics processes
+      bool _hasMoveable;
+      // Flag to indicate this object has a texture to render to the window
+      bool _hasTexture;
+      // Flag to indicate this object has animation
+      bool _hasAnimation;
+
       // Position with respect to the parent object
       Vector _position;
       // Rotation with respect to the parent object
@@ -151,13 +158,13 @@ namespace Regolith
 
 
       // Tells the caller that the object is moveable. i.e. the velocity may be non-zero
-      virtual bool hasMovement() const override { return _mass >= epsilon; }
+      virtual bool hasMovement() const override { return _hasMoveable; }
 
       // Tells the caller that the object can be rendered.
-      virtual bool hasTexture() const override { return false; }
+      virtual bool hasTexture() const override { return _hasTexture; }
 
       // Tells the caller that the is animated for every frame
-      virtual bool hasAnimation() const override { return false; }
+      virtual bool hasAnimation() const override { return _hasAnimation; }
 
 
 ////////////////////////////////////////////////////////////////////////////////

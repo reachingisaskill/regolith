@@ -31,6 +31,7 @@ namespace Regolith
   // Container typedefs
   typedef std::map< std::string, TTF_Font* > FontMap;
   typedef std::map< std::string, CollisionTeam > TeamNameMap;
+  typedef std::map< std::string, CollisionType > TypeNameMap;
 
   // Factory typedefs
   typedef FactoryTemplate< Signal, ContextGroup&, DataHandler& > SignalFactory;
@@ -64,6 +65,7 @@ namespace Regolith
       // Owned memory for objects, contexts, etc
       FontMap _fonts;
       TeamNameMap _teamNames;
+      TypeNameMap _typeNames;
 
       // Useful global constants
       std::string _title;
@@ -187,7 +189,16 @@ namespace Regolith
       CollisionTeam getCollisionTeam( std::string name );
 
       // Add a team to the map
-      void addTeam( std::string name, CollisionTeam id ) { _teamNames[name] = id; }
+      void addCollisionTeam( std::string name, CollisionTeam id ) { _teamNames[name] = id; }
+
+      // Return the number of teams
+      size_t getNumberTypes() const { return _typeNames.size(); }
+
+      // Return the type ID for a given name
+      CollisionType getCollisionType( std::string name );
+
+      // Add a type to the map
+      void addCollisionType( std::string name, CollisionType id ) { _typeNames[name] = id; }
 
 
       ////////////////////////////////////////////////////////////////////////////////

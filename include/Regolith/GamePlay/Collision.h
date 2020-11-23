@@ -54,8 +54,6 @@ namespace Regolith
 
     // The type of the collision
     CollisionType type;
-
-    HitBox() : position(), width( 0.0 ), height( 0.0 ), type( 0 ) {}
   };
 
 
@@ -82,7 +80,16 @@ namespace Regolith
       Collision();
 //      ~Collision();
 
+      // Configure the hitboxes for each frame
       void configure( Json::Value& );
+
+
+      // Return the total number of frames loaded
+      unsigned int getNumberFrames() const { return _collisionFrames.size(); }
+
+      // Return the number of hitboxes in the current frame
+      unsigned int getNumberHitBoxes() const { return _collisionFrames[_currentCollision].size(); }
+
 
       // If this is an animated collision, update accordingly
       void setFrameNumber( unsigned int frame ) { _currentCollision = frame; }

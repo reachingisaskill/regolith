@@ -202,6 +202,7 @@ namespace Regolith
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
     Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().ContextManagerStatus;
+    if ( quitFlag ) return;
 
     // Update the thread status
     std::unique_lock<std::mutex> statusLock( threadStatus.mutex );
@@ -215,6 +216,7 @@ namespace Regolith
       std::unique_lock<std::mutex> lk( startCondition.mutex );
       startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
       lk.unlock();
+      if ( quitFlag ) return;
     }
 
     // Update the thread status

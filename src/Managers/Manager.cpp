@@ -26,6 +26,7 @@ namespace Regolith
     _signalFactory(),
     _fonts(),
     _teamNames(),
+    _typeNames(),
     _title(),
     _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
@@ -49,10 +50,11 @@ namespace Regolith
   {
     DEBUG_LOG( "Manager::~Manager : Destruction" );
     // Close the threads first
-    _theThreads.quit();
+    _theThreads.join();
 
-    INFO_LOG( "Manager::~Manager : Clearing team list" );
+    INFO_LOG( "Manager::~Manager : Clearing collision name lists" );
     _teamNames.clear();
+    _typeNames.clear();
 
     INFO_LOG( "Manager::~Manager : Removing each of the fonts and clearing the map" );
     for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )
@@ -61,10 +63,13 @@ namespace Regolith
     }
     _fonts.clear();
 
+    INFO_LOG( "Manager::~Manager : Clearing context manager" );
     _theContexts.clear();
 
+    INFO_LOG( "Manager::~Manager : Clearing data manager" );
     _theData.clear();
 
+    INFO_LOG( "Manager::~Manager : Clearing audio manager" );
     _theAudio.clear();
 
     INFO_LOG( "Manager::~Manager : Clearing hardware manager" );
@@ -164,6 +169,19 @@ namespace Regolith
     {
       Exception ex( "Manager::getCollisionTeam()", "Could not find requested team name. Cannot load object." );
       ex.addDetail( "Team Name", name );
+      throw ex;
+    }
+    return found->second;
+  }
+
+
+  CollisionType Manager::getCollisionType( std::string name )
+  {
+    TypeNameMap::iterator found = _typeNames.find( name );
+    if ( found == _typeNames.end() )
+    {
+      Exception ex( "Manager::getCollisionType()", "Could not find requested type name. Cannot load object." );
+      ex.addDetail( "Type Name", name );
       throw ex;
     }
     return found->second;

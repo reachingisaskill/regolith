@@ -31,16 +31,8 @@ namespace Regolith
 
   ThreadManager::~ThreadManager()
   {
-    // Make sure this is true if the thread manager is being destroyed!
-    if ( QuitFlag == false )
-    {
-      this->stopAll();
-    }
-
-    // Wait for all the threads to re-join
-    _dataManagerThread.join();
-    _contextManagerThread.join();
-    _engineRenderingThread.join();
+    // All executing threads must have been stopped by the owner of this object!
+    // Don't fuck this up or everything will explode!
   }
 
 
@@ -114,6 +106,20 @@ namespace Regolith
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
+  }
+
+
+  void ThreadManager::join()
+  {
+    if ( ! QuitFlag ) this->stopAll();
+
+    // Wait for all the threads to re-join
+    INFO_LOG( "ThreadManager::~ThreadManager : Joining data manager thread" );
+    _dataManagerThread.join();
+    INFO_LOG( "ThreadManager::~ThreadManager : Joining context manager thread" );
+    _contextManagerThread.join();
+    INFO_LOG( "ThreadManager::~ThreadManager : Joining engine rendering thread" );
+    _engineRenderingThread.join();
   }
 
 

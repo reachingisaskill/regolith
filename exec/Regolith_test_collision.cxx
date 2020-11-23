@@ -1,148 +1,113 @@
 #define TESTASS_APPROX_LIMIT 1.0E-6
 
 #include "Regolith.h"
-#include "Regolith/Test/TestCollision.h"
+#include "Regolith/GamePlay/Collision.h"
 
 #include "testass.h"
 #include "logtastic.h"
 
 #include <iostream>
+#include <string>
 
 
 using namespace Regolith;
 
 
+////////////////////////////////////////////////////////////////////////////////
+  // Json Data for test 1
+const std::string json_test_1 = "{ \"hit_boxes\" : [ [ { \"position\" : [ 10, 20 ], \"width\" : 100, \"height\": 200, \"type\" : \"test0\" } ], \
+                                                     [ { \"position\" : [ 30, 40 ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test1\" } ], \
+                                                     [ { \"position\" : [ 30, 40 ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test1\" } ], \
+                                                     [ { \"position\" : [ 10, 20 ], \"width\" : 1,   \"height\": 2,   \"type\" : \"test1\" }, \
+                                                       { \"position\" : [ 20, 30 ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test2\" }, \
+                                                       { \"position\" : [ 30, 40 ], \"width\" : 100, \"height\": 200, \"type\" : \"test3\" } ], \
+                                                     [ { \"position\" : [ 3 , 4  ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test1\" } ] ] }";
+
+////////////////////////////////////////////////////////////////////////////////
+
 int main( int, char** )
 {
+  // Configure the logger first
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_collision.log" );
+
+  // Create the manager
+  Regolith::Manager* manager = Manager::createInstance();
+
+  // Tell logging to start
   logtastic::start( "Regolith - Collision Tests", REGOLITH_VERSION_NUMBER );
 
+  // Configure Testass
   testass::control::init( "Regolith", "Collision" );
   testass::control::get()->setVerbosity( testass::control::verb_short );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Configure some name lookups in the manager first
+  manager->addCollisionType( "test0", 0 );
+  manager->addCollisionType( "test1", 1 );
+  manager->addCollisionType( "test2", 2 );
+  manager->addCollisionType( "test3", 3 );
 
-  SECTION( "Architecture & Basics" );
-  {
-    TestCollision* object1 = new TestCollision();
+  Json::CharReaderBuilder json_reader_builder;
+  Json::CharReader* json_reader = json_reader_builder.newCharReader();
+  Json::Value json_data;
+  std::string error_string;
 
-    object1->setPosition( Vector( 1.0, 1.0 ) );
-
-    const Collision& col = object1->getCollision();
-
-    ASSERT_EQUAL( col.position().x(), 0.0 );
-    ASSERT_EQUAL( col.position().y(), 1.0 );
-    ASSERT_EQUAL( col.width(), 2.0 );
-    ASSERT_EQUAL( col.height(), 3.0 );
-  }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  SECTION( "Axis-Aligned Bounding Boxes - Collision" );
-  {
-    TestCollision* object1 = new TestCollision();
-    TestCollision* object2 = new TestCollision();
-
-    object1->setPosition( Vector( 0.0, 0.0 ) );
-    object2->setPosition( Vector( 5.0, 0.0 ) );
-
-    collides( object1, object2 );
-    ASSERT_FALSE( object1->collided() );
-    ASSERT_FALSE( object2->collided() );
-    object1->reset();
-    object2->reset();
-
-
-    object2->setPosition( Vector( 1.0, 0.0 ) );
-    collides( object1, object2 );
-    ASSERT_TRUE( object1->collided() );
-    ASSERT_TRUE( object2->collided() );
-    object1->reset();
-    object2->reset();
-
-
-    object2->setPosition( Vector( 0.0, -1.0 ) );
-    collides( object1, object2 );
-    ASSERT_TRUE( object1->collided() );
-    ASSERT_TRUE( object2->collided() );
-    ASSERT_EQUAL( object1->lastNormal(), unitVector_y ); // Default to y direction.
-    ASSERT_EQUAL( object2->lastNormal(), -unitVector_y ); // Default to y direction.
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 1.0 );
-    ASSERT_APPROX_EQUAL( object2->lastOverlap(), 1.0 );
-    object1->reset();
-    object2->reset();
-
-
-    object2->setPosition( Vector( -1.9999, 0.0 ) );
-    collides( object1, object2 );
-    ASSERT_TRUE( object1->collided() );
-    ASSERT_TRUE( object2->collided() );
-    ASSERT_EQUAL( object1->lastNormal(), unitVector_x );
-    ASSERT_EQUAL( object2->lastNormal(), -unitVector_x );
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 5.0E-5 );
-    ASSERT_APPROX_EQUAL( object2->lastOverlap(), 5.0E-5 );
-    object1->reset();
-    object2->reset();
-
-    object2->setPosition( Vector( 0.0, 3.0 ) );
-    collides( object1, object2 );
-    ASSERT_FALSE( object1->collided() );
-    ASSERT_FALSE( object2->collided() );
-    object1->reset();
-    object2->reset();
-
-
-    object2->setPosition( Vector( 1.9999, 0.0 ) );
-    collides( object1, object2 );
-    ASSERT_TRUE( object1->collided() );
-    ASSERT_TRUE( object2->collided() );
-    ASSERT_EQUAL( object1->lastNormal(), -unitVector_x );
-    ASSERT_EQUAL( object2->lastNormal(), unitVector_x );
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 5.0E-5 );
-    ASSERT_APPROX_EQUAL( object2->lastOverlap(), 5.0E-5 );
-    object1->reset();
-    object2->reset();
-
-
-    object2->setPosition( Vector( 0.0, -2.9999 ) );
-    collides( object1, object2 );
-    ASSERT_TRUE( object1->collided() );
-    ASSERT_TRUE( object2->collided() );
-    ASSERT_EQUAL( object1->lastNormal(), unitVector_y );
-    ASSERT_EQUAL( object2->lastNormal(), -unitVector_y );
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 5.0E-5 );
-    ASSERT_APPROX_EQUAL( object2->lastOverlap(), 5.0E-5 );
-    object1->reset();
-    object2->reset();
-
-
-    object2->setPosition( Vector( 0.0, -3.0 ) );
-    collides( object1, object2 );
-    ASSERT_FALSE( object1->collided() );
-    ASSERT_FALSE( object2->collided() );
-    object1->reset();
-    object2->reset();
-
-
-    object2->setPosition( Vector( 0.2, -2.6 ) );
-    collides( object1, object2 );
-    ASSERT_TRUE( object1->collided() );
-    ASSERT_TRUE( object2->collided() );
-    ASSERT_EQUAL( object1->lastNormal(), unitVector_y );
-    ASSERT_EQUAL( object2->lastNormal(), -unitVector_y );
-    ASSERT_APPROX_EQUAL( object1->lastOverlap(), 0.2 );
-    object1->reset();
-    object2->reset();
-
-  }
+  Collision collision;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  SECTION( "Axis-Aligned Bounding Boxes - Containment" );
+  SECTION( "Frame Configuration" );
   {
+    ASSERT_EQUAL( collision.getNumberFrames(), (unsigned int) 0 );
+
+    if ( ! json_reader->parse( json_test_1.c_str(), json_test_1.c_str() + json_test_1.size(), &json_data, &error_string ) )
+    {
+      ERROR_LOG( "Error occured parsins Json String" );
+      ERROR_STREAM << error_string;
+      error_string.clear();
+    }
+
+
+    collision.configure( json_data );
+
+    ASSERT_EQUAL( collision.getNumberFrames(), (unsigned int) 5 );
+    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
+
+    collision.setFrameNumber( 1 );
+    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
+
+    collision.setFrameNumber( 2 );
+    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
+
+    collision.setFrameNumber( 3 );
+    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 3 );
+
+    collision.setFrameNumber( 4 );
+    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
+  }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  SECTION( "Hit Box Configuration" );
+  {
+    collision.setFrameNumber( 0 );
+
+    Collision::iterator it = collision.begin();
+    Collision::iterator end = collision.end();
+
+    ASSERT_APPROX_EQUAL( it->position.x(), 10 );
+    ASSERT_APPROX_EQUAL( it->position.y(), 20 );
+    ASSERT_APPROX_EQUAL( it->width, 100 );
+    ASSERT_APPROX_EQUAL( it->height, 200 );
+    ASSERT_EQUAL( it->type, (unsigned int) 0 );
+
+    ASSERT_FALSE( it == end );
+    ++it;
+    ASSERT_TRUE( it == end );
+
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,6 +118,7 @@ int main( int, char** )
   }
 
   testass::control::kill();
+  Manager::killInstance();
   logtastic::stop();
   return 0;
 }

@@ -67,6 +67,9 @@ namespace Regolith
       // Send the stop signals
       void stopAll();
 
+      // Closes the thread handlers
+      void join();
+
 
 ////////////////////////////////////////////////////////////////////////////////
       // Conditions for threads to interact with

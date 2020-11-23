@@ -112,6 +112,16 @@ namespace Regolith
 
   void PhysicalObject::configure( Json::Value& json_data, ContextGroup& /*cg*/, DataHandler& handler )
   {
+    Utilities::validateJson( json_data, "has_moveable", Utilities::JSON_TYPE_BOOLEAN );
+    Utilities::validateJson( json_data, "has_texture", Utilities::JSON_TYPE_BOOLEAN );
+    Utilities::validateJson( json_data, "has_animation", Utilities::JSON_TYPE_BOOLEAN );
+
+    // Configure the basic properties of the object
+    _hasMoveable = json_data["has_moveable"].asBool();
+    _hasTexture = json_data["has_texture"].asBool();
+    _hasAnimation = json_data["has_animation"].asBool();
+
+
     // Set the mass properties - Determine if an object can even be moved
     if ( Utilities::validateJson( json_data, "mass", Utilities::JSON_TYPE_FLOAT, false ) )
     {

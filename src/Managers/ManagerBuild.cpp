@@ -235,7 +235,7 @@ namespace Regolith
     {
       std::string team_name = it.key().asString();
       CollisionTeam id = (CollisionTeam) it->asInt();
-      addTeam( team_name, id );
+      addCollisionTeam( team_name, id );
     }
   }
 
