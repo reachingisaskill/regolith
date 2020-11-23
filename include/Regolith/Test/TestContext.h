@@ -44,6 +44,9 @@ namespace Regolith
       // Title Scenes take ownership of the display.
       virtual bool overridesPreviousContext() const override { return true; }
 
+      // Updates the camera position
+      virtual Vector updateCamera( float ) const override { return Vector(); }
+
 
 //////////////////////////////////////////////////
       // Requirements for the ControllableInterface - input action handling
