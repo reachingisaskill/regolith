@@ -123,26 +123,32 @@ namespace Regolith
     _cameraPosition = updateCamera( time );
 
 
-//    DEBUG_STREAM << "ContextLayer::update : Starting Layer Collision";
-//
-//    // Colliding objects
-//    CollisionHandler::iterator end = _theCollision.collisionEnd();
-//    for ( CollisionHandler::iterator it = _theCollision.collisionBegin(); it != end; ++it )
-//    {
-//      PhysicalObjectList& team1 = _layerGraph[ it->first ];
-//      PhysicalObjectList& team2 = _layerGraph[ it->second ];
-//
-//      PhysicalObjectList::iterator end1 = team1.end();
-//      PhysicalObjectList::iterator end2 = team2.end();
-//
-//      for ( CollidableList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
-//      {
-//        for ( CollidableList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
-//        {
-//          collides( (*it1), (*it2) );
-//        }
-//      }
-//    }
+    DEBUG_STREAM << "ContextLayer::update : Starting Layer Collision";
+
+    // Colliding objects
+    CollisionHandler::iterator end = _theCollision.collisionEnd();
+
+    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    {
+      for ( CollisionHandler::iterator it = _theCollision.collisionBegin(); it != end; ++it )
+      {
+        PhysicalObjectList& team1 = layer_it->second.layerGraph[ it->first ];
+        if ( team1.size() == 0 ) continue;
+        PhysicalObjectList& team2 = layer_it->second.layerGraph[ it->second ];
+        if ( team2.size() == 0 ) continue;
+
+        PhysicalObjectList::iterator end1 = team1.end();
+        PhysicalObjectList::iterator end2 = team2.end();
+
+        for ( PhysicalObjectList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
+        {
+          for ( PhysicalObjectList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
+          {
+            _theCollision.collides( (*it1), (*it2) );
+          }
+        }
+      }
+    }
   }
 
 

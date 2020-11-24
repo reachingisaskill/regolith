@@ -17,7 +17,7 @@ using namespace Regolith;
   // Json Data for test 1
 const std::string json_test_1 = "{ \"hit_boxes\" : [ [ { \"position\" : [ 10, 20 ], \"width\" : 100, \"height\": 200, \"type\" : \"test0\" } ], \
                                                      [ { \"position\" : [ 30, 40 ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test1\" } ], \
-                                                     [ { \"position\" : [ 30, 40 ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test1\" } ], \
+                                                     [ { \"position\" : [ 50, 60 ], \"width\" : 20,  \"height\": 10,  \"type\" : \"test1\" } ], \
                                                      [ { \"position\" : [ 10, 20 ], \"width\" : 1,   \"height\": 2,   \"type\" : \"test1\" }, \
                                                        { \"position\" : [ 20, 30 ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test2\" }, \
                                                        { \"position\" : [ 30, 40 ], \"width\" : 100, \"height\": 200, \"type\" : \"test3\" } ], \
@@ -91,7 +91,7 @@ int main( int, char** )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  SECTION( "Hit Box Configuration" );
+  SECTION( "Hit Box Configuration - Frame 0" );
   {
     collision.setFrameNumber( 0 );
 
@@ -108,6 +108,94 @@ int main( int, char** )
     ++it;
     ASSERT_TRUE( it == end );
 
+  }
+
+  SECTION( "Hit Box Configuration - Frame 1" );
+  {
+
+    collision.setFrameNumber( 1 );
+    Collision::iterator it = collision.begin();
+    Collision::iterator end = collision.end();
+
+    ASSERT_APPROX_EQUAL( it->position.x(), 30 );
+    ASSERT_APPROX_EQUAL( it->position.y(), 40 );
+    ASSERT_APPROX_EQUAL( it->width, 10 );
+    ASSERT_APPROX_EQUAL( it->height, 20 );
+    ASSERT_EQUAL( it->type, (unsigned int) 1 );
+
+    ASSERT_FALSE( it == end );
+    ++it;
+    ASSERT_TRUE( it == end );
+  }
+
+  SECTION( "Hit Box Configuration - Frame 2" );
+  {
+
+    collision.setFrameNumber( 2 );
+    Collision::iterator it = collision.begin();
+    Collision::iterator end = collision.end();
+
+    ASSERT_APPROX_EQUAL( it->position.x(), 50 );
+    ASSERT_APPROX_EQUAL( it->position.y(), 60 );
+    ASSERT_APPROX_EQUAL( it->width, 20 );
+    ASSERT_APPROX_EQUAL( it->height, 10 );
+    ASSERT_EQUAL( it->type, (unsigned int) 1 );
+
+    ASSERT_FALSE( it == end );
+    ++it;
+    ASSERT_TRUE( it == end );
+  }
+
+  SECTION( "Hit Box Configuration - Frame 3" );
+  {
+    collision.setFrameNumber( 3 );
+    Collision::iterator it = collision.begin();
+    Collision::iterator end = collision.end();
+    ASSERT_FALSE( it == end );
+
+    ASSERT_APPROX_EQUAL( it->position.x(), 10 );
+    ASSERT_APPROX_EQUAL( it->position.y(), 20 );
+    ASSERT_APPROX_EQUAL( it->width, 1 );
+    ASSERT_APPROX_EQUAL( it->height, 2 );
+    ASSERT_EQUAL( it->type, (unsigned int) 1 );
+
+    ++it;
+    ASSERT_FALSE( it == end );
+
+    ASSERT_APPROX_EQUAL( it->position.x(), 20 );
+    ASSERT_APPROX_EQUAL( it->position.y(), 30 );
+    ASSERT_APPROX_EQUAL( it->width, 10 );
+    ASSERT_APPROX_EQUAL( it->height, 20 );
+    ASSERT_EQUAL( it->type, (unsigned int) 2 );
+
+    ++it;
+    ASSERT_FALSE( it == end );
+
+    ASSERT_APPROX_EQUAL( it->position.x(), 30 );
+    ASSERT_APPROX_EQUAL( it->position.y(), 40 );
+    ASSERT_APPROX_EQUAL( it->width, 100 );
+    ASSERT_APPROX_EQUAL( it->height, 200 );
+    ASSERT_EQUAL( it->type, (unsigned int) 3 );
+
+    ++it;
+    ASSERT_TRUE( it == end );
+  }
+
+  SECTION( "Hit Box Configuration - Frame 4" );
+  {
+    collision.setFrameNumber( 4 );
+    Collision::iterator it = collision.begin();
+    Collision::iterator end = collision.end();
+    ASSERT_FALSE( it == end );
+
+    ASSERT_APPROX_EQUAL( it->position.x(), 3 );
+    ASSERT_APPROX_EQUAL( it->position.y(), 4 );
+    ASSERT_APPROX_EQUAL( it->width, 10 );
+    ASSERT_APPROX_EQUAL( it->height, 20 );
+    ASSERT_EQUAL( it->type, (unsigned int) 1 );
+
+    ++it;
+    ASSERT_TRUE( it == end );
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

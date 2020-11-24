@@ -105,6 +105,9 @@ namespace Regolith
       // For derived classes to impose a force
       void addForce( Vector f ) { _forces += f; }
 
+      // Forces an immediate movement of the object. Used mostly to prevent overlap during collisions.
+      void kick( Vector& k ) { _position += k; }
+
 
 ////////////////////////////////////////////////////////////////////////////////
       // State interface functions
@@ -185,7 +188,10 @@ namespace Regolith
 
 
       // For the camera to request the current renderable texture
-      const Texture& getTexture() const { return _currentState.texture; }
+      constexpr const Texture& getTexture() const { return _currentState.texture; }
+
+      // For the collision handler to request the current hitboxes
+      constexpr const Collision& getCollision() const { return _currentState.collision; }
 
 
       // Perform the time integration for movement of this object
@@ -194,8 +200,8 @@ namespace Regolith
       // Perform an update to all the animations
       virtual void update( float );
 
-      // Perform collision resolution on this object
-      virtual bool collides( PhysicalObject* );
+      // Call back function for when this object collides with another
+      virtual void onCollision( Vector, CollisionType, CollisionType, PhysicalObject* );
 
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -275,9 +275,10 @@ namespace Regolith
   }
 
 
-  bool PhysicalObject::collides( PhysicalObject* )
+  void PhysicalObject::onCollision( Vector contact, CollisionType /*this_type*/, CollisionType /*other_type*/, PhysicalObject* /*other_object*/)
   {
-    return false;
+    // Default behaviour is just to move away from other object.:w
+    this->kick( contact );
   }
 
 }

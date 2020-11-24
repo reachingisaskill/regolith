@@ -98,6 +98,7 @@ namespace Regolith
   // Useful Definitions
   const Vector unitVector_x( 1.0f, 0.0f );
   const Vector unitVector_y( 0.0f, 1.0f );
+  const Vector zeroVector( 0.0, 0.0 );
 }
 
 #endif // REGOLITH_UTILITIES_VECTOR_H_

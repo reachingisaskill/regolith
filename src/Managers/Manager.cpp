@@ -1,5 +1,6 @@
 
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Components/Window.h"
 
@@ -43,6 +44,8 @@ namespace Regolith
     logtastic::registerSignalHandler( SIGINT, deathSignals );
     logtastic::registerSignalHandler( SIGSEGV, deathSignals );
     logtastic::registerSignalHandler( SIGTERM, deathSignals );
+
+    _objectFactory.addBuilder< PhysicalObject >( "physical_object" );
   }
 
 
