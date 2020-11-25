@@ -222,7 +222,7 @@ namespace Regolith
   void OpenContextSignal::configure( Json::Value& json_data, ContextGroup& cg, DataHandler& )
   {
     Utilities::validateJson( json_data, "context_name", Utilities::JSON_TYPE_STRING );
-    _theContext = cg.requestContext( json_data["context_name"].asString() );
+    _theContext = cg.getContextPointer( json_data["context_name"].asString() );
 
     INFO_STREAM << "OpenContextSignal::configure : Registered context with name: " << json_data["context_name"].asString();
   }

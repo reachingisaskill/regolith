@@ -64,6 +64,8 @@ namespace Regolith
       // Used to determine collision and movement properties
       float _mass;
       float _inverseMass;
+      float _hooksConstant;
+      float _elasticity;
 
       // Defines the size of the drawable area for the object. Should ALWAYS contain all the collision boxes.
       float _width;
@@ -217,6 +219,10 @@ namespace Regolith
       // Mass variable accessors.
       const float& getMass() const { return _mass; }
       const float& getInverseMass() const { return _inverseMass; }
+
+      // Collision physics accessors
+      const float& getHooksConstant() const { return _hooksConstant; }
+      const float& getElasticity() const { return _elasticity; }
 
       // Position set/get
       const Vector& position() const { return _position; }

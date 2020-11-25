@@ -9,7 +9,6 @@ namespace Regolith
 
   TestContext::TestContext() :
     Context(),
-    _testHandler( nullptr ),
     _cg_load( nullptr ),
     _timer(),
     _isLoadScreen( false )
@@ -36,13 +35,6 @@ namespace Regolith
     // Load the name of this context
     Utilities::validateJson( tests, "name", Utilities::JSON_TYPE_STRING );
     _name = tests["name"].asString();
-
-    // Find a data handler to unload, load and unload again.
-    if ( Utilities::validateJson( tests, "data_handler_loading", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      INFO_STREAM << "TestContext::configure : Testing the multithreaded loading using data handler: " << tests["data_handler_loading"].asString();
-      _testHandler = group.getDataHandler( tests["data_handler_loading"].asString() );
-    }
 
     // Test loading another context group
     if ( Utilities::validateJson( tests, "context_group_loading", Utilities::JSON_TYPE_OBJECT, false ) )
@@ -73,13 +65,6 @@ namespace Regolith
     INFO_STREAM << "TestContext::onStart " << _name << " : Starting test context.";
 
     _timer.reset();
-
-    if ( _testHandler != nullptr )
-    {
-      INFO_STREAM << "TestContext::onStart " << _name << " : Reloading test data handler";
-      Manager::getInstance()->getDataManager().unload( _testHandler );
-      Manager::getInstance()->getDataManager().load( _testHandler );
-    }
   }
 
 

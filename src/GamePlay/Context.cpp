@@ -123,7 +123,7 @@ namespace Regolith
     _cameraPosition = updateCamera( time );
 
 
-    DEBUG_STREAM << "ContextLayer::update : Starting Layer Collision";
+    DEBUG_STREAM << "Context::update : Starting Layer Collision";
 
     // Colliding objects
     CollisionHandler::iterator end = _theCollision.collisionEnd();
@@ -309,7 +309,7 @@ namespace Regolith
 //    // Let the focus handler register input actions
 //    _theFocus.registerActions( _theInput );
 
-    // Finall call the overriden function for the context
+    // Register the input actions that this context can receive
     this->registerActions( _theInput );
   }
 

@@ -16,7 +16,6 @@ namespace Regolith
   {
     private:
       std::string _name;
-      DataHandler* _testHandler;
       ContextGroup* _cg_load;
       CountdownTimer _timer;
       bool _isLoadScreen;

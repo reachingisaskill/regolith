@@ -5,7 +5,6 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Components/Engine.h"
-#include "Regolith/Utilities/ProxyMap.h"
 
 
 namespace Regolith
@@ -197,7 +196,7 @@ namespace Regolith
   class OpenContextSignal : public Signal
   {
     private:
-      Proxy<Context*> _theContext;
+      Context** _theContext;
 
     public :
       // Con/Destruction

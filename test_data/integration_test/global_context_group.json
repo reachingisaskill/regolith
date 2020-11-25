@@ -3,15 +3,18 @@
 
   "entry_point" : "context_0",
 
-  "data_handlers" : 
+
+  "game_objects" : 
   {
-    "test_handler" :
+    "null_object" :
     {
-      "null_object" :
-      {
-        "type" : "null"
-      }
+      "type" : "null"
     }
+  },
+
+
+  "spawn_buffers" :
+  {
   },
 
 
