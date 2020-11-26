@@ -1,7 +1,7 @@
 {
   "load_screen" : null,
 
-  "entry_point" : "context_0",
+  "entry_point" : "the_context",
 
 
   "game_objects" : 
@@ -54,9 +54,7 @@
 
   "contexts" :
   {
-    "context_0" : "test_data/integration_test/context_0.json",
-    "context_child" : "test_data/integration_test/context_child.json",
-    "load_screen" : "test_data/integration_test/load_screen.json"
+    "the_context" : "test_data/physics_test/context_0.json"
   }
 
 }

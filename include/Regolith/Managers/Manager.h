@@ -30,12 +30,10 @@ namespace Regolith
 
   // Container typedefs
   typedef std::map< std::string, TTF_Font* > FontMap;
-  typedef std::map< std::string, CollisionTeam > TeamNameMap;
-  typedef std::map< std::string, CollisionType > TypeNameMap;
 
   // Factory typedefs
-  typedef FactoryTemplate< Signal, ContextGroup&, DataHandler& > SignalFactory;
-  typedef FactoryTemplate< GameObject, ContextGroup&, DataHandler& > ObjectFactory;
+  typedef FactoryTemplate< Signal, ContextGroup& > SignalFactory;
+  typedef FactoryTemplate< GameObject, ContextGroup& > ObjectFactory;
   typedef FactoryTemplate< Context, ContextGroup& > ContextFactory;
 
   // Manager class
@@ -64,6 +62,8 @@ namespace Regolith
 
       // Owned memory for objects, contexts, etc
       FontMap _fonts;
+
+      // Maps of the collision team and type names
       TeamNameMap _teamNames;
       TypeNameMap _typeNames;
 
@@ -93,8 +93,10 @@ namespace Regolith
       void _loadFonts( Json::Value& );
       // Configure the window
       void _loadWindow( Json::Value& );
-      // Load all the collision teams
+      // Load map of collision teams
       void _loadTeams( Json::Value& );
+      // Load map of collision types
+      void _loadTypes( Json::Value& );
       // Load all the data manager
       void _loadData( Json::Value& );
       // Load all the resources
@@ -180,6 +182,16 @@ namespace Regolith
 
 
       ////////////////////////////////////////////////////////////////////////////////
+      // User Event functions
+
+      // Configure the list of user events for game events
+      void configureEvents();
+
+      // Push a user event into the SDL event queue
+      void raiseEvent( RegolithEvent );
+
+
+      ////////////////////////////////////////////////////////////////////////////////
       // Team Configuration
 
       // Return the number of teams
@@ -202,17 +214,7 @@ namespace Regolith
 
 
       ////////////////////////////////////////////////////////////////////////////////
-      // User Event functions
-
-      // Configure the list of user events for game events
-      void configureEvents();
-
-      // Push a user event into the SDL event queue
-      void raiseEvent( RegolithEvent );
-
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // Context stact Interface.
+      // Context stack Interface.
       // Pushed context stack operations to the engine
 
       // Opens the entry point of the current context group

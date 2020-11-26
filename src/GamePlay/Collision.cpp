@@ -49,9 +49,6 @@ namespace Regolith
 
           Json::Value& hitbox_data = frame_hitboxes[hitbox_num];
 
-//          DEBUG_STREAM << "Collision::configure : " << hitbox_data.asString();
-          DEBUG_STREAM << "Collision::configure : " << hitbox_data.isMember( "position" );
-
           Utilities::validateJson( hitbox_data, "position", Utilities::JSON_TYPE_ARRAY );
           Utilities::validateJsonArray( hitbox_data["position"], 2, Utilities::JSON_TYPE_INTEGER );
           Utilities::validateJson( hitbox_data, "width", Utilities::JSON_TYPE_INTEGER );
@@ -68,6 +65,8 @@ namespace Regolith
           _collisionFrames[frame_num].push_back( hb );
         }
       }
+
+      DEBUG_LOG( "Collision::configure : Loaded all hitboxes" );
     }
     else if ( Utilities::validateJson( json_data, "hit_box_file", Utilities::JSON_TYPE_STRING, false ) )
     {

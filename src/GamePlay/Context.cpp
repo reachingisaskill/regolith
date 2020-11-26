@@ -233,9 +233,12 @@ namespace Regolith
       float w = layer_data["width"].asFloat();
       float h = layer_data["height"].asFloat();
 
-
       // Creates it if it doesn't already exist
       _layers[ layer_name ].configure( this, Vector( x, y ), Vector( dx, dy ), w, h );
+
+
+      // Tell the collision handler to create the map of expected collision teams in the new layer
+      _theCollision.setupEmptyLayer( _layers[ layer_name ] );
 
 
       // Find and place all the requested elements

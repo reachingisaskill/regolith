@@ -24,8 +24,9 @@ namespace Regolith
   class ContextGroup
   {
     public:
-      class Operation;
+//      class Operation;
 
+////////////////////////////////////////////////////////////////////////////////
     private:
       typedef std::map<std::string, SpawnBuffer> SpawnBufferMap;
 //      typedef std::queue<Operation> OperationQueue;

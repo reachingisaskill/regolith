@@ -27,7 +27,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Signal Base class
 
-  class Signal : public MassProduceable<ContextGroup&, DataHandler&>
+  class Signal : public MassProduceable<ContextGroup&>
   {
     private:
 
@@ -57,7 +57,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputActionSignal( *this ); }
   };
@@ -79,7 +79,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputBooleanSignal( *this ); }
   };
@@ -101,7 +101,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputFloatSignal( *this ); }
   };
@@ -123,7 +123,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputVectorSignal( *this ); }
   };
@@ -146,7 +146,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new InputMouseSignal( *this ); }
   };
@@ -167,7 +167,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new GameEventSignal( *this ); }
   };
@@ -205,7 +205,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new OpenContextSignal( *this ); }
   };
@@ -226,7 +226,7 @@ namespace Regolith
 
       void trigger() const;
 
-      virtual void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      virtual void configure( Json::Value&, ContextGroup& ) override;
 
       virtual Signal* clone() const override { return new OpenContextGroupSignal( *this ); }
   };

@@ -84,11 +84,12 @@ namespace Regolith
       // Map of all the possible states
       StateMap _stateMap;
 
-      // Reference to the current state
-      StateDetails& _currentState;
-
       // When reset is called return to this state
-      StateDetails& _startState;
+      std::string _startState;
+      StateDetails* _startStatePointer;
+
+      // Reference to the current state
+      StateDetails* _currentState;
 
 
     protected :
@@ -118,7 +119,7 @@ namespace Regolith
       StateDetails& getState( std::string name ) { return _stateMap[ name ]; }
 
       // Sets the current state to the reference
-      void setState( StateDetails& state ) { _currentState = state; }
+      void setState( StateDetails* state ) { _currentState = state; }
 
 //      // Return the vector of children used in the current state
 //      PhysicalObjectVector& getChildren() { return _currentState.children; }
@@ -151,7 +152,7 @@ namespace Regolith
       // Configuration
 
       // Perform the basic configuration
-      void configure( Json::Value&, ContextGroup&, DataHandler& ) override;
+      void configure( Json::Value&, ContextGroup& ) override;
 
       // Resets the object to it's initial configuration to allow reusing of objects
       virtual void reset();
@@ -190,10 +191,10 @@ namespace Regolith
 
 
       // For the camera to request the current renderable texture
-      constexpr const Texture& getTexture() const { return _currentState.texture; }
+      constexpr const Texture& getTexture() const { return _currentState->texture; }
 
       // For the collision handler to request the current hitboxes
-      constexpr const Collision& getCollision() const { return _currentState.collision; }
+      constexpr const Collision& getCollision() const { return _currentState->collision; }
 
 
       // Perform the time integration for movement of this object
@@ -210,7 +211,7 @@ namespace Regolith
       // Object property accessors and modifiers
 
       // Return the current state of the object
-      unsigned int getState() const { return _currentState.id; }
+      unsigned int getState() const { return _currentState->id; }
       
       // Return the assigned collision team
       CollisionTeam getCollisionTeam() const { return _collisionTeam; }

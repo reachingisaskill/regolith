@@ -25,7 +25,7 @@ namespace Regolith
   }
 
 
-  void TestObject::configure( Json::Value&, ContextGroup&, DataHandler& )
+  void TestObject::configure( Json::Value&, ContextGroup& )
   {
   }
 }

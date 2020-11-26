@@ -20,7 +20,7 @@ namespace Regolith
    * Texture => Drawable
    * Movement => Movable
    */
-  class GameObject : public MassProduceable< ContextGroup&, DataHandler& >
+  class GameObject : public MassProduceable< ContextGroup& >
   {
     public:
       virtual ~GameObject() {}

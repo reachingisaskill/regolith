@@ -82,6 +82,10 @@ namespace Regolith
       this->_loadTeams( json_data["collision_teams"] );
 
 
+      //Load all the collision types
+      this->_loadTypes( json_data["collision_types"] );
+
+
       // Load all the game objects files
       this->_loadData( json_data["game_data"] );
 
@@ -230,12 +234,24 @@ namespace Regolith
 
   void Manager::_loadTeams( Json::Value& json_data )
   {
-    Json::Value::const_iterator data_end = json_data.end();
-    for ( Json::Value::const_iterator it = json_data.begin(); it != data_end; ++it )
+    INFO_LOG( "Manager::_loadTeams : Loading collision team map" );
+    for ( Json::Value::const_iterator it = json_data.begin(); it != json_data.end(); ++it )
     {
       std::string team_name = it.key().asString();
       CollisionTeam id = (CollisionTeam) it->asInt();
       addCollisionTeam( team_name, id );
+    }
+  }
+
+
+  void Manager::_loadTypes( Json::Value& json_data )
+  {
+    INFO_LOG( "Manager::_loadTeams : Loading collision type map" );
+    for ( Json::Value::const_iterator it = json_data.begin(); it != json_data.end(); ++it )
+    {
+      std::string team_name = it.key().asString();
+      CollisionType id = (CollisionType) it->asInt();
+      addCollisionType( team_name, id );
     }
   }
 

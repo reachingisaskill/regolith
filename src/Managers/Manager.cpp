@@ -44,8 +44,6 @@ namespace Regolith
     logtastic::registerSignalHandler( SIGINT, deathSignals );
     logtastic::registerSignalHandler( SIGSEGV, deathSignals );
     logtastic::registerSignalHandler( SIGTERM, deathSignals );
-
-    _objectFactory.addBuilder< PhysicalObject >( "physical_object" );
   }
 
 
@@ -54,10 +52,6 @@ namespace Regolith
     DEBUG_LOG( "Manager::~Manager : Destruction" );
     // Close the threads first
     _theThreads.join();
-
-    INFO_LOG( "Manager::~Manager : Clearing collision name lists" );
-    _teamNames.clear();
-    _typeNames.clear();
 
     INFO_LOG( "Manager::~Manager : Removing each of the fonts and clearing the map" );
     for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )
@@ -166,12 +160,21 @@ namespace Regolith
   }
 
 
+  void Manager::renderSurfaces( DataHandler* handler )
+  {
+    _theEngine.renderTextures( handler );
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Accessors for global data
+
   CollisionTeam Manager::getCollisionTeam( std::string name )
   {
     TeamNameMap::iterator found = _teamNames.find( name );
     if ( found == _teamNames.end() )
     {
-      Exception ex( "Manager::getCollisionTeam()", "Could not find requested team name. Cannot load object." );
+      Exception ex( "Manager::getCollisionTeam()", "Could not find requested team name." );
       ex.addDetail( "Team Name", name );
       throw ex;
     }
@@ -184,18 +187,13 @@ namespace Regolith
     TypeNameMap::iterator found = _typeNames.find( name );
     if ( found == _typeNames.end() )
     {
-      Exception ex( "Manager::getCollisionType()", "Could not find requested type name. Cannot load object." );
+      Exception ex( "Manager::getCollisionType()", "Could not find requested type name." );
       ex.addDetail( "Type Name", name );
       throw ex;
     }
     return found->second;
   }
 
-
-  void Manager::renderSurfaces( DataHandler* handler )
-  {
-    _theEngine.renderTextures( handler );
-  }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure user events

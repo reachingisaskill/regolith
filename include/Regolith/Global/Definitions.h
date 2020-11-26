@@ -37,6 +37,9 @@ namespace Regolith
   typedef unsigned int CollisionTeam;
   typedef unsigned int CollisionType;
 
+  typedef std::map< std::string, CollisionTeam > TeamNameMap;
+  typedef std::map< std::string, CollisionType > TypeNameMap;
+
   typedef std::list< PhysicalObject* > PhysicalObjectList;
   typedef std::vector< PhysicalObject* > PhysicalObjectVector;
   typedef std::set< PhysicalObject* > PhysicalObjectSet;

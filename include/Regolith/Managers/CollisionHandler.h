@@ -28,6 +28,7 @@ namespace Regolith
 
   // Forward declarations
   class PhysicalObject;
+  class ContextLayer;
 
 
   // Collision handler definition
@@ -78,6 +79,9 @@ namespace Regolith
       // Manually add a containment pairing
       void addContainerPair( CollisionTeam, CollisionTeam );
 
+      // Configures an empty layer
+      void setupEmptyLayer( ContextLayer& ) const;
+
       // Basic iterator interface
       iterator collisionBegin() const { return _pairings.begin(); }
       iterator collisionEnd() const { return _pairings.end(); }
@@ -90,6 +94,7 @@ namespace Regolith
       void collides( PhysicalObject*, PhysicalObject* );
       // Does the first object contain the second
       void contains( PhysicalObject*, PhysicalObject* ) {}
+
   };
 
 

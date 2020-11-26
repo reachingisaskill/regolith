@@ -1,5 +1,5 @@
 {
-  "type" : "physics_test",
+  "type" : "empty_context",
 
   "input_mapping" : "empty",
 

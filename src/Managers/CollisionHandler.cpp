@@ -2,6 +2,7 @@
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/GamePlay/ContextLayer.h"
 
 
 namespace Regolith
@@ -86,8 +87,12 @@ namespace Regolith
     Utilities::validateJson( json_data, "collision_rules", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["collision_rules"], 0, Utilities::JSON_TYPE_ARRAY );
 
-    Json::Value& collision_rules = json_data["collision_rules"];
+    Utilities::validateJson( json_data, "container_rules", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data["container_rules"], 0, Utilities::JSON_TYPE_ARRAY );
 
+
+    // Load the collision rules
+    Json::Value& collision_rules = json_data["collision_rules"];
     for ( Json::ArrayIndex i = 0; i < collision_rules.size(); ++i )
     {
       Utilities::validateJsonArray( collision_rules[i], 2, Utilities::JSON_TYPE_STRING );
@@ -102,13 +107,8 @@ namespace Regolith
       INFO_STREAM << "Added Collision Rule: " << team_name1 << " vs " << team_name2;
     }
 
-
-
-    Utilities::validateJson( json_data, "container_rules", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["container_rules"], 0, Utilities::JSON_TYPE_ARRAY );
-
+    // Load the containment rules
     Json::Value& container_rules = json_data["container_rules"];
-
     for ( Json::ArrayIndex i = 0; i < container_rules.size(); ++i )
     {
       Utilities::validateJsonArray( container_rules[i], 2, Utilities::JSON_TYPE_STRING );
@@ -121,6 +121,34 @@ namespace Regolith
 
       addContainerPair( team1, team2 );
       INFO_STREAM << "Added Container Rule: " << team_name1 << " <- " << team_name2;
+    }
+  }
+
+
+  void CollisionHandler::setupEmptyLayer( ContextLayer& layer ) const
+  {
+    for ( CollisionPairList::const_iterator it = _pairings.begin(); it != _pairings.end(); ++it )
+    {
+      if ( layer.layerGraph.find( it->first ) == layer.layerGraph.end() )
+      {
+        layer.layerGraph[ it->first ] = PhysicalObjectList();
+      }
+      if ( layer.layerGraph.find( it->second ) == layer.layerGraph.end() )
+      {
+        layer.layerGraph[ it->second ] = PhysicalObjectList();
+      }
+    }
+
+    for ( CollisionPairList::const_iterator it = _containers.begin(); it != _containers.end(); ++it )
+    {
+      if ( layer.layerGraph.find( it->first ) == layer.layerGraph.end() )
+      {
+        layer.layerGraph[ it->first ] = PhysicalObjectList();
+      }
+      if ( layer.layerGraph.find( it->second ) == layer.layerGraph.end() )
+      {
+        layer.layerGraph[ it->second ] = PhysicalObjectList();
+      }
     }
   }
 

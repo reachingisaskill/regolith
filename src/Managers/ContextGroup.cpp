@@ -176,7 +176,7 @@ namespace Regolith
 
       try
       {
-        GameObject* obj = obj_factory.build( object_data, *this, _theData );
+        GameObject* obj = obj_factory.build( object_data, *this );
         _gameObjects[ obj_name ] = dynamic_cast< PhysicalObject* >( obj );
       }
       catch ( Exception& ex )

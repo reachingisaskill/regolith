@@ -68,8 +68,9 @@ namespace Regolith
     _collisionTeam( 0 ),
 //    _children(),
     _stateMap(),
-    _currentState( _stateMap.begin()->second ), // This is invalid until configure is called!
-    _startState( _stateMap.begin()->second ) // This is invalid until configure is called!
+    _startState(),
+    _startStatePointer( nullptr ),
+    _currentState( nullptr )
   {
   }
 
@@ -90,8 +91,9 @@ namespace Regolith
     _collisionTeam( other._collisionTeam ),
 //    _children(),
     _stateMap( other._stateMap ),
-    _currentState( _stateMap.begin()->second ),
-    _startState( _stateMap.begin()->second )
+    _startState( other._startState ),
+    _startStatePointer( &_stateMap[_startState] ),
+    _currentState( _startStatePointer )
   {
 //    for ( PhysicalObjectMap::const_iterator it = other._children.begin(); it != other._children.end(); ++it )
 //    {
@@ -114,7 +116,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configuration
 
-  void PhysicalObject::configure( Json::Value& json_data, ContextGroup& /*cg*/, DataHandler& handler )
+  void PhysicalObject::configure( Json::Value& json_data, ContextGroup& cg )
   {
     Utilities::validateJson( json_data, "has_moveable", Utilities::JSON_TYPE_BOOLEAN );
     Utilities::validateJson( json_data, "has_texture", Utilities::JSON_TYPE_BOOLEAN );
@@ -182,7 +184,7 @@ namespace Regolith
       _width = bounding_box_data["position"][0].asFloat();
       _height = bounding_box_data["position"][1].asFloat();
 
-      std::string collision_team = json_data["collision_team"].asString();
+      std::string collision_team = bounding_box_data["collision_team"].asString();
       _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
 
       INFO_STREAM << "PhysicalObject::configure : Configuring collidable object with type: " << collision_team;
@@ -218,7 +220,7 @@ namespace Regolith
         // Texture details
         if ( Utilities::validateJson( state_data, "texture", Utilities::JSON_TYPE_OBJECT, false ) )
         {
-          _stateMap[ state_name ].texture.configure( state_data["texture"], handler );
+          _stateMap[ state_name ].texture.configure( state_data["texture"], cg.getDataHandler() );
         }
         
         // Hitbox details
@@ -238,7 +240,17 @@ namespace Regolith
     // Store the reset state if given
     if ( Utilities::validateJson( json_data, "start_state", Utilities::JSON_TYPE_STRING, false ) )
     {
-      _startState = _stateMap[ json_data["start_state"].asString() ];
+      std::string start_state_name = json_data["start_state"].asString();
+      StateMap::iterator found = _stateMap.find( start_state_name );
+      if ( found == _stateMap.end() )
+      {
+        Exception ex( "PhysicalObject::configure()", "Requested start state not found in object configuration." );
+        ex.addDetail( "Requested State Name", start_state_name );
+        throw ex;
+      }
+
+      _startState = start_state_name;
+      _startStatePointer = &found->second;
     }
 
   }
@@ -248,7 +260,7 @@ namespace Regolith
   {
     _velocity.zero();
     _forces.zero();
-    _currentState = _startState;
+    _currentState = _startStatePointer;
   }
 
 
@@ -286,7 +298,7 @@ namespace Regolith
 
   void PhysicalObject::update( float time )
   {
-    _currentState.update( time );
+    _currentState->update( time );
   }
 
 

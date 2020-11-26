@@ -75,8 +75,8 @@ namespace Regolith
       // Hooks for context state changes
       virtual void onStart() { this->setClosed( false ); }
       virtual void onStop() { this->setClosed( true ); }
-      virtual void onPause() = 0;
-      virtual void onResume() = 0;
+      virtual void onPause() {}
+      virtual void onResume() {}
 
 
       // Sets the closed flag for the engine to pop it from the context stack.
@@ -84,7 +84,7 @@ namespace Regolith
       void setClosed( bool status ) { _closed = status; }
 
       // Called during the update loop for frame-dependent context actions
-      virtual void updateContext( float ) {}
+      virtual void updateContext( float ) = 0;
 
       // Called after the physics processes to update the current position that the camera renders from
       virtual Vector updateCamera( float ) const = 0;
@@ -137,6 +137,13 @@ namespace Regolith
 
       // Render all the objects
       void render( Camera& );
+
+
+//////////////////////////////////////////////////
+      // Requirements for the ControllableInterface - input action handling
+
+      // Register input actions with this context. Default is input actions
+      virtual void registerActions( InputHandler& ) override {}
 
   };
 
