@@ -47,7 +47,7 @@ namespace Regolith
       std::string _fileName;
 
       // Pointer to the load screen
-      Context* _loadScreen;
+      Context** _loadScreen;
 
       // List of the contexts controlled by this handler
       ContextMap _contexts;
@@ -103,7 +103,7 @@ namespace Regolith
       // Load screen and entry points
 
       // Return the load screen
-      Context* getLoadScreen() const { return _loadScreen; }
+      Context** getLoadScreen() const { return _loadScreen; }
 
       // Set the entry point when this context group loads
       void setEntryPoint( Context** c ) { _entryPoint = c; }

@@ -112,12 +112,13 @@ namespace Regolith
   void Manager::openContextGroup( ContextGroup* cg )
   {
     DEBUG_LOG( "Manager::openContextGroup : Opening Context Group" );
+    DEBUG_STREAM << "Manager::openContextGroup : Context Load Screen @ " << *cg->getLoadScreen();
 
     // Prepare the context manager
     _theContexts.setNextContextGroup( cg );
 
     // Tell the engine to queue the load screen for the context group
-    _theEngine.openContextGroup( (Context*)cg->getLoadScreen() );
+    _theEngine.openContextGroup( *cg->getLoadScreen() );
 
     // Tell the context manager that we can trigger the load thread
     _theContexts.loadNextContextGroup();

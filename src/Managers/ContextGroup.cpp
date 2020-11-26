@@ -14,12 +14,12 @@ namespace Regolith
     _theAudio( Manager::getInstance()->getAudioManager() ),
     _theData(),
     _fileName(),
-    _loadScreen(),
+    _loadScreen( nullptr ),
     _contexts(),
     _gameObjects(),
     _spawnBuffers(),
 //    _onLoadOperations(),
-    _entryPoint(),
+    _entryPoint( nullptr ),
     _isLoaded( false )
   {
   }
@@ -55,7 +55,7 @@ namespace Regolith
     if ( ! _isGlobalGroup )
     {
       Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING );
-      _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContext( json_data["load_screen"].asString() );
+      _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContextPointer( json_data["load_screen"].asString() );
     }
 
 

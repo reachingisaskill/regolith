@@ -201,6 +201,7 @@ namespace Regolith
     }
     else // Stack is empty! Time to abandon ship
     {
+      DEBUG_LOG( "Engine::perfornStackOperations : Context stack is empty. Closing engine." );
       // Reset these anyway so the rendering thread doesnt fall over.
       _visibleStackStart = _contextStack.rbegin();
       _visibleStackEnd = _contextStack.rend();
