@@ -21,8 +21,6 @@ namespace Regolith
 
   void Collision::configure( Json::Value& json_data )
   {
-    // Configure me senpai...
-
     if ( Utilities::validateJson( json_data, "hit_boxes", Utilities::JSON_TYPE_ARRAY, false ) )
     {
       DEBUG_LOG( "Collision::configure : Loading hitboxes from array of frames" );

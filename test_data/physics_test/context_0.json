@@ -1,0 +1,41 @@
+{
+  "type" : "physics_test",
+
+  "input_mapping" : "empty",
+
+  "collision_handling" :
+  {
+    "collision_rules" : [ ["object", "object"] ],
+    "container_rules" : [ ["object", "container"] ]
+  },
+
+  "layers" :
+  {
+    "the_layer" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024.0,
+      "height" : 768.0,
+      "movement_scale" : [ 1.0, 1.0 ],
+      "elements" :
+      {
+        "the_container" :
+        {
+          "position" : [ 0.0, 0.0 ]
+        }
+      },
+      "spawn" :
+      {
+      }
+    }
+  },
+  
+  "camera" :
+  {
+    "follow:" : null,
+    "lower_limit" : [ 0.0, 0.0 ],
+    "upper_limit" : [ 1024.0, 768.0 ]
+  }
+
+}
+

@@ -1,0 +1,63 @@
+{
+  "load_screen" : null,
+
+  "entry_point" : "context_0",
+
+
+  "game_objects" : 
+  {
+    "red_box" : 
+    {
+      "type" : "physical_object",
+      "has_moveable" : true,
+      "has_texture" : true,
+      "has_animation" : false,
+      "mass" : 10.0,
+      "hooks_constant" : 2.0,
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "velocity" : [ 0.0, 0.0 ],
+      "rotation" : 0.0,
+      "bounding_box" :
+      {
+        "width" : 20.0,
+        "height" : 20.0,
+        "collision_team" : "object"
+      },
+      "states" : 
+      {
+        "default" :
+        {
+          "texture" :
+          {
+            "texture_name" : "coloured_boxes",
+            "start_number" : 0
+          },
+          "collision" :
+          {
+            "hit_boxes" :
+            [
+              [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
+            ]
+          }
+        }
+      },
+      "start_state" : "default"
+    }
+  },
+
+
+  "spawn_buffers" :
+  {
+  },
+
+
+  "contexts" :
+  {
+    "context_0" : "test_data/integration_test/context_0.json",
+    "context_child" : "test_data/integration_test/context_child.json",
+    "load_screen" : "test_data/integration_test/load_screen.json"
+  }
+
+}
+

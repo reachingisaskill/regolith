@@ -171,17 +171,16 @@ namespace Regolith
     }
 
     // Set the collision properties
-    if ( Utilities::validateJson( json_data, "collision", Utilities::JSON_TYPE_OBJECT, false ) )
+    if ( Utilities::validateJson( json_data, "bounding_box", Utilities::JSON_TYPE_OBJECT, false ) )
     {
-      Json::Value& collision_data = json_data["collision"];
+      Json::Value& bounding_box_data = json_data["bounding_box"];
 
-      Utilities::validateJson( collision_data, "width", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( collision_data, "height", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( collision_data, "collision_team", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( collision_data, "collision_type", Utilities::JSON_TYPE_STRING );
+      Utilities::validateJson( bounding_box_data, "width", Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( bounding_box_data, "height", Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJson( bounding_box_data, "collision_team", Utilities::JSON_TYPE_STRING );
 
-      _width = collision_data["position"][0].asFloat();
-      _height = collision_data["position"][1].asFloat();
+      _width = bounding_box_data["position"][0].asFloat();
+      _height = bounding_box_data["position"][1].asFloat();
 
       std::string collision_team = json_data["collision_team"].asString();
       _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
