@@ -5,8 +5,9 @@
 
   "collision_handling" :
   {
-    "collision_rules" : [ ["object", "object"] ],
-    "container_rules" : [ ["object", "container"] ]
+    "team_collision" : [ "object" ],
+    "collision_rules" : [ ],
+    "container_rules" : [ ["object", "scene_boundary"] ]
   },
 
   "layers" :
@@ -17,15 +18,20 @@
       "width" : 1024.0,
       "height" : 768.0,
       "movement_scale" : [ 1.0, 1.0 ],
-      "elements" :
+      "objects" :
       {
-        "the_container" :
+        "environment_container" :
         {
           "position" : [ 0.0, 0.0 ]
         }
       },
-      "spawn" :
+      "spawns" :
       {
+        "red_box" :
+        {
+          "position" : [ 50.0, 50.0 ],
+          "velocity" : [ 0.01, 0.0 ]
+        }
       }
     }
   },

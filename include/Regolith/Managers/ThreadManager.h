@@ -29,7 +29,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Status enum for thread behvaiour
 
-  enum class ThreadStatus { Null, Waiting, Initialising, Running, Closing };
+  enum class ThreadStatus { Null, Waiting, Initialising, Running, Closing, Stop };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,8 +64,11 @@ namespace Regolith
       // Send the start signals
       void startAll();
 
-      // Send the stop signals
+      // Tell the threads to stop the primary loops and perform closing operations
       void stopAll();
+
+      // Tell the threads to stop completely
+      void closeAll();
 
       // Closes the thread handlers
       void join();
@@ -76,6 +79,9 @@ namespace Regolith
 
       // Signals the start of the engine - all threads now active
       static Condition<bool> StartCondition;
+
+      // Signals the start of the engine - all threads now be joined
+      static Condition<bool> StopCondition;
 
       // Every thread that sees this flag MUST end
       static std::atomic<bool> QuitFlag;

@@ -14,7 +14,7 @@ namespace Regolith
 
   // Local function declarations
 
-  Vector placeInLayer( ContextLayer&, PhysicalObject*, Json::Value& );
+  void configureObject( ContextLayer&, PhysicalObject*, Json::Value& );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -92,25 +92,33 @@ namespace Regolith
     {
       for ( LayerGraph::iterator team_it = layer_it->second.layerGraph.begin(); team_it != layer_it->second.layerGraph.end(); ++team_it )
       {
-        for ( PhysicalObjectList::iterator it = team_it->second.begin(); it != team_it->second.end(); ++it )
+        DEBUG_STREAM << "Context::update : Updating " << team_it->second.size() << " objects.";
+        for ( PhysicalObjectList::iterator obj_it = team_it->second.begin(); obj_it != team_it->second.end(); /*++obj_it*/ )
         {
           // If object is marked for destruction, remove it from the scene graph
-          if ( (*it)->isDestroyed() )
+          if ( (*obj_it)->isDestroyed() )
           {
-            team_it->second.erase( it );
+            DEBUG_LOG( "Context::update : Removing object from layer." );
+            obj_it = team_it->second.erase( obj_it );
             continue;
           }
-
-          // If object can be moved, do the physics integration
-          if ( (*it)->hasMovement() )
+          else
           {
-            (*it)->step( time );
-          }
 
-          // If the object is animated, update the animation
-          if ( (*it)->hasAnimation() )
-          {
-            (*it)->update( time );
+            // If object can be moved, do the physics integration
+            if ( (*obj_it)->hasMovement() )
+            {
+              (*obj_it)->step( time );
+            }
+
+            // If the object is animated, update the animation
+            if ( (*obj_it)->hasAnimation() )
+            {
+              (*obj_it)->update( time );
+            }
+
+            // Update the iterator.
+            ++obj_it;
           }
         }
       }
@@ -123,18 +131,45 @@ namespace Regolith
     _cameraPosition = updateCamera( time );
 
 
-    DEBUG_STREAM << "Context::update : Starting Layer Collision";
-
-    // Colliding objects
-    CollisionHandler::iterator end = _theCollision.collisionEnd();
+    DEBUG_STREAM << "Context::update : Starting Team Collision";
+    CollisionHandler::SetIterator team_end = _theCollision.teamCollisionEnd();
 
     for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      for ( CollisionHandler::iterator it = _theCollision.collisionBegin(); it != end; ++it )
+      for ( CollisionHandler::SetIterator rule_it = _theCollision.teamCollisionBegin(); rule_it != team_end; ++rule_it )
       {
-        PhysicalObjectList& team1 = layer_it->second.layerGraph[ it->first ];
+        PhysicalObjectList& team = layer_it->second.layerGraph[ *rule_it ];
+        if ( team.size() < 2 ) continue;
+
+        PhysicalObjectList::iterator end = team.end();
+        PhysicalObjectList::iterator it1 = team.begin();
+        PhysicalObjectList::iterator it2 = team.begin();
+
+        while ( it1 != end )
+        {
+          it2 = it1;
+          ++it2;
+          while ( it2 != end )
+          {
+            _theCollision.collides( (*it1), (*it2) );
+            ++it2;
+          }
+          ++it1;
+        }
+      }
+    }
+
+
+    DEBUG_STREAM << "Context::update : Starting Layer Collision";
+    CollisionHandler::PairIterator collides_end = _theCollision.collisionEnd();
+
+    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    {
+      for ( CollisionHandler::PairIterator rule_it = _theCollision.collisionBegin(); rule_it != collides_end; ++rule_it )
+      {
+        PhysicalObjectList& team1 = layer_it->second.layerGraph[ rule_it->first ];
         if ( team1.size() == 0 ) continue;
-        PhysicalObjectList& team2 = layer_it->second.layerGraph[ it->second ];
+        PhysicalObjectList& team2 = layer_it->second.layerGraph[ rule_it->second ];
         if ( team2.size() == 0 ) continue;
 
         PhysicalObjectList::iterator end1 = team1.end();
@@ -145,6 +180,32 @@ namespace Regolith
           for ( PhysicalObjectList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
           {
             _theCollision.collides( (*it1), (*it2) );
+          }
+        }
+      }
+    }
+
+
+    DEBUG_STREAM << "Context::update : Starting Layer Containment";
+    collides_end = _theCollision.containerEnd();
+
+    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    {
+      for ( CollisionHandler::PairIterator rule_it = _theCollision.containerBegin(); rule_it != collides_end; ++rule_it )
+      {
+        PhysicalObjectList& team1 = layer_it->second.layerGraph[ rule_it->first ];
+        if ( team1.size() == 0 ) continue;
+        PhysicalObjectList& team2 = layer_it->second.layerGraph[ rule_it->second ];
+        if ( team2.size() == 0 ) continue;
+
+        PhysicalObjectList::iterator end1 = team1.end();
+        PhysicalObjectList::iterator end2 = team2.end();
+
+        for ( PhysicalObjectList::iterator it1 = team1.begin(); it1 != end1; ++it1 )
+        {
+          for ( PhysicalObjectList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
+          {
+            _theCollision.contains( (*it1), (*it2) );
           }
         }
       }
@@ -166,6 +227,7 @@ namespace Regolith
 
       for ( LayerGraph::iterator team_it = layer_it->second.layerGraph.begin(); team_it != layer_it->second.layerGraph.end(); ++team_it )
       {
+        DEBUG_STREAM << "Context::render : Rendering team : " << team_it->first;
         for ( PhysicalObjectList::iterator it = team_it->second.begin(); it != team_it->second.end(); ++it )
         {
           // If the object can be drawn, render it to the back buffer
@@ -218,7 +280,8 @@ namespace Regolith
       Utilities::validateJsonArray( layer_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( layer_data, "width", Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( layer_data, "height", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( layer_data, "elements", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( layer_data, "objects", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( layer_data, "spawns", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( layer_data, "movement_scale", Utilities::JSON_TYPE_ARRAY );
       Utilities::validateJsonArray( layer_data["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
 
@@ -242,19 +305,16 @@ namespace Regolith
 
 
       // Find and place all the requested elements
-      Json::Value& element_data = layer_data["elements"];
-      Json::ArrayIndex element_data_size = element_data.size();
-      for ( Json::ArrayIndex j = 0; j != element_data_size; ++j )
+      Json::Value& object_data = layer_data["objects"];
+      for( Json::Value::iterator o_it = object_data.begin(); o_it != object_data.end(); ++o_it )
       {
-        Utilities::validateJson( element_data[j], "name", Utilities::JSON_TYPE_STRING );
-
-        std::string object_name = element_data[j]["name"].asString();
+        std::string object_name = o_it.key().asString();
         INFO_STREAM << "Adding game object into context layer: " << object_name;
 
         PhysicalObject* object;
 
         // If a global object is requested
-        if ( Utilities::validateJson( element_data[j], "global", Utilities::JSON_TYPE_BOOLEAN, false ) && element_data[j]["global"].asBool() )
+        if ( Utilities::validateJson( *o_it, "global", Utilities::JSON_TYPE_BOOLEAN, false ) && (*o_it)["global"].asBool() )
         {
           object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getPhysicalObject( object_name );
         }
@@ -271,8 +331,41 @@ namespace Regolith
           throw ex;
         }
 
-        Vector object_pos = placeInLayer( _layers[ layer_name ], object, element_data[j] );
-        object->setPosition( object_pos );
+        configureObject( _layers[ layer_name ], object, *o_it );
+
+        _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
+      }
+
+
+      // Find and place all the spawned elements
+      Json::Value& spawn_data = layer_data["spawns"];
+      for( Json::Value::iterator s_it = spawn_data.begin(); s_it != spawn_data.end(); ++s_it )
+      {
+        std::string spawn_name = s_it.key().asString();
+        INFO_STREAM << "Spawning game object into context layer: " << spawn_name;
+
+        PhysicalObject* object;
+
+        // If a global object is requested
+        if ( Utilities::validateJson( *s_it, "global", Utilities::JSON_TYPE_BOOLEAN, false ) && (*s_it)["global"].asBool() )
+        {
+
+          object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->spawnPhysicalObject( spawn_name );
+        }
+        else
+        {
+          object = _owner->spawnPhysicalObject( spawn_name );
+        }
+
+        if ( object == nullptr )
+        {
+          Exception ex( "Context::configure()", "Object could not be spawned. Too many copies exist already." );
+          ex.addDetail( "Object Name", spawn_name );
+          ex.addDetail( "Layer Name", layer_name );
+          throw ex;
+        }
+
+        configureObject( _layers[ layer_name ], object, *s_it );
 
         _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
       }
@@ -319,24 +412,28 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  Vector placeInLayer( ContextLayer& layer, PhysicalObject* object, Json::Value& json_data )
+  void configureObject( ContextLayer& layer, PhysicalObject* object, Json::Value& json_data )
   {
-    DEBUG_LOG( "Context::placeInLayer : Placing in Layer" );
-    Vector pos( 0.0 );
-    Vector offset( 0.0 );
+    DEBUG_LOG( "Context::configureObject : Placing in Layer" );
 
+    // Load the absolute position
     if ( Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY, false ) )
     {
       Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+      Vector pos( 0.0 );
 
       float x = json_data["position"][0].asFloat();
       float y = json_data["position"][1].asFloat();
       pos.set( x, y );
+
+      object->setPosition( pos );
     }
 
+    // Load the alignment info
     if ( Utilities::validateJson( json_data, "alignment", Utilities::JSON_TYPE_ARRAY, false ) )
     {
       Utilities::validateJsonArray( json_data["alignment"], 2, Utilities::JSON_TYPE_STRING );
+      Vector offset( 0.0 );
 
       if ( json_data["alignment"][0].asString() == "center" )
       {
@@ -355,9 +452,21 @@ namespace Regolith
       {
         offset.y() = layer.getPosition().y() + ( layer.getHeight() - object->getHeight() );
       }
+
+      object->setPosition( object->getPosition() + offset );
     }
 
-    return pos+offset;
+    // Load the velocity
+    if ( Utilities::validateJson( json_data, "velocity", Utilities::JSON_TYPE_ARRAY, false ) )
+    {
+      Utilities::validateJsonArray( json_data["velocity"], 2, Utilities::JSON_TYPE_FLOAT );
+      Vector vel( 0.0 );
+
+      vel.x() = json_data["velocity"][0].asFloat();
+      vel.y() = json_data["velocity"][1].asFloat();
+
+      object->setVelocity( vel );
+    }
   }
 }
 

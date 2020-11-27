@@ -404,6 +404,7 @@ namespace Regolith
     INFO_LOG( "dataManagerLoadingThread : Start" );
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+    std::atomic<bool>& errorFlag = Manager::getInstance()->getThreadManager().ErrorFlag;
     Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().DataManagerStatus;
     if ( quitFlag ) return;
 
@@ -505,7 +506,19 @@ namespace Regolith
     // Do any closing operations here
 
 
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Stop;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
+
     INFO_LOG( "dataManagerLoadingThread : Stopped" );
+    if ( ! errorFlag )
+    {
+      Condition<bool>& stopCondition = Manager::getInstance()->getThreadManager().StopCondition;
+      std::unique_lock<std::mutex> lk( stopCondition.mutex );
+      stopCondition.variable.wait( lk, [&]()->bool{ return errorFlag || stopCondition.data; } );
+      lk.unlock();
+    }
 
     // Update the thread status
     statusLock.lock();

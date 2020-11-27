@@ -41,7 +41,7 @@
 
   "collision_teams" :
   {
-    "container" : 0,
+    "scene_boundary" : 0,
     "environment" : 1,
     "object" : 2
   },

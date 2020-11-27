@@ -15,6 +15,7 @@ namespace Regolith
   // Collision handler class member functions
 
   CollisionHandler::CollisionHandler() :
+    _teamCollision(),
     _pairings(),
     _containers()
   {
@@ -23,6 +24,12 @@ namespace Regolith
 
   CollisionHandler::~CollisionHandler()
   {
+  }
+
+
+  void CollisionHandler::addTeamCollision( CollisionTeam team )
+  {
+    _teamCollision.insert( team );
   }
 
 
@@ -84,12 +91,26 @@ namespace Regolith
   {
     INFO_LOG( "Configuring Collision Handler" );
 
+    Utilities::validateJson( json_data, "team_collision", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data["collision_rules"], 0, Utilities::JSON_TYPE_STRING );
+
     Utilities::validateJson( json_data, "collision_rules", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["collision_rules"], 0, Utilities::JSON_TYPE_ARRAY );
 
     Utilities::validateJson( json_data, "container_rules", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["container_rules"], 0, Utilities::JSON_TYPE_ARRAY );
 
+
+    // Load the team collision rules
+    Json::Value& team_rules = json_data["team_collision"];
+    for ( Json::ArrayIndex i = 0; i < team_rules.size(); ++i )
+    {
+      std::string team_name = team_rules[i].asString();
+      CollisionTeam team = Manager::getInstance()->getCollisionTeam( team_name );
+
+      addTeamCollision( team );
+      INFO_STREAM << "Added Team Collision: " << team_name;
+    }
 
     // Load the collision rules
     Json::Value& collision_rules = json_data["collision_rules"];

@@ -117,16 +117,19 @@ namespace Regolith
       // Accessors
 
       // Return a pointer to a requested context.
-      Context* getContext( std::string name );
+      Context* getContext( std::string );
 
       // Return a pointer to a pointer to a requested context.
-      Context** getContextPointer( std::string name );
+      Context** getContextPointer( std::string );
 
       // Return a pointer to a given object.
-      PhysicalObject* getPhysicalObject( std::string name );
+      PhysicalObject* getPhysicalObject( std::string );
 
       // Return a pointer to a pointer to a given object.
-      PhysicalObject** getPhysicalObjectPointer( std::string name );
+      PhysicalObject** getPhysicalObjectPointer( std::string );
+
+      // Spawn an object and return a pointer to it
+      PhysicalObject* spawnPhysicalObject( std::string );
 
       // Return a spawner for inserting spawnable objects into a specified layer
       Spawner getSpawner( std::string, ContextLayer* );

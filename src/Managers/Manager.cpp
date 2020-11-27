@@ -60,11 +60,11 @@ namespace Regolith
     }
     _fonts.clear();
 
-    INFO_LOG( "Manager::~Manager : Clearing context manager" );
-    _theContexts.clear();
+//    INFO_LOG( "Manager::~Manager : Clearing context manager" );
+//    _theContexts.clear();
 
-    INFO_LOG( "Manager::~Manager : Clearing data manager" );
-    _theData.clear();
+//    INFO_LOG( "Manager::~Manager : Clearing data manager" );
+//    _theData.clear();
 
     INFO_LOG( "Manager::~Manager : Clearing audio manager" );
     _theAudio.clear();
@@ -142,9 +142,19 @@ namespace Regolith
     _theEngine.run();
 
 
-    // Join all the threads
+
+    // Unload everything
+    INFO_LOG( "Manager::run : Unloading data" );
+    _theContexts.clear();
+    _theData.clear();
+
+    // Stop all the threads
     INFO_LOG( "Manager::run : Stopping all worker threads" );
     _theThreads.stopAll();
+
+    // Join all the threads
+    INFO_LOG( "Manager::run : Joining all worker threads" );
+    _theThreads.closeAll();
   }
 
 
@@ -259,7 +269,7 @@ namespace Regolith
     backtrace_symbols_fd( array, size, STDERR_FILENO );
 #endif
 
-    Manager::getInstance()->quit();
+    Manager::getInstance()->error();
   }
 
 }

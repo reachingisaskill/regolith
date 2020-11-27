@@ -50,6 +50,8 @@ namespace Regolith
     // Create the texture
     texture->texture = SDL_CreateTextureFromSurface( _theRenderer, texture->surface );
 
+    DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << texture->texture;
+
     // Check that it worked
     if ( texture->texture == nullptr )
     {
@@ -73,8 +75,13 @@ namespace Regolith
     _targetRect.w = object->getWidth() * _scaleX;
     _targetRect.h = object->getHeight() * _scaleY;
 
+    DEBUG_STREAM << "Camera::renderPhysicalObject : Physical Object @ " << object;
+    DEBUG_STREAM << "Camera::renderPhysicalObject : Position: " << _targetRect.x << ", " << _targetRect.y << " | " << _targetRect.w << ", " << _targetRect.h;
+    DEBUG_STREAM << "Camera::renderPhysicalObject : Scales: " << _scaleX << ", " << _scaleY;
+
     const Texture& texture = object->getTexture();
 
+    DEBUG_STREAM << "Camera::renderPhysicalObject : SDL_Texture @ " << texture._theTexture->texture;
     SDL_RenderCopyEx( _theRenderer, texture._theTexture->texture, &texture._clip, &_targetRect, object->getRotation(), nullptr, texture._flipFlag );
   }
 

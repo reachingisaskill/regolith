@@ -310,6 +310,7 @@ namespace Regolith
     INFO_LOG( "engineRederingThread : Start" );
 
     std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
+    std::atomic<bool>& errorFlag = Manager::getInstance()->getThreadManager().ErrorFlag;
     Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().EngineRenderingStatus;
     if ( quitFlag ) return;
 
@@ -467,10 +468,27 @@ namespace Regolith
     statusLock.unlock();
     threadStatus.variable.notify_all();
 
-    INFO_LOG( "engineRenderingThread : Clearing camera" );
-    camera.clear();
+
+    // Do any closing operations here
+
+
+    statusLock.lock();
+    threadStatus.data = ThreadStatus::Stop;
+    statusLock.unlock();
+    threadStatus.variable.notify_all();
 
     INFO_LOG( "engineRenderingThread : Stopped" );
+    if ( ! errorFlag )
+    {
+      Condition<bool>& stopCondition = Manager::getInstance()->getThreadManager().StopCondition;
+      std::unique_lock<std::mutex> lk( stopCondition.mutex );
+      stopCondition.variable.wait( lk, [&]()->bool{ return errorFlag || stopCondition.data; } );
+      lk.unlock();
+    }
+
+    INFO_LOG( "engineRenderingThread : Clearing camera" );
+    // Camera can only be cleared once all the texture data has been unloaded
+    camera.clear();
 
     // Update the thread status
     statusLock.lock();

@@ -121,6 +121,7 @@ namespace Regolith
     Utilities::validateJson( json_data, "has_moveable", Utilities::JSON_TYPE_BOOLEAN );
     Utilities::validateJson( json_data, "has_texture", Utilities::JSON_TYPE_BOOLEAN );
     Utilities::validateJson( json_data, "has_animation", Utilities::JSON_TYPE_BOOLEAN );
+    Utilities::validateJson( json_data, "states", Utilities::JSON_TYPE_OBJECT );
 
     // Configure the basic properties of the object
     _hasMoveable = json_data["has_moveable"].asBool();
@@ -181,8 +182,8 @@ namespace Regolith
       Utilities::validateJson( bounding_box_data, "height", Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( bounding_box_data, "collision_team", Utilities::JSON_TYPE_STRING );
 
-      _width = bounding_box_data["position"][0].asFloat();
-      _height = bounding_box_data["position"][1].asFloat();
+      _width = bounding_box_data["width"].asFloat();
+      _height = bounding_box_data["height"].asFloat();
 
       std::string collision_team = bounding_box_data["collision_team"].asString();
       _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
@@ -205,35 +206,38 @@ namespace Regolith
 //      }
 //    }
 
+
     // Controlling the states
-    if ( Utilities::validateJson( json_data, "states", Utilities::JSON_TYPE_OBJECT, false ) )
+    Json::Value& states = json_data["states"];
+    if ( states.size() == 0 )
     {
-      Json::Value& states = json_data["states"];
+      Exception ex( "PhysicalObject::configure()", "Every physical object must have at least one state" );
+      throw ex;
+    }
 
-      for( Json::Value::iterator s_it = states.begin(); s_it != states.end(); ++s_it )
+    for( Json::Value::iterator s_it = states.begin(); s_it != states.end(); ++s_it )
+    {
+      std::string state_name = s_it.key().asString();
+      Json::Value& state_data = (*s_it);
+
+      _stateMap.emplace( std::make_pair( state_name, StateDetails() ) );
+
+      // Texture details
+      if ( Utilities::validateJson( state_data, "texture", Utilities::JSON_TYPE_OBJECT, _hasTexture ) )
       {
-        std::string state_name = s_it.key().asString();
-        Json::Value& state_data = (*s_it);
+        _stateMap[ state_name ].texture.configure( state_data["texture"], cg.getDataHandler() );
+      }
+      
+      // Hitbox details
+      if ( Utilities::validateJson( state_data, "collision", Utilities::JSON_TYPE_OBJECT, false ) )
+      {
+        _stateMap[ state_name ].collision.configure( state_data["collision"] );
+      }
 
-        _stateMap.emplace( std::make_pair( state_name, StateDetails() ) );
-
-        // Texture details
-        if ( Utilities::validateJson( state_data, "texture", Utilities::JSON_TYPE_OBJECT, false ) )
-        {
-          _stateMap[ state_name ].texture.configure( state_data["texture"], cg.getDataHandler() );
-        }
-        
-        // Hitbox details
-        if ( Utilities::validateJson( state_data, "collision", Utilities::JSON_TYPE_OBJECT, false ) )
-        {
-          _stateMap[ state_name ].collision.configure( state_data["collision"] );
-        }
-
-        // Animation details
-        if ( Utilities::validateJson( state_data, "update_period", Utilities::JSON_TYPE_FLOAT, false ) )
-        {
-          _stateMap[ state_name ].updatePeriod = state_data[ "update_period" ].asFloat();
-        }
+      // Animation details
+      if ( Utilities::validateJson( state_data, "update_period", Utilities::JSON_TYPE_FLOAT, _hasAnimation ) )
+      {
+        _stateMap[ state_name ].updatePeriod = state_data[ "update_period" ].asFloat();
       }
     }
 
@@ -252,12 +256,21 @@ namespace Regolith
       _startState = start_state_name;
       _startStatePointer = &found->second;
     }
+    else
+    {
+      _startState = _stateMap.begin()->first;
+      _startStatePointer = &_stateMap.begin()->second;
+    }
 
+    _currentState = _startStatePointer;
+
+    DEBUG_STREAM << "PhysicalObject::configure : Configured physical object. Pos = " << _position << " Vel = " << _velocity << " M = " << _mass << " w/h = " << _width << ", " << _height;
   }
 
 
   void PhysicalObject::reset()
   {
+    _destroyMe = false;
     _velocity.zero();
     _forces.zero();
     _currentState = _startStatePointer;

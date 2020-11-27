@@ -120,6 +120,10 @@ namespace Regolith
       void quit() { _theThreads.quit(); }
 
 
+      // Sends quit an error flags to all threads and rejoins them if possible
+      void error() { _theThreads.error(); }
+
+
       // Create and return the pointer to the Renderer - can only be called once!
       Camera& requestCamera();
 

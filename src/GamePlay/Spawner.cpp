@@ -34,6 +34,23 @@ namespace Regolith
   }
 
 
+  const PhysicalObject* Spawner::spawn( Vector position, Vector velocity ) const
+  {
+    if ( _owner.spawnable() )
+    {
+      PhysicalObject* temp = _owner.pop();
+      temp->setPosition( position );
+      temp->setVelocity( velocity );
+      _targetLayer->layerGraph[ temp->getCollisionTeam() ].push_back( temp );
+      return temp;
+    }
+    else
+    {
+      return nullptr;
+    }
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Spawn Buffer
 
@@ -54,7 +71,7 @@ namespace Regolith
   {
     if ( num == 0 )
     {
-      Exception ex( "SpawnBuffer::SpawnBuffer()", "Cannot create an empty spawn buffer. Will cause undefined behaviour." );
+      Exception ex( "SpawnBuffer::fill()", "Cannot create an empty spawn buffer. Will cause undefined behaviour." );
       throw ex;
     }
 
@@ -64,6 +81,8 @@ namespace Regolith
     _start->object = master;
     _start->next = _start;
     _start->object->destroy();
+
+    DEBUG_STREAM << "SpawnBuffer::fill : Master @ " << master;
 
     // Master object counts as the first one
     --num;
@@ -76,6 +95,8 @@ namespace Regolith
       new_item->next = _start;
       new_item->object->destroy();
 
+      DEBUG_STREAM << "SpawnBuffer::fill : Clone @ " << new_item->object;
+
       _currentItem->next = new_item;
       _currentItem = new_item;
     }
@@ -87,6 +108,9 @@ namespace Regolith
 
   void SpawnBuffer::clear()
   {
+    // Already clear
+    if ( _start == nullptr ) return;
+
     _currentItem = _start->next;
 
     while ( _currentItem != _start )
@@ -123,8 +147,14 @@ namespace Regolith
 
   PhysicalObject* SpawnBuffer::pop()
   {
+    // Get the next object
     PhysicalObject* temp = _currentItem->object;
+
+    // Update the current pointer
     _currentItem = _currentItem->next;
+
+    // Reset the state of the object and return it
+    temp->reset();
     return temp;
   }
 

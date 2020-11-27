@@ -7,6 +7,7 @@ namespace Regolith
 
   // Static thread communication variables
   Condition<bool> ThreadManager::StartCondition( false );
+  Condition<bool> ThreadManager::StopCondition( false );
   std::atomic<bool> ThreadManager::QuitFlag( false );
   std::atomic<bool> ThreadManager::ErrorFlag( false );
 
@@ -109,9 +110,30 @@ namespace Regolith
   }
 
 
+  void ThreadManager::closeAll()
+  {
+    // Wait until the threads have finished their post-execution operations
+    waitThreadStatus( ThreadStatus::Stop );
+
+    // Set the stop condition under lock
+    INFO_LOG( "ThreadManager::closeAll : Setting the stop condition variable" );
+    {
+      std::lock_guard<std::mutex> lk( StopCondition.mutex );
+      StopCondition.data = true;
+    }
+    // Notify all the waiting threads
+    StopCondition.variable.notify_all();
+    // Threads can now be safely joined
+  }
+
+
   void ThreadManager::join()
   {
-    if ( ! QuitFlag ) this->stopAll();
+    if ( ! QuitFlag )
+    {
+      this->stopAll();
+      this->closeAll();
+    }
 
     // Wait for all the threads to re-join
     INFO_LOG( "ThreadManager::~ThreadManager : Joining data manager thread" );

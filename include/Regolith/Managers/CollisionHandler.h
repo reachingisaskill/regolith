@@ -35,8 +35,10 @@ namespace Regolith
   class CollisionHandler
   {
     typedef std::vector< std::pair< CollisionTeam, CollisionTeam > > CollisionPairList;
+    typedef std::set< CollisionTeam > CollisionSet;
 
     private:
+      CollisionSet _teamCollision;
       CollisionPairList _pairings;
       CollisionPairList _containers;
 
@@ -63,8 +65,9 @@ namespace Regolith
       inline void callback( PhysicalObject*, PhysicalObject* );
 
     public:
-      // No changing!
-      typedef CollisionPairList::const_iterator iterator;
+      // Const iterators - no changing!
+      typedef CollisionSet::const_iterator SetIterator;
+      typedef CollisionPairList::const_iterator PairIterator;
 
       // Con/De-structors
       CollisionHandler();
@@ -72,6 +75,9 @@ namespace Regolith
 
       // Configure the pairings itself from the json data
       void configure( Json::Value& );
+
+      // Manually add a team collision
+      void addTeamCollision( CollisionTeam );
 
       // Manually add a pairing
       void addCollisionPair( CollisionTeam, CollisionTeam );
@@ -83,12 +89,16 @@ namespace Regolith
       void setupEmptyLayer( ContextLayer& ) const;
 
       // Basic iterator interface
-      iterator collisionBegin() const { return _pairings.begin(); }
-      iterator collisionEnd() const { return _pairings.end(); }
+      SetIterator teamCollisionBegin() const { return _teamCollision.begin(); }
+      SetIterator teamCollisionEnd() const { return _teamCollision.end(); }
 
       // Basic iterator interface
-      iterator containerBegin() const { return _containers.begin(); }
-      iterator containerEnd() const { return _containers.end(); }
+      PairIterator collisionBegin() const { return _pairings.begin(); }
+      PairIterator collisionEnd() const { return _pairings.end(); }
+
+      // Basic iterator interface
+      PairIterator containerBegin() const { return _containers.begin(); }
+      PairIterator containerEnd() const { return _containers.end(); }
 
       // Do two object collide
       void collides( PhysicalObject*, PhysicalObject* );

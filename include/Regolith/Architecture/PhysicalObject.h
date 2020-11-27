@@ -102,9 +102,6 @@ namespace Regolith
       // For derived classes to update the mass. Sets both mass and it's inverse
       void setMass( float );
 
-      // For derived classes to set the velocity
-      void setVelocity( Vector v ) { _velocity = v; }
-
       // For derived classes to impose a force
       void addForce( Vector f ) { _forces += f; }
 
@@ -230,6 +227,11 @@ namespace Regolith
       Vector getPosition() const { return _position; }
       void setPosition( Vector p ) { _position = p; }
 
+      // Velocity
+      const Vector& velocity() const { return _velocity; }
+      Vector getVelocity() const { return _velocity; }
+      void setVelocity( Vector v ) { _velocity = v; }
+
       // Rotation set/get
       const float& rotation() const { return _rotation; }
       float getRotation() const { return _rotation; }
@@ -242,10 +244,6 @@ namespace Regolith
       // Bounding box dimensions
       const float& getWidth() const { return _width; }
       const float& getHeight() const { return _height; }
-
-      // Velocity
-      const Vector& velocity() const { return _velocity; }
-      Vector getVelocity() const { return _velocity; }
   };
 
 }

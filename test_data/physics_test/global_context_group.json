@@ -43,12 +43,45 @@
         }
       },
       "start_state" : "default"
+    },
+
+    "environment_container" :
+    {
+      "type" : "physical_object",
+      "has_moveable" : false,
+      "has_texture" : false,
+      "has_animation" : false,
+      "mass" : 0.0,
+      "hooks_constant" : 2.0,
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "bounding_box" :
+      {
+        "width" : 1024.0,
+        "height" : 768.0,
+        "collision_team" : "scene_boundary"
+      },
+      "states" : 
+      {
+        "default" :
+        {
+          "collision" :
+          {
+            "hit_boxes" :
+            [
+              [ { "position" : [ 0, 0 ], "width" : 1024, "height" : 768, "type" : "basic" } ]
+            ]
+          }
+        }
+      },
+      "start_state" : "default"
     }
   },
 
 
   "spawn_buffers" :
   {
+    "red_box" : 3
   },
 
 

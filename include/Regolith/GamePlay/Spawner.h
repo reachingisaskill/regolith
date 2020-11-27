@@ -35,6 +35,8 @@ namespace Regolith
     // Returns a const pointer to the object in case the context wishes to interrogate that specific object
     const PhysicalObject* spawn( Vector ) const;
 
+    const PhysicalObject* spawn( Vector, Vector ) const;
+
   };
 
 

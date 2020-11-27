@@ -348,6 +348,28 @@ namespace Regolith
   }
 
 
+  PhysicalObject* ContextGroup::spawnPhysicalObject( std::string name )
+  {
+    SpawnBufferMap::iterator found = _spawnBuffers.find( name );
+
+    if ( found == _spawnBuffers.end() )
+    {
+      Exception ex( "ContextGroup::spawnPhysicalObject()", "Could not find requested spawn buffer." );
+      ex.addDetail( "Buffer Name", name );
+      throw ex;
+    }
+
+    if ( found->second.spawnable() )
+    {
+      return found->second.pop();
+    }
+    else
+    {
+      return nullptr;
+    }
+  }
+
+
   Spawner ContextGroup::getSpawner( std::string name, ContextLayer* layer )
   {
     SpawnBufferMap::iterator found = _spawnBuffers.find( name );
