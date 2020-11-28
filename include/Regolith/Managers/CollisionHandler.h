@@ -103,7 +103,7 @@ namespace Regolith
       // Do two object collide
       void collides( PhysicalObject*, PhysicalObject* );
       // Does the first object contain the second
-      void contains( PhysicalObject*, PhysicalObject* ) {}
+      void contains( PhysicalObject*, PhysicalObject* );
 
   };
 

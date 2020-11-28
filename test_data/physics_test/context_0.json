@@ -30,7 +30,7 @@
         "red_box" :
         {
           "position" : [ 50.0, 50.0 ],
-          "velocity" : [ 0.01, 0.0 ]
+          "velocity" : [ -0.1, -0.1 ]
         }
       }
     }

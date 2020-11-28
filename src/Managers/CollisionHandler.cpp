@@ -348,6 +348,99 @@ namespace Regolith
   }
 
 
+  void CollisionHandler::contains( PhysicalObject* object1, PhysicalObject* object2 )
+  {
+    DEBUG_LOG( "CollisionHandler::contains : Checking containment" );
+
+    _object_pos1 = object1->position();
+    _object_pos2 = object2->position();
+
+    const Collision& collision1 = object1->getCollision();
+    const Collision& collision2 = object2->getCollision();
+
+    for ( Collision::iterator col_it1 = collision1.begin(); col_it1 != collision1.end(); ++col_it1 )
+    {
+      // Position of a container hitbox
+      _pos1 = _object_pos1 + col_it1->position;
+
+      // Is the bounding box not contained within the hitbox
+      if (  _pos1.x() > _object_pos2.x() ||
+            _pos1.y() > _object_pos2.y() ||
+            ( _pos1.x() + col_it1->width ) < ( _object_pos2.x() + object2->getWidth() ) ||
+            ( _pos1.y() + col_it1->height ) < ( _object_pos2.y() + object2->getHeight() ) )
+      {
+
+        // See which hit box is outside the container
+        for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
+        {
+          // Position of a container hitbox
+          _pos2 = _object_pos2 + col_it2->position;
+    
+          _diff_x = _pos1.x() - _pos2.x();
+          _diff_y = _pos1.y() - _pos2.y();
+          _overlap_x = ( _pos1.x() + col_it1->width ) - ( _pos2.x() + col_it2->width );
+          _overlap_y = ( _pos1.y() + col_it1->height ) - ( _pos2.y() + col_it2->height );
+
+          if ( _diff_x < 0.0 )
+          {
+            if ( _diff_y < 0.0 )
+            {
+              _contact_vector.set( _diff_x, _diff_y );
+            }
+            else if ( _overlap_y > 0.0 )
+            {
+              _contact_vector.set( _diff_x, _overlap_y );
+            }
+            else
+            {
+              _contact_vector.set( _diff_x, 0.0 );
+            }
+            _type1 = col_it1->type;
+            _type2 = col_it2->type;
+            callback( object1, object2 );
+          }
+          else if ( _overlap_x > 0.0 )
+          {
+            if ( _diff_y < 0.0 )
+            {
+              _contact_vector.set( _overlap_x, _diff_y );
+            }
+            else if ( _overlap_y > 0.0 )
+            {
+              _contact_vector.set( _overlap_x, _overlap_y );
+            }
+            else
+            {
+              _contact_vector.set( _overlap_x, 0.0 );
+            }
+            _type1 = col_it1->type;
+            _type2 = col_it2->type;
+            callback( object1, object2 );
+          }
+          else
+          {
+            if ( _diff_y < 0.0 )
+            {
+              _contact_vector.set( 0.0, _diff_y );
+            }
+            else if ( _overlap_y > 0.0 )
+            {
+              _contact_vector.set( 0.0, _overlap_y );
+            }
+            else
+            {
+              continue;
+            }
+            _type1 = col_it1->type;
+            _type2 = col_it2->type;
+            callback( object1, object2 );
+          }
+        }
+      }
+    }
+  }
+
+
   void CollisionHandler::callback( PhysicalObject* object1, PhysicalObject* object2 )
   {
     if ( object1->hasMovement() )
@@ -383,49 +476,6 @@ namespace Regolith
     }
 
   }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Collides functions
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Contains function
-
-
-  /*
-  bool contains( Collidable* parent, Collidable* child )
-  {
-    DEBUG_LOG( "Checking Containment" );
-
-    const Collision& parent_coll = parent->getCollision();
-    const Collision& child_coll = child->getCollision();
-
-    Vector parent_pos;
-    Vector child_pos;
-
-    parent_pos = parent->position() + parent_coll.position(); // Move into global coordinate system
-    DEBUG_STREAM << " Global Pos1 : " << parent_pos << " W = " << parent_coll.width() << " H = " << parent_coll.height();
-
-    child_pos = child->position() + child_coll.position(); // Move into global coordinate system
-    DEBUG_STREAM << "   Global Pos2 : " << child_pos << " W = " << child_coll.width() << " H = " << child_coll.height();
-
-
-    // X Axis
-    float diff_x = child_pos.x() - parent_pos.x();
-    if ( ( diff_x > -child_coll.width() ) && ( diff_x < parent_coll.width() ) ) 
-    {
-      // Y Axis
-      float diff_y = child_pos.y() - parent_pos.y();
-      if ( ( diff_y > child_coll.height() ) && ( diff_y < parent_coll.height() ) )
-      {
-        return true;
-      }
-    }
-
-    return false;
-  }
-  */
-
 
 
 //  void contains( Collidable* parent, Collidable* child )
