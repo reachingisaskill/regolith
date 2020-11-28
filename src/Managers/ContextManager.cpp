@@ -1,7 +1,8 @@
 
 #include "Regolith/Managers/ContextManager.h"
-#include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/ThreadManager.h"
+#include "Regolith/Managers/ThreadHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -198,54 +199,26 @@ namespace Regolith
 
   void contextManagerLoadingThread()
   {
-    INFO_LOG( "ContextManagerLoadingThread : Start" );
+    ThreadHandler threadHandler( "ContextManagerThread" );
 
-    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
-    std::atomic<bool>& errorFlag = Manager::getInstance()->getThreadManager().ErrorFlag;
-    Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().ContextManagerStatus;
-    if ( quitFlag ) return;
+    // Wait on the start condition
+    threadHandler.waitStart();
 
-    // Update the thread status
-    std::unique_lock<std::mutex> statusLock( threadStatus.mutex );
-    threadStatus.data = ThreadStatus::Waiting;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
 
-    INFO_LOG( "ContextManagerLoadingThread : Waiting" );
-    {
-      Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
-      std::unique_lock<std::mutex> lk( startCondition.mutex );
-      startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
-      lk.unlock();
-      if ( quitFlag ) return;
-    }
-
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Initialising;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
-
-    INFO_LOG( "ContextManagerLoadingThread : Initialising" );
-
+    // Set up references
     ContextManager& manager = Manager::getInstance()->getContextManager();
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
     std::unique_lock<std::mutex> contextLock( contextUpdate.mutex );
 
+
     // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Running;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
+    threadHandler.running();
 
     try
     {
-      INFO_LOG( "ContextManagerLoadingThread : Running" );
-
-      while( ! quitFlag )
+      while( threadHandler.isGood() )
       {
-        contextUpdate.variable.wait( contextLock, [&]()->bool{ return quitFlag || contextUpdate.data; } );
-        if ( quitFlag ) break;
+        contextUpdate.variable.wait( contextLock, [&]()->bool{ return (! threadHandler.isGood() ) || contextUpdate.data; } );
 
         DEBUG_STREAM << "ContextManagerLoadingThread : WORKING";
 
@@ -273,59 +246,33 @@ namespace Regolith
     }
     catch( Exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
       if ( contextLock.owns_lock() )
       {
         contextUpdate.variable.notify_all();
         contextLock.unlock();
       }
-      FAILURE_LOG( "ContextManagerLoadingThread : Regolith Exception thrown." );
-      std::cerr << ex.elucidate();
+      threadHandler.throwError( ex );
+      return;
     }
     catch( std::exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
       if ( contextLock.owns_lock() )
       {
         contextUpdate.variable.notify_all();
         contextLock.unlock();
       }
-      FAILURE_LOG( "ContextManagerLoadingThread : Standard Exception thrown." );
-      std::cerr << ex.what();
+      threadHandler.throwError( ex );
+      return;
     }
 
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Running;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
-
-    INFO_LOG( "ContextManagerLoadingThread : Closing" );
+    // If there's an error just bail.
+    if ( threadHandler.error() ) return;
 
 
-    // Do any closing operatins here
+    // Do any closing operations here
 
 
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Stop;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
-
-    INFO_LOG( "ContextManagerLoadingThread : Stopped" );
-    if ( ! errorFlag )
-    {
-      Condition<bool>& stopCondition = Manager::getInstance()->getThreadManager().StopCondition;
-      std::unique_lock<std::mutex> lk( stopCondition.mutex );
-      stopCondition.variable.wait( lk, [&]()->bool{ return errorFlag || stopCondition.data; } );
-      lk.unlock();
-    }
-
-
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Null;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
+    threadHandler.waitStop();
   }
 
 }

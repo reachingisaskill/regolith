@@ -2,6 +2,7 @@
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Managers/ThreadHandler.h"
 
 
 namespace Regolith
@@ -307,35 +308,12 @@ namespace Regolith
 
   void engineRenderingThread()
   {
-    INFO_LOG( "engineRederingThread : Start" );
+    ThreadHandler threadHandler( "EngineRenderingThread" );
 
-    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
-    std::atomic<bool>& errorFlag = Manager::getInstance()->getThreadManager().ErrorFlag;
-    Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().EngineRenderingStatus;
-    if ( quitFlag ) return;
+    // Wait on the start condition
+    threadHandler.waitStart();
 
-    // Update the thread status
-    std::unique_lock<std::mutex> statusLock( threadStatus.mutex );
-    threadStatus.data = ThreadStatus::Waiting;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
-
-    INFO_LOG( "engineRenderingThread : Waiting" );
-    {
-      Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
-      std::unique_lock<std::mutex> lk( startCondition.mutex );
-      startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
-      lk.unlock();
-      if ( quitFlag ) return;
-    }
-    INFO_LOG( "engineRenderingThread : Initialising" );
-
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Initialising;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
-
+    // Get a reference to the engine
     Engine& engine = Manager::getInstance()->getEngine();
 
     // Get references to the required components
@@ -351,19 +329,14 @@ namespace Regolith
     // Control access to the DataHandler being loaded
     std::unique_lock<std::mutex> queueLock( engine._renderQueueMutex, std::defer_lock );
 
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Running;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
 
-    // Now its running!
-    INFO_LOG( "engineRenderingthread : Running" );
+    // Update the thread status
+    threadHandler.running();
 
     try
     {
 
-      while ( ! quitFlag )
+      while ( threadHandler.isGood() )
       {
         // Acquire the render lock to stop other threads changing the context stack while it is being rendered.
 #ifdef REGOLITH_VALGRIND_BUILD
@@ -431,7 +404,6 @@ namespace Regolith
     }
     catch( Exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
       if ( renderLock.owns_lock() )
       {
         renderLock.unlock();
@@ -440,13 +412,11 @@ namespace Regolith
       {
         queueLock.unlock();
       }
-      FAILURE_LOG( "engineRenderingThread : Regolith Exception thrown" );
-      FAILURE_STREAM << "engineRenderingThread : " << ex.elucidate();
-      std::cerr << ex.elucidate() << std::endl;
+      threadHandler.throwError( ex );
+      return;
     }
     catch( std::exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
       if ( renderLock.owns_lock() )
       {
         renderLock.unlock();
@@ -455,46 +425,22 @@ namespace Regolith
       {
         queueLock.unlock();
       }
-      FAILURE_LOG( "engineRenderingThread : Standard Exception thrown" );
-      FAILURE_STREAM << "engineRenderingThread : " << ex.what();
-      std::cerr << ex.what() << std::endl;
+      threadHandler.throwError( ex );
+      return;
     }
 
-    INFO_LOG( "engineRenderingThread : Closing" );
-
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Closing;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
+    // If there's an error just bail.
+    if ( threadHandler.error() ) return;
 
 
     // Do any closing operations here
 
 
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Stop;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
+    threadHandler.waitStop();
 
-    INFO_LOG( "engineRenderingThread : Stopped" );
-    if ( ! errorFlag )
-    {
-      Condition<bool>& stopCondition = Manager::getInstance()->getThreadManager().StopCondition;
-      std::unique_lock<std::mutex> lk( stopCondition.mutex );
-      stopCondition.variable.wait( lk, [&]()->bool{ return errorFlag || stopCondition.data; } );
-      lk.unlock();
-    }
-
-    INFO_LOG( "engineRenderingThread : Clearing camera" );
-    // Camera can only be cleared once all the texture data has been unloaded
+    // Clear the camera after everything else has stopped as this deletes the SDL_Renderer
+    // which in turn invalidates the loaded textures
     camera.clear();
-
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Null;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
   }
 
 }

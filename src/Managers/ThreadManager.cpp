@@ -1,9 +1,11 @@
 
 #include "Regolith/Managers/ThreadManager.h"
+#include "Regolith/Managers/ThreadHandler.h"
 
 
 namespace Regolith
 {
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
   // Static thread communication variables
   Condition<bool> ThreadManager::StartCondition( false );
@@ -12,11 +14,13 @@ namespace Regolith
   std::atomic<bool> ThreadManager::ErrorFlag( false );
 
 
-  // Static thread status variables
-  Condition<ThreadStatus> ThreadManager::DataManagerStatus( ThreadStatus::Null );
-  Condition<ThreadStatus> ThreadManager::ContextManagerStatus( ThreadStatus::Null );
-  Condition<ThreadStatus> ThreadManager::EngineRenderingStatus( ThreadStatus::Null );
+//  // Static thread status variables
+//  Condition<ThreadStatus> ThreadManager::DataManagerStatus( ThreadStatus::Null );
+//  Condition<ThreadStatus> ThreadManager::ContextManagerStatus( ThreadStatus::Null );
+//  Condition<ThreadStatus> ThreadManager::EngineRenderingStatus( ThreadStatus::Null );
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
   ThreadManager::ThreadManager() :
     _dataManagerThread( dataManagerLoadingThread ),
@@ -37,6 +41,23 @@ namespace Regolith
   }
 
 
+  void ThreadManager::registerThreadHandler( ThreadHandler* handler )
+  {
+    std::lock_guard<std::mutex> lk( _handlerSetMutex );
+    _threadHandlers.insert( handler );
+  }
+
+
+  void ThreadManager::removeThreadHandler( ThreadHandler* handler )
+  {
+    std::lock_guard<std::mutex> lk( _handlerSetMutex );
+    _threadHandlers.erase( handler );
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Functions to signal the changes of states
+
 //  void ThreadManager::quit()
 //  {
 //    INFO_LOG( "Thread Manager Calling Quit" );
@@ -51,16 +72,12 @@ namespace Regolith
 
   void ThreadManager::error()
   {
-    ERROR_LOG( "Thread Manager Calling Quit. An error has occured." );
+    ERROR_LOG( "ThreadManager::error : Calling Quit. An error has occured." );
     // Set the atomic error and quit flags
     ErrorFlag = true;
     QuitFlag = true;
 
     // Notify all the conditions so that the threads see the flags
-    DataManagerStatus.variable.notify_all();
-    ContextManagerStatus.variable.notify_all();
-    EngineRenderingStatus.variable.notify_all();
-
     StartCondition.variable.notify_all();
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
@@ -147,32 +164,14 @@ namespace Regolith
 
   void ThreadManager::waitThreadStatus( ThreadStatus status )
   {
-    // Use an extra if statement here because I believe valgrind can cause some the notification signals to get interpretted out of order.
-    // Hence we get stuck here indefinitely...
+    // Aquire the handler mutex
+    std::unique_lock<std::mutex> lock( _handlerSetMutex );
 
-    // Wait on the DataManager thread
-    std::unique_lock<std::mutex> dataManagerLock( DataManagerStatus.mutex );
-    if ( ! (DataManagerStatus.data == status) )
+    // Iterate through the handlers check them individually
+    for ( HandlerSet::iterator it = _threadHandlers.begin(); it != _threadHandlers.end(); ++it )
     {
-      DataManagerStatus.variable.wait( dataManagerLock, [&]()->bool{ return ErrorFlag || QuitFlag || (DataManagerStatus.data == status); } );
+      (*it)->waitStatus( status );
     }
-    dataManagerLock.unlock();
-
-    // Wait on the ContextManager thread
-    std::unique_lock<std::mutex> contextManagerLock( ContextManagerStatus.mutex );
-    if ( ! (ContextManagerStatus.data == status) )
-    {
-      DataManagerStatus.variable.wait( contextManagerLock, [&]()->bool{ return ErrorFlag || QuitFlag || (ContextManagerStatus.data == status); } );
-    }
-    contextManagerLock.unlock();
-
-    // Wait on the Engine Rendering thread
-    std::unique_lock<std::mutex> engineRenderingLock( EngineRenderingStatus.mutex );
-    if ( ! (EngineRenderingStatus.data == status) )
-    {
-      EngineRenderingStatus.variable.wait( engineRenderingLock, [&]()->bool{ return ErrorFlag || QuitFlag || (EngineRenderingStatus.data == status); } );
-    }
-    engineRenderingLock.unlock();
   }
 
 }

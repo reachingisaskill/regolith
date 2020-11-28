@@ -116,8 +116,8 @@ namespace Regolith
       void run();
 
 
-      // Set the atomic quit flag
-      void quit() { _theThreads.quit(); }
+//      // Set the atomic quit flag
+//      void quit() { _theThreads.quit(); }
 
 
       // Sends quit an error flags to all threads and rejoins them if possible

@@ -56,6 +56,12 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Status enum for thread behvaiour
+
+  enum class ThreadStatus { Null, Waiting, Initialising, Running, Closing, Stop };
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful Enumerations
 
   enum CameraMode
@@ -673,6 +679,18 @@ namespace Regolith
     "triggerright",
     "null"
   };
+
+
+  const std::map< ThreadStatus, std::string > ThreadStatusStrings =
+  {
+    { ThreadStatus::Null, "Null" },
+    { ThreadStatus::Waiting, "Waiting" },
+    { ThreadStatus::Initialising, "Initialising" },
+    { ThreadStatus::Running, "Running" },
+    { ThreadStatus::Closing, "Closing" },
+    { ThreadStatus::Stop, "Stop" }
+  };
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Enumeration lookup functions

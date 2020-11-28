@@ -276,17 +276,21 @@ namespace Regolith
     {
       Json::Value& layer_data = *layer_it;
 
+      // Validate required keys
       Utilities::validateJson( layer_data, "position", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJsonArray( layer_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( layer_data, "width", Utilities::JSON_TYPE_FLOAT );
       Utilities::validateJson( layer_data, "height", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( layer_data, "objects", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( layer_data, "spawns", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( layer_data, "objects", Utilities::JSON_TYPE_ARRAY );
+      Utilities::validateJson( layer_data, "spawns", Utilities::JSON_TYPE_ARRAY );
       Utilities::validateJson( layer_data, "movement_scale", Utilities::JSON_TYPE_ARRAY );
+
+      // Validate array types
+      Utilities::validateJsonArray( layer_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+      Utilities::validateJsonArray( layer_data["objects"], 0, Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJsonArray( layer_data["spawns"], 0, Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJsonArray( layer_data["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
 
       std::string layer_name = layer_it.key().asString();
-
       INFO_STREAM << "Building context layer: " << layer_name;
 
       float x = layer_data["position"][0].asFloat();
@@ -306,15 +310,17 @@ namespace Regolith
 
       // Find and place all the requested elements
       Json::Value& object_data = layer_data["objects"];
-      for( Json::Value::iterator o_it = object_data.begin(); o_it != object_data.end(); ++o_it )
+      for  ( Json::ArrayIndex i = 0; i < object_data.size(); ++i )
       {
-        std::string object_name = o_it.key().asString();
+        Utilities::validateJson( object_data[i], "name", Utilities::JSON_TYPE_STRING );
+
+        std::string object_name = object_data[i]["name"].asString();
         INFO_STREAM << "Adding game object into context layer: " << object_name;
 
         PhysicalObject* object;
 
         // If a global object is requested
-        if ( Utilities::validateJson( *o_it, "global", Utilities::JSON_TYPE_BOOLEAN, false ) && (*o_it)["global"].asBool() )
+        if ( Utilities::validateJson( object_data[i], "global", Utilities::JSON_TYPE_BOOLEAN, false ) && object_data[i]["global"].asBool() )
         {
           object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getPhysicalObject( object_name );
         }
@@ -331,7 +337,7 @@ namespace Regolith
           throw ex;
         }
 
-        configureObject( _layers[ layer_name ], object, *o_it );
+        configureObject( _layers[ layer_name ], object, object_data[i] );
 
         _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
       }
@@ -339,15 +345,17 @@ namespace Regolith
 
       // Find and place all the spawned elements
       Json::Value& spawn_data = layer_data["spawns"];
-      for( Json::Value::iterator s_it = spawn_data.begin(); s_it != spawn_data.end(); ++s_it )
+      for ( Json::ArrayIndex j = 0; j < spawn_data.size(); ++j )
       {
-        std::string spawn_name = s_it.key().asString();
-        INFO_STREAM << "Spawning game object into context layer: " << spawn_name;
+        Utilities::validateJson( spawn_data[j], "name", Utilities::JSON_TYPE_STRING );
+
+        std::string spawn_name = spawn_data[j]["name"].asString();
+        INFO_STREAM << "Context::configure : Spawning game object into context layer: " << spawn_name;
 
         PhysicalObject* object;
 
         // If a global object is requested
-        if ( Utilities::validateJson( *s_it, "global", Utilities::JSON_TYPE_BOOLEAN, false ) && (*s_it)["global"].asBool() )
+        if ( Utilities::validateJson( spawn_data[j], "global", Utilities::JSON_TYPE_BOOLEAN, false ) && spawn_data[j]["global"].asBool() )
         {
 
           object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->spawnPhysicalObject( spawn_name );
@@ -365,7 +373,7 @@ namespace Regolith
           throw ex;
         }
 
-        configureObject( _layers[ layer_name ], object, *s_it );
+        configureObject( _layers[ layer_name ], object, spawn_data[j] );
 
         _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
       }

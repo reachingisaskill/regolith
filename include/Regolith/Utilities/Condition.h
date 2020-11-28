@@ -14,8 +14,8 @@ namespace Regolith
   template < class DATA >
   struct Condition
   {
-    std::condition_variable variable;
-    std::mutex mutex;
+    mutable std::condition_variable variable;
+    mutable std::mutex mutex;
     DATA data;
 
     Condition() {}

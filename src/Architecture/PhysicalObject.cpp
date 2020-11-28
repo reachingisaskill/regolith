@@ -55,6 +55,9 @@ namespace Regolith
 
   PhysicalObject::PhysicalObject() :
     _destroyMe( false ),
+    _hasMoveable( false ),
+    _hasTexture( false ),
+    _hasAnimation( false ),
     _position(),
     _rotation( 0.0 ),
     _mass( 0.0 ),
@@ -78,6 +81,9 @@ namespace Regolith
   // Manually copy the children
   PhysicalObject::PhysicalObject( const PhysicalObject& other ) :
     _destroyMe( other._destroyMe ),
+    _hasMoveable( other._hasMoveable ),
+    _hasTexture( other._hasTexture ),
+    _hasAnimation( other._hasAnimation ),
     _position( other._position ),
     _rotation( other._rotation ),
     _mass( other._mass ),

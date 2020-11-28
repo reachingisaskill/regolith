@@ -3,6 +3,7 @@
 #include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Managers/ThreadHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 #include <mutex>
@@ -401,53 +402,26 @@ namespace Regolith
 
   void dataManagerLoadingThread()
   {
-    INFO_LOG( "dataManagerLoadingThread : Start" );
+    ThreadHandler threadHandler( "DataManagerThread" );
 
-    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
-    std::atomic<bool>& errorFlag = Manager::getInstance()->getThreadManager().ErrorFlag;
-    Condition<ThreadStatus>& threadStatus = Manager::getInstance()->getThreadManager().DataManagerStatus;
-    if ( quitFlag ) return;
+    // Wait on the start condition
+    threadHandler.waitStart();
 
-    // Update the thread status
-    std::unique_lock<std::mutex> statusLock( threadStatus.mutex );
-    threadStatus.data = ThreadStatus::Waiting;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
 
-    INFO_LOG( "dataManagerLoadingThread : Waiting" );
-    {
-      Condition<bool>& startCondition = Manager::getInstance()->getThreadManager().StartCondition;
-      std::unique_lock<std::mutex> lk( startCondition.mutex );
-      startCondition.variable.wait( lk, [&]()->bool{ return quitFlag || startCondition.data; } );
-      lk.unlock();
-      if ( quitFlag ) return;
-    }
-
-    INFO_LOG( "dataManagerLoadingThread : Initialising." );
-
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Initialising;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
-
+    // Get references to required data
     DataManager& manager = Manager::getInstance()->getDataManager();
     Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
     std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
 
+
     // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Running;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
+    threadHandler.running();
 
     try
     {
-      INFO_LOG( "dataManagerLoadingThread : Running." );
-      while( ! quitFlag )
+      while( threadHandler.isGood() )
       {
-        dataUpdate.variable.wait( dataLock, [&]()->bool{ return quitFlag || dataUpdate.data; } );
-        if ( quitFlag ) break;
+        dataUpdate.variable.wait( dataLock, [&]()->bool{ return (! threadHandler.isGood()) || dataUpdate.data; } );
 
         manager.setLoading( true );
 
@@ -471,60 +445,35 @@ namespace Regolith
 
       dataLock.unlock();
     }
-    catch ( const Exception& ex )
+    catch ( Exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
       if ( dataLock.owns_lock() )
       {
         dataUpdate.variable.notify_all();
         dataLock.unlock();
       }
-      FAILURE_LOG( "dataManagerLoadingThread : Regolith Exception thrown" );
-      std::cerr << ex.elucidate();
+      threadHandler.throwError( ex );
+      return;
     }
-    catch( const std::exception& ex )
+    catch( std::exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
       if ( dataLock.owns_lock() )
       {
         dataUpdate.variable.notify_all();
         dataLock.unlock();
       }
-      FAILURE_LOG( "dataManagerLoadingThread : Standard Exception thrown" );
-      std::cerr << ex.what();
+      threadHandler.throwError( ex );
+      return;
     }
 
-    INFO_LOG( "dataManagerLoadingThread : Closing" );
-
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Closing;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
+    // If there's an error just bail.
+    if ( threadHandler.error() ) return;
 
 
     // Do any closing operations here
 
 
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Stop;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
-
-    INFO_LOG( "dataManagerLoadingThread : Stopped" );
-    if ( ! errorFlag )
-    {
-      Condition<bool>& stopCondition = Manager::getInstance()->getThreadManager().StopCondition;
-      std::unique_lock<std::mutex> lk( stopCondition.mutex );
-      stopCondition.variable.wait( lk, [&]()->bool{ return errorFlag || stopCondition.data; } );
-      lk.unlock();
-    }
-
-    // Update the thread status
-    statusLock.lock();
-    threadStatus.data = ThreadStatus::Null;
-    statusLock.unlock();
-    threadStatus.variable.notify_all();
+    threadHandler.waitStop();
   }
 
 
