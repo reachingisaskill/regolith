@@ -54,6 +54,9 @@ namespace Regolith
       // Handler global events without a context.
       _inputManager.handleEvents( nullptr );
 
+      // Reset the frame timer before the loop starts
+      _frameTimer.lap();
+
       while ( performStackOperations() )
       {
         // If there's an error in another thread, we abandon ship

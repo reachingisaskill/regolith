@@ -30,12 +30,17 @@
         {
           "name" : "red_box",
           "position" : [ 50.0, 50.0 ],
-          "velocity" : [ 0.05, 0.0 ]
+          "velocity" : [ 0.20, 0.0 ]
         },
         {
           "name" : "red_box",
           "position" : [ 500.0, 50.0 ],
-          "velocity" : [ -0.05, 0.0 ]
+          "velocity" : [ -0.20, 0.0 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 800.0, 50.0 ],
+          "velocity" : [ -0.20, 0.0 ]
         }
       ]
     }

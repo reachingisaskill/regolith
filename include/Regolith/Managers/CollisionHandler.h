@@ -3,6 +3,7 @@
 #define REGOLITH_COLLISION_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Utilities/Contact.h"
 
 #include <vector>
 #include <utility>
@@ -26,11 +27,14 @@ namespace Regolith
    * the impact.
    */
 
+
+////////////////////////////////////////////////////////////////////////////////
   // Forward declarations
   class PhysicalObject;
   class ContextLayer;
 
 
+////////////////////////////////////////////////////////////////////////////////
   // Collision handler definition
   class CollisionHandler
   {
@@ -52,13 +56,11 @@ namespace Regolith
       float _overlap_y;
       float _diff_x;
       float _diff_y;
-
-      Vector _contact_vector;
-      CollisionType _type1;
-      CollisionType _type2;
-      float _invM1;
-      float _invM2;
       float _total_invM;
+      float _coef_restitution;
+
+      Contact _contact1;
+      Contact _contact2;
 
     protected:
       // Used to handle the function calls the two objects that have collided.
@@ -72,6 +74,13 @@ namespace Regolith
       // Con/De-structors
       CollisionHandler();
       virtual ~CollisionHandler();
+
+      // Delete the copy/move constructors. Can't be arsed to implement them and we don't need them.
+      CollisionHandler( const CollisionHandler& ) = delete;
+      CollisionHandler( CollisionHandler&& ) = delete;
+      CollisionHandler& operator=( const CollisionHandler& ) = delete;
+      CollisionHandler& operator=( CollisionHandler&& ) = delete;
+
 
       // Configure the pairings itself from the json data
       void configure( Json::Value& );

@@ -3,6 +3,7 @@
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Utilities/Contact.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -62,7 +63,6 @@ namespace Regolith
     _rotation( 0.0 ),
     _mass( 0.0 ),
     _inverseMass( 0.0 ),
-    _hooksConstant( 0.0 ),
     _elasticity( 0.0 ),
     _width( 0.0 ),
     _height( 0.0 ),
@@ -88,7 +88,6 @@ namespace Regolith
     _rotation( other._rotation ),
     _mass( other._mass ),
     _inverseMass( other._inverseMass ),
-    _hooksConstant( other._hooksConstant ),
     _elasticity( other._elasticity ),
     _width( other._width ),
     _height( other._height ),
@@ -141,14 +140,8 @@ namespace Regolith
       setMass( json_data["mass"].asFloat() );
     }
 
-    // Set Hooks' constant for the object. This is only a VERY rough approximation to 2D interactions
-    if ( Utilities::validateJson( json_data, "hooks_constant", Utilities::JSON_TYPE_FLOAT, false ) )
-    {
-      _hooksConstant = json_data["hooks_constant"].asFloat();
-    }
-
-    // Set the elasticity of the object. 1 = perfectly elastic. 0.0 is 100% overlapable
-    if ( Utilities::validateJson( json_data, "hooks_constant", Utilities::JSON_TYPE_FLOAT, false ) )
+    // Set the coefficient of elasticity of the object. 1 = perfectly elastic.
+    if ( Utilities::validateJson( json_data, "elasticity", Utilities::JSON_TYPE_FLOAT, false ) )
     {
       _elasticity = json_data["elasticity"].asFloat();
     }
@@ -321,10 +314,9 @@ namespace Regolith
   }
 
 
-  void PhysicalObject::onCollision( Vector contact, CollisionType /*this_type*/, CollisionType /*other_type*/, PhysicalObject* /*other_object*/)
+  void PhysicalObject::onCollision( Contact& contact, PhysicalObject* /*other_object*/)
   {
-    // Default behaviour is a simple partially elastic collision
-    this->addForce( contact*(_hooksConstant*_elasticity) );
+    this->kick( contact.impulse );
   }
 
 }

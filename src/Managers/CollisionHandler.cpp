@@ -19,6 +19,8 @@ namespace Regolith
     _pairings(),
     _containers()
   {
+    _contact1.other = &_contact2;
+    _contact2.other = &_contact1;
   }
 
 
@@ -232,18 +234,20 @@ namespace Regolith
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
                 {
-                  _type1 = col_it1->type;
-                  _type2 = col_it2->type;
+                  _contact1.type = col_it1->type;
+                  _contact2.type = col_it2->type;
 
                   // Both X & Y overlap - set the reference contact object
                   if ( _overlap_x >= _overlap_y )
                   {
-                    _contact_vector.set( 0.0, _overlap_y );
+                    _contact1.overlap.set( 0.0,  _overlap_y );
+                    _contact2.overlap.set( 0.0, -_overlap_y );
                     callback( object1, object2 );
                   }
                   else
                   {
-                    _contact_vector.set( _overlap_x, 0.0 );
+                    _contact1.overlap.set(  _overlap_x, 0.0 );
+                    _contact2.overlap.set( -_overlap_x, 0.0 );
                     callback( object1, object2 );
                   }
                 }
@@ -258,18 +262,20 @@ namespace Regolith
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
                 {
-                  _type1 = col_it1->type;
-                  _type2 = col_it2->type;
+                  _contact1.type = col_it1->type;
+                  _contact2.type = col_it2->type;
 
                   // Both X & Y overlap - set the reference contact object
                   if ( _overlap_x >= _overlap_y )
                   {
-                    _contact_vector.set( 0.0, -_overlap_y );
+                    _contact1.overlap.set( 0.0, -_overlap_y );
+                    _contact2.overlap.set( 0.0,  _overlap_y );
                     callback( object1, object2 );
                   }
                   else
                   {
-                    _contact_vector.set( _overlap_x, 0.0 );
+                    _contact1.overlap.set(  _overlap_x, 0.0 );
+                    _contact2.overlap.set( -_overlap_x, 0.0 );
                     callback( object1, object2 );
                   }
                 }
@@ -298,18 +304,20 @@ namespace Regolith
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
                 {
-                  _type1 = col_it1->type;
-                  _type2 = col_it2->type;
+                  _contact1.type = col_it1->type;
+                  _contact2.type = col_it2->type;
 
                   // Both X & Y overlap - set the reference contact object
                   if ( _overlap_x >= _overlap_y )
                   {
-                    _contact_vector.set( 0.0, _overlap_y );
+                    _contact1.overlap.set( 0.0,  _overlap_y );
+                    _contact2.overlap.set( 0.0, -_overlap_y );
                     callback( object1, object2 );
                   }
                   else
                   {
-                    _contact_vector.set( -_overlap_x, 0.0 );
+                    _contact1.overlap.set( -_overlap_x, 0.0 );
+                    _contact2.overlap.set(  _overlap_x, 0.0 );
                     callback( object1, object2 );
                   }
                 }
@@ -324,18 +332,20 @@ namespace Regolith
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
                 {
-                  _type1 = col_it1->type;
-                  _type2 = col_it2->type;
+                  _contact1.type = col_it1->type;
+                  _contact2.type = col_it2->type;
 
                   // Both X & Y overlap - set the reference contact object
                   if ( _overlap_x >= _overlap_y )
                   {
-                    _contact_vector.set( 0.0, -_overlap_y );
+                    _contact1.overlap.set( 0.0, -_overlap_y );
+                    _contact2.overlap.set( 0.0,  _overlap_y );
                     callback( object1, object2 );
                   }
                   else
                   {
-                    _contact_vector.set( -_overlap_x, 0.0 );
+                    _contact1.overlap.set( -_overlap_x, 0.0 );
+                    _contact2.overlap.set(  _overlap_x, 0.0 );
                     callback( object1, object2 );
                   }
                 }
@@ -385,54 +395,62 @@ namespace Regolith
           {
             if ( _diff_y < 0.0 )
             {
-              _contact_vector.set( _diff_x, _diff_y );
+              _contact1.overlap.set(  _diff_x,  _diff_y );
+              _contact2.overlap.set( -_diff_x, -_diff_y );
             }
             else if ( _overlap_y > 0.0 )
             {
-              _contact_vector.set( _diff_x, _overlap_y );
+              _contact1.overlap.set(  _diff_x,  _overlap_y );
+              _contact2.overlap.set( -_diff_x, -_overlap_y );
             }
             else
             {
-              _contact_vector.set( _diff_x, 0.0 );
+              _contact1.overlap.set(  _diff_x, 0.0 );
+              _contact2.overlap.set( -_diff_x, 0.0 );
             }
-            _type1 = col_it1->type;
-            _type2 = col_it2->type;
+            _contact1.type = col_it1->type;
+            _contact2.type = col_it2->type;
             callback( object1, object2 );
           }
           else if ( _overlap_x > 0.0 )
           {
             if ( _diff_y < 0.0 )
             {
-              _contact_vector.set( _overlap_x, _diff_y );
+              _contact1.overlap.set(  _overlap_x,  _diff_y );
+              _contact2.overlap.set( -_overlap_x, -_diff_y );
             }
             else if ( _overlap_y > 0.0 )
             {
-              _contact_vector.set( _overlap_x, _overlap_y );
+              _contact1.overlap.set(  _overlap_x,  _overlap_y );
+              _contact2.overlap.set( -_overlap_x, -_overlap_y );
             }
             else
             {
-              _contact_vector.set( _overlap_x, 0.0 );
+              _contact1.overlap.set(  _overlap_x, 0.0 );
+              _contact2.overlap.set( -_overlap_x, 0.0 );
             }
-            _type1 = col_it1->type;
-            _type2 = col_it2->type;
+            _contact1.type = col_it1->type;
+            _contact2.type = col_it2->type;
             callback( object1, object2 );
           }
           else
           {
             if ( _diff_y < 0.0 )
             {
-              _contact_vector.set( 0.0, _diff_y );
+              _contact1.overlap.set( 0.0,  _diff_y );
+              _contact2.overlap.set( 0.0, -_diff_y );
             }
             else if ( _overlap_y > 0.0 )
             {
-              _contact_vector.set( 0.0, _overlap_y );
+              _contact1.overlap.set( 0.0,  _overlap_y );
+              _contact2.overlap.set( 0.0, -_overlap_y );
             }
             else
             {
               continue;
             }
-            _type1 = col_it1->type;
-            _type2 = col_it2->type;
+            _contact1.type = col_it1->type;
+            _contact2.type = col_it2->type;
             callback( object1, object2 );
           }
         }
@@ -443,38 +461,49 @@ namespace Regolith
 
   void CollisionHandler::callback( PhysicalObject* object1, PhysicalObject* object2 )
   {
+    _coef_restitution = 1.0 + 0.5 * ( object1->getElasticity() + object2->getElasticity() );
+
     if ( object1->hasMovement() )
     {
       if ( object2->hasMovement() )
       {
         // If both objects can move we weight the contact vector by the inverse of their masses
-        _invM1 = object1->getInverseMass();
-        _invM2 = object2->getInverseMass();
-        _total_invM = _invM1 + _invM2;
+        _total_invM = object1->getInverseMass() + object1->getInverseMass();
+        Vector temp = _coef_restitution * ( object2->getVelocity() - object1->getVelocity() ) / _total_invM;
+        _contact1.impulse =  object2->getInverseMass() * temp;
+        _contact2.impulse = -object1->getInverseMass() * temp;
 
-        object1->onCollision( -(_invM1/_total_invM)*_contact_vector, _type1, _type2, object2 );
-        object2->onCollision(  (_invM2/_total_invM)*_contact_vector, _type2, _type1, object1 );
+        _contact1.inertiaRatio = object1->getInverseMass()/_total_invM;
+        _contact2.inertiaRatio = object2->getInverseMass()/_total_invM;
       }
       else
       {
-        object1->onCollision( -_contact_vector, _type1, _type2, object2 );
-        object2->onCollision(       zeroVector, _type2, _type1, object1 );
+        _contact1.inertiaRatio = 1.0;
+        _contact2.inertiaRatio = 0.0;
+        _contact1.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity());
+        _contact2.impulse.zero();
       }
     }
     else
     {
       if ( object2->hasMovement() )
       {
-        object1->onCollision(      zeroVector, _type1, _type2, object2 );
-        object2->onCollision( _contact_vector, _type2, _type1, object1 );
+        _contact1.inertiaRatio = 0.0;
+        _contact2.inertiaRatio = 1.0;
+        _contact1.impulse.zero();
+        _contact2.impulse = _coef_restitution * (object1->getVelocity() - object2->getVelocity());
       }
       else
       {
-        object1->onCollision( zeroVector, _type1, _type2, object2 );
-        object2->onCollision( zeroVector, _type2, _type1, object1 );
+        _contact1.inertiaRatio = 0.0;
+        _contact2.inertiaRatio = 0.0;
+        _contact1.impulse.zero();
+        _contact2.impulse.zero();
       }
     }
 
+    object1->onCollision( _contact1, object2 );
+    object2->onCollision( _contact2, object1 );
   }
 
 

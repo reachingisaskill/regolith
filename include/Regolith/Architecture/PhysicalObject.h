@@ -9,6 +9,9 @@
 
 namespace Regolith
 {
+////////////////////////////////////////////////////////////////////////////////
+  // Forward declares
+  struct Contact;
 
   /*
    * Defines the interface for "physical objects" any object that can be cloned, moved, seen or collided with.
@@ -64,7 +67,6 @@ namespace Regolith
       // Used to determine collision and movement properties
       float _mass;
       float _inverseMass;
-      float _hooksConstant;
       float _elasticity;
 
       // Defines the size of the drawable area for the object. Should ALWAYS contain all the collision boxes.
@@ -106,7 +108,7 @@ namespace Regolith
       void addForce( Vector f ) { _forces += f; }
 
       // Forces an immediate movement of the object. Used mostly to prevent overlap during collisions.
-      void kick( Vector& k ) { _position += k; }
+      void kick( Vector& j ) { _velocity += j; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +203,7 @@ namespace Regolith
       virtual void update( float );
 
       // Call back function for when this object collides with another
-      virtual void onCollision( Vector, CollisionType, CollisionType, PhysicalObject* );
+      virtual void onCollision( Contact&, PhysicalObject* );
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -219,7 +221,6 @@ namespace Regolith
       const float& getInverseMass() const { return _inverseMass; }
 
       // Collision physics accessors
-      const float& getHooksConstant() const { return _hooksConstant; }
       const float& getElasticity() const { return _elasticity; }
 
       // Position set/get
