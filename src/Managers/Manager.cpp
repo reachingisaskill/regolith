@@ -254,10 +254,10 @@ namespace Regolith
     FAILURE_STREAM << "DEATHSIGNAL : Regolith received signal: " << signal;
     FAILURE_LOG( "DEATHSIGNAL : Trying to die gracefully..." );
 
-    ERROR_STREAM << "Last SDL Error : " << SDL_GetError();
-    ERROR_STREAM << "Last IMG Error : " << IMG_GetError();
-    ERROR_STREAM << "Last TTF Error : " << TTF_GetError();
-    ERROR_STREAM << "Last MIX Error : " << Mix_GetError();
+//    ERROR_STREAM << "Last SDL Error : " << SDL_GetError();
+//    ERROR_STREAM << "Last IMG Error : " << IMG_GetError();
+//    ERROR_STREAM << "Last TTF Error : " << TTF_GetError();
+//    ERROR_STREAM << "Last MIX Error : " << Mix_GetError();
 
 #ifdef __linux__
     void* array[20];

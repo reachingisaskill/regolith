@@ -304,7 +304,7 @@ namespace Regolith
 
     // Update complete - reset forces
     _forces.zero();
-    DEBUG_STREAM << "PhysicalObject::step() : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
+    DEBUG_STREAM << "PhysicalObject::step : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
   }
 
 
@@ -316,8 +316,10 @@ namespace Regolith
 
   void PhysicalObject::onCollision( Contact& contact, PhysicalObject* /*other_object*/)
   {
-    this->move( contact.overlap );
+    DEBUG_STREAM << "PhysicalObject::onCollision : " << contact.overlap << " | " << contact.impulse;
+    this->move( contact.inertiaRatio * contact.overlap );
     this->kick( contact.impulse );
+    DEBUG_STREAM << "PhysicalObject::onCollision : Position : " << _position << ", Vel : " << _velocity;
   }
 
 }

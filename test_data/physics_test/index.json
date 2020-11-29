@@ -13,6 +13,6 @@
   },
   "textures": 
   {
-    "coloured_boxes": { "path": "test_data/physics_test/coloured_boxes.bmp", "rows": 2, "columns": 2, "width": 20, "height": 20 }
+    "coloured_boxes": { "path": "test_data/physics_test/coloured_boxes.bmp", "rows": 2, "columns": 2, "width": 40, "height": 40 }
   }
 }

@@ -385,13 +385,15 @@ namespace Regolith
         {
           // Position of a container hitbox
           _pos2 = _object_pos2 + col_it2->position;
+          DEBUG_STREAM << "CollisionHandler::contains : Pos 1 = " << _pos1 << " Pos = " << _pos2;
     
-          _diff_x = _pos1.x() - _pos2.x();
-          _diff_y = _pos1.y() - _pos2.y();
-          _overlap_x = ( _pos1.x() + col_it1->width ) - ( _pos2.x() + col_it2->width );
-          _overlap_y = ( _pos1.y() + col_it1->height ) - ( _pos2.y() + col_it2->height );
+          _diff_x = _pos2.x() - _pos1.x();
+          _diff_y = _pos2.y() - _pos1.y();
+          _overlap_x = ( _pos2.x() + col_it2->width ) - ( _pos1.x() + col_it1->width );
+          _overlap_y = ( _pos2.y() + col_it2->height ) - ( _pos1.y() + col_it1->height );
+          DEBUG_STREAM << "CollisionHandler::contains : Diff = " << _diff_x << ", " << _diff_y << "   Overlap = " << _overlap_x << ", " << _overlap_y;
 
-          if ( _diff_x < 0.0 )
+          if ( _diff_x < 0.0 ) // Behind container position
           {
             if ( _diff_y < 0.0 )
             {
@@ -405,8 +407,8 @@ namespace Regolith
             }
             else
             {
-              _contact1.overlap.set( -_diff_x, 0.0 );
-              _contact2.overlap.set(  _diff_x, 0.0 );
+              _contact1.overlap.set(  _diff_x, 0.0 );
+              _contact2.overlap.set( -_diff_x, 0.0 );
             }
             _contact1.type = col_it1->type;
             _contact2.type = col_it2->type;
@@ -468,10 +470,10 @@ namespace Regolith
       if ( object2->hasMovement() )
       {
         // If both objects can move we weight the contact vector by the inverse of their masses
-        _total_invM = object1->getInverseMass() + object1->getInverseMass();
-        Vector temp = _coef_restitution * ( object2->getVelocity() - object1->getVelocity() ) / _total_invM;
-        _contact1.impulse =  object2->getInverseMass() * temp;
-        _contact2.impulse = -object1->getInverseMass() * temp;
+        _total_invM = object1->getInverseMass() + object2->getInverseMass();
+        Vector temp = _coef_restitution * ( object2->getVelocity() - object1->getVelocity() ) / ( object1->getMass() + object2->getMass() );
+        _contact1.impulse =  object2->getMass() * temp;
+        _contact2.impulse = -object1->getMass() * temp;
 
         _contact1.inertiaRatio = object1->getInverseMass()/_total_invM;
         _contact2.inertiaRatio = object2->getInverseMass()/_total_invM;
@@ -505,105 +507,6 @@ namespace Regolith
     object1->onCollision( _contact1, object2 );
     object2->onCollision( _contact2, object1 );
   }
-
-
-//  void contains( Collidable* parent, Collidable* child )
-//  {
-//    DEBUG_LOG( "Checking Containment" );
-//
-//    const Collision& parent_coll = parent->getCollision();
-//    const Collision& child_coll = child->getCollision();
-//
-//    Vector parent_pos;
-//    Vector child_pos;
-//
-//    parent_pos = parent->position() + parent_coll.position(); // Move into global coordinate system
-//    DEBUG_STREAM << " Global Pos1 : " << parent_pos << " W = " << parent_coll.width() << " H = " << parent_coll.height();
-//
-//    child_pos = child->position() + child_coll.position(); // Move into global coordinate system
-//    DEBUG_STREAM << " Global Pos2 : " << child_pos << " W = " << child_coll.width() << " H = " << child_coll.height();
-//
-//
-//    // X Axis
-//    float diff_x = child_pos.x() - parent_pos.x();
-//    float diff_y = child_pos.y() - parent_pos.y();
-//
-//    if ( ( diff_x >= 0.0 ) && ( ( diff_x + child_coll.width()) <= parent_coll.width() ) )
-//      if ( ( diff_y >= 0.0 ) && ( ( diff_y + child_coll.height()) <= parent_coll.height() ) )
-//        return; // Contained
-//
-//    if ( diff_x > 0.0 )
-//    {
-//      diff_x += child_coll.width() - parent_coll.width();
-//      if ( diff_x < 0.0 ) diff_x = 0.0;
-//    }
-//
-//    if ( diff_y > 0.0 )
-//    {
-//      diff_y += child_coll.height() - parent_coll.height();
-//      if ( diff_y < 0.0 ) diff_y = 0.0;
-//    }
-//
-//    Vector normal( diff_x, diff_y );
-//    float length = normal.mod();
-//
-//    DEBUG_STREAM << "DIFF_X = " << diff_x << " ,  DIFF_Y = " << diff_y << " L = " << length;
-//
-//
-//    callback( child, parent, (normal /= length), length );
-//  }
-
-
-//  bool contains( ContextLayer& layer, Collidable* object )
-//  {
-//    DEBUG_LOG( "Checking Layer Containement" );
-//
-//    const Collision& object_coll = object->getCollision();
-//
-//    const Vector& layer_pos = layer.getPosition();
-//    Vector object_pos;
-//
-//    object_pos = object->position() + object_coll.position(); // Move into global coordinate system
-//    DEBUG_STREAM << "   Global Pos2 : " << object_pos << " W = " << object_coll.width() << " H = " << object_coll.height();
-//
-//
-//    // X Axis
-//    float diff_x = object_pos.x() - layer_pos.x();
-//    if ( ( diff_x > -object_coll.width() ) && ( diff_x < layer.getWidth() ) ) 
-//    {
-//      // Y Axis
-//      float diff_y = object_pos.y() - layer_pos.y();
-//      if ( ( diff_y > object_coll.height() ) && ( diff_y < layer.getHeight() ) )
-//      {
-//        return true;
-//      }
-//    }
-//
-//    return false;
-//  }
-
-
-//  bool contains( Collidable* object, const Vector& point )
-//  {
-//    DEBUG_LOG( "Checking Point Containment" );
-//
-//    const Collision& collision = object->getCollision();
-//    Vector pos = object->position() + collision.position(); // Move into global coordinate system
-//    DEBUG_STREAM << " Global Pos1 : " << pos << " W = " << collision.width() << " H = " << collision.height();
-//
-//    // X Axis
-//    float diff_x = point.x() - pos.x();
-//    if ( ( diff_x > 0.0 ) && ( diff_x < collision.width() ) )
-//    {
-//      float diff_y = point.y() - pos.y();
-//      if ( ( diff_y > 0.0 ) && ( diff_y < collision.height() ) ) 
-//      {
-//        return true;
-//      }
-//    }
-//
-//    return false;
-//  }
 
 }
 

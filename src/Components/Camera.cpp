@@ -82,19 +82,9 @@ namespace Regolith
     const Texture& texture = object->getTexture();
 
     DEBUG_STREAM << "Camera::renderPhysicalObject : SDL_Texture @ " << texture._theTexture->texture;
+    DEBUG_STREAM << "Camera::renderPhysicalObject : Clip : " << texture._clip.x << ", " << texture._clip.y << ", " << texture._clip.w << ", " << texture._clip.h;
     SDL_RenderCopyEx( _theRenderer, texture._theTexture->texture, &texture._clip, &_targetRect, object->getRotation(), nullptr, texture._flipFlag );
   }
-
-
-//  SDL_Rect Camera::place( const SDL_Rect& rect ) const
-//  {
-//    SDL_Rect newRect;
-////    newRect.x = (rect.x - _layerPosition.x()) * _scaleX;
-////    newRect.y = (rect.y - _layerPosition.y()) * _scaleY;
-////    newRect.w = rect.w * _scaleX;
-////    newRect.h = rect.h * _scaleY;
-//    return newRect;
-//  }
 
 }
 

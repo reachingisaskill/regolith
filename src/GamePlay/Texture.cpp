@@ -115,13 +115,10 @@ namespace Regolith
   void Texture::setFrameNumber( unsigned int num )
   {
     _currentSprite = num;
-    int sprite_x = (_currentSprite % _theTexture->columns) * _clip.w;
-    int sprite_y = (_currentSprite / _theTexture->columns) * _clip.h;
+    _clip.x = (_currentSprite % _theTexture->columns) * _clip.w;
+    _clip.y = (_currentSprite / _theTexture->columns) * _clip.h;
 
-    _clip.x = sprite_x;
-    _clip.y = sprite_y;
-//    _clip.w = _spriteWidth;
-//    _clip.h = _spriteHeight;
+    DEBUG_STREAM << "Texture::setFrameNumber : " << _currentSprite << " : " << _clip.x << ", " << _clip.y << ", " << _clip.w << ", " << _clip.h;
   }
 
 
@@ -133,6 +130,11 @@ namespace Regolith
     _theTexture = handler.getRawTexture( texture_name );
     DEBUG_STREAM << "Found texture: " << texture_name << " : " << _theTexture;
 
+    _clip.x = 0;
+    _clip.y = 0;
+    _clip.w = _theTexture->width / _theTexture->columns;
+    _clip.h = _theTexture->height / _theTexture->rows;
+
     if ( json_data.isMember( "start_number" ) )
     {
       setFrameNumber( json_data["start_number"].asInt() );
@@ -141,11 +143,6 @@ namespace Regolith
     {
       setFrameNumber( 0 );
     }
-
-    _clip.x = 0;
-    _clip.y = 0;
-    _clip.w = _theTexture->width / _theTexture->columns;
-    _clip.h = _theTexture->height / _theTexture->rows;
 
     DEBUG_STREAM << "Texture::configure : " << _theTexture->rows << "x" << _theTexture->columns << " -> " << _theTexture->cells << " start: " << _currentSprite;
   }
