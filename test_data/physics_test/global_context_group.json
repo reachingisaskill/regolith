@@ -51,7 +51,7 @@
       "has_texture" : false,
       "has_animation" : false,
       "mass" : 0.0,
-      "elasticity" : 1.0,
+      "elasticity" : 0.8,
       "position" : [ 0.0, 0.0 ],
       "bounding_box" :
       {

@@ -316,6 +316,7 @@ namespace Regolith
 
   void PhysicalObject::onCollision( Contact& contact, PhysicalObject* /*other_object*/)
   {
+    this->move( contact.overlap );
     this->kick( contact.impulse );
   }
 
