@@ -9,28 +9,27 @@ namespace Regolith
 
   // Static thread communication variables
   Condition<bool> ThreadManager::StartCondition( false );
-  Condition<bool> ThreadManager::StopCondition( false );
   std::atomic<bool> ThreadManager::QuitFlag( false );
   std::atomic<bool> ThreadManager::ErrorFlag( false );
-
-
-//  // Static thread status variables
-//  Condition<ThreadStatus> ThreadManager::DataManagerStatus( ThreadStatus::Null );
-//  Condition<ThreadStatus> ThreadManager::ContextManagerStatus( ThreadStatus::Null );
-//  Condition<ThreadStatus> ThreadManager::EngineRenderingStatus( ThreadStatus::Null );
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   ThreadManager::ThreadManager() :
-    _dataManagerThread( dataManagerLoadingThread ),
-    _contextManagerThread( contextManagerLoadingThread ),
-    _engineRenderingThread( engineRenderingThread ),
+    _dataManagerThread(),
+    _contextManagerThread(),
+    _engineRenderingThread(),
+    _threadStatus(),
     DataUpdate( false ),
     ContextUpdate( false ),
     MusicUpdate( nullptr ),
     RenderMutex()
   {
+    GuardLock lk( _threadStatus.mutex );
+    for ( char n = 0; n < REGOLITH_THREAD_TOTAL; ++n )
+    {
+      _threadStatus.data[ (ThreadName) n ] = THREAD_NULL;
+    }
   }
 
 
@@ -41,34 +40,57 @@ namespace Regolith
   }
 
 
-  void ThreadManager::registerThreadHandler( ThreadHandler* handler )
+  void ThreadManager::setThreadStatus( ThreadName name, ThreadStatus status )
   {
-    std::lock_guard<std::mutex> lk( _handlerSetMutex );
-    _threadHandlers.insert( handler );
+    UniqueLock lk( _threadStatus.mutex );
+    _threadStatus.data[name] = status;
+    lk.unlock();
+
+    _threadStatus.variable.notify_all();
   }
 
 
-  void ThreadManager::removeThreadHandler( ThreadHandler* handler )
+  void ThreadManager::waitThreadStatus( ThreadName name, ThreadStatus status )
   {
-    std::lock_guard<std::mutex> lk( _handlerSetMutex );
-    _threadHandlers.erase( handler );
+    UniqueLock lk( _threadStatus.mutex );
+
+    if ( ErrorFlag || ( _threadStatus.data[name] >= status ) )
+    {
+      lk.unlock();
+      return;
+    }
+
+    _threadStatus.variable.wait( lk, [&]()->bool{ return ErrorFlag || ( _threadStatus.data[name] >= status ); } );
+
+    lk.unlock();
+  }
+
+
+  void ThreadManager::waitThreadStatus( ThreadStatus status )
+  {
+    UniqueLock lk( _threadStatus.mutex );
+
+    for ( char n = 0; n < REGOLITH_THREAD_TOTAL; ++n )
+    {
+      if ( ErrorFlag )
+      {
+        lk.unlock();
+        return;
+      }
+
+      if ( _threadStatus.data[ (ThreadName) n ] >= status )
+      {
+        continue;
+      }
+
+      _threadStatus.variable.wait( lk, [&]()->bool{ return ErrorFlag || ( _threadStatus.data[ (ThreadName) n ] >= status ); } );
+    }
+
+    lk.unlock();
   }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Functions to signal the changes of states
-
-//  void ThreadManager::quit()
-//  {
-//    INFO_LOG( "Thread Manager Calling Quit" );
-//    QuitFlag = true;
-//
-//    StartCondition.variable.notify_all();
-//    DataUpdate.variable.notify_all();
-//    ContextUpdate.variable.notify_all();
-//    MusicUpdate.variable.notify_all();
-//  }
-
 
   void ThreadManager::error()
   {
@@ -85,11 +107,18 @@ namespace Regolith
   }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
   void ThreadManager::startAll()
   {
+    _dataManagerThread = std::thread( dataManagerLoadingThread );
+    _contextManagerThread = std::thread( contextManagerLoadingThread );
+    _engineRenderingThread = std::thread( engineRenderingThread );
+
+
     // Wait for all the threads to be in a Waiting state
     INFO_LOG( "ThreadManager::startAll : Waiting for threads to be intialised." );
-    waitThreadStatus( ThreadStatus::Waiting );
+    waitThreadStatus( THREAD_WAITING );
 
     if ( ErrorFlag )
     {
@@ -100,17 +129,23 @@ namespace Regolith
     // Set the start condition under lock
     INFO_LOG( "ThreadManager::startAll : Setting the start condition variable" );
     {
-      std::lock_guard<std::mutex> lk( StartCondition.mutex );
+      GuardLock lk( StartCondition.mutex );
       StartCondition.data = true;
     }
 
     // Notify the start and pause briefly. Seems to help the locks become aquired in a reliable way
     StartCondition.variable.notify_all();
-    std::this_thread::sleep_for( std::chrono::milliseconds( 5 ) );
+    std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 
     INFO_LOG( "ThreadManager::startAll : Waiting for all threads to be in the running state" );
     // Only return once all the threads are running (or broken!)
-    waitThreadStatus( ThreadStatus::Running );
+    waitThreadStatus( THREAD_RUNNING );
+
+    if ( ErrorFlag )
+    {
+      Exception ex( "ThreadManager::startAll()", "Threads not running. Error flag raised." );
+      throw ex;
+    }
   }
 
 
@@ -124,34 +159,13 @@ namespace Regolith
     DataUpdate.variable.notify_all();
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
-  }
 
-
-  void ThreadManager::closeAll()
-  {
-    // Wait until the threads have finished their post-execution operations
-    waitThreadStatus( ThreadStatus::Stop );
-
-    // Set the stop condition under lock
-    INFO_LOG( "ThreadManager::closeAll : Setting the stop condition variable" );
-    {
-      std::lock_guard<std::mutex> lk( StopCondition.mutex );
-      StopCondition.data = true;
-    }
-    // Notify all the waiting threads
-    StopCondition.variable.notify_all();
-    // Threads can now be safely joined
+    waitThreadStatus( THREAD_STOP );
   }
 
 
   void ThreadManager::join()
   {
-    if ( ! QuitFlag )
-    {
-      this->stopAll();
-      this->closeAll();
-    }
-
     // Wait for all the threads to re-join
     INFO_LOG( "ThreadManager::~ThreadManager : Joining data manager thread" );
     _dataManagerThread.join();
@@ -159,19 +173,6 @@ namespace Regolith
     _contextManagerThread.join();
     INFO_LOG( "ThreadManager::~ThreadManager : Joining engine rendering thread" );
     _engineRenderingThread.join();
-  }
-
-
-  void ThreadManager::waitThreadStatus( ThreadStatus status )
-  {
-    // Aquire the handler mutex
-    std::unique_lock<std::mutex> lock( _handlerSetMutex );
-
-    // Iterate through the handlers check them individually
-    for ( HandlerSet::iterator it = _threadHandlers.begin(); it != _threadHandlers.end(); ++it )
-    {
-      (*it)->waitStatus( status );
-    }
   }
 
 }

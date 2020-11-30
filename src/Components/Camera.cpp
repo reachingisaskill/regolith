@@ -9,7 +9,8 @@
 namespace Regolith
 {
 
-  Camera::Camera( SDL_Renderer*& renderer, const int& width, const int& height, const float& scalex, const float& scaley ) :
+  Camera::Camera( Window& window, SDL_Renderer* renderer, const int& width, const int& height, const float& scalex, const float& scaley ) :
+    _theWindow( window ),
     _theRenderer( renderer ),
     _width( width ),
     _height( height ),
@@ -35,7 +36,9 @@ namespace Regolith
 
   void Camera::clear()
   {
-    SDL_DestroyRenderer( _theRenderer );
+    INFO_LOG( "Camera::clear : Destroying SDL_Renderer" );
+    _theWindow.destroy();
+    INFO_LOG( "Camera::clear : Rendering now disabled." );
   }
 
 

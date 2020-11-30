@@ -242,12 +242,16 @@ namespace Regolith
                   {
                     _contact1.overlap.set( 0.0, -_overlap_y );
                     _contact2.overlap.set( 0.0,  _overlap_y );
+                    _contact1.normal = _contact1.overlap.norm();
+                    _contact2.normal = _contact2.overlap.norm();
                     callback( object1, object2 );
                   }
                   else
                   {
                     _contact1.overlap.set( -_overlap_x, 0.0 );
                     _contact2.overlap.set(  _overlap_x, 0.0 );
+                    _contact1.normal = _contact1.overlap.norm();
+                    _contact2.normal = _contact2.overlap.norm();
                     callback( object1, object2 );
                   }
                 }
@@ -270,12 +274,16 @@ namespace Regolith
                   {
                     _contact1.overlap.set( 0.0,  _overlap_y );
                     _contact2.overlap.set( 0.0, -_overlap_y );
+                    _contact1.normal = _contact1.overlap.norm();
+                    _contact2.normal = _contact2.overlap.norm();
                     callback( object1, object2 );
                   }
                   else
                   {
                     _contact1.overlap.set( -_overlap_x, 0.0 );
                     _contact2.overlap.set(  _overlap_x, 0.0 );
+                    _contact1.normal = _contact1.overlap.norm();
+                    _contact2.normal = _contact2.overlap.norm();
                     callback( object1, object2 );
                   }
                 }
@@ -312,12 +320,16 @@ namespace Regolith
                   {
                     _contact1.overlap.set( 0.0, -_overlap_y );
                     _contact2.overlap.set( 0.0,  _overlap_y );
+                    _contact1.normal = _contact1.overlap.norm();
+                    _contact2.normal = _contact2.overlap.norm();
                     callback( object1, object2 );
                   }
                   else
                   {
                     _contact1.overlap.set(  _overlap_x, 0.0 );
                     _contact2.overlap.set( -_overlap_x, 0.0 );
+                    _contact1.normal = _contact1.overlap.norm();
+                    _contact2.normal = _contact2.overlap.norm();
                     callback( object1, object2 );
                   }
                 }
@@ -340,12 +352,16 @@ namespace Regolith
                   {
                     _contact1.overlap.set( 0.0,  _overlap_y );
                     _contact2.overlap.set( 0.0, -_overlap_y );
+                    _contact1.normal = _contact1.overlap.norm();
+                    _contact2.normal = _contact2.overlap.norm();
                     callback( object1, object2 );
                   }
                   else
                   {
                     _contact1.overlap.set(  _overlap_x, 0.0 );
                     _contact2.overlap.set( -_overlap_x, 0.0 );
+                    _contact1.normal = _contact1.overlap.norm();
+                    _contact2.normal = _contact2.overlap.norm();
                     callback( object1, object2 );
                   }
                 }
@@ -412,6 +428,11 @@ namespace Regolith
             }
             _contact1.type = col_it1->type;
             _contact2.type = col_it2->type;
+            _contact1.normal = _contact1.overlap.norm();
+            _contact2.normal = _contact2.overlap.norm();
+            DEBUG_STREAM << "CollisionHandler::contains : HERE 1";
+            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
             callback( object1, object2 );
           }
           else if ( _overlap_x > 0.0 )
@@ -433,6 +454,11 @@ namespace Regolith
             }
             _contact1.type = col_it1->type;
             _contact2.type = col_it2->type;
+            _contact1.normal = _contact1.overlap.norm();
+            _contact2.normal = _contact2.overlap.norm();
+            DEBUG_STREAM << "CollisionHandler::contains : HERE 2";
+            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
             callback( object1, object2 );
           }
           else
@@ -453,6 +479,11 @@ namespace Regolith
             }
             _contact1.type = col_it1->type;
             _contact2.type = col_it2->type;
+            _contact1.normal = _contact1.overlap.norm();
+            _contact2.normal = _contact2.overlap.norm();
+            DEBUG_STREAM << "CollisionHandler::contains : HERE 3";
+            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
             callback( object1, object2 );
           }
         }
@@ -470,19 +501,21 @@ namespace Regolith
       if ( object2->hasMovement() )
       {
         // If both objects can move we weight the contact vector by the inverse of their masses
-        _total_invM = object1->getInverseMass() + object2->getInverseMass();
-        Vector temp = _coef_restitution * ( object2->getVelocity() - object1->getVelocity() ) / ( object1->getMass() + object2->getMass() );
-        _contact1.impulse =  object2->getMass() * temp;
-        _contact2.impulse = -object1->getMass() * temp;
+        _total_M = object1->getMass() + object2->getMass();
 
-        _contact1.inertiaRatio = object1->getInverseMass()/_total_invM;
-        _contact2.inertiaRatio = object2->getInverseMass()/_total_invM;
+        float temp = _coef_restitution * ( object2->getVelocity()*_contact1.normal - object1->getVelocity()*_contact1.normal );
+
+        _contact1.inertiaRatio = object2->getMass()/_total_M;
+        _contact2.inertiaRatio = object1->getMass()/_total_M;
+        _contact1.impulse =  _contact1.inertiaRatio * temp * _contact1.normal;
+        _contact2.impulse =  _contact2.inertiaRatio * temp * _contact2.normal;
+
       }
       else
       {
         _contact1.inertiaRatio = 1.0;
         _contact2.inertiaRatio = 0.0;
-        _contact1.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity());
+        _contact1.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact1.normal;
         _contact2.impulse.zero();
       }
     }
@@ -493,7 +526,8 @@ namespace Regolith
         _contact1.inertiaRatio = 0.0;
         _contact2.inertiaRatio = 1.0;
         _contact1.impulse.zero();
-        _contact2.impulse = _coef_restitution * (object1->getVelocity() - object2->getVelocity());
+//        _contact2.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact2.normal;
+        _contact2.impulse = _coef_restitution * (object1->getVelocity()*_contact2.normal - object2->getVelocity()*_contact2.normal) * _contact2.normal;
       }
       else
       {
@@ -503,6 +537,8 @@ namespace Regolith
         _contact2.impulse.zero();
       }
     }
+
+    DEBUG_STREAM << "CollisionHandler::callback : Impulse 1 = " << _contact1.impulse <<  " -- Impulse 2 = " << _contact2.impulse;
 
     object1->onCollision( _contact1, object2 );
     object2->onCollision( _contact2, object1 );

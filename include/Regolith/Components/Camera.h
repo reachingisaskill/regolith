@@ -8,11 +8,13 @@
 namespace Regolith
 {
   class PhysicalObject;
+  class Window;
 
   class Camera
   {
     private:
-      SDL_Renderer*& _theRenderer;
+      Window& _theWindow;
+      SDL_Renderer* _theRenderer;
 //      float _zoom;
 
       // References to the dimensions of the displayed area
@@ -30,7 +32,7 @@ namespace Regolith
 
     public:
       // Constructor
-      Camera( SDL_Renderer*&, const int&, const int &, const float&, const float& );
+      Camera( Window&, SDL_Renderer*, const int&, const int &, const float&, const float& );
 
       // Destructor
       virtual ~Camera() {}
@@ -38,8 +40,9 @@ namespace Regolith
       // Clears the SDL renderer. Makes the camera invalid
       void clear();
 
-//      // Places the object's rectangle inside the window
-//      SDL_Rect place( const SDL_Rect& ) const;
+
+      // Sets the renderer pointer for the camera
+      void setRenderer( SDL_Renderer* ren ) { _theRenderer = ren; }
 
 
       // Resets the rendering state for the next frame

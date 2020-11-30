@@ -35,8 +35,10 @@ namespace Regolith
   // Manager Class
   class ThreadManager
   {
+    friend class ThreadHandler;
+
     private:
-      typedef std::set< ThreadHandler* > HandlerSet;
+      typedef std::map< ThreadName, ThreadStatus > StatusMap;
 
     private:
       // Data manager thread container
@@ -50,12 +52,14 @@ namespace Regolith
 
 
       // Set of thread handlers that are current active
-      HandlerSet _threadHandlers;
-      std::mutex _handlerSetMutex;
+      Condition< StatusMap > _threadStatus;
 
 
-      // Private function to wait on the status of the thread handlers
-      void waitThreadStatus( ThreadStatus );
+    protected:
+
+      // Used by the thread handlers to update their respective status' status
+      void setThreadStatus( ThreadName, ThreadStatus );
+
 
     public:
       // Con/Destructors
@@ -64,18 +68,9 @@ namespace Regolith
       ~ThreadManager();
 
 
-      // Function for a thread handler to register itself with the manager
-      void registerThreadHandler( ThreadHandler* );
-
-      // Function for a thread handler to remove itself from the manager before destruction
-      void removeThreadHandler( ThreadHandler* );
-
-
-//      // Set the global quit flag. Threads will stop when they are ready to do so
-//      void quit() { QuitFlag = true; }
-
       // Stop the threads with error signals
       void error();
+
 
       // Send the start signals
       void startAll();
@@ -83,12 +78,13 @@ namespace Regolith
       // Tell the threads to stop the primary loops and perform closing operations
       void stopAll();
 
-      // Tell the threads to stop completely
-      void closeAll();
-
       // Closes the thread handlers
       void join();
 
+
+      // Wait on the status of one or all the the threads
+      void waitThreadStatus( ThreadStatus );
+      void waitThreadStatus( ThreadName, ThreadStatus );
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -96,9 +92,6 @@ namespace Regolith
 
       // Signals the start of the engine - all threads now active
       static Condition<bool> StartCondition;
-
-      // Signals the start of the engine - all threads now be joined
-      static Condition<bool> StopCondition;
 
       // Every thread that sees this flag MUST end
       static std::atomic<bool> QuitFlag;

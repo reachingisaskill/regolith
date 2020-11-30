@@ -15,6 +15,7 @@ namespace Regolith
     float inertiaRatio;
     Vector impulse;
     Vector overlap;
+    Vector normal;
     CollisionType type;
   };
 

@@ -52,6 +52,9 @@ namespace Regolith
 
     protected:
 
+      // Destroys the window and renderer objects
+      void destroy();
+
     public:
 //////////////////////////////////////////////////////////////////////////////// 
       // Con/Destruction

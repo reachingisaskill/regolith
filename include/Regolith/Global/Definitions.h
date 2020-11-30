@@ -58,7 +58,23 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Status enum for thread behvaiour
 
-  enum class ThreadStatus { Null, Waiting, Initialising, Running, Closing, Stop };
+  enum ThreadStatus
+  {
+    THREAD_NULL = 0,
+    THREAD_WAITING = 1,
+    THREAD_INITIALISING = 2,
+    THREAD_RUNNING = 3,
+    THREAD_CLOSING = 4,
+    THREAD_STOP = 5
+  };
+
+  enum ThreadName : char
+  {
+    REGOLITH_THREAD_RENDERING,
+    REGOLITH_THREAD_DATA,
+    REGOLITH_THREAD_CONTEXT,
+    REGOLITH_THREAD_TOTAL
+  };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -681,14 +697,23 @@ namespace Regolith
   };
 
 
-  const std::map< ThreadStatus, std::string > ThreadStatusStrings =
+  const char* const ThreadStatusStrings[] =
   {
-    { ThreadStatus::Null, "Null" },
-    { ThreadStatus::Waiting, "Waiting" },
-    { ThreadStatus::Initialising, "Initialising" },
-    { ThreadStatus::Running, "Running" },
-    { ThreadStatus::Closing, "Closing" },
-    { ThreadStatus::Stop, "Stop" }
+    "Null",
+    "Waiting",
+    "Initialising",
+    "Running",
+    "Closing",
+    "Stop"
+  };
+
+
+  const char* const ThreadNameStrings[] =
+  {
+    "EngineRenderingThread",
+    "DataManagerThread",
+    "ContextManagerThread",
+    "Null"
   };
 
 

@@ -10,28 +10,25 @@
 
 namespace Regolith
 {
+  class ThreadManager;
 
   class ThreadHandler
   {
     private:
       std::string _threadName;
+      ThreadName _identifier;
+      ThreadManager& _owner;
 
       std::atomic<bool>& _quitFlag;
       std::atomic<bool>& _errorFlag;
       Condition<bool>& _startCondition;
-      Condition<bool>& _stopCondition;
-
-      Condition< ThreadStatus > _status;
-
-    protected:
-      // Update the status of this thread and broadcast
-      void updateStatus( ThreadStatus );
 
     public:
 
       // Aquire references to the static thread flags
-      ThreadHandler( std::string );
+      ThreadHandler( std::string, ThreadName );
 
+      // Do nothing here
       ~ThreadHandler();
 
       // Non-copyable and non-moveable
@@ -42,21 +39,20 @@ namespace Regolith
 
 
       // Wait for the status of this handler to change
-      void waitStatus( ThreadStatus ) const;
+      void waitStatus( ThreadName, ThreadStatus );
       
 
-      // Return the status of thread
-      ThreadStatus getStatus() const;
-
-
       // Halt execution and wait for the start signal
-      void waitStart();
+      void start();
 
       // Signal that the main loop is now starting
       void running();
 
       // Halt execution and wait for the stop signal
-      void waitStop();
+      void closing();
+
+      // Halt execution and wait for the stop signal
+      void stop();
 
 
       // Return the status of the static quit flag

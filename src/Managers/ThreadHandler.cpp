@@ -2,100 +2,69 @@
 #include "Regolith/Managers/ThreadHandler.h"
 
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Managers/ThreadManager.h"
 
 
 namespace Regolith
 {
 
-  ThreadHandler::ThreadHandler( std::string name ) :
+  ThreadHandler::ThreadHandler( std::string name, ThreadName id ) :
     _threadName( name ),
+    _identifier( id ),
+    _owner( Manager::getInstance()->getThreadManager() ),
     _quitFlag( ThreadManager::QuitFlag ),
     _errorFlag( ThreadManager::ErrorFlag ),
-    _startCondition( ThreadManager::StartCondition ),
-    _stopCondition( ThreadManager::StopCondition )
+    _startCondition( ThreadManager::StartCondition )
   {
   }
 
 
   ThreadHandler::~ThreadHandler()
   {
-    Manager::getInstance()->getThreadManager().removeThreadHandler( this );
   }
 
 
-  void ThreadHandler::updateStatus( ThreadStatus new_status )
+  void ThreadHandler::start()
   {
-    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Updating status: " << ThreadStatusStrings.at( new_status );
-    std::lock_guard< std::mutex > lk( _status.mutex );
-    _status.data = new_status;
-    _status.variable.notify_all();
-  }
-
-
-  ThreadStatus ThreadHandler::getStatus() const
-  {
-    std::lock_guard< std::mutex > lk( _status.mutex );
-    return _status.data;
-  }
-
-
-  void ThreadHandler::waitStart()
-  {
-    updateStatus( ThreadStatus::Waiting );
     INFO_STREAM << "ThreadHandler< " << _threadName << " > : Waiting on start condition.";
-    std::unique_lock<std::mutex> lk( _startCondition.mutex );
-    if ( _quitFlag || _errorFlag || _startCondition.data )
+    _owner.setThreadStatus( _identifier, THREAD_WAITING );
+
+    UniqueLock lk( _startCondition.mutex );
+    if ( ! (_quitFlag || _errorFlag || _startCondition.data) )
     {
+      _startCondition.variable.wait( lk, [&]()->bool{ return _quitFlag || _errorFlag || _startCondition.data; } );
       lk.unlock();
-      return;
     }
-    _startCondition.variable.wait( lk, [&]()->bool{ return _quitFlag || _errorFlag || _startCondition.data; } );
-    lk.unlock();
 
-    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Registering with manager.";
-    Manager::getInstance()->getThreadManager().registerThreadHandler( this );
-
-    updateStatus( ThreadStatus::Initialising );
     INFO_STREAM << "ThreadHandler< " << _threadName << " > : Initialising.";
+    _owner.setThreadStatus( _identifier, THREAD_INITIALISING );
   }
 
 
   void ThreadHandler::running()
   {
-    updateStatus( ThreadStatus::Running );
     INFO_STREAM << "ThreadHandler< " << _threadName << " > : Thread running.";
+    _owner.setThreadStatus( _identifier, THREAD_RUNNING );
   }
 
 
-  void ThreadHandler::waitStop()
+  void ThreadHandler::closing()
   {
-    updateStatus( ThreadStatus::Closing );
-    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Waiting on stop condition.";
-    std::unique_lock<std::mutex> lk( _stopCondition.mutex );
-    if ( _quitFlag || _errorFlag || _stopCondition.data )
-    {
-      lk.unlock();
-      return;
-    }
-    _stopCondition.variable.wait( lk, [&]()->bool{ return _quitFlag || _errorFlag || _stopCondition.data; } );
-    lk.unlock();
-    updateStatus( ThreadStatus::Stop );
-    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Stopping.";
+    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Thread closing.";
+    _owner.setThreadStatus( _identifier, THREAD_CLOSING );
   }
 
 
-  void ThreadHandler::waitStatus( ThreadStatus expected ) const
+  void ThreadHandler::stop()
   {
-    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Waiting on status: " << ThreadStatusStrings.at( expected );
-    std::unique_lock<std::mutex> lk( _status.mutex );
-    if ( _quitFlag || _errorFlag || (_status.data == expected) )
-    {
-      lk.unlock();
-      return;
-    }
-    _status.variable.wait( lk, [&]()->bool{ return _quitFlag || _errorFlag || ( _status.data == expected ); } );
-    lk.unlock();
-    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Status acheived: " << ThreadStatusStrings.at( expected );
+    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Thread stopped.";
+    _owner.setThreadStatus( _identifier, THREAD_STOP );
+  }
+
+
+  void ThreadHandler::waitStatus( ThreadName name, ThreadStatus status )
+  {
+    _owner.waitThreadStatus( name, status );
   }
 
 
@@ -106,8 +75,6 @@ namespace Regolith
     FAILURE_STREAM << "ThreadHandler< " << _threadName << " > : Regolith Exception thrown.";
     FAILURE_STREAM << "ThreadHandler< " << _threadName << " > : " << ex.elucidate();
     std::cerr << ex.elucidate() << std::endl;
-
-    updateStatus( ThreadStatus::Stop );
   }
 
 
@@ -118,8 +85,6 @@ namespace Regolith
     FAILURE_STREAM << "ThreadHandler< " << _threadName << " > : Standard Exception thrown.";
     FAILURE_STREAM << "ThreadHandler< " << _threadName << " > : " << ex.what();
     std::cerr << ex.what() << std::endl;
-
-    updateStatus( ThreadStatus::Stop );
   }
 
 }

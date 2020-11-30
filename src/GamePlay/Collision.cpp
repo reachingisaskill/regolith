@@ -62,6 +62,11 @@ namespace Regolith
           hb.height = hitbox_data["height"].asInt();
           hb.type = Manager::getInstance()->getCollisionType( hitbox_data["type"].asString() );
 
+//          hb.halfWidth = 0.5*hb.width;
+//          hb.halfHeight = 0.5*hb.height;
+//          hb.center.x() = hb.position().x() + hb.halfWidth;
+//          hb.center.y() = hb.position().y() + hb.halfHeight;
+
           _collisionFrames[frame_num].push_back( hb );
         }
       }

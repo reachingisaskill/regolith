@@ -29,54 +29,13 @@
       [
         {
           "name" : "red_box",
-          "position" : [ 50.0, 50.0 ],
+          "position" : [ 100.0, 100.0 ],
           "velocity" : [ 0.50, 0.0 ]
         },
         {
           "name" : "red_box",
-          "position" : [ 500.0, 50.0 ],
-          "velocity" : [ -0.50, 0.0 ]
-        },
-        {
-          "name" : "blue_box",
-          "position" : [ 600.0, 50.0 ],
-          "velocity" : [ 0.10, 0.0 ]
-        },
-
-        {
-          "name" : "red_box",
-          "position" : [ 50.0, 250.0 ],
-          "velocity" : [ -0.30, 0.0 ]
-        },
-        {
-          "name" : "red_box",
-          "position" : [ 100.0, 250.0 ],
-          "velocity" : [ 0.00, 0.0 ]
-        },
-        {
-          "name" : "red_box",
-          "position" : [ 150.0, 250.0 ],
-          "velocity" : [ 0.00, 0.0 ]
-        },
-        {
-          "name" : "red_box",
-          "position" : [ 200.0, 250.0 ],
-          "velocity" : [ 0.00, 0.0 ]
-        },
-        {
-          "name" : "red_box",
-          "position" : [ 250.0, 250.0 ],
-          "velocity" : [ 0.00, 0.0 ]
-        },
-        {
-          "name" : "red_box",
-          "position" : [ 300.0, 250.0 ],
-          "velocity" : [ 0.00, 0.0 ]
-        },
-        {
-          "name" : "red_box",
-          "position" : [ 350.0, 250.0 ],
-          "velocity" : [ 0.00, 0.0 ]
+          "position" : [ 500.0, 115.0 ],
+          "velocity" : [ 0.0, 0.0 ]
         }
       ]
     }

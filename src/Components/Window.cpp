@@ -26,18 +26,25 @@ namespace Regolith
     _fullscreen( false ),
     _scaleX( 1.0 ),
     _scaleY( 1.0 ),
-    _camera( _theRenderer, _resolutionWidth, _resolutionHeight, _scaleX, _scaleY )
+    _camera( *this, _theRenderer, _resolutionWidth, _resolutionHeight, _scaleX, _scaleY )
   {
   }
 
 
   Window::~Window()
   {
-    if ( _exists )
-    {
-      SDL_DestroyWindow( _theWindow );
-      _theWindow = nullptr;
-    }
+  }
+
+
+  void Window::destroy()
+  {
+    SDL_DestroyRenderer( _theRenderer );
+    SDL_DestroyWindow( _theWindow );
+
+    _theRenderer = nullptr;
+    _theWindow = nullptr;
+
+    _exists = false;
   }
 
 
@@ -77,6 +84,8 @@ namespace Regolith
       Exception ex( "Window::create()", "Could not create SDL Renderer" );
       throw ex;
     }
+
+    _camera.setRenderer( _theRenderer );
 
     return _camera;
   }

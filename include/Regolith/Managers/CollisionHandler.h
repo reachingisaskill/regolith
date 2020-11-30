@@ -56,7 +56,7 @@ namespace Regolith
       float _overlap_y;
       float _diff_x;
       float _diff_y;
-      float _total_invM;
+      float _total_M;
       float _coef_restitution;
 
       Contact _contact1;

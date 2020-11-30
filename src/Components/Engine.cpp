@@ -311,10 +311,10 @@ namespace Regolith
 
   void engineRenderingThread()
   {
-    ThreadHandler threadHandler( "EngineRenderingThread" );
+    ThreadHandler threadHandler( "EngineRenderingThread", REGOLITH_THREAD_RENDERING );
 
     // Wait on the start condition
-    threadHandler.waitStart();
+    threadHandler.start();
 
     // Get a reference to the engine
     Engine& engine = Manager::getInstance()->getEngine();
@@ -432,18 +432,16 @@ namespace Regolith
       return;
     }
 
-    // If there's an error just bail.
-    if ( threadHandler.error() ) return;
+    threadHandler.closing();
 
 
-    // Do any closing operations here
-
-
-    threadHandler.waitStop();
-
-    // Clear the camera after everything else has stopped as this deletes the SDL_Renderer
-    // which in turn invalidates the loaded textures
+    // Can only delete the SDL_Renderer once other threads have finished using it
+    threadHandler.waitStatus( REGOLITH_THREAD_DATA, THREAD_CLOSING );
+    threadHandler.waitStatus( REGOLITH_THREAD_CONTEXT, THREAD_CLOSING );
+    INFO_LOG( "EngineRenderingThread : Clearing camera!" );
     camera.clear();
+
+    threadHandler.stop();
   }
 
 }

@@ -50,8 +50,6 @@ namespace Regolith
   Manager::~Manager()
   {
     DEBUG_LOG( "Manager::~Manager : Destruction" );
-    // Close the threads first
-    _theThreads.join();
 
     INFO_LOG( "Manager::~Manager : Removing each of the fonts and clearing the map" );
     for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )
@@ -154,7 +152,7 @@ namespace Regolith
 
     // Join all the threads
     INFO_LOG( "Manager::run : Joining all worker threads" );
-    _theThreads.closeAll();
+    _theThreads.join();
   }
 
 
@@ -254,10 +252,10 @@ namespace Regolith
     FAILURE_STREAM << "DEATHSIGNAL : Regolith received signal: " << signal;
     FAILURE_LOG( "DEATHSIGNAL : Trying to die gracefully..." );
 
-//    ERROR_STREAM << "Last SDL Error : " << SDL_GetError();
-//    ERROR_STREAM << "Last IMG Error : " << IMG_GetError();
-//    ERROR_STREAM << "Last TTF Error : " << TTF_GetError();
-//    ERROR_STREAM << "Last MIX Error : " << Mix_GetError();
+    ERROR_STREAM << "Last SDL Error : " << SDL_GetError();
+    ERROR_STREAM << "Last IMG Error : " << IMG_GetError();
+    ERROR_STREAM << "Last TTF Error : " << TTF_GetError();
+    ERROR_STREAM << "Last MIX Error : " << Mix_GetError();
 
 #ifdef __linux__
     void* array[20];

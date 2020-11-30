@@ -199,10 +199,10 @@ namespace Regolith
 
   void contextManagerLoadingThread()
   {
-    ThreadHandler threadHandler( "ContextManagerThread" );
+    ThreadHandler threadHandler( "ContextManagerThread", REGOLITH_THREAD_CONTEXT );
 
     // Wait on the start condition
-    threadHandler.waitStart();
+    threadHandler.start();
 
 
     // Set up references
@@ -265,14 +265,11 @@ namespace Regolith
       return;
     }
 
-    // If there's an error just bail.
-    if ( threadHandler.error() ) return;
-
+    threadHandler.closing();
 
     // Do any closing operations here
 
-
-    threadHandler.waitStop();
+    threadHandler.stop();
   }
 
 }

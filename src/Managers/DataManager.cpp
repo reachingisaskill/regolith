@@ -402,10 +402,10 @@ namespace Regolith
 
   void dataManagerLoadingThread()
   {
-    ThreadHandler threadHandler( "DataManagerThread" );
+    ThreadHandler threadHandler( "DataManagerThread", REGOLITH_THREAD_DATA );
 
     // Wait on the start condition
-    threadHandler.waitStart();
+    threadHandler.start();
 
 
     // Get references to required data
@@ -466,14 +466,11 @@ namespace Regolith
       return;
     }
 
-    // If there's an error just bail.
-    if ( threadHandler.error() ) return;
-
+    threadHandler.closing();
 
     // Do any closing operations here
 
-
-    threadHandler.waitStop();
+    threadHandler.stop();
   }
 
 
