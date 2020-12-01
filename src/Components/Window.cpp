@@ -94,8 +94,15 @@ namespace Regolith
       throw ex;
     }
 
-//    _theRenderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
-    _theRenderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED );
+    if ( _vsyncOn )
+    {
+      _theRenderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+    }
+    else
+    {
+      _theRenderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED );
+    }
+
     if ( _theRenderer == nullptr )
     {
       Exception ex( "Window::create()", "Could not create SDL Renderer" );

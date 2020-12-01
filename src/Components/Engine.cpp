@@ -56,6 +56,7 @@ namespace Regolith
 
       // Reset the frame timer before the loop starts
       _frameTimer.lap();
+      _frameTimer.resetFPSCount();
 
       while ( performStackOperations() )
       {
