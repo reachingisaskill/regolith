@@ -96,18 +96,55 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Minimal timer class
 
-  FrameTimer::FrameTimer() :
-    _startTime( SDL_GetTicks() )
+  FrameTimer::FrameTimer( unsigned int n ) :
+    _startTime( SDL_GetTicks() ),
+    _frameCount( n ),
+    _frameSum( 0.0 ),
+    _fpsSum( 0.0 ),
+    _avgCount( 0.0 ),
+    _avgfps( 0.0 ),
+    _maxfps( 0.0 ),
+    _minfps( 1.0E36 )
   {
   }
 
 
-  Uint32 FrameTimer::lap()
+  float FrameTimer::lap()
   {
     Uint32 ticks = SDL_GetTicks();
-    Uint32 time = ticks - _startTime;
+    float time = ticks - _startTime;
     _startTime = ticks;
-    return time;
+
+    _fpsSum += 1000.0 / time;
+    _frameSum += 1.0;
+    if ( _frameSum >= _frameCount )
+    {
+      float fps = _fpsSum/_frameSum;
+
+      if ( fps < 1.0E6 )
+      {
+        _avgfps = ( _avgfps * _avgCount + fps ) / ( _avgCount + 1.0 );
+        _avgCount += 1.0;
+        if ( fps > _maxfps ) _maxfps = fps;
+        if ( fps < _minfps ) _minfps = fps;
+      }
+
+      _frameSum = 0.0;
+      _fpsSum = 0.0;
+    }
+
+    return (float) time;
+  }
+
+
+  void FrameTimer::resetFPSCount()
+  {
+    _frameSum = 0.0;
+    _fpsSum = 0.0;
+    _avgCount = 0.0;
+    _avgfps = 0.0;
+    _minfps = 1.0E36;
+    _maxfps = 0.0;
   }
 
 

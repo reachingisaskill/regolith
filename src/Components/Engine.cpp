@@ -95,7 +95,7 @@ namespace Regolith
 #endif
 
         DEBUG_LOG( "Engine::run : ------ CONTEXTS ------" );
-        float time = (float)_frameTimer.lap(); // Only conversion from int to float happens here.
+        float time = _frameTimer.lap(); // Only conversion from int to float happens here.
 
         // Iterate through all the visible contexts and update as necessary
         for ( ContextStack::reverse_iterator context_it = _visibleStackStart; context_it != _visibleStackEnd; ++context_it )
@@ -199,6 +199,8 @@ namespace Regolith
         // Set the end iterator
         _visibleStackEnd = _contextStack.rend();
 
+        DEBUG_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
+        _frameTimer.resetFPSCount();
       }
 
       return true;
@@ -206,6 +208,9 @@ namespace Regolith
     else // Stack is empty! Time to abandon ship
     {
       DEBUG_LOG( "Engine::perfornStackOperations : Context stack is empty. Closing engine." );
+      DEBUG_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
+      _frameTimer.resetFPSCount();
+
       // Reset these anyway so the rendering thread doesnt fall over.
       _visibleStackStart = _contextStack.rbegin();
       _visibleStackEnd = _contextStack.rend();

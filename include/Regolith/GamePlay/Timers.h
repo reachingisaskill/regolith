@@ -52,10 +52,26 @@ namespace Regolith
     private:
       Uint32 _startTime;
 
-    public:
-      FrameTimer();
+      float _frameCount;
+      float _frameSum;
+      float _fpsSum;
 
-      Uint32 lap();
+      float _avgCount;
+      float _avgfps;
+      float _maxfps;
+      float _minfps;
+
+    public:
+      FrameTimer( unsigned int n = 100 );
+
+      float lap();
+
+      void resetFPSCount();
+
+      float getMaxFPS() const { return _maxfps; }
+      float getMinFPS() const { return _minfps; }
+      float getAvgFPS() const { return _avgfps; }
+
   };
 
 

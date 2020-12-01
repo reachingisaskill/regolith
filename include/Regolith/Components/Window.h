@@ -36,6 +36,7 @@ namespace Regolith
       int _height;
       int _resolutionWidth;
       int _resolutionHeight;
+      bool _vsyncOn;
 
       // Flags to track the window status
       bool _mouseFocus;
@@ -71,6 +72,7 @@ namespace Regolith
 
       // Configure the window
       void configure( std::string, int, int );
+      void configure( Json::Value& );
 
 //      // Return the SDL window pointer
 //      SDL_Window* getSDLWindow() const { return _theWindow; }

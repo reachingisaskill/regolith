@@ -46,6 +46,7 @@ namespace Regolith
 
       ContextStack::reverse_iterator _visibleStackStart;
       ContextStack::reverse_iterator _visibleStackEnd;
+
       FrameTimer _frameTimer;
 
       bool _pause;
@@ -80,6 +81,10 @@ namespace Regolith
 
       // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
       void openContextGroup( Context* );
+
+
+      // Return the current estimated FPS of the engine
+      float getFPS() const { return _frameTimer.getAvgFPS(); }
 
 
       // Fulfill the interface for a component

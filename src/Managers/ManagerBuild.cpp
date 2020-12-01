@@ -75,7 +75,6 @@ namespace Regolith
 
       // Configure the window
       this->_loadWindow( json_data["window"] );
-      _theWindow.registerEvents( _theInput );
 
 
       //Load all the collision teams
@@ -206,29 +205,21 @@ namespace Regolith
 
   void Manager::_loadWindow( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "screen_width", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "screen_height", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "default_colour", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "title", Utilities::JSON_TYPE_STRING );
+    // Let the window configure itself from the json data
+    _theWindow.configure( json_data );
 
-    Utilities::validateJsonArray( json_data["default_colour"], 4, Utilities::JSON_TYPE_INTEGER );
-
-    // Load the window configuration before we start loading texture data
-    int screen_width = json_data["screen_width"].asInt();
-    int screen_height = json_data["screen_height"].asInt();
-    std::string title = json_data["title"].asString();
-
-    // Initialise the window
-    _theWindow.configure( title, screen_width, screen_height );
+    // Register the regolith events with the input manager
     _theWindow.registerEvents( _theInput );
 
     // Set the default colour
+    Utilities::validateJson( json_data, "default_colour", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data["default_colour"], 4, Utilities::JSON_TYPE_INTEGER );
+
     Json::Value color = json_data["default_color"];
     _defaultColor.r = color[0].asInt();
     _defaultColor.g = color[1].asInt();
     _defaultColor.b = color[2].asInt();
     _defaultColor.a = color[3].asInt();
-
   }
 
 

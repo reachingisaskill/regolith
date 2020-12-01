@@ -20,6 +20,7 @@ namespace Regolith
     _height( 0 ),
     _resolutionWidth( 0 ),
     _resolutionHeight( 0 ),
+    _vsyncOn( true ),
     _mouseFocus( false ),
     _keyboardFocus( false ),
     _minimized( false ),
@@ -59,6 +60,21 @@ namespace Regolith
   }
 
 
+  void Window::configure( Json::Value& json_data )
+  {
+    Utilities::validateJson( json_data, "screen_width", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "screen_height", Utilities::JSON_TYPE_INTEGER );
+    Utilities::validateJson( json_data, "title", Utilities::JSON_TYPE_STRING );
+    Utilities::validateJson( json_data, "v-sync", Utilities::JSON_TYPE_BOOLEAN );
+
+    // Load the window configuration before we start loading texture data
+    _width = json_data["screen_width"].asInt();
+    _height = json_data["screen_height"].asInt();
+    _title = json_data["title"].asString();
+    _vsyncOn = json_data["v-sync"].asBool();
+  }
+
+
   Camera& Window::create()
   {
     if ( _exists )
@@ -78,7 +94,8 @@ namespace Regolith
       throw ex;
     }
 
-    _theRenderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+//    _theRenderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC );
+    _theRenderer =  SDL_CreateRenderer( _theWindow, -1, SDL_RENDERER_ACCELERATED );
     if ( _theRenderer == nullptr )
     {
       Exception ex( "Window::create()", "Could not create SDL Renderer" );
