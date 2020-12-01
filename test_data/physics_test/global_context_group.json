@@ -82,6 +82,44 @@
       "start_state" : "default"
     },
 
+    "green_box" :
+    {
+      "type" : "physical_object",
+      "has_moveable" : false,
+      "has_texture" : true,
+      "has_animation" : false,
+      "mass" : 0.0,
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "velocity" : [ 0.0, 0.0 ],
+      "rotation" : 0.0,
+      "bounding_box" :
+      {
+        "width" : 20.0,
+        "height" : 20.0,
+        "collision_team" : "object"
+      },
+      "states" : 
+      {
+        "default" :
+        {
+          "texture" :
+          {
+            "texture_name" : "coloured_boxes",
+            "start_number" : 2
+          },
+          "collision" :
+          {
+            "hit_boxes" :
+            [
+              [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
+            ]
+          }
+        }
+      },
+      "start_state" : "default"
+    },
+
     "environment_container" :
     {
       "type" : "physical_object",

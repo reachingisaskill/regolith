@@ -213,10 +213,10 @@ namespace Regolith
 
           ////////////////////////////////////////////////// 
           // IF OBJ2 IN FRONT OBJ1 - X
-          if ( _diff_x > 0.0 ) 
+          if ( _diff_x >= 0.0 ) 
           {
             _overlap_x = col_it1->width - _diff_x;
-            DEBUG_STREAM << "CollisionHandler::collides :  Diff_x = " << _diff_x << ", Overlap = " << _overlap_x;
+            DEBUG_STREAM << "CollisionHandler::collides : Diff_x = " << _diff_x << ", Overlap = " << _overlap_x;
 
             // If hitboxes overlap in x
             if ( _overlap_x > 0.0 )
@@ -234,26 +234,22 @@ namespace Regolith
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
                 {
+                  if ( _overlap_x > 0.5*col_it1->width || _overlap_x > 0.5*col_it2->width )
+                  {
+                    _overlap_x = 0.0;
+                  }
+                  else if ( _overlap_y > 0.5*col_it1->height || _overlap_y > 0.5*col_it2->height )
+                  {
+                    _overlap_y = 0.0;
+                  }
+
                   _contact1.type = col_it1->type;
                   _contact2.type = col_it2->type;
-
-                  // Both X & Y overlap - set the reference contact object
-                  if ( _overlap_x >= _overlap_y )
-                  {
-                    _contact1.overlap.set( 0.0, -_overlap_y );
-                    _contact2.overlap.set( 0.0,  _overlap_y );
-                    _contact1.normal = _contact1.overlap.norm();
-                    _contact2.normal = _contact2.overlap.norm();
-                    callback( object1, object2 );
-                  }
-                  else
-                  {
-                    _contact1.overlap.set( -_overlap_x, 0.0 );
-                    _contact2.overlap.set(  _overlap_x, 0.0 );
-                    _contact1.normal = _contact1.overlap.norm();
-                    _contact2.normal = _contact2.overlap.norm();
-                    callback( object1, object2 );
-                  }
+                  _contact1.overlap.set( -_overlap_x, -_overlap_y );
+                  _contact2.overlap.set(  _overlap_x,  _overlap_y );
+                  _contact1.normal = _contact1.overlap.norm();
+                  _contact2.normal = _contact2.overlap.norm();
+                  callback( object1, object2 );
                 }
               }
               ////////////////////////////////////////////////// 
@@ -266,26 +262,22 @@ namespace Regolith
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
                 {
+                  if ( _overlap_x > 0.5*col_it1->width || _overlap_x > 0.5*col_it2->width )
+                  {
+                    _overlap_x = 0.0;
+                  }
+                  else if ( _overlap_y > 0.5*col_it1->height || _overlap_y > 0.5*col_it2->height )
+                  {
+                    _overlap_y = 0.0;
+                  }
+
                   _contact1.type = col_it1->type;
                   _contact2.type = col_it2->type;
-
-                  // Both X & Y overlap - set the reference contact object
-                  if ( _overlap_x >= _overlap_y )
-                  {
-                    _contact1.overlap.set( 0.0,  _overlap_y );
-                    _contact2.overlap.set( 0.0, -_overlap_y );
-                    _contact1.normal = _contact1.overlap.norm();
-                    _contact2.normal = _contact2.overlap.norm();
-                    callback( object1, object2 );
-                  }
-                  else
-                  {
-                    _contact1.overlap.set( -_overlap_x, 0.0 );
-                    _contact2.overlap.set(  _overlap_x, 0.0 );
-                    _contact1.normal = _contact1.overlap.norm();
-                    _contact2.normal = _contact2.overlap.norm();
-                    callback( object1, object2 );
-                  }
+                  _contact1.overlap.set( -_overlap_x,  _overlap_y );
+                  _contact2.overlap.set(  _overlap_x, -_overlap_y );
+                  _contact1.normal = _contact1.overlap.norm();
+                  _contact2.normal = _contact2.overlap.norm();
+                  callback( object1, object2 );
                 }
               }
             }
@@ -312,26 +304,22 @@ namespace Regolith
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
                 {
+                  if ( _overlap_x > 0.5*col_it1->width || _overlap_x > 0.5*col_it2->width )
+                  {
+                    _overlap_x = 0.0;
+                  }
+                  else if ( _overlap_y > 0.5*col_it1->height || _overlap_y > 0.5*col_it2->height )
+                  {
+                    _overlap_y = 0.0;
+                  }
+
                   _contact1.type = col_it1->type;
                   _contact2.type = col_it2->type;
-
-                  // Both X & Y overlap - set the reference contact object
-                  if ( _overlap_x >= _overlap_y )
-                  {
-                    _contact1.overlap.set( 0.0, -_overlap_y );
-                    _contact2.overlap.set( 0.0,  _overlap_y );
-                    _contact1.normal = _contact1.overlap.norm();
-                    _contact2.normal = _contact2.overlap.norm();
-                    callback( object1, object2 );
-                  }
-                  else
-                  {
-                    _contact1.overlap.set(  _overlap_x, 0.0 );
-                    _contact2.overlap.set( -_overlap_x, 0.0 );
-                    _contact1.normal = _contact1.overlap.norm();
-                    _contact2.normal = _contact2.overlap.norm();
-                    callback( object1, object2 );
-                  }
+                  _contact1.overlap.set(  _overlap_x, -_overlap_y );
+                  _contact2.overlap.set( -_overlap_x,  _overlap_y );
+                  _contact1.normal = _contact1.overlap.norm();
+                  _contact2.normal = _contact2.overlap.norm();
+                  callback( object1, object2 );
                 }
               }
               ////////////////////////////////////////////////// 
@@ -344,26 +332,22 @@ namespace Regolith
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
                 {
+                  if ( _overlap_x > 0.5*col_it1->width || _overlap_x > 0.5*col_it2->width )
+                  {
+                    _overlap_x = 0.0;
+                  }
+                  else if ( _overlap_y > 0.5*col_it1->height || _overlap_y > 0.5*col_it2->height )
+                  {
+                    _overlap_y = 0.0;
+                  }
+
                   _contact1.type = col_it1->type;
                   _contact2.type = col_it2->type;
-
-                  // Both X & Y overlap - set the reference contact object
-                  if ( _overlap_x >= _overlap_y )
-                  {
-                    _contact1.overlap.set( 0.0,  _overlap_y );
-                    _contact2.overlap.set( 0.0, -_overlap_y );
-                    _contact1.normal = _contact1.overlap.norm();
-                    _contact2.normal = _contact2.overlap.norm();
-                    callback( object1, object2 );
-                  }
-                  else
-                  {
-                    _contact1.overlap.set(  _overlap_x, 0.0 );
-                    _contact2.overlap.set( -_overlap_x, 0.0 );
-                    _contact1.normal = _contact1.overlap.norm();
-                    _contact2.normal = _contact2.overlap.norm();
-                    callback( object1, object2 );
-                  }
+                  _contact1.overlap.set(  _overlap_x,  _overlap_y );
+                  _contact2.overlap.set( -_overlap_x, -_overlap_y );
+                  _contact1.normal = _contact1.overlap.norm();
+                  _contact2.normal = _contact2.overlap.norm();
+                  callback( object1, object2 );
                 }
               }
             }
@@ -515,7 +499,8 @@ namespace Regolith
       {
         _contact1.inertiaRatio = 1.0;
         _contact2.inertiaRatio = 0.0;
-        _contact1.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact1.normal;
+//        _contact1.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact1.normal;
+        _contact1.impulse = _coef_restitution * (object2->getVelocity()*_contact1.normal - object1->getVelocity()*_contact1.normal) * _contact1.normal;
         _contact2.impulse.zero();
       }
     }

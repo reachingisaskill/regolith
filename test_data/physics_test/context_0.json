@@ -23,6 +23,10 @@
         {
           "name" : "environment_container",
           "position" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "green_box",
+          "position" : [ 500, 380 ]
         }
       ],
       "spawns" :
@@ -36,6 +40,51 @@
           "name" : "red_box",
           "position" : [ 500.0, 115.0 ],
           "velocity" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 200.0, 200.0 ],
+          "velocity" : [ 0.50, 0.0 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 500.0, 200.0 ],
+          "velocity" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 500.0, 605.0 ],
+          "velocity" : [ 0.2, 0.1 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 250.0, 700.0 ],
+          "velocity" : [ 0.30, 0.1 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 0.0, 0.0 ],
+          "velocity" : [ 0.1, 0.1 ]
+        },
+        {
+          "name" : "blue_box",
+          "position" : [ 700.0, 200.0 ],
+          "velocity" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "blue_box",
+          "position" : [ 550.0, 605.0 ],
+          "velocity" : [ 0.2, 0.1 ]
+        },
+        {
+          "name" : "blue_box",
+          "position" : [ 350.0, 700.0 ],
+          "velocity" : [ 0.30, 0.1 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 0.0, 700.0 ],
+          "velocity" : [ 0.1, 0.1 ]
         }
       ]
     }
