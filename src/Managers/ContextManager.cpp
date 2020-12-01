@@ -225,7 +225,7 @@ namespace Regolith
         if ( manager._nextContextGroup != nullptr )
         {
           // Update and load the current context group pointer
-          if ( ! manager._currentContextGroup->isGlobal() )
+          if ( ( manager._currentContextGroup != nullptr ) && ( ! manager._currentContextGroup->isGlobal() ) )
           {
             manager._currentContextGroup->unload();
           }

@@ -141,14 +141,14 @@ namespace Regolith
 
 
 
+    // Stop all the threads
+    INFO_LOG( "Manager::run : Stopping all worker threads" );
+    _theThreads.stopAll();
+
     // Unload everything
     INFO_LOG( "Manager::run : Unloading data" );
     _theContexts.clear();
     _theData.clear();
-
-    // Stop all the threads
-    INFO_LOG( "Manager::run : Stopping all worker threads" );
-    _theThreads.stopAll();
 
     // Join all the threads
     INFO_LOG( "Manager::run : Joining all worker threads" );

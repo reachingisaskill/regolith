@@ -160,12 +160,15 @@ namespace Regolith
     ContextUpdate.variable.notify_all();
     MusicUpdate.variable.notify_all();
 
-    waitThreadStatus( THREAD_STOP );
+    waitThreadStatus( THREAD_CLOSING );
   }
 
 
   void ThreadManager::join()
   {
+    // Make sure the threads have reached stop-state
+    waitThreadStatus( THREAD_STOP );
+
     // Wait for all the threads to re-join
     INFO_LOG( "ThreadManager::~ThreadManager : Joining data manager thread" );
     _dataManagerThread.join();
