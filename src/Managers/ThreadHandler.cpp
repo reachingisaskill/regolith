@@ -14,7 +14,8 @@ namespace Regolith
     _owner( Manager::getInstance()->getThreadManager() ),
     _quitFlag( ThreadManager::QuitFlag ),
     _errorFlag( ThreadManager::ErrorFlag ),
-    _startCondition( ThreadManager::StartCondition )
+    _startCondition( ThreadManager::StartCondition ),
+    _stopCondition( ThreadManager::StopCondition )
   {
   }
 
@@ -50,8 +51,15 @@ namespace Regolith
 
   void ThreadHandler::closing()
   {
-    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Thread closing.";
+    INFO_STREAM << "ThreadHandler< " << _threadName << " > : Waiting on stop condition.";
     _owner.setThreadStatus( _identifier, THREAD_CLOSING );
+
+    UniqueLock lk( _stopCondition.mutex );
+    if ( ! (_errorFlag || _stopCondition.data) )
+    {
+      _stopCondition.variable.wait( lk, [&]()->bool{ return _errorFlag || _stopCondition.data; } );
+      lk.unlock();
+    }
   }
 
 

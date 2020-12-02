@@ -145,6 +145,8 @@ namespace Regolith
     INFO_LOG( "Manager::run : Stopping all worker threads" );
     _theThreads.stopAll();
 
+    DEBUG_STREAM << "Manager::run : HERE : " << ThreadManager::StopCondition.data;
+
     // Unload everything
     INFO_LOG( "Manager::run : Unloading data" );
     _theContexts.clear();

@@ -93,6 +93,9 @@ namespace Regolith
       // Signals the start of the engine - all threads now active
       static Condition<bool> StartCondition;
 
+      // Signals the start of the engine - all threads now active
+      static Condition<bool> StopCondition;
+
       // Every thread that sees this flag MUST end
       static std::atomic<bool> QuitFlag;
 

@@ -5,7 +5,7 @@
     "screen_height" : 768,
     "default_colour" : [ 150, 150, 500, 255 ],
     "title" : "Regolith Physics Test",
-    "v-sync" : false
+    "v-sync" : true
   },
 
   "fonts" :

@@ -22,6 +22,7 @@ namespace Regolith
       std::atomic<bool>& _quitFlag;
       std::atomic<bool>& _errorFlag;
       Condition<bool>& _startCondition;
+      Condition<bool>& _stopCondition;
 
     public:
 

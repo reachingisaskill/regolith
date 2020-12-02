@@ -200,8 +200,11 @@ namespace Regolith
         // Set the end iterator
         _visibleStackEnd = _contextStack.rend();
 
-        DEBUG_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
-        _frameTimer.resetFPSCount();
+        if ( _frameTimer.hasFPSMeasurement() )
+        {
+          DEBUG_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
+          _frameTimer.resetFPSCount();
+        }
       }
 
       return true;
@@ -209,8 +212,11 @@ namespace Regolith
     else // Stack is empty! Time to abandon ship
     {
       DEBUG_LOG( "Engine::perfornStackOperations : Context stack is empty. Closing engine." );
-      DEBUG_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
-      _frameTimer.resetFPSCount();
+      if ( _frameTimer.hasFPSMeasurement() )
+      {
+        DEBUG_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
+        _frameTimer.resetFPSCount();
+      }
 
       // Reset these anyway so the rendering thread doesnt fall over.
       _visibleStackStart = _contextStack.rbegin();
@@ -440,10 +446,6 @@ namespace Regolith
 
     threadHandler.closing();
 
-
-    // Can only delete the SDL_Renderer once other threads have finished using it
-    threadHandler.waitStatus( REGOLITH_THREAD_DATA, THREAD_CLOSING );
-    threadHandler.waitStatus( REGOLITH_THREAD_CONTEXT, THREAD_CLOSING );
     INFO_LOG( "EngineRenderingThread : Clearing camera!" );
     camera.clear();
 

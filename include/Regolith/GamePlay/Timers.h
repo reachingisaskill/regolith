@@ -67,6 +67,7 @@ namespace Regolith
       float lap();
 
       void resetFPSCount();
+      bool hasFPSMeasurement() const { return _avgCount > 0; }
 
       float getMaxFPS() const { return _maxfps; }
       float getMinFPS() const { return _minfps; }
