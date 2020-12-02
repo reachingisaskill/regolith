@@ -4,15 +4,23 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// Include the version info first - affects the global defines
+#include "Regolith/Global/Version.h"
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // Global macro definitions
 
-#ifdef REGOLITH_DEBUG_VERSION
+#if defined REGOLITH_VERSION_DEBUG
 
 // This tells components that it will be running inside valgrind (more reliable - but slower - thread communication).
 #define REGOLITH_VALGRIND_BUILD 1
 
-#elif defined REGOLITH_RELEASE_VERSION
+#endif
 
+#ifdef REGOLITH_VERSION_RELEASE
+
+// Turn off debugging log statments
 #define LOGTASTIC_DEBUG_OFF
 
 #endif
@@ -26,7 +34,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Some bureaucracy headers
-#include "Regolith/Global/Version.h"
 #include "Regolith/Global/SDL.h"
 #include "Regolith/Global/Json.h"
 #include "Regolith/Global/Definitions.h"
