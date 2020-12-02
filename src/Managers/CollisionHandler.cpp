@@ -181,14 +181,10 @@ namespace Regolith
 
   void CollisionHandler::collides( PhysicalObject* object1, PhysicalObject* object2 )
   {
-    DEBUG_LOG( "CollisionHandler::collides : Checking Collision" );
-
     _object_pos1 = object1->position();
     _object_pos2 = object2->position();
 
-
     // Step 1 : Do the bounding boxes overlap
-
     if ( ( _object_pos1.x() < ( _object_pos2.x() + object2->getWidth() ) ) &&
          ( ( _object_pos1.x() + object1->getWidth() ) > _object_pos2.x() ) &&
          ( _object_pos1.y() < ( _object_pos2.y() + object2->getHeight() ) ) &&
@@ -216,7 +212,7 @@ namespace Regolith
           if ( _diff_x >= 0.0 ) 
           {
             _overlap_x = col_it1->width - _diff_x;
-            DEBUG_STREAM << "CollisionHandler::collides : Diff_x = " << _diff_x << ", Overlap = " << _overlap_x;
+//            DEBUG_STREAM << "CollisionHandler::collides : Diff_x = " << _diff_x << ", Overlap = " << _overlap_x;
 
             // If hitboxes overlap in x
             if ( _overlap_x > 0.0 )
@@ -229,7 +225,7 @@ namespace Regolith
               if ( _diff_y >= 0.0 )
               {
                 _overlap_y = col_it1->height - _diff_y;
-                DEBUG_STREAM << "CollisionHandler::collides : Diff_y = " << _diff_y << ", Overlap = " << _overlap_y;
+//                DEBUG_STREAM << "CollisionHandler::collides : Diff_y = " << _diff_y << ", Overlap = " << _overlap_y;
 
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
@@ -257,7 +253,7 @@ namespace Regolith
               else
               {
                 _overlap_y = col_it2->height + _diff_y;
-                DEBUG_STREAM << "CollisionHandler::collides : Diff_y = " << _diff_y << ", Overlap = " << _overlap_y;
+//                DEBUG_STREAM << "CollisionHandler::collides : Diff_y = " << _diff_y << ", Overlap = " << _overlap_y;
 
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
@@ -287,7 +283,7 @@ namespace Regolith
           else
           {
             _overlap_x = col_it2->width + _diff_x;
-            DEBUG_STREAM << "CollisionHandler::collides : Diff_x = " << _diff_x << ", Overlap = " << _overlap_x;
+//            DEBUG_STREAM << "CollisionHandler::collides : Diff_x = " << _diff_x << ", Overlap = " << _overlap_x;
 
             // If hitboxes overlap in x
             if ( _overlap_x > 0.0 )
@@ -299,7 +295,7 @@ namespace Regolith
               if ( _diff_y >= 0.0 )
               {
                 _overlap_y = col_it1->height - _diff_y;
-                DEBUG_STREAM << "CollisionHandler::collides : Diff_y = " << _diff_y << ", Overlap = " << _overlap_y;
+//                DEBUG_STREAM << "CollisionHandler::collides : Diff_y = " << _diff_y << ", Overlap = " << _overlap_y;
 
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
@@ -327,7 +323,7 @@ namespace Regolith
               else
               {
                 _overlap_y = col_it2->height + _diff_y;
-                DEBUG_STREAM << "CollisionHandler::collides : Diff_y = " << _diff_y << ", Overlap = " << _overlap_y;
+//                DEBUG_STREAM << "CollisionHandler::collides : Diff_y = " << _diff_y << ", Overlap = " << _overlap_y;
 
                 // If hitboxes overlap in y
                 if ( _overlap_y > 0.0 )
@@ -360,7 +356,7 @@ namespace Regolith
 
   void CollisionHandler::contains( PhysicalObject* object1, PhysicalObject* object2 )
   {
-    DEBUG_LOG( "CollisionHandler::contains : Checking containment" );
+//    DEBUG_LOG( "CollisionHandler::contains : Checking containment" );
 
     _object_pos1 = object1->position();
     _object_pos2 = object2->position();
@@ -385,13 +381,13 @@ namespace Regolith
         {
           // Position of a container hitbox
           _pos2 = _object_pos2 + col_it2->position;
-          DEBUG_STREAM << "CollisionHandler::contains : Pos 1 = " << _pos1 << " Pos = " << _pos2;
+//          DEBUG_STREAM << "CollisionHandler::contains : Pos 1 = " << _pos1 << " Pos = " << _pos2;
     
           _diff_x = _pos2.x() - _pos1.x();
           _diff_y = _pos2.y() - _pos1.y();
           _overlap_x = ( _pos2.x() + col_it2->width ) - ( _pos1.x() + col_it1->width );
           _overlap_y = ( _pos2.y() + col_it2->height ) - ( _pos1.y() + col_it1->height );
-          DEBUG_STREAM << "CollisionHandler::contains : Diff = " << _diff_x << ", " << _diff_y << "   Overlap = " << _overlap_x << ", " << _overlap_y;
+//          DEBUG_STREAM << "CollisionHandler::contains : Diff = " << _diff_x << ", " << _diff_y << "   Overlap = " << _overlap_x << ", " << _overlap_y;
 
           if ( _diff_x < 0.0 ) // Behind container position
           {
@@ -414,9 +410,8 @@ namespace Regolith
             _contact2.type = col_it2->type;
             _contact1.normal = _contact1.overlap.norm();
             _contact2.normal = _contact2.overlap.norm();
-            DEBUG_STREAM << "CollisionHandler::contains : HERE 1";
-            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
-            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
             callback( object1, object2 );
           }
           else if ( _overlap_x > 0.0 )
@@ -440,9 +435,8 @@ namespace Regolith
             _contact2.type = col_it2->type;
             _contact1.normal = _contact1.overlap.norm();
             _contact2.normal = _contact2.overlap.norm();
-            DEBUG_STREAM << "CollisionHandler::contains : HERE 2";
-            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
-            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
             callback( object1, object2 );
           }
           else
@@ -465,9 +459,8 @@ namespace Regolith
             _contact2.type = col_it2->type;
             _contact1.normal = _contact1.overlap.norm();
             _contact2.normal = _contact2.overlap.norm();
-            DEBUG_STREAM << "CollisionHandler::contains : HERE 3";
-            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
-            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
             callback( object1, object2 );
           }
         }
@@ -523,7 +516,7 @@ namespace Regolith
       }
     }
 
-    DEBUG_STREAM << "CollisionHandler::callback : Impulse 1 = " << _contact1.impulse <<  " -- Impulse 2 = " << _contact2.impulse;
+//    DEBUG_STREAM << "CollisionHandler::callback : Impulse 1 = " << _contact1.impulse <<  " -- Impulse 2 = " << _contact2.impulse;
 
     object1->onCollision( _contact1, object2 );
     object2->onCollision( _contact2, object1 );

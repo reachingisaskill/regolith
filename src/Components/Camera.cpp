@@ -78,14 +78,14 @@ namespace Regolith
     _targetRect.w = object->getWidth() * _scaleX;
     _targetRect.h = object->getHeight() * _scaleY;
 
-    DEBUG_STREAM << "Camera::renderPhysicalObject : Physical Object @ " << object;
-    DEBUG_STREAM << "Camera::renderPhysicalObject : Position: " << _targetRect.x << ", " << _targetRect.y << " | " << _targetRect.w << ", " << _targetRect.h;
-    DEBUG_STREAM << "Camera::renderPhysicalObject : Scales: " << _scaleX << ", " << _scaleY;
+//    DEBUG_STREAM << "Camera::renderPhysicalObject : Physical Object @ " << object;
+//    DEBUG_STREAM << "Camera::renderPhysicalObject : Position: " << _targetRect.x << ", " << _targetRect.y << " | " << _targetRect.w << ", " << _targetRect.h;
+//    DEBUG_STREAM << "Camera::renderPhysicalObject : Scales: " << _scaleX << ", " << _scaleY;
 
     const Texture& texture = object->getTexture();
 
-    DEBUG_STREAM << "Camera::renderPhysicalObject : SDL_Texture @ " << texture._theTexture->texture;
-    DEBUG_STREAM << "Camera::renderPhysicalObject : Clip : " << texture._clip.x << ", " << texture._clip.y << ", " << texture._clip.w << ", " << texture._clip.h;
+//    DEBUG_STREAM << "Camera::renderPhysicalObject : SDL_Texture @ " << texture._theTexture->texture;
+//    DEBUG_STREAM << "Camera::renderPhysicalObject : Clip : " << texture._clip.x << ", " << texture._clip.y << ", " << texture._clip.w << ", " << texture._clip.h;
     SDL_RenderCopyEx( _theRenderer, texture._theTexture->texture, &texture._clip, &_targetRect, object->getRotation(), nullptr, texture._flipFlag );
   }
 

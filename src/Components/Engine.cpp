@@ -202,7 +202,7 @@ namespace Regolith
 
         if ( _frameTimer.hasFPSMeasurement() )
         {
-          DEBUG_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
+          INFO_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
           _frameTimer.resetFPSCount();
         }
       }
@@ -214,7 +214,7 @@ namespace Regolith
       DEBUG_LOG( "Engine::perfornStackOperations : Context stack is empty. Closing engine." );
       if ( _frameTimer.hasFPSMeasurement() )
       {
-        DEBUG_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
+        INFO_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
         _frameTimer.resetFPSCount();
       }
 

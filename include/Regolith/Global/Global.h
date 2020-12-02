@@ -4,17 +4,24 @@
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Logtastic configuration
-#define LOGTASTIC_FUNCTION_NAME ""
-//#define LOGTASTIC_DEBUG_OFF
-#include "logtastic.h"
+// Global macro definitions
+
+#ifdef REGOLITH_DEBUG_VERSION
+
+// This tells components that it will be running inside valgrind (more reliable - but slower - thread communication).
+#define REGOLITH_VALGRIND_BUILD 1
+
+#elif defined REGOLITH_RELEASE_VERSION
+
+#define LOGTASTIC_DEBUG_OFF
+
+#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Global macro definitions
-
-// Uncomment this to tell components that it will be running inside valgrind (more reliable - but slower - thread management).
-#define REGOLITH_VALGRIND_BUILD 1
+// Logtastic configuration
+#define LOGTASTIC_FUNCTION_NAME ""
+#include "logtastic.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

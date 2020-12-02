@@ -49,11 +49,5 @@ And that's it!
 
 ## To Do List / Known Bugs
 
-### Architecture Improvements
-- I'd like to redesign the fundamental class structure using a single GameObject base class and a range of Interface classes to define functionality.
-I hit a snag as a lot of the functionality has overlapping definitions/dependencies.
-This will generally produce a lot of inheritence triangles if I'm not careful and may actually be overkill, but I'm thinking about it.
-
-### Portability
-- Move all SDL include statements into the Defitions file and wrap them with #if-#else statements to select for operating system
+- TESTING! Most of it seems to work with no obvious memory leaks or crashes. Now it just needs some more thorough testing and new features.
 
