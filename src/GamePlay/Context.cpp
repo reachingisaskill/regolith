@@ -1,11 +1,11 @@
 
 #include "Regolith/GamePlay/Context.h"
 
-#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/NoisyObject.h"
 #include "Regolith/Architecture/ButtonObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Camera.h"
+#include "Regolith/GamePlay/PhysicalObject.h"
 #include "Regolith/GamePlay/ContextLayer.h"
 
 
@@ -25,6 +25,7 @@ namespace Regolith
     _theInput(),
     _theFocus(),
     _theCollision(),
+    _defaultTrack( nullptr ),
     _closed( false ),
     _paused( false ),
     _pauseable( false ),
@@ -56,6 +57,26 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context stack call back functions
+
+  void Context::startContext()
+  {
+    if ( _defaultTrack != nullptr )
+    {
+      _owner->getAudioHandler().playSong( _defaultTrack );
+    }
+    this->onStart();
+  }
+
+
+  void Context::stopContext()
+  {
+    if ( _defaultTrack != nullptr )
+    {
+      _owner->getAudioHandler().stopSong();
+    }
+    this->onStop();
+  }
+
 
   void Context::pauseContext()
   {
@@ -266,7 +287,16 @@ namespace Regolith
     if ( Utilities::validateJson( json_data, "pauseable", Utilities::JSON_TYPE_BOOLEAN, false ) )
     {
       _pauseable = json_data["pauseable"].asBool();
-      DEBUG_STREAM << "  Context " << ( _pauseable ? "is" : "is not" ) << " pauseable";
+      DEBUG_STREAM << "Context::configure : Context " << ( _pauseable ? "is" : "is not" ) << " pauseable";
+    }
+
+
+    // Default music
+    if ( Utilities::validateJson( json_data, "music_track", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      std::string track_name = json_data["music_track"].asString();
+      _defaultTrack = handler.getDataHandler().getRawMusic( track_name );
+      DEBUG_STREAM << "Context::configure : Default music track : " << track_name;
     }
 
 

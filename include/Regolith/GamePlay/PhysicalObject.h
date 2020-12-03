@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_ARCHITECTURE_PHYSICAL_OBJECT_H_
-#define REGOLITH_ARCHITECTURE_PHYSICAL_OBJECT_H_
+#ifndef REGOLITH_GAMEPLAY_PHYSICAL_OBJECT_H_
+#define REGOLITH_GAMEPLAY_PHYSICAL_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
@@ -249,5 +249,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_ARCHITECTURE_PHYSICAL_OBJECT_H_
+#endif // REGOLITH_GAMEPLAY_PHYSICAL_OBJECT_H_
 

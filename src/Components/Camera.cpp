@@ -1,7 +1,7 @@
 
 #include "Regolith/Components/Camera.h"
 
-#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/GamePlay/PhysicalObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Window.h"
 

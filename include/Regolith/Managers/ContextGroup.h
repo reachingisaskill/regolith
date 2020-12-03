@@ -4,10 +4,9 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
-#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/DataHandler.h"
-#include "Regolith/GamePlay/Context.h"
+#include "Regolith/GamePlay/PhysicalObject.h"
 #include "Regolith/GamePlay/Spawner.h"
 #include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/Utilities/ProxyMap.h"
@@ -20,6 +19,10 @@
 
 namespace Regolith
 {
+
+  class Context;
+
+////////////////////////////////////////////////////////////////////////////////
 
   class ContextGroup
   {

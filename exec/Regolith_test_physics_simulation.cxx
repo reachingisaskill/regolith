@@ -1,7 +1,7 @@
 
 #include "Regolith.h"
 #include "Regolith/Test/EmptyContext.h"
-#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/GamePlay/PhysicalObject.h"
 
 #include "logtastic.h"
 

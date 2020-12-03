@@ -44,11 +44,14 @@ namespace Regolith
 
 //////////////////////////////////////////////////////////////////////////////// 
     private:
-      // Context-local audio and input handlers
+      // Context-local handlers
       ContextGroup* _owner;
       InputHandler _theInput;
       FocusHandler _theFocus;
       CollisionHandler _theCollision;
+
+      // Pointer to an optional track to play on load
+      RawMusic* _defaultTrack;
 
       // Details for using the camera
       Vector _cameraPosition;
@@ -117,8 +120,8 @@ namespace Regolith
       bool isPaused() const { return _paused; }
 
       // Interface for context stack
-      void startContext() { this->onStart(); }
-      void stopContext() { this->onStop(); }
+      void startContext();
+      void stopContext();
       void pauseContext();
       void resumeContext();
 

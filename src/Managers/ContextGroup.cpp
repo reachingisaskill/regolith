@@ -1,9 +1,10 @@
 
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Utilities/JsonValidation.h"
-#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/GamePlay/PhysicalObject.h"
 #include "Regolith/Architecture/NoisyObject.h"
+#include "Regolith/GamePlay/Context.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 
 namespace Regolith

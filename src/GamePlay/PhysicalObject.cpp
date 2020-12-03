@@ -1,5 +1,5 @@
 
-#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/GamePlay/PhysicalObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
