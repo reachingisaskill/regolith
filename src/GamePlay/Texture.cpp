@@ -14,34 +14,37 @@ namespace Regolith
   // RawTexture Member function definitions
 
   RawTexture::RawTexture() :
-    texture( nullptr ),
+    sdl_texture( nullptr ),
     width( 0 ),
     height( 0 ),
     rows( 0 ),
     columns( 0 ),
-    cells( 0 )
+    cells( 0 ),
+    update( false )
   {
   }
 
 
   RawTexture::RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c ) :
-    texture( t ),
+    sdl_texture( t ),
     width( w ),
     height( h ),
     rows( r ),
     columns( c ),
-    cells( r*c )
+    cells( r*c ),
+    update( false )
   {
   }
 
 
   RawTexture::RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c, unsigned short n ) :
-    texture( t ),
+    sdl_texture( t ),
     width( w ),
     height( h ),
     rows( r ),
     columns( c ),
-    cells( n )
+    cells( n ),
+    update( false )
   {
   }
 
@@ -50,7 +53,7 @@ namespace Regolith
   // Texture Member function definitions
 
   Texture::Texture() :
-    _theTexture( nullptr ),
+    _rawTexture( nullptr ),
     _flipFlag( SDL_FLIP_NONE ),
     _clip( { 0, 0, 0, 0 } ),
     _currentSprite( 0 )
@@ -63,6 +66,19 @@ namespace Regolith
   }
 
 
+  void Texture::setNewSurface( SDL_Surface* surface )
+  {
+    if ( _rawTexture == nullptr )
+    {
+      SDL_DestroySurface( surface );
+    }
+    else
+    {
+      _rawTexture.surface = surface;
+    }
+  }
+
+
   void Texture::setClip( SDL_Rect c )
   {
     _clip = c;
@@ -71,19 +87,19 @@ namespace Regolith
 
   void Texture::setColor( Uint8 red, Uint8 green, Uint8 blue )
   {
-    SDL_SetTextureColorMod( _theTexture->texture, red, green, blue );
+    SDL_SetTextureColorMod( _rawTexture->texture, red, green, blue );
   }
 
 
   void Texture::setAlpha( Uint8 alpha )
   {
-    SDL_SetTextureAlphaMod( _theTexture->texture, alpha );
+    SDL_SetTextureAlphaMod( _rawTexture->texture, alpha );
   }
 
 
   void Texture::setBlendMode( SDL_BlendMode blendmode )
   {
-    SDL_SetTextureBlendMode( _theTexture->texture, blendmode );
+    SDL_SetTextureBlendMode( _rawTexture->texture, blendmode );
   }
 
 
@@ -108,8 +124,8 @@ namespace Regolith
   void Texture::setFrameNumber( unsigned int num )
   {
     _currentSprite = num;
-    _clip.x = (_currentSprite % _theTexture->columns) * _clip.w;
-    _clip.y = (_currentSprite / _theTexture->columns) * _clip.h;
+    _clip.x = (_currentSprite % _rawTexture->columns) * _clip.w;
+    _clip.y = (_currentSprite / _rawTexture->columns) * _clip.h;
 
     DEBUG_STREAM << "Texture::setFrameNumber : " << _currentSprite << " : " << _clip.x << ", " << _clip.y << ", " << _clip.w << ", " << _clip.h;
   }
@@ -120,13 +136,13 @@ namespace Regolith
     Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
 
     std::string texture_name = json_data["texture_name"].asString();
-    _theTexture = handler.getRawTexture( texture_name );
-    DEBUG_STREAM << "Found texture: " << texture_name << " : " << _theTexture;
+    _rawTexture = handler.getRawTexture( texture_name );
+    DEBUG_STREAM << "Found texture: " << texture_name << " : " << _rawTexture;
 
     _clip.x = 0;
     _clip.y = 0;
-    _clip.w = _theTexture->width / _theTexture->columns;
-    _clip.h = _theTexture->height / _theTexture->rows;
+    _clip.w = _rawTexture->width / _rawTexture->columns;
+    _clip.h = _rawTexture->height / _rawTexture->rows;
 
     if ( json_data.isMember( "start_number" ) )
     {
@@ -137,7 +153,7 @@ namespace Regolith
       setFrameNumber( 0 );
     }
 
-    DEBUG_STREAM << "Texture::configure : " << _theTexture->rows << "x" << _theTexture->columns << " -> " << _theTexture->cells << " start: " << _currentSprite;
+    DEBUG_STREAM << "Texture::configure : " << _rawTexture->rows << "x" << _rawTexture->columns << " -> " << _rawTexture->cells << " start: " << _currentSprite;
   }
 
 

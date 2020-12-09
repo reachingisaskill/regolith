@@ -21,8 +21,19 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Data Manager
 
+  /*
+   * The Data Manager controls the global operations regarding loading the game assets stored on 
+   * the hard disk.
+   * This includes images/texture files, sound/music files and all fonts.A
+   * It is the object that loads and caches the data stored in the index file - a lookup of all
+   * asset files of all types and the information required to correctly load them into memory.
+   *
+   * The Data Loading Thread loads the assets requested by the data handlers into memory for the
+   * current context groups to use.
+   */
   class DataManager
   {
+    // Make these functions friends to make loading/unloading data easier in the Data Manager Thread
     friend void dataManagerLoadingThread();
     friend void dataLoadFunction();
     friend void dataUnloadFunction();
@@ -37,24 +48,6 @@ namespace Regolith
 
       // Map of all the assets that can be used
       AssetMap _assets;
-
-      /*
-      // Map of texture details
-      RawTextureDetailMap _textureDetails;
-
-      // Map of string details
-      RawStringDetailMap _stringDetails;
-
-      // Map of music details
-      RawMusicDetailMap _musicDetails;
-
-      // Map of sounds details
-      RawSoundDetailMap _soundDetails;
-
-//      // Map of font details
-//      RawTextureDetailMap _fontDetails;
-      */
-
 
       // Loading queue
       MutexedBuffer< DataHandler* > _loadQueue;
@@ -73,7 +66,7 @@ namespace Regolith
       // Clear all the stored data
       void clear();
 
-      // Basic configuration of object and build the global objects
+      // Basic configuration of manager and build the global objects
       void configure( Json::Value& );
 
 
@@ -97,24 +90,34 @@ namespace Regolith
       const Asset& getAsset( std::string ) const;
 
 
-      // Build a raw texture object with no pointer for a data handler using the index
+////////////////////////////////////////////////////////////////////////////////
+      // Access basic loaded assets
+
+      // Build a raw texture object with null pointer for a data handler
       RawTexture buildRawTexture( std::string ) const;
 
-      // Build a raw music object with no pointer for a data handler using the index
+      // Build a raw music object with null pointer for a data handler
       RawMusic buildRawMusic( std::string ) const;
 
-      // Build a raw sound object with no pointer for a data handler using the index
+      // Build a raw sound object with null pointer for a data handler
       RawSound buildRawSound( std::string ) const;
 
+      // Build a raw font object with null pointer for a data handler
+      RawFont buildRawFont( std::string ) const;
 
-      // Build a raw texture object with no pointer for a data handler using the index
+
+      // Load a raw texture object
       void loadRawTexture( std::string, RawTexture& ) const;
 
-      // Build a raw music object with no pointer for a data handler using the index
+      // Load a raw music object
       void loadRawMusic( std::string, RawMusic& ) const;
 
-      // Build a raw sound object with no pointer for a data handler using the index
+      // Load a raw sound object
       void loadRawSound( std::string, RawSound& ) const;
+
+      // Load a raw font object
+      void loadRawFont( std::string, RawFont& ) const;
+
   };
 
 }

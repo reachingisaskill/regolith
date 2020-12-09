@@ -42,21 +42,21 @@ namespace Regolith
   }
 
 
-  void Camera::renderRawTexture( RawTexture* texture ) const
+  void Camera::renderRawTexture( RawTexture* texture )
   {
     // If it's already renderered
-    if ( texture->texture != nullptr )
+    if ( texture->sdl_texture != nullptr )
     {
-      return;
+      SDL_DestroyTexture( texture->sdl_texture );
     }
 
     // Create the texture
-    texture->texture = SDL_CreateTextureFromSurface( _theRenderer, texture->surface );
+    texture->sdl_texture = SDL_CreateTextureFromSurface( _theRenderer, texture->surface );
 
-    DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << texture->texture;
+    DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << texture->sdl_texture;
 
     // Check that it worked
-    if ( texture->texture == nullptr )
+    if ( texture->sdl_texture == nullptr )
     {
       SDL_FreeSurface( texture->surface );
       texture->surface = nullptr;
@@ -71,22 +71,23 @@ namespace Regolith
   }
 
 
-  void Camera::renderPhysicalObject( PhysicalObject* object, Vector& camera_position ) const
+  void Camera::renderPhysicalObject( PhysicalObject* object, Vector& camera_position )
   {
     _targetRect.x = ( object->getPosition().x() - camera_position.x() ) * _scaleX;
     _targetRect.y = ( object->getPosition().y() - camera_position.y() ) * _scaleY;
     _targetRect.w = object->getWidth() * _scaleX;
     _targetRect.h = object->getHeight() * _scaleY;
 
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : Physical Object @ " << object;
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : Position: " << _targetRect.x << ", " << _targetRect.y << " | " << _targetRect.w << ", " << _targetRect.h;
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : Scales: " << _scaleX << ", " << _scaleY;
-
     const Texture& texture = object->getTexture();
 
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : SDL_Texture @ " << texture._theTexture->texture;
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : Clip : " << texture._clip.x << ", " << texture._clip.y << ", " << texture._clip.w << ", " << texture._clip.h;
-    SDL_RenderCopyEx( _theRenderer, texture._theTexture->texture, &texture._clip, &_targetRect, object->getRotation(), nullptr, texture._flipFlag );
+    // If a new surface has been provided, re-render the texture
+    if ( texture._rawTexture->surface != nullptr )
+    {
+      renderRawTexture( texture._rawTexture );
+    }
+
+    // Render to the back bufer
+    SDL_RenderCopyEx( _theRenderer, texture._rawTexture->sdl_texture, &texture._clip, &_targetRect, object->getRotation(), nullptr, texture._flipFlag );
   }
 
 }

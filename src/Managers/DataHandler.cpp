@@ -55,6 +55,23 @@ namespace Regolith
 
     DataManager& manager = Manager::getInstance()->getDataManager();
 
+
+    RawFontMap::iterator font_end = _rawFonts.end();
+    for ( RawFontMap::iterator it = _rawFonts.begin(); it != font_end; ++it )
+    {
+      std::string name = it->first;
+      try
+      {
+        manager.loadRawFont( name, it->second );
+        DEBUG_STREAM << "Loaded Font: " << name << " @ " << it->second.ttf_font;
+      }
+      catch( Exception& ex )
+      {
+        ex.addDetail( "Font Name", name );
+        throw ex;
+      }
+    }
+
     RawTextureMap::iterator texture_end = _rawTextures.end();
     for ( RawTextureMap::iterator it = _rawTextures.begin(); it != texture_end; ++it )
     {
@@ -63,7 +80,7 @@ namespace Regolith
       {
         manager.loadRawTexture( name, it->second );
         _surfaceRenderQueue.push( &it->second );
-        DEBUG_STREAM << "Loaded Surface: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
+        DEBUG_STREAM << "Loaded Surface: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.sdl_texture;
       }
       catch( Exception& ex )
       {
@@ -131,11 +148,11 @@ namespace Regolith
     {
       std::string name = it->first;
 
-      if ( it->second.texture != nullptr )
+      if ( it->second.sdl_texture != nullptr )
       {
-        DEBUG_STREAM << "Unloaded texture: " << name << " @ " << it->second.texture;
-        SDL_DestroyTexture( it->second.texture );
-        it->second.texture = nullptr;
+        DEBUG_STREAM << "Unloaded texture: " << name << " @ " << it->second.sdl_texture;
+        SDL_DestroyTexture( it->second.sdl_texture );
+        it->second.sdl_texture = nullptr;
       }
     }
 
@@ -204,6 +221,19 @@ namespace Regolith
     {
       RawMusic new_music = Manager::getInstance()->getDataManager().buildRawMusic( name );
       found = _rawMusic.insert( std::make_pair( name, new_music ) ).first;
+    }
+
+    return &(found->second);
+  }
+
+
+  RawFont* DataHandler::getRawFont( std::string name )
+  {
+    RawFontMap::iterator found = _rawFonts.find( name );
+    if ( found == _rawFonts.end() )
+    {
+      RawFont new_font = Manager::getInstance()->getDataManager().buildRawFont( name );
+      found = _rawFonts.insert( std::make_pair( name, new_font ) ).first;
     }
 
     return &(found->second);

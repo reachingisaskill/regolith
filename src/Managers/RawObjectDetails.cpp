@@ -5,31 +5,31 @@
 namespace Regolith
 {
 
-  Asset::Asset( TextureDetail d ) :
-    type( ASSET_TEXTURE )
+  Asset::Asset( ImageDetail d ) :
+    type( ASSET_IMAGE )
   {
-    new (&textureDetail) TextureDetail( d );
+    new (&imageDetail) ImageDetail( d );
   }
 
 
-  Asset::Asset( StringDetail d ) :
-    type( ASSET_STRING )
+  Asset::Asset( TextDetail d ) :
+    type( ASSET_TEXT )
   {
-    new (&stringDetail) StringDetail( d );
+    new (&textDetail) TextDetail( d );
   }
 
 
-  Asset::Asset( MusicDetail d ) :
-    type( ASSET_MUSIC )
+  Asset::Asset( AudioDetail d ) :
+    type( ASSET_AUDIO )
   {
-    new (&musicDetail) MusicDetail( d );
+    new (&audioDetail) AudioDetail( d );
   }
 
 
-  Asset::Asset( SoundDetail d ) :
-    type( ASSET_SOUND )
+  Asset::Asset( FontDetail d ) :
+    type( ASSET_FONT )
   {
-    new (&soundDetail) SoundDetail( d );
+    new (&fontDetail) FontDetail( d );
   }
 
 
@@ -38,25 +38,21 @@ namespace Regolith
   {
     switch ( type )
     {
-      case ASSET_TEXTURE :
-        new (&textureDetail) TextureDetail( ass.textureDetail );
+      case ASSET_IMAGE :
+        new (&imageDetail) ImageDetail( ass.imageDetail );
         break;
 
-      case ASSET_STRING :
-        new (&stringDetail) StringDetail( ass.stringDetail );
+      case ASSET_TEXT :
+        new (&textDetail) StringDetail( ass.textDetail );
         break;
 
-      case ASSET_MUSIC :
-        new (&musicDetail) MusicDetail( ass.musicDetail );
+      case ASSET_AUDIO :
+        new (&audioDetail) AudioDetail( ass.audioDetail );
         break;
 
-      case ASSET_SOUND :
-        new (&soundDetail) SoundDetail( ass.soundDetail );
+      case ASSET_FONT :
+        new (&fontDetail) FontDetail( ass.fontDetail );
         break;
-
-//      case ASSET_FONT :
-//        new (&fontDetail) FontDetail( ass.fontDetail );
-//        break;
     }
   }
 
@@ -66,25 +62,21 @@ namespace Regolith
   {
     switch( type )
     {
-      case ASSET_TEXTURE :
-        textureDetail.~TextureDetail();
+      case ASSET_IMAGE :
+        imageDetail.~ImageDetail();
         break;
 
-      case ASSET_STRING :
-        stringDetail.~StringDetail();
+      case ASSET_TEXT :
+        textDetail.~TextDetail();
         break;
 
-      case ASSET_MUSIC :
-        musicDetail.~MusicDetail();
+      case ASSET_AUDIO :
+        audioDetail.~AudioDetail();
         break;
 
-      case ASSET_SOUND :
-        soundDetail.~SoundDetail();
+      case ASSET_FONT :
+        fontDetail.~FontDetail();
         break;
-
-//      case ASSET_FONT :
-//        fontDetail.~FontDetail();
-//        break;
     }
   }
 

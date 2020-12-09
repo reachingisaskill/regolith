@@ -5,6 +5,9 @@
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/ThreadHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
+#include "Regolith/GamePlay/Font.h"
+#include "Regolith/GamePlay/Texture.h"
+#include "Regolith/GamePlay/Noises.h"
 
 #include <mutex>
 #include <atomic>
@@ -110,18 +113,18 @@ namespace Regolith
 
     switch ( asset_found->second.type )
     {
-      case ASSET_TEXTURE :
-        return RawTexture( nullptr, asset_found->second.textureDetail.width, asset_found->second.textureDetail.height, asset_found->second.textureDetail.rows, asset_found->second.textureDetail.columns );
+      case ASSET_IMAGE :
+        return RawTexture( nullptr, asset_found->second.imageDetail.width, asset_found->second.imageDetail.height, asset_found->second.imageDetail.rows, asset_found->second.imageDetail.columns );
         break;
 
-      case ASSET_STRING :
-        return RawTexture( nullptr, asset_found->second.stringDetail.width, asset_found->second.stringDetail.height, 1, 1 );
+      case ASSET_TEXT :
+        return RawTexture( nullptr, asset_found->second.textDetail.width, asset_found->second.textDetail.height, 1, 1 );
         break;
 
       default :
         Exception ex( "DataManager::buildRawTexture()", "Asset is not a texture" );
         ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_TEXTURE or ASSET_STRING" );
+        ex.addDetail( "Expected", "ASSET_IMAGE or ASSET_TEXT" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
         break;
@@ -141,18 +144,14 @@ namespace Regolith
 
     switch ( asset_found->second.type )
     {
-      case ASSET_MUSIC :
-        return RawMusic();
-        break;
-
-      case ASSET_SOUND :
+      case ASSET_AUDIO :
         return RawMusic();
         break;
 
       default :
         Exception ex( "DataManager::buildRawMusic()", "Asset is not a music track" );
         ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_MUSIC or ASSET_SOUND" );
+        ex.addDetail( "Expected", "ASSET_AUDIO" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
         break;
@@ -172,20 +171,50 @@ namespace Regolith
 
     switch ( asset_found->second.type )
     {
-      case ASSET_SOUND :
+      case ASSET_AUDIO :
         return RawSound();
         break;
 
       default :
-        Exception ex( "DataManager::buildRawMusic()", "Asset is not a music track" );
+        Exception ex( "DataManager::buildRawMusic()", "Asset is not a sound" );
         ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_SOUND" );
+        ex.addDetail( "Expected", "ASSET_AUDIO" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
         break;
     }
   }
 
+
+  RawFont DataManager::buildRawFont( std::string name ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::buildRawFont()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_FONT :
+        return RawFont();
+        break;
+
+      default :
+        Exception ex( "DataManager::buildRawFont()", "Asset is not a font" );
+        ex.addDetail( "Asset Name", name );
+        ex.addDetail( "Expected", "ASSET_FONT" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Load raw asset functions
 
   void DataManager::loadRawTexture( std::string name, RawTexture& texture ) const
   {
@@ -199,18 +228,18 @@ namespace Regolith
 
     switch ( asset_found->second.type )
     {
-      case ASSET_TEXTURE :
-        texture.surface = loadSurfaceFromFile( asset_found->second.textureDetail.filename, asset_found->second.textureDetail.colourkey );
+      case ASSET_IMAGE :
+        texture.surface = loadSurfaceFromFile( asset_found->second.imageDetail.filename, asset_found->second.imageDetail.colourkey );
         break;
 
-      case ASSET_STRING :
-        texture.surface = loadSurfaceFromString( asset_found->second.stringDetail.text, asset_found->second.stringDetail.font, asset_found->second.stringDetail.colour );
+      case ASSET_TEXT :
+        texture.surface = loadSurfaceFromString( asset_found->second.textDetail.text, asset_found->second.textDetail.font, asset_found->second.textDetail.colour );
         break;
 
       default :
         Exception ex( "DataManager::loadRawTexture()", "Asset is not a texture" );
         ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_TEXTURE or ASSET_STRING" );
+        ex.addDetail( "Expected", "ASSET_IMAGE or ASSET_TEXT" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
         break;
@@ -230,18 +259,14 @@ namespace Regolith
 
     switch ( asset_found->second.type )
     {
-      case ASSET_MUSIC :
-        music.music = loadMusic( asset_found->second.musicDetail.filename );
-        break;
-
-      case ASSET_SOUND :
-        music.music = loadMusic( asset_found->second.soundDetail.filename );
+      case ASSET_AUDIO :
+        music.music = loadMusic( asset_found->second.audioDetail.filename );
         break;
 
       default :
         Exception ex( "DataManager::loadRawMusic()", "Asset is not a music track" );
         ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_MUSIC or ASSET_SOUND" );
+        ex.addDetail( "Expected", "ASSET_AUDIO" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
         break;
@@ -261,14 +286,41 @@ namespace Regolith
 
     switch ( asset_found->second.type )
     {
-      case ASSET_SOUND :
-        sound.sound = loadSound( asset_found->second.soundDetail.filename );
+      case ASSET_AUDIO :
+        sound.sound = loadSound( asset_found->second.audioDetail.filename );
         break;
 
       default :
         Exception ex( "DataManager::loadRawSound()", "Asset is not a sound file" );
         ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_SOUND" );
+        ex.addDetail( "Expected", "ASSET_AUDIO" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
+  }
+
+
+  void DataManager::loadRawFont( std::string name, RawFont& font ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::loadRawFont()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_FONT :
+        font.ttf_font = loadFont( asset_found->second.fontDetail.filename, asset_found->second.fontDetail.size );
+        break;
+
+      default :
+        Exception ex( "DataManager::loadRawFont()", "Asset is not a font file" );
+        ex.addDetail( "Asset Name", name );
+        ex.addDetail( "Expected", "ASSET_FONT" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
         throw ex;
         break;
@@ -292,16 +344,34 @@ namespace Regolith
     // Load and validate the index file
     Json::Value index_data;
     Utilities::loadJsonData( index_data, _indexFile );
-    Utilities::validateJson( index_data, "textures", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( index_data, "strings", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( index_data, "fonts", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( index_data, "images", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( index_data, "text", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( index_data, "sounds", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( index_data, "music", Utilities::JSON_TYPE_OBJECT );
-//    Utilities::validateJson( index_data, "fonts", Utilities::JSON_TYPE_OBJECT );
 
-    for ( Json::Value::iterator it = index_data["textures"].begin(); it != index_data["textures"].end(); ++it )
+
+    // Load details of all the font assets
+    for ( Json::Value::iterator it = index_data["fonts"].begin(); it != index_data["fonts"].end(); ++it )
     {
       Json::Value& data = *it;
-      TextureDetail detail;
+      FontDetail detail;
+
+      std::string name = it.key().asString();
+      detail.filename = data["path"].asString();
+      detail.size = data["size"].asInt();
+      detail.colour.r = data["colour"][0].asInt();
+      detail.colour.g = data["colour"][1].asInt();
+      detail.colour.b = data["colour"][2].asInt();
+      detail.colour.a = data["colour"][3].asInt();
+
+      _assets.insert( std::make_pair( name, Asset( detail ) ) );
+    }
+
+    // Load details of all the image assets
+    for ( Json::Value::iterator it = index_data["images"].begin(); it != index_data["images"].end(); ++it )
+    {
+      Json::Value& data = *it;
+      ImageDetail detail;
 
       std::string name = it.key().asString();
       detail.filename = data["path"].asString();
@@ -320,60 +390,37 @@ namespace Regolith
       {
         detail.colourkey = { 0, 0, 0, 0 };
       }
-      _assets.insert( { name, Asset( detail ) } );
-//      _assets[name] = Asset( detail );
+      _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "DataManager::configure : Asset Texture: " << name;
     }
 
-    for ( Json::Value::iterator it = index_data["strings"].begin(); it != index_data["strings"].end(); ++it )
+    // Load details of all the text assets
+    for ( Json::Value::iterator it = index_data["text"].begin(); it != index_data["text"].end(); ++it )
     {
       Json::Value& data = *it;
-      StringDetail detail;
-
-      std::string font_name = data["font"].asString();
+      TextDetail detail;
 
       std::string name = it.key().asString();
-      detail.text = data["text"].asString();
-      detail.font = Manager::getInstance()->getFontPointer( font_name );
-      detail.colour.r = data["colour"][0].asInt();
-      detail.colour.g = data["colour"][1].asInt();
-      detail.colour.b = data["colour"][2].asInt();
-      detail.colour.a = data["colour"][3].asInt();
+      detail.text = data["filename"].asString();
+      detail.font = data["font"].asString();
 
-      SDL_Surface* textSurface = TTF_RenderText_Solid( detail.font, detail.text.c_str(), detail.colour );
-      if ( textSurface == nullptr )
+      AssetMap::iterator font_it = _assets.find( detail.font );
+      if ( font_it == _assets.end() || font_it->second.type != ASSET_FONT )
       {
-        Exception ex( "DataManager::configure()", "Could not render text" );
-        ex.addDetail( "Text string", detail.text.c_str() );
-        ex.addDetail( "Font", detail.font );
-        ex.addDetail( "SDL_TTF Error", TTF_GetError() );
+        Exception ex( "DataManager::configure()", "Expected font not found" );
+        ex.addDetail( "Font Name", detail.font );
         throw ex;
       }
-      detail.width = textSurface->w;
-      detail.height = textSurface->h;
-      SDL_FreeSurface( textSurface );
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "DataManager::configure : Asset String: " << name;
     }
 
-    for ( Json::Value::iterator it = index_data["music"].begin(); it != index_data["music"].end(); ++it )
-    {
-      Json::Value& data = *it;
-      MusicDetail detail;
-
-      std::string name = it.key().asString();
-      detail.filename = data["path"].asString();
-
-      _assets.insert( std::make_pair( name, Asset( detail ) ) );
-      DEBUG_STREAM << "DataManager::configure : Asset Music: " << name;
-    }
-
-
+    // Load details of all the audio assets
     for ( Json::Value::iterator it = index_data["sounds"].begin(); it != index_data["sounds"].end(); ++it )
     {
       Json::Value& data = *it;
-      SoundDetail detail;
+      AudioDetail detail;
 
       std::string name = it.key().asString();
       detail.filename = data["path"].asString();
@@ -381,19 +428,6 @@ namespace Regolith
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "DataManager::configure : Asset Sound: " << name;
     }
-
-
-//    for ( Json::Value::iterator it = index_data["font"].begin(); it != index_data["font"].end(); ++it )
-//    {
-//      Json::Value& data = *it;
-//      FontDetail detail;
-//
-//      std::string name = it.key().asString();
-//      detail.filename = data["filename"].asString();
-//
-//      _assets.insert( std::make_pair( name, Asset( detail ) ) );
-//    }
-
   }
 
 

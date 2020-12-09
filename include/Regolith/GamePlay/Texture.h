@@ -21,13 +21,14 @@ namespace Regolith
 
   struct RawTexture
   {
-    SDL_Texture* texture;
+    SDL_Texture* sdl_texture;
     SDL_Surface* surface;
     int width;
     int height;
     unsigned short int rows;
     unsigned short int columns;
     unsigned short cells;
+    bool update;
 
     RawTexture();
     RawTexture( SDL_Texture*, int, int, unsigned short, unsigned short );
@@ -35,7 +36,7 @@ namespace Regolith
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Useful functions
+  // Surface creation functions
 
   SDL_Surface* loadSurfaceFromFile( std::string, const SDL_Color& );
   SDL_Surface* loadSurfaceFromString( std::string, TTF_Font*, const SDL_Color& );
@@ -51,7 +52,7 @@ namespace Regolith
 
     private:
       // Pointer to the raw sdl texture
-      mutable RawTexture* _theTexture;
+      mutable RawTexture* _rawTexture;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
 
@@ -71,13 +72,12 @@ namespace Regolith
       virtual ~Texture();
 
 
+      // Sets a new surface to the raw texture. Forces the renderer to re-draw the texture using the new surface
+      void setNewSurface( SDL_Surface* );
+
       // Configures as a sprite sheet with optional animation. No. rows, No. Columns, and No. of used cells and update period
       // This function is optinal. Without it this acts as a single flat texture
       void configure( Json::Value&, DataHandler& );
-
-
-//      // Render with the current renderer object
-//      virtual void draw( SDL_Renderer*, SDL_Rect* ) const;
 
 
       // Accessors
@@ -111,7 +111,7 @@ namespace Regolith
       void setFrameNumber( unsigned int );
 
       // Sprite details
-      int getNumberSprites() const { return _theTexture->cells; }
+      int getNumberSprites() const { return _rawTexture->cells; }
       const unsigned int& currentSpriteNumber() { return _currentSprite; }
   };
 }

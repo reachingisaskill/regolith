@@ -5,19 +5,22 @@
 
 #include <string>
 #include <map>
+#include <set>
 
 
 namespace Regolith
 {
+  // Forward declare DataHandler
+  class DataHandler;
 
   // Enumeration of the possible assets that can be loaded
-  enum AssetType { ASSET_TEXTURE, ASSET_STRING, ASSET_MUSIC, ASSET_SOUND };
-  static const char* const AssetTypeNames[] = { "ASSET_TEXTURE", "ASSET_STRING", "ASSET_MUSIC", "ASSET_SOUND" };
+  enum AssetType { ASSET_IMAGE, ASSET_TEXT, ASSET_AUDIO, ASSET_FONT };
+  static const char* const AssetTypeNames[] = { "ASSET_IMAGE", "ASSET_TEXT", "ASSET_AUDIO", "ASSET_FONT" };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Structures for each asset type 
 
-  struct TextureDetail
+  struct ImageDetail
   {
     std::string filename;
     unsigned int width;
@@ -28,33 +31,27 @@ namespace Regolith
   };
 
 
-  struct StringDetail
+  struct TextDetail
   {
     std::string text;
-    TTF_Font* font;
+    std::string font;
     unsigned int width;
     unsigned int height;
+  };
+
+
+  struct AudioDetail
+  {
+    std::string filename;
+  };
+
+
+  struct FontDetail
+  {
+    std::string filename;
+    unsigned int size;
     SDL_Color colour;
   };
-
-
-  struct MusicDetail
-  {
-    std::string filename;
-  };
-
-
-  struct SoundDetail
-  {
-    std::string filename;
-  };
-
-
-//  struct FontDetail
-//  {
-//    std::string filename;
-//    unsigned int size;
-//  };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -62,22 +59,23 @@ namespace Regolith
 
   struct Asset
   {
+    // Const asset type
     const AssetType type;
 
+    // Union of all detail types. Asset type determines the active one
     union
     {
-      TextureDetail textureDetail;
-      StringDetail stringDetail;
-      MusicDetail musicDetail;
-      SoundDetail soundDetail;
-//      FontDetail fontDetail;
+      ImageDetail imageDetail;
+      TextDetail textDetail;
+      AudioDetail audioDetail;
+      FontDetail fontDetail;
     };
 
-    Asset( TextureDetail );
-    Asset( StringDetail );
-    Asset( MusicDetail );
-    Asset( SoundDetail );
-//    Asset( FontDetail );
+    // Contructors and destructors to handle union
+    Asset( ImageDetail );
+    Asset( TextDetail );
+    Asset( AudioDetail );
+    Asset( FontDetail );
 
     Asset( const Asset& );
 
