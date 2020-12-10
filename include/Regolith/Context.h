@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_ARCHITECTURE_CONTEXT_H_
-#define REGOLITH_ARCHITECTURE_CONTEXT_H_
+#ifndef REGOLITH_CONTEXT_H_
+#define REGOLITH_CONTEXT_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/MassProduceable.h"
@@ -152,5 +152,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_ARCHITECTURE_CONTEXT_H_
+#endif // REGOLITH_CONTEXT_H_
 

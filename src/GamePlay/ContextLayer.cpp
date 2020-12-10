@@ -2,7 +2,7 @@
 #include "Regolith/GamePlay/ContextLayer.h"
 
 #include "Regolith/Architecture/ControllableInterface.h"
-#include "Regolith/GamePlay/Context.h"
+#include "Regolith/Context.h"
 #include "Regolith/GamePlay/PhysicalObject.h"
 
 

@@ -19,6 +19,34 @@ namespace Regolith
    */
   class PhysicalObject : virtual public GameObject
   {
+////////////////////////////////////////////////////////////////////////////////
+    // Info required for each state
+    public:
+      class StateDetails
+      {
+        private:
+          float _count;
+          unsigned int _numberFrames;
+
+        public:
+          // Public member variables
+          unsigned int id;
+          float updatePeriod;
+          Texture texture;
+          Collision collision;
+          unsigned int currentFrame;
+//          PhysicalObjectVector children;
+
+          // Constructor
+          StateDetails();
+
+          // Update the frame number
+          void update( float );
+
+      };
+
+      typedef std::map< std::string, StateDetails > StateMap;
+
 
 ////////////////////////////////////////////////////////////////////////////////
     private:
@@ -52,6 +80,19 @@ namespace Regolith
       // Used to configure the collision logic
       CollisionTeam _collisionTeam;
 
+//      // Map of all the children
+//      PhysicalObjectMap _children;
+
+      // Map of all the possible states
+      StateMap _stateMap;
+
+      // When reset is called return to this state
+      std::string _startState;
+      StateDetails* _startStatePointer;
+
+      // Reference to the current state
+      StateDetails* _currentState;
+
 
     protected :
       // Copy constructor - protected so only way to duplicate objects is through the "clone" function
@@ -71,6 +112,22 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
+      // State interface functions
+
+      // Gets a reference to a state
+      StateDetails& getState( std::string name ) { return _stateMap[ name ]; }
+
+      // Sets the current state to the reference
+      void setState( StateDetails* state ) { _currentState = state; }
+
+//      // Return the vector of children used in the current state
+//      PhysicalObjectVector& getChildren() { return _currentState.children; }
+
+      // Return the texture being used in the current state
+//      Texture& getTexture() { return _currentState.texture; }
+
+
+////////////////////////////////////////////////////////////////////////////////
       // Creation and destruction
     public:
       // Default constructor
@@ -87,7 +144,7 @@ namespace Regolith
 
       // Function to create to an copied instance at the specified position
       // ALL derived classes my override this function with the copy-constructor for that class!
-      virtual PhysicalObject* clone() const = 0;
+      virtual PhysicalObject* clone() const { return new PhysicalObject( *this ); }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -95,6 +152,9 @@ namespace Regolith
 
       // Perform the basic configuration
       void configure( Json::Value&, ContextGroup& ) override;
+
+      // Resets the object to it's initial configuration to allow reusing of objects
+      virtual void reset();
 
 
       // Tells the caller that derived classes come from a physical object.
@@ -121,25 +181,26 @@ namespace Regolith
       // set the flag to remove the object
       void destroy() { _destroyMe = true; }
 
-      // Resets the object to it's initial configuration to allow reusing of objects
-      virtual void reset();
-
 
 ////////////////////////////////////////////////////////////////////////////////
       // Specifc functions for enabling physics and rendering on the object
 
+//      // Returns the vector of children that are active for the current state
+//      const PhysicalObjectVector& getChildren() const { return _currentState.children; }
+
 
       // For the camera to request the current renderable texture
-      virtual const Texture& getTexture() const = 0;
+      constexpr const Texture& getTexture() const { return _currentState->texture; }
 
       // For the collision handler to request the current hitboxes
-      virtual const Collision& getCollision() const = 0;
+      constexpr const Collision& getCollision() const { return _currentState->collision; }
 
-      // Perform an update to all the animations
-      virtual void update( float ) = 0;
 
       // Perform the time integration for movement of this object
       virtual void step( float );
+
+      // Perform an update to all the animations
+      virtual void update( float );
 
       // Call back function for when this object collides with another
       virtual void onCollision( Contact&, PhysicalObject* );
@@ -148,6 +209,9 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Object property accessors and modifiers
 
+      // Return the current state of the object
+      unsigned int getState() const { return _currentState->id; }
+      
       // Return the assigned collision team
       CollisionTeam getCollisionTeam() const { return _collisionTeam; }
 
@@ -174,7 +238,7 @@ namespace Regolith
       float getRotation() const { return _rotation; }
       void setRotation( float r ) { _rotation = r; }
 
-      // Preferred methods for changing position/rotation
+      // Preferred methods for changing positin/rotation
       void move( Vector m ) { _position += m; }
       void rotate( float r ) { _rotation += r; }
 

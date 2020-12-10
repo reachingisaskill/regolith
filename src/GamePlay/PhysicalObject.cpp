@@ -10,50 +10,6 @@
 namespace Regolith
 {
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//// State details class////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Construction
-
-  PhysicalObject::StateDetails::StateDetails() :
-    _count( 0.0 ),
-    _numberFrames( 0 ),
-    id( 0 ),
-    updatePeriod( 0.0 ),
-    texture(),
-    collision(),
-    currentFrame( 0 )
-  {
-  }
-
-
-  // Update the current frame number
-  void PhysicalObject::StateDetails::update( float timestep )
-  {
-    // Update the timer
-    _count += timestep;
-
-    // Determine how many frames have elapsed in the animation
-    currentFrame += _count / updatePeriod;
-    currentFrame = currentFrame % _numberFrames;
-
-    // Reset the timer based on the update period
-    _count = std::fmod( _count, updatePeriod );
-
-    // Update the texture and collision objects
-    texture.setFrameNumber( currentFrame );
-    collision.setFrameNumber( currentFrame );
-
-    DEBUG_STREAM << "StateDetails::update : _count : " << _count << ", frame No. : " << currentFrame << " of " << _numberFrames << ", update rate : " << updatePeriod;
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//// Physical object class//////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Construction & destruction
-
   PhysicalObject::PhysicalObject() :
     _destroyMe( false ),
     _hasMoveable( false ),
@@ -68,12 +24,7 @@ namespace Regolith
     _height( 0.0 ),
     _velocity(),
     _forces(),
-    _collisionTeam( 0 ),
-//    _children(),
-    _stateMap(),
-    _startState(),
-    _startStatePointer( nullptr ),
-    _currentState( nullptr )
+    _collisionTeam( 0 )
   {
   }
 
@@ -93,40 +44,25 @@ namespace Regolith
     _height( other._height ),
     _velocity( other._velocity ),
     _forces(),
-    _collisionTeam( other._collisionTeam ),
-//    _children(),
-    _stateMap( other._stateMap ),
-    _startState( other._startState ),
-    _startStatePointer( &_stateMap[_startState] ),
-    _currentState( _startStatePointer )
+    _collisionTeam( other._collisionTeam )
   {
-//    for ( PhysicalObjectMap::const_iterator it = other._children.begin(); it != other._children.end(); ++it )
-//    {
-//      this->_children[ it->first ] = it->second->clone();
-//    }
   }
 
 
   // Destroy the children
   PhysicalObject::~PhysicalObject()
   {
-//    for ( PhysicalObjectMap::iterator it = _children.begin(); it != _children.end(); ++it )
-//    {
-//      delete it->second;
-//    }
-//    _children.clear();
   }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configuration
 
-  void PhysicalObject::configure( Json::Value& json_data, ContextGroup& cg )
+  void PhysicalObject::configure( Json::Value& json_data, ContextGroup& /*cg*/ )
   {
     Utilities::validateJson( json_data, "has_moveable", Utilities::JSON_TYPE_BOOLEAN );
     Utilities::validateJson( json_data, "has_texture", Utilities::JSON_TYPE_BOOLEAN );
     Utilities::validateJson( json_data, "has_animation", Utilities::JSON_TYPE_BOOLEAN );
-    Utilities::validateJson( json_data, "states", Utilities::JSON_TYPE_OBJECT );
 
     // Configure the basic properties of the object
     _hasMoveable = json_data["has_moveable"].asBool();
@@ -187,81 +123,8 @@ namespace Regolith
       std::string collision_team = bounding_box_data["collision_team"].asString();
       _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
 
-      INFO_STREAM << "PhysicalObject::configure : Configuring collidable object with type: " << collision_team;
+      INFO_STREAM << "PhysicalObject::configure : Configuring physical object with collision team: " << collision_team;
     }
-
-//    // If children are present, configure them too
-//    if ( Utilities::validateJson( json_data, "children", Utilities::JSON_TYPE_OBJECT, false ) )
-//    {
-//      Json::Value& children = json_data["children"];
-//
-//      for( Json::Value::iterator c_it = children.begin(); c_it != children.end(); ++c_it )
-//      {
-//        std::string child_name = c_it.key().asString();
-//        _children[ child_name ] = nullptr;
-//
-//
-//        // Use the builder to create child objects
-//      }
-//    }
-
-
-    // Controlling the states
-    Json::Value& states = json_data["states"];
-    if ( states.size() == 0 )
-    {
-      Exception ex( "PhysicalObject::configure()", "Every physical object must have at least one state" );
-      throw ex;
-    }
-
-    for( Json::Value::iterator s_it = states.begin(); s_it != states.end(); ++s_it )
-    {
-      std::string state_name = s_it.key().asString();
-      Json::Value& state_data = (*s_it);
-
-      _stateMap.emplace( std::make_pair( state_name, StateDetails() ) );
-
-      // Texture details
-      if ( Utilities::validateJson( state_data, "texture", Utilities::JSON_TYPE_OBJECT, _hasTexture ) )
-      {
-        _stateMap[ state_name ].texture.configure( state_data["texture"], cg.getDataHandler() );
-      }
-      
-      // Hitbox details
-      if ( Utilities::validateJson( state_data, "collision", Utilities::JSON_TYPE_OBJECT, false ) )
-      {
-        _stateMap[ state_name ].collision.configure( state_data["collision"] );
-      }
-
-      // Animation details
-      if ( Utilities::validateJson( state_data, "update_period", Utilities::JSON_TYPE_FLOAT, _hasAnimation ) )
-      {
-        _stateMap[ state_name ].updatePeriod = state_data[ "update_period" ].asFloat();
-      }
-    }
-
-    // Store the reset state if given
-    if ( Utilities::validateJson( json_data, "start_state", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      std::string start_state_name = json_data["start_state"].asString();
-      StateMap::iterator found = _stateMap.find( start_state_name );
-      if ( found == _stateMap.end() )
-      {
-        Exception ex( "PhysicalObject::configure()", "Requested start state not found in object configuration." );
-        ex.addDetail( "Requested State Name", start_state_name );
-        throw ex;
-      }
-
-      _startState = start_state_name;
-      _startStatePointer = &found->second;
-    }
-    else
-    {
-      _startState = _stateMap.begin()->first;
-      _startStatePointer = &_stateMap.begin()->second;
-    }
-
-    _currentState = _startStatePointer;
 
     DEBUG_STREAM << "PhysicalObject::configure : Configured physical object. Pos = " << _position << " Vel = " << _velocity << " M = " << _mass << " w/h = " << _width << ", " << _height;
   }
@@ -272,7 +135,6 @@ namespace Regolith
     _destroyMe = false;
     _velocity.zero();
     _forces.zero();
-    _currentState = _startStatePointer;
   }
 
 
@@ -305,12 +167,6 @@ namespace Regolith
     // Update complete - reset forces
     _forces.zero();
     DEBUG_STREAM << "PhysicalObject::step : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
-  }
-
-
-  void PhysicalObject::update( float time )
-  {
-    _currentState->update( time );
   }
 
 

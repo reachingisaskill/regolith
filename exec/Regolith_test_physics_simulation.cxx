@@ -1,7 +1,7 @@
 
 #include "Regolith.h"
 #include "Regolith/Test/EmptyContext.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/SimpleObject.h"
 
 #include "logtastic.h"
 
@@ -23,7 +23,7 @@ int main( int, char** )
   logtastic::start( "Regolith - Full Physics Simulation Test", REGOLITH_VERSION_NUMBER );
 
   INFO_LOG( "Main : Creating test builders" );
-  man->getObjectFactory().addBuilder< PhysicalObject >( "physical_object" );
+  man->getObjectFactory().addBuilder< SimpleObject >( "simple_object" );
   man->getContextFactory().addBuilder< EmptyContext >( "empty_context" );
 
   try

@@ -2,7 +2,7 @@
 #ifndef REGOLITH_TEST_TEST_CONTEXT_H_
 #define REGOLITH_TEST_TEST_CONTEXT_H_
 
-#include "Regolith/GamePlay/Context.h"
+#include "Regolith/Context.h"
 #include "Regolith/GamePlay/Timers.h"
 
 

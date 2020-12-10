@@ -2,7 +2,7 @@
 #ifndef REGOLITH_TEST_EMPTY_CONTEXT_H_
 #define REGOLITH_TEST_EMPTY_CONTEXT_H_
 
-#include "Regolith/GamePlay/Context.h"
+#include "Regolith/Context.h"
 
 
 namespace Regolith

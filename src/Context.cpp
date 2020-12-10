@@ -1,5 +1,5 @@
 
-#include "Regolith/GamePlay/Context.h"
+#include "Regolith/Context.h"
 
 #include "Regolith/Architecture/NoisyObject.h"
 #include "Regolith/Architecture/ButtonObject.h"
