@@ -25,11 +25,9 @@ namespace Regolith
     _objectFactory(),
     _contextFactory(),
     _signalFactory(),
-    _fonts(),
     _teamNames(),
     _typeNames(),
     _title(),
-    _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
     _eventStartIndex(0),
     _gameEvents(),
@@ -50,13 +48,6 @@ namespace Regolith
   Manager::~Manager()
   {
     DEBUG_LOG( "Manager::~Manager : Destruction" );
-
-    INFO_LOG( "Manager::~Manager : Removing each of the fonts and clearing the map" );
-    for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )
-    {
-      TTF_CloseFont( it->second );
-    }
-    _fonts.clear();
 
 //    INFO_LOG( "Manager::~Manager : Clearing context manager" );
 //    _theContexts.clear();
@@ -155,18 +146,6 @@ namespace Regolith
     // Join all the threads
     INFO_LOG( "Manager::run : Joining all worker threads" );
     _theThreads.join();
-  }
-
-
-  TTF_Font* Manager::getFontPointer( std::string name )
-  {
-    FontMap::iterator find = _fonts.find( name );
-    if ( find == _fonts.end() )
-    {
-      ERROR_STREAM << "Manager::getFontPointer : Could not find requested font : " << name;
-      return _defaultFont;
-    }
-    return find->second;
   }
 
 

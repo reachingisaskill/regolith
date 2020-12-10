@@ -1,5 +1,6 @@
 
 #include "Regolith/GamePlay/Font.h"
+#include "Regolith/Managers/DataHandler.h"
 
 
 namespace Regolith
@@ -13,7 +14,7 @@ namespace Regolith
     TTF_Font* theFont = TTF_OpenFont( filename.c_str(), fontsize );
     if ( theFont == nullptr ) // Failed to open
     {
-      FAILURE_STREAM << "Manager::_loadFonts() : Failed to load font : " << font_name;
+      FAILURE_STREAM << "Manager::_loadFonts() : Failed to load font : " << filename;
       Exception ex( "Manager::_loadFonts()", "Can not load font" );
       ex.addDetail( "Font Name", filename );
       ex.addDetail( "Font Path", fontsize );
@@ -47,6 +48,16 @@ namespace Regolith
 
   SDL_Surface* Font::write( std::string text )
   {
+    SDL_Surface* textSurface = TTF_RenderText_Solid( _rawFont->ttf_font, text.c_str(), _rawFont->colour );
+    if ( textSurface == nullptr )
+    {
+      Exception ex( "Font::write()", "Could not render text", true );
+      ex.addDetail( "Text string", text );
+      ex.addDetail( "SDL_ttf error", TTF_GetError() );
+      throw ex;
+    }
+
+    return textSurface;
   }
 
 

@@ -70,11 +70,16 @@ namespace Regolith
   {
     if ( _rawTexture == nullptr )
     {
-      SDL_DestroySurface( surface );
+      SDL_FreeSurface( surface );
+    }
+    else if ( _rawTexture->surface != nullptr )
+    {
+      SDL_FreeSurface( _rawTexture->surface );
+      _rawTexture->surface = surface;
     }
     else
     {
-      _rawTexture.surface = surface;
+      _rawTexture->surface = surface;
     }
   }
 
@@ -87,19 +92,19 @@ namespace Regolith
 
   void Texture::setColor( Uint8 red, Uint8 green, Uint8 blue )
   {
-    SDL_SetTextureColorMod( _rawTexture->texture, red, green, blue );
+    SDL_SetTextureColorMod( _rawTexture->sdl_texture, red, green, blue );
   }
 
 
   void Texture::setAlpha( Uint8 alpha )
   {
-    SDL_SetTextureAlphaMod( _rawTexture->texture, alpha );
+    SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, alpha );
   }
 
 
   void Texture::setBlendMode( SDL_BlendMode blendmode )
   {
-    SDL_SetTextureBlendMode( _rawTexture->texture, blendmode );
+    SDL_SetTextureBlendMode( _rawTexture->sdl_texture, blendmode );
   }
 
 
@@ -165,7 +170,7 @@ namespace Regolith
     SDL_Surface* textSurface = TTF_RenderText_Solid( font, textureString.c_str(), color );
     if ( textSurface == nullptr )
     {
-      Exception ex( "Scene::_addTextureFromText()", "Could not render text", true );
+      Exception ex( "loadSurfaceFromString()", "Could not render text", true );
       ex.addDetail( "Text string", textureString );
       ex.addDetail( "SDL_ttf error", TTF_GetError() );
       throw ex;
@@ -181,7 +186,7 @@ namespace Regolith
     SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
     if ( loadedSurface == nullptr )
     {
-      Exception ex( "Scene::addTextureFromFile()", "Could not load image data", false );
+      Exception ex( "loadSurfaceFromFile()", "Could not load image data", false );
       ex.addDetail( "Image path", path );
       ex.addDetail( "SDL_img error", IMG_GetError() );
       throw ex;

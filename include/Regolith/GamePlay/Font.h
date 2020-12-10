@@ -7,6 +7,8 @@
 
 namespace Regolith
 {
+  // Forward declarations
+  class DataHandler;
 
   // Function that creates the TTF_Font object on the heap
   TTF_Font* loadFont( std::string, int );

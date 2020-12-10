@@ -232,9 +232,20 @@ namespace Regolith
         texture.surface = loadSurfaceFromFile( asset_found->second.imageDetail.filename, asset_found->second.imageDetail.colourkey );
         break;
 
-      case ASSET_TEXT :
-        texture.surface = loadSurfaceFromString( asset_found->second.textDetail.text, asset_found->second.textDetail.font, asset_found->second.textDetail.colour );
-        break;
+//      case ASSET_TEXT :
+//        {
+//          AssetMap::const_iterator font_found = _assets.find( asset_found->second.textDetail.font );
+//          if ( font_found == _assets.end() || font_found->second.type != ASSET_FONT )
+//          {
+//            Exception ex( "DataManager::loadRawTexture()", "Requested font not found" );
+//            ex.addDetail( "Asset Name", name );
+//            ex.addDetail( "Font Name", asset_found->second.textDetail.font );
+//            throw ex;
+//          }
+//
+//          texture.surface = loadSurfaceFromString( asset_found->second.textDetail.text, asset_found->second.textDetail.font, asset_found->second.textDetail.colour );
+//        }
+//        break;
 
       default :
         Exception ex( "DataManager::loadRawTexture()", "Asset is not a texture" );
@@ -347,7 +358,7 @@ namespace Regolith
     Utilities::validateJson( index_data, "fonts", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( index_data, "images", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( index_data, "text", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( index_data, "sounds", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( index_data, "audio", Utilities::JSON_TYPE_OBJECT );
 
 
     // Load details of all the font assets
@@ -417,7 +428,7 @@ namespace Regolith
     }
 
     // Load details of all the audio assets
-    for ( Json::Value::iterator it = index_data["sounds"].begin(); it != index_data["sounds"].end(); ++it )
+    for ( Json::Value::iterator it = index_data["audio"].begin(); it != index_data["audio"].end(); ++it )
     {
       Json::Value& data = *it;
       AudioDetail detail;

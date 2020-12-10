@@ -2,16 +2,13 @@
   "fonts": 
   {
   },
-  "sounds": 
+  "audio": 
   {
   },
-  "music": 
+  "text": 
   {
   },
-  "strings": 
-  {
-  },
-  "textures": 
+  "images": 
   {
     "coloured_boxes": { "path": "test_data/physics_test/coloured_boxes.bmp", "rows": 2, "columns": 2, "width": 40, "height": 40 }
   }

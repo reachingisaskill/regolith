@@ -43,7 +43,7 @@ namespace Regolith
         break;
 
       case ASSET_TEXT :
-        new (&textDetail) StringDetail( ass.textDetail );
+        new (&textDetail) TextDetail( ass.textDetail );
         break;
 
       case ASSET_AUDIO :
