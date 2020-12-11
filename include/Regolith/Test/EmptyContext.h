@@ -33,6 +33,10 @@ namespace Regolith
       virtual Vector updateCamera( float ) const override { return Vector(); }
 
 
+      // Called for each object that is flagged to have global physics
+      virtual void updatePhysics( PhysicalObject*, float ) const {}
+
+
       // Updates the internal state of the context. Nothing to do here.
       void updateContext( float ) {}
   };

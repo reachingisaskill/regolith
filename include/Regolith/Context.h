@@ -92,6 +92,9 @@ namespace Regolith
       // Called after the physics processes to update the current position that the camera renders from
       virtual Vector updateCamera( float ) const = 0;
 
+      // Called for each object that is flagged to have global physics
+      virtual void updatePhysics( PhysicalObject*, float ) const = 0;
+
 //////////////////////////////////////////////////////////////////////////////// 
     public:
       // Con/De-structor

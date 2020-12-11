@@ -30,6 +30,8 @@ namespace Regolith
       bool _hasTexture;
       // Flag to indicate this object has animation
       bool _hasAnimation;
+      // Flag to indicate this object responds to global physics
+      bool _hasPhysics;
 
       // Position with respect to the parent object
       Vector _position;
@@ -62,12 +64,6 @@ namespace Regolith
 
       // For derived classes to update the mass. Sets both mass and it's inverse
       void setMass( float );
-
-      // For derived classes to impose a force
-      void addForce( Vector f ) { _forces += f; }
-
-      // Forces an immediate movement of the object. Used mostly to prevent overlap during collisions.
-      void kick( Vector& j ) { _velocity += j; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -111,6 +107,9 @@ namespace Regolith
       // Tells the caller that the is animated for every frame
       virtual bool hasAnimation() const override { return _hasAnimation; }
 
+      // Tells the caller that the is animated for every frame
+      virtual bool hasPhysics() const override { return _hasPhysics; }
+
 
 ////////////////////////////////////////////////////////////////////////////////
       // Controlling object permanence within the context
@@ -147,6 +146,14 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////
       // Object property accessors and modifiers
+
+
+      // For derived classes to impose a force
+      void addForce( Vector f ) { _forces += f; }
+
+      // Forces an immediate movement of the object. Used mostly to prevent overlap during collisions.
+      void kick( Vector& j ) { _velocity += j; }
+
 
       // Return the assigned collision team
       CollisionTeam getCollisionTeam() const { return _collisionTeam; }

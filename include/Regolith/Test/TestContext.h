@@ -46,6 +46,9 @@ namespace Regolith
       // Updates the camera position
       virtual Vector updateCamera( float ) const override { return Vector(); }
 
+      // Called for each object that is flagged to have global physics
+      virtual void updatePhysics( PhysicalObject*, float ) const {}
+
 
 //////////////////////////////////////////////////
       // Requirements for the ControllableInterface - input action handling

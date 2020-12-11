@@ -15,6 +15,7 @@ namespace Regolith
     _hasMoveable( false ),
     _hasTexture( false ),
     _hasAnimation( false ),
+    _hasPhysics( false ),
     _position(),
     _rotation( 0.0 ),
     _mass( 0.0 ),
@@ -35,6 +36,7 @@ namespace Regolith
     _hasMoveable( other._hasMoveable ),
     _hasTexture( other._hasTexture ),
     _hasAnimation( other._hasAnimation ),
+    _hasPhysics( other._hasPhysics ),
     _position( other._position ),
     _rotation( other._rotation ),
     _mass( other._mass ),
@@ -63,11 +65,13 @@ namespace Regolith
     Utilities::validateJson( json_data, "has_moveable", Utilities::JSON_TYPE_BOOLEAN );
     Utilities::validateJson( json_data, "has_texture", Utilities::JSON_TYPE_BOOLEAN );
     Utilities::validateJson( json_data, "has_animation", Utilities::JSON_TYPE_BOOLEAN );
+    Utilities::validateJson( json_data, "has_physics", Utilities::JSON_TYPE_BOOLEAN );
 
     // Configure the basic properties of the object
     _hasMoveable = json_data["has_moveable"].asBool();
     _hasTexture = json_data["has_texture"].asBool();
     _hasAnimation = json_data["has_animation"].asBool();
+    _hasPhysics = json_data["has_physics"].asBool();
 
 
     // Set the mass properties - Determine if an object can even be moved

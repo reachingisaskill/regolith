@@ -29,6 +29,7 @@ namespace Regolith
       virtual bool hasInput() const { return false; }
       virtual bool hasButton() const { return false; }
       virtual bool hasAnimation() const { return false; }
+      virtual bool hasPhysics() const { return false; }
       virtual bool hasTexture() const { return false; }
       virtual bool hasMovement() const { return false; }
       virtual bool isPhysical() const { return false; }

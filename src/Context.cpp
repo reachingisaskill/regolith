@@ -138,6 +138,11 @@ namespace Regolith
               (*obj_it)->update( time );
             }
 
+            if ( (*obj_it)->hasPhysics() )
+            {
+              this->updatePhysics( (*obj_it), time );
+            }
+
             // Update the iterator.
             ++obj_it;
           }
