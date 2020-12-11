@@ -14,6 +14,8 @@ namespace Regolith
     _rawTextures(),
     _rawSounds(),
     _rawMusic(),
+    _rawFonts(),
+    _rawTexts(),
     _surfaceRenderQueue(),
     _isLoaded( false ),
     _isRendered( true ),
@@ -56,22 +58,6 @@ namespace Regolith
     DataManager& manager = Manager::getInstance()->getDataManager();
 
 
-    RawFontMap::iterator font_end = _rawFonts.end();
-    for ( RawFontMap::iterator it = _rawFonts.begin(); it != font_end; ++it )
-    {
-      std::string name = it->first;
-      try
-      {
-        manager.loadRawFont( name, it->second );
-        DEBUG_STREAM << "Loaded Font: " << name << " @ " << it->second.ttf_font;
-      }
-      catch( Exception& ex )
-      {
-        ex.addDetail( "Font Name", name );
-        throw ex;
-      }
-    }
-
     RawTextureMap::iterator texture_end = _rawTextures.end();
     for ( RawTextureMap::iterator it = _rawTextures.begin(); it != texture_end; ++it )
     {
@@ -92,6 +78,38 @@ namespace Regolith
     // Tell the engine to render the surfaces into textures on the rendering thread
     Manager::getInstance()->renderSurfaces( this );
 
+
+    RawFontMap::iterator font_end = _rawFonts.end();
+    for ( RawFontMap::iterator it = _rawFonts.begin(); it != font_end; ++it )
+    {
+      std::string name = it->first;
+      try
+      {
+        manager.loadRawFont( name, it->second );
+        DEBUG_STREAM << "Loaded Font: " << name << " @ " << it->second.ttf_font;
+      }
+      catch( Exception& ex )
+      {
+        ex.addDetail( "Font Name", name );
+        throw ex;
+      }
+    }
+
+    RawTextMap::iterator text_end = _rawTexts.end();
+    for ( RawTextMap::iterator it = _rawTexts.begin(); it != text_end; ++it )
+    {
+      std::string name = it->first;
+      try
+      {
+        manager.loadRawText( name, it->second );
+        DEBUG_STREAM << "Loaded Text: " << name;
+      }
+      catch( Exception& ex )
+      {
+        ex.addDetail( "Text Name", name );
+        throw ex;
+      }
+    }
 
     RawMusicMap::iterator music_end = _rawMusic.end();
     for ( RawMusicMap::iterator it = _rawMusic.begin(); it != music_end; ++it )
@@ -156,6 +174,32 @@ namespace Regolith
       }
     }
 
+    RawFontMap::iterator font_end = _rawFonts.end();
+    for ( RawFontMap::iterator it = _rawFonts.begin(); it != font_end; ++it )
+    {
+      std::string name = it->first;
+
+      if ( it->second.ttf_font != nullptr )
+      {
+        DEBUG_STREAM << "Unloaded font: " << name << " @ " << it->second.ttf_font;
+        TTF_CloseFont( it->second.ttf_font );
+        it->second.ttf_font = nullptr;
+      }
+    }
+
+    RawTextMap::iterator texts_end = _rawTexts.end();
+    for ( RawTextMap::iterator it = _rawTexts.begin(); it != texts_end; ++it )
+    {
+      std::string name = it->first;
+
+      if ( it->second.text != nullptr )
+      {
+        DEBUG_STREAM << "Unloaded text: " << name;
+        delete it->second.text;
+        it->second.text = nullptr;
+      }
+    }
+
     RawMusicMap::iterator music_end = _rawMusic.end();
     for ( RawMusicMap::iterator it = _rawMusic.begin(); it != music_end; ++it )
     {
@@ -167,7 +211,6 @@ namespace Regolith
         Mix_FreeMusic( it->second.music );
         it->second.music = nullptr;
       }
-
     }
 
     RawSoundMap::iterator sounds_end = _rawSounds.end();
@@ -181,7 +224,6 @@ namespace Regolith
         Mix_FreeChunk( it->second.sound );
         it->second.sound = nullptr;
       }
-
     }
 
     _isLoaded = false;
@@ -234,6 +276,19 @@ namespace Regolith
     {
       RawFont new_font = Manager::getInstance()->getDataManager().buildRawFont( name );
       found = _rawFonts.insert( std::make_pair( name, new_font ) ).first;
+    }
+
+    return &(found->second);
+  }
+
+
+  RawText* DataHandler::getRawText( std::string name )
+  {
+    RawTextMap::iterator found = _rawTexts.find( name );
+    if ( found == _rawTexts.end() )
+    {
+      RawText new_text = Manager::getInstance()->getDataManager().buildRawText( name );
+      found = _rawTexts.insert( std::make_pair( name, new_text ) ).first;
     }
 
     return &(found->second);

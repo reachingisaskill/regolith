@@ -105,6 +105,9 @@ namespace Regolith
       // Build a raw font object with null pointer for a data handler
       RawFont buildRawFont( std::string ) const;
 
+      // Build a raw text object with null pointer for a data handler
+      RawText buildRawText( std::string ) const;
+
 
       // Load a raw texture object
       void loadRawTexture( std::string, RawTexture& ) const;
@@ -117,6 +120,9 @@ namespace Regolith
 
       // Load a raw font object
       void loadRawFont( std::string, RawFont& ) const;
+
+      // Load a raw text object
+      void loadRawText( std::string, RawText& ) const;
 
   };
 

@@ -15,6 +15,7 @@ namespace Regolith
 
   RawTexture::RawTexture() :
     sdl_texture( nullptr ),
+    surface( nullptr ),
     width( 0 ),
     height( 0 ),
     rows( 0 ),
@@ -27,6 +28,7 @@ namespace Regolith
 
   RawTexture::RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c ) :
     sdl_texture( t ),
+    surface( nullptr ),
     width( w ),
     height( h ),
     rows( r ),
@@ -39,6 +41,7 @@ namespace Regolith
 
   RawTexture::RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c, unsigned short n ) :
     sdl_texture( t ),
+    surface( nullptr ),
     width( w ),
     height( h ),
     rows( r ),
@@ -46,6 +49,15 @@ namespace Regolith
     cells( n ),
     update( false )
   {
+  }
+
+
+  RawTexture::~RawTexture()
+  {
+    if ( surface != nullptr )
+    {
+      SDL_FreeSurface( surface );
+    }
   }
 
 
@@ -149,7 +161,7 @@ namespace Regolith
     _clip.w = _rawTexture->width / _rawTexture->columns;
     _clip.h = _rawTexture->height / _rawTexture->rows;
 
-    if ( json_data.isMember( "start_number" ) )
+    if ( Utilities::validateJson( json_data, "start_number", Utilities::JSON_TYPE_INTEGER, false ) )
     {
       setFrameNumber( json_data["start_number"].asInt() );
     }

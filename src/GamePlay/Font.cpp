@@ -1,6 +1,7 @@
 
 #include "Regolith/GamePlay/Font.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 
 namespace Regolith
@@ -40,19 +41,21 @@ namespace Regolith
   }
 
 
-  void Font::configure( std::string font_name, DataHandler& handler )
+  void Font::configure( Json::Value& json_data, DataHandler& handler )
   {
-    _rawFont = handler.getRawFont( font_name );
+    Utilities::validateJson( json_data, "font", Utilities::JSON_TYPE_STRING );
+
+    _rawFont = handler.getRawFont( json_data["font"].asString() );
   }
 
 
-  SDL_Surface* Font::write( std::string text )
+  SDL_Surface* Font::write( Text& text )
   {
-    SDL_Surface* textSurface = TTF_RenderText_Solid( _rawFont->ttf_font, text.c_str(), _rawFont->colour );
+    SDL_Surface* textSurface = TTF_RenderText_Solid( _rawFont->ttf_font, text.getRawText()->c_str(), _rawFont->colour );
     if ( textSurface == nullptr )
     {
       Exception ex( "Font::write()", "Could not render text", true );
-      ex.addDetail( "Text string", text );
+      ex.addDetail( "Text string", text.getRawText() );
       ex.addDetail( "SDL_ttf error", TTF_GetError() );
       throw ex;
     }
@@ -61,7 +64,7 @@ namespace Regolith
   }
 
 
-  SDL_Surface* Font::writeParagraph( std::string /*text*/, float /*width*/, float /*height*/, AlignmentMode /*hor*/, AlignmentMode /*ver*/ )
+  SDL_Surface* Font::writeParagraph( Text& /*text*/, float /*width*/, float /*height*/ )
   {
     Exception ex( "Font::writeParagraph()", "Functionality not yet available" );
     throw ex;

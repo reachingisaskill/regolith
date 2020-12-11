@@ -33,10 +33,7 @@ namespace Regolith
 
   struct TextDetail
   {
-    std::string text;
-    std::string font;
-    unsigned int width;
-    unsigned int height;
+    std::string filename;
   };
 
 

@@ -9,6 +9,7 @@ namespace Regolith
 {
   // Forward declarations
   class DataHandler;
+  class Text;
 
   // Function that creates the TTF_Font object on the heap
   TTF_Font* loadFont( std::string, int );
@@ -43,14 +44,14 @@ namespace Regolith
 
 
       // Configure the font object
-      void configure( std::string, DataHandler& );
+      void configure( Json::Value&, DataHandler& );
 
 
       // Using the loaded font, turn a string of text into a simple surface
-      SDL_Surface* write( std::string );
+      SDL_Surface* write( Text& );
 
       // More advanced, turn a long string of text in to a surface, contained and aligned within the provided limits
-      SDL_Surface* writeParagraph( std::string, float, float, AlignmentMode, AlignmentMode );
+      SDL_Surface* writeParagraph( Text&, float, float );
   };
 
 }

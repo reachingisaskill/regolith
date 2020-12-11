@@ -6,6 +6,7 @@
 #include "Regolith/GamePlay/Texture.h"
 #include "Regolith/GamePlay/Noises.h"
 #include "Regolith/GamePlay/Font.h"
+#include "Regolith/GamePlay/Text.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
@@ -41,6 +42,9 @@ namespace Regolith
 
       // List of all the fonts
       RawFontMap _rawFonts;
+
+      // List of all the fonts
+      RawTextMap _rawTexts;
 
       // Queue of surfaces to render in the engine.
       SurfaceRenderQueue _surfaceRenderQueue;
@@ -93,6 +97,9 @@ namespace Regolith
 
       // Get a font with a given name
       RawFont* getRawFont( std::string );
+
+      // Get a font with a given name
+      RawText* getRawText( std::string );
 
   };
 

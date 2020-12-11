@@ -33,6 +33,8 @@ namespace Regolith
     RawTexture();
     RawTexture( SDL_Texture*, int, int, unsigned short, unsigned short );
     RawTexture( SDL_Texture*, int, int, unsigned short, unsigned short, unsigned short );
+
+    ~RawTexture();
   };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

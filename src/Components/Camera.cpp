@@ -65,9 +65,8 @@ namespace Regolith
       throw ex;
     }
 
-    // Delete the surface data
-    SDL_FreeSurface( texture->surface );
-    texture->surface = nullptr;
+    // Set the update flag to false
+    texture->update = false;
   }
 
 
@@ -81,7 +80,7 @@ namespace Regolith
     const Texture& texture = object->getTexture();
 
     // If a new surface has been provided, re-render the texture
-    if ( texture._rawTexture->surface != nullptr )
+    if ( texture._rawTexture->update )
     {
       renderRawTexture( texture._rawTexture );
     }

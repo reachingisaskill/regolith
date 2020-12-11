@@ -6,6 +6,7 @@
 #include "Regolith/Managers/ThreadHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 #include "Regolith/GamePlay/Font.h"
+#include "Regolith/GamePlay/Text.h"
 #include "Regolith/GamePlay/Texture.h"
 #include "Regolith/GamePlay/Noises.h"
 
@@ -117,10 +118,6 @@ namespace Regolith
         return RawTexture( nullptr, asset_found->second.imageDetail.width, asset_found->second.imageDetail.height, asset_found->second.imageDetail.rows, asset_found->second.imageDetail.columns );
         break;
 
-      case ASSET_TEXT :
-        return RawTexture( nullptr, asset_found->second.textDetail.width, asset_found->second.textDetail.height, 1, 1 );
-        break;
-
       default :
         Exception ex( "DataManager::buildRawTexture()", "Asset is not a texture" );
         ex.addDetail( "Asset Name", name );
@@ -213,6 +210,33 @@ namespace Regolith
   }
 
 
+  RawText DataManager::buildRawText( std::string name ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::buildRawFont()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_TEXT :
+        return RawText();
+        break;
+
+      default :
+        Exception ex( "DataManager::buildRawText()", "Asset is not a text" );
+        ex.addDetail( "Asset Name", name );
+        ex.addDetail( "Expected", "ASSET_TEXT" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Load raw asset functions
 
@@ -231,21 +255,6 @@ namespace Regolith
       case ASSET_IMAGE :
         texture.surface = loadSurfaceFromFile( asset_found->second.imageDetail.filename, asset_found->second.imageDetail.colourkey );
         break;
-
-//      case ASSET_TEXT :
-//        {
-//          AssetMap::const_iterator font_found = _assets.find( asset_found->second.textDetail.font );
-//          if ( font_found == _assets.end() || font_found->second.type != ASSET_FONT )
-//          {
-//            Exception ex( "DataManager::loadRawTexture()", "Requested font not found" );
-//            ex.addDetail( "Asset Name", name );
-//            ex.addDetail( "Font Name", asset_found->second.textDetail.font );
-//            throw ex;
-//          }
-//
-//          texture.surface = loadSurfaceFromString( asset_found->second.textDetail.text, asset_found->second.textDetail.font, asset_found->second.textDetail.colour );
-//        }
-//        break;
 
       default :
         Exception ex( "DataManager::loadRawTexture()", "Asset is not a texture" );
@@ -339,6 +348,33 @@ namespace Regolith
   }
 
 
+  void DataManager::loadRawText( std::string name, RawText& text ) const
+  {
+    AssetMap::const_iterator asset_found = _assets.find( name );
+    if ( asset_found == _assets.end() )
+    {
+      Exception ex( "DataManager::loadRawText()", "Asset does not exist" );
+      ex.addDetail( "Asset Name", name );
+      throw ex;
+    }
+
+    switch ( asset_found->second.type )
+    {
+      case ASSET_TEXT :
+        text.text = loadText( asset_found->second.textDetail.filename );
+        break;
+
+      default :
+        Exception ex( "DataManager::loadRawText()", "Asset is not a text file" );
+        ex.addDetail( "Asset Name", name );
+        ex.addDetail( "Expected", "ASSET_TEXT" );
+        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
+        throw ex;
+        break;
+    }
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure
 
@@ -412,16 +448,7 @@ namespace Regolith
       TextDetail detail;
 
       std::string name = it.key().asString();
-      detail.text = data["filename"].asString();
-      detail.font = data["font"].asString();
-
-      AssetMap::iterator font_it = _assets.find( detail.font );
-      if ( font_it == _assets.end() || font_it->second.type != ASSET_FONT )
-      {
-        Exception ex( "DataManager::configure()", "Expected font not found" );
-        ex.addDetail( "Font Name", detail.font );
-        throw ex;
-      }
+      detail.filename = data["filename"].asString();
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "DataManager::configure : Asset String: " << name;
