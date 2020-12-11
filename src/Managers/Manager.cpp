@@ -117,31 +117,49 @@ namespace Regolith
     INFO_LOG( "Manager::run : Starting worker threads" );
     _theThreads.startAll();
 
-    // Load the first context group blocking this thread until completion
-    INFO_LOG( "Manager::run : Loading entry point" );
-    _theContexts.loadEntryPoint();
 
-    // Reset the stack to the first context
-    INFO_LOG( "Manager::run : Loading the first context" );
-    this->openEntryPoint();
+    try
+    {
+      // Load the first context group blocking this thread until completion
+      INFO_LOG( "Manager::run : Loading entry point" );
+      _theContexts.loadEntryPoint();
+
+      // Reset the stack to the first context
+      INFO_LOG( "Manager::run : Loading the first context" );
+      this->openEntryPoint();
+
+      // Start the engine!
+      INFO_LOG( "Manager::run : Starting the engine." );
+      _theEngine.run();
+    }
+    catch ( Exception& ex )
+    {
+      ERROR_LOG( "Manager::run : A Regolith error occured during runtime" );
+      ERROR_STREAM << ex.elucidate();
+      std::cerr << ex.elucidate();
+    }
 
 
-    // Start the engine!
-    INFO_LOG( "Manager::run : Starting the engine." );
-    _theEngine.run();
-
-
-
-    // Stop all the threads
+      // Stop all the threads
     INFO_LOG( "Manager::run : Stopping all worker threads" );
     _theThreads.stopAll();
 
-    DEBUG_STREAM << "Manager::run : HERE : " << ThreadManager::StopCondition.data;
 
-    // Unload everything
-    INFO_LOG( "Manager::run : Unloading data" );
-    _theContexts.clear();
-    _theData.clear();
+    try
+    {
+      // Unload everything
+      INFO_LOG( "Manager::run : Unloading data" );
+      _theContexts.clear();
+      _theData.clear();
+    }
+    catch ( Exception& ex )
+    {
+      ERROR_LOG( "Manager::run : A Regolith exception occured unloading data" );
+      ERROR_STREAM << ex.elucidate();
+      std::cerr << ex.elucidate();
+      return;
+    }
+
 
     // Join all the threads
     INFO_LOG( "Manager::run : Joining all worker threads" );
@@ -232,11 +250,6 @@ namespace Regolith
   {
     FAILURE_STREAM << "DEATHSIGNAL : Regolith received signal: " << signal;
     FAILURE_LOG( "DEATHSIGNAL : Trying to die gracefully..." );
-
-    ERROR_STREAM << "Last SDL Error : " << SDL_GetError();
-    ERROR_STREAM << "Last IMG Error : " << IMG_GetError();
-    ERROR_STREAM << "Last TTF Error : " << TTF_GetError();
-    ERROR_STREAM << "Last MIX Error : " << Mix_GetError();
 
 #ifdef __linux__
     void* array[20];

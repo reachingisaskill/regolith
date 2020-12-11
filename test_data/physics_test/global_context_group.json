@@ -8,7 +8,7 @@
   {
     "red_box" : 
     {
-      "type" : "physical_object",
+      "type" : "simple_object",
       "has_moveable" : true,
       "has_texture" : true,
       "has_animation" : false,
@@ -23,30 +23,24 @@
         "height" : 20.0,
         "collision_team" : "object"
       },
-      "states" : 
+      "texture" :
       {
-        "default" :
-        {
-          "texture" :
-          {
-            "texture_name" : "coloured_boxes",
-            "start_number" : 0
-          },
-          "collision" :
-          {
-            "hit_boxes" :
-            [
-              [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
-            ]
-          }
-        }
+        "texture_name" : "coloured_boxes",
+        "start_number" : 0
+      },
+      "collision" :
+      {
+        "hit_boxes" :
+        [
+          [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
+        ]
       },
       "start_state" : "default"
     },
 
     "blue_box" :
     {
-      "type" : "physical_object",
+      "type" : "simple_object",
       "has_moveable" : true,
       "has_texture" : true,
       "has_animation" : false,
@@ -61,30 +55,24 @@
         "height" : 20.0,
         "collision_team" : "object"
       },
-      "states" : 
+      "texture" :
       {
-        "default" :
-        {
-          "texture" :
-          {
-            "texture_name" : "coloured_boxes",
-            "start_number" : 3
-          },
-          "collision" :
-          {
-            "hit_boxes" :
-            [
-              [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
-            ]
-          }
-        }
+        "texture_name" : "coloured_boxes",
+        "start_number" : 3
+      },
+      "collision" :
+      {
+        "hit_boxes" :
+        [
+          [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
+        ]
       },
       "start_state" : "default"
     },
 
     "green_box" :
     {
-      "type" : "physical_object",
+      "type" : "simple_object",
       "has_moveable" : false,
       "has_texture" : true,
       "has_animation" : false,
@@ -99,30 +87,24 @@
         "height" : 20.0,
         "collision_team" : "object"
       },
-      "states" : 
+      "texture" :
       {
-        "default" :
-        {
-          "texture" :
-          {
-            "texture_name" : "coloured_boxes",
-            "start_number" : 2
-          },
-          "collision" :
-          {
-            "hit_boxes" :
-            [
-              [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
-            ]
-          }
-        }
+        "texture_name" : "coloured_boxes",
+        "start_number" : 2
+      },
+      "collision" :
+      {
+        "hit_boxes" :
+        [
+          [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
+        ]
       },
       "start_state" : "default"
     },
 
     "environment_container" :
     {
-      "type" : "physical_object",
+      "type" : "simple_object",
       "has_moveable" : false,
       "has_texture" : false,
       "has_animation" : false,
@@ -135,18 +117,12 @@
         "height" : 768.0,
         "collision_team" : "scene_boundary"
       },
-      "states" : 
+      "collision" :
       {
-        "default" :
-        {
-          "collision" :
-          {
-            "hit_boxes" :
-            [
-              [ { "position" : [ 0, 0 ], "width" : 1024, "height" : 768, "type" : "basic" } ]
-            ]
-          }
-        }
+        "hit_boxes" :
+        [
+          [ { "position" : [ 0, 0 ], "width" : 1024, "height" : 768, "type" : "basic" } ]
+        ]
       },
       "start_state" : "default"
     }

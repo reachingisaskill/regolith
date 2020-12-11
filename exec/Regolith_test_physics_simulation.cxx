@@ -35,11 +35,6 @@ int main( int, char** )
     man->run();
 
   }
-  catch ( Exception& ex )
-  {
-    FAILURE_LOG( ex.what() );
-    std::cerr << ex.elucidate();
-  }
   catch ( std::exception& ex )
   {
     FAILURE_LOG( "Main : Unexpected exception occured:" );
