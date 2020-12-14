@@ -4,6 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Textures/Spritesheet.h"
 
 
 namespace Regolith
@@ -24,7 +25,7 @@ namespace Regolith
           // Public member variables
           unsigned int id;
           float updatePeriod;
-          Texture texture;
+          Spritesheet texture;
           Collision collision;
           unsigned int currentFrame;
 //          StateObjectVector children;
@@ -102,7 +103,7 @@ namespace Regolith
       virtual void update( float ) override;
 
       // For the camera to request the current renderable texture
-      virtual const Texture& getTexture() const override;
+      virtual Texture& getTexture() const override;
 
       // For the collision handler to request the current hitboxes
       virtual const Collision& getCollision() const override;

@@ -72,12 +72,12 @@ namespace Regolith
   }
 
 
-  const Texture& CompositeObject::getTexture() const
+  Texture& CompositeObject::getTexture()
   {
   }
 
 
-  const Collision& CompositeObject::getCollision() const
+  Collision& CompositeObject::getCollision()
   {
   }
 

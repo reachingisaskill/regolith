@@ -42,31 +42,28 @@ namespace Regolith
   }
 
 
-  void Camera::renderRawTexture( RawTexture* texture )
+  void Camera::renderTexture( Texture& texture )
   {
-    // If it's already renderered
-    if ( texture->sdl_texture != nullptr )
+    while ( texture.update() )
     {
-      SDL_DestroyTexture( texture->sdl_texture );
+      // Get the base surface
+      SDL_Surface* temp_surface = texture.getUpdateSurface();
+
+      // Create the texture
+      SDL_Texture temp_texture = SDL_CreateTextureFromSurface( _theRenderer, temp_surface );
+      DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << temp_texture;
+
+      // Check that it worked
+      if ( temp_texture == nullptr )
+      {
+        Exception ex( "RawTexture::renderTexture", "Could not convert surface to texture" );
+        ex.addDetail( "SDL error", SDL_GetError() );
+        throw ex;
+      }
+
+      // Update the texture with the new SDL_Texture
+      texture.setRenderedTexture( temp_texture );
     }
-
-    // Create the texture
-    texture->sdl_texture = SDL_CreateTextureFromSurface( _theRenderer, texture->surface );
-
-    DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << texture->sdl_texture;
-
-    // Check that it worked
-    if ( texture->sdl_texture == nullptr )
-    {
-      SDL_FreeSurface( texture->surface );
-      texture->surface = nullptr;
-      Exception ex( "RawTexture::renderTexture", "Could not convert surface to texture" );
-      ex.addDetail( "SDL error", SDL_GetError() );
-      throw ex;
-    }
-
-    // Set the update flag to false
-    texture->update = false;
   }
 
 
@@ -77,16 +74,16 @@ namespace Regolith
     _targetRect.w = object->getWidth() * _scaleX;
     _targetRect.h = object->getHeight() * _scaleY;
 
-    const Texture& texture = object->getTexture();
+    Texture& texture = object->getTexture();
 
     // If a new surface has been provided, re-render the texture
-    if ( texture._rawTexture->update )
+    if ( texture.update() )
     {
-      renderRawTexture( texture._rawTexture );
+      renderTexture( texture );
     }
 
     // Render to the back bufer
-    SDL_RenderCopyEx( _theRenderer, texture._rawTexture->sdl_texture, &texture._clip, &_targetRect, object->getRotation(), nullptr, texture._flipFlag );
+    SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), texture.getTextureCenter(), (SDL_RendererFlip) other->getFlipFlag() ^ texture.getRendererFlip() );
   }
 
 }

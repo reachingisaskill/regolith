@@ -54,7 +54,7 @@ namespace Regolith
 
 
       // Render a specific raw texture
-      void renderRawTexture( RawTexture* );
+      void renderTexture( Texture& );
 
 
       // Render a physical object

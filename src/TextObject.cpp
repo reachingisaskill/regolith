@@ -33,17 +33,15 @@ namespace Regolith
     // Configure the parent class first
     PhysicalObject::configure( json_data, cg);
 
+    // Configure the texture
+    _texture.configure( json_data, cg.getDataHandler() );
+
     // Hitbox details
     if ( Utilities::validateJson( json_data, "collision", Utilities::JSON_TYPE_OBJECT, false ) )
     {
       _collision.configure( json_data["collision"] );
     }
 
-    // Configure the font
-    _font.configure( json_data, cg.getDataHandler() );
-
-    // Configure the text to display
-    _text.configure( json_data, cg.getDataHandler() );
   }
 
 
@@ -54,13 +52,13 @@ namespace Regolith
   }
 
 
-  const Texture& TextObject::getTexture() const
+  Texture& TextObject::getTexture()
   {
     return _texture;
   }
 
 
-  const Collision& TextObject::getCollision() const
+  Collision& TextObject::getCollision()
   {
     return _collision;
   }

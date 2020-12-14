@@ -4,6 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Textures/Spritesheet.h"
 
 
 namespace Regolith
@@ -15,7 +16,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
     private:
       // Texture of the object
-      Texture _texture;
+      Spritesheet _texture;
 
       // Collision for the object
       Collision _collision;
@@ -61,10 +62,10 @@ namespace Regolith
       virtual void update( float timestep ) override;
 
       // For the camera to request the current renderable texture
-      virtual const Texture& getTexture() const override;
+      virtual Texture& getTexture() override;
 
       // For the collision handler to request the current hitboxes
-      virtual const Collision& getCollision() const override;
+      virtual Collision& getCollision() override;
   };
 
 }

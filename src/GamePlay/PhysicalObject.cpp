@@ -18,6 +18,7 @@ namespace Regolith
     _hasPhysics( false ),
     _position(),
     _rotation( 0.0 ),
+    _flipFlag( SDL_FLIP_NONE ),
     _mass( 0.0 ),
     _inverseMass( 0.0 ),
     _elasticity( 0.0 ),
@@ -39,6 +40,7 @@ namespace Regolith
     _hasPhysics( other._hasPhysics ),
     _position( other._position ),
     _rotation( other._rotation ),
+    _flipFlag( other._flipFlag ),
     _mass( other._mass ),
     _inverseMass( other._inverseMass ),
     _elasticity( other._elasticity ),
@@ -101,6 +103,18 @@ namespace Regolith
     {
       _rotation =  json_data["rotation"].asFloat();
       WARN_LOG( "PhysicalObject::configure() : Rotations are not currently fully supported for collision detection." );
+    }
+
+    // Set the starting flip state
+    if ( Utilities::validateJson( json_data, "flip_horizontal", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    {
+      if ( json_data["flip_horizontal"].asBool() )
+        _flipFlag = (SDL_RendererFlip) (_flipFlag ^ SDL_FLIP_HORIZONTAL);
+    }
+    if ( Utilities::validateJson( json_data, "flip_vertical", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    {
+      if ( json_data["flip_vertical"].asBool() )
+        _flipFlag = (SDL_RendererFlip) (_flipFlag ^ SDL_FLIP_VERTICAL);
     }
 
     // Set the initial velocity

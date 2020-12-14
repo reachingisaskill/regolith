@@ -72,13 +72,13 @@ namespace Regolith
   }
 
 
-  const Texture& SimpleObject::getTexture() const
+  Texture& SimpleObject::getTexture()
   {
     return _texture;
   }
 
 
-  const Collision& SimpleObject::getCollision() const
+  Collision& SimpleObject::getCollision()
   {
     return _collision;
   }

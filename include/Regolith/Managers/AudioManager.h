@@ -3,7 +3,6 @@
 #define REGOLITH_MANAGERS_AUDIO_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/GamePlay/Noises.h"
 #include "Regolith/Utilities/MutexedBuffer.h"
 
 #include <utility>

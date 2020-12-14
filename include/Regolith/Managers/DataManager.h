@@ -4,7 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Utilities/MutexedBuffer.h"
-#include "Regolith/Managers/RawObjectDetails.h"
+#include "Regolith/Assets/RawObjectDetails.h"
 
 #include <thread>
 #include <mutex>

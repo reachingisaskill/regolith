@@ -4,7 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
-#include "Regolith/GamePlay/Texture.h"
+#include "Regolith/Architecture/Texture.h"
 #include "Regolith/GamePlay/Collision.h"
 
 namespace Regolith
@@ -37,6 +37,8 @@ namespace Regolith
       Vector _position;
       // Rotation with respect to the parent object
       float _rotation;
+      // Flip flag
+      SDL_RendererFlip _flipFlag;
 
       // Used to determine collision and movement properties
       float _mass;
@@ -129,10 +131,10 @@ namespace Regolith
 
 
       // For the camera to request the current renderable texture
-      virtual const Texture& getTexture() const = 0;
+      virtual Texture& getTexture() = 0;
 
       // For the collision handler to request the current hitboxes
-      virtual const Collision& getCollision() const = 0;
+      virtual const Collision& getCollision() = 0;
 
       // Perform an update to all the animations
       virtual void update( float ) = 0;

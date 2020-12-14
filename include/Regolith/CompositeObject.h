@@ -57,10 +57,10 @@ namespace Regolith
       virtual void update( float ) override;
 
       // For the camera to request the current renderable texture
-      virtual const Texture& getTexture() const;
+      virtual Texture& getTexture() override;
 
       // For the collision handler to request the current hitboxes
-      virtual const Collision& getCollision() const;
+      virtual Collision& getCollision();
   };
 
 }

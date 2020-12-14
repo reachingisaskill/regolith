@@ -3,10 +3,11 @@
 #define REGOLITH_MANAGERS_DATA_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/GamePlay/Texture.h"
-#include "Regolith/GamePlay/Noises.h"
-#include "Regolith/GamePlay/Font.h"
-#include "Regolith/GamePlay/Text.h"
+#include "Regolith/Assets/RawTexture.h"
+#include "Regolith/Assets/RawSound.h"
+#include "Regolith/Assets/RawMusic.h"
+#include "Regolith/Assets/RawFont.h"
+#include "Regolith/Assets/RawText.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Utilities/ProxyMap.h"
 

@@ -1,5 +1,5 @@
 
-#include "Regolith/Managers/RawObjectDetails.h"
+#include "Regolith/Assets/RawObjectDetails.h"
 
 
 namespace Regolith
