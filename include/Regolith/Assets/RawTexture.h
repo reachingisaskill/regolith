@@ -14,9 +14,6 @@ namespace Regolith
    * Stores details are specfic to the sdl_texture it points to.
    * Remember that multiple textures may use the same SDL_Texture during rendering.
    * Hence all modifications - e.g. rotations, etc must be applied to the Texture objects, not the RawTexture.
-   *
-   * The SDL_Surface pointer is included such that the renderer can  re-render the texture during the rendering
-   * loop if required.
    */
   struct RawTexture
   {
@@ -40,7 +37,6 @@ namespace Regolith
   // Surface creation functions
 
   SDL_Surface* loadSurfaceFromFile( std::string, const SDL_Color& );
-  SDL_Surface* loadSurfaceFromString( std::string, TTF_Font*, const SDL_Color& );
 }
 
 #endif // REGOLITH_ASSETS_RAW_TEXTURE_H_

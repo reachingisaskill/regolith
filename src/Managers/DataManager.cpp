@@ -5,10 +5,11 @@
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/ThreadHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
-#include "Regolith/GamePlay/Font.h"
-#include "Regolith/GamePlay/Text.h"
-#include "Regolith/GamePlay/Texture.h"
-#include "Regolith/GamePlay/Noises.h"
+#include "Regolith/Assets/RawFont.h"
+#include "Regolith/Assets/RawText.h"
+#include "Regolith/Assets/RawTexture.h"
+#include "Regolith/Assets/RawMusic.h"
+#include "Regolith/Assets/RawSound.h"
 
 #include <mutex>
 #include <atomic>

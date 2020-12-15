@@ -1,8 +1,9 @@
 
 #include "Regolith/Components/Camera.h"
 
+#include "Regolith/Architecture/Texture.h"
+#include "Regolith/Assets/RawTexture.h"
 #include "Regolith/GamePlay/PhysicalObject.h"
-#include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Window.h"
 
 
@@ -42,6 +43,26 @@ namespace Regolith
   }
 
 
+  void Camera::renderRawTexture( RawTexture* raw_texture )
+  {
+    // Create the texture
+    raw_texture->sdl_texture = SDL_CreateTextureFromSurface( _theRenderer, raw_texture->surface );
+    DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << raw_texture->sdl_texture;
+
+    // Check that it worked
+    if ( raw_texture->sdl_texture == nullptr )
+    {
+      Exception ex( "RawTexture::renderRawTexture", "Could not convert surface to texture" );
+      ex.addDetail( "SDL error", SDL_GetError() );
+      throw ex;
+    }
+
+//      SDL_SetTextureColorMod( _rawTexture->sdl_texture, raw_texture->colourMod.r, raw_texture->colourMod.g, raw_texture->colourMod.b );
+//      SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, raw_texture->alpha );
+//      SDL_SetTextureBlendMode( _rawTexture->sdl_texture, raw_texture->blendmode );
+  }
+
+
   void Camera::renderTexture( Texture& texture )
   {
     while ( texture.update() )
@@ -50,8 +71,8 @@ namespace Regolith
       SDL_Surface* temp_surface = texture.getUpdateSurface();
 
       // Create the texture
-      SDL_Texture temp_texture = SDL_CreateTextureFromSurface( _theRenderer, temp_surface );
-      DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << temp_texture;
+      SDL_Texture* temp_texture = SDL_CreateTextureFromSurface( _theRenderer, temp_surface );
+      DEBUG_STREAM << "Camera::renderTexture : SDL_Texture @ " << temp_texture;
 
       // Check that it worked
       if ( temp_texture == nullptr )
@@ -60,6 +81,10 @@ namespace Regolith
         ex.addDetail( "SDL error", SDL_GetError() );
         throw ex;
       }
+
+//      SDL_SetTextureColorMod( _rawTexture->sdl_texture, red, green, blue );
+//      SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, alpha );
+//      SDL_SetTextureBlendMode( _rawTexture->sdl_texture, blendmode );
 
       // Update the texture with the new SDL_Texture
       texture.setRenderedTexture( temp_texture );
@@ -83,7 +108,7 @@ namespace Regolith
     }
 
     // Render to the back bufer
-    SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), texture.getTextureCenter(), (SDL_RendererFlip) other->getFlipFlag() ^ texture.getRendererFlip() );
+    SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), texture.getTextureCenter(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
   }
 
 }

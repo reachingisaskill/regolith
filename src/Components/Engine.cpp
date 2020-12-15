@@ -168,17 +168,21 @@ namespace Regolith
     }
 
 
-    // This is a loop because contexts can open children as soon as they are started.
-    while ( _openContext != nullptr )
+    // Only permit new contexts to open when there isn't a context group queued for loading
+    if ( _openContextGroup == nullptr )
     {
-      modified = true;
+      // This is a loop because contexts can open children as soon as they are started.
+      while ( _openContext != nullptr )
+      {
+        modified = true;
 
-      DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
-      // Push onto stack
-      _contextStack.push_front( _openContext );
-      _openContext = nullptr;
-      // Trigger the start hooks
-      _contextStack.front()->startContext();
+        DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
+        // Push onto stack
+        _contextStack.push_front( _openContext );
+        _openContext = nullptr;
+        // Trigger the start hooks
+        _contextStack.front()->startContext();
+      }
     }
 
 

@@ -63,9 +63,9 @@ namespace Regolith
 
       virtual ~Spritesheet();
 
+      // Return true if a surface needs to be rendered during the rendering cycle
+      virtual bool update() const { return ( _rawTexture != nullptr ) && ( _rawTexture->sdl_texture == nullptr ); }
 
-      // Sets a new surface to the raw texture. Forces the renderer to re-draw the texture using the new surface
-      void setNewSurface( SDL_Surface* );
 
       // Configures as a sprite sheet with optional animation. No. rows, No. Columns, and No. of used cells and update period
       // This function is optinal. Without it this acts as a single flat texture

@@ -104,7 +104,8 @@ namespace Regolith
     _theEngine.openContextGroup( *cg->getLoadScreen() );
 
     // Tell the context manager that we can trigger the load thread
-    _theContexts.loadNextContextGroup();
+//    _theContexts.loadNextContextGroup();
+    // This funtion MUST be called when the loadscreen context is opened!
   }
 
 

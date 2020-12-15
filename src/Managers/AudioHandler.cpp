@@ -2,6 +2,8 @@
 
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/ThreadManager.h"
+#include "Regolith/Assets/RawSound.h"
+#include "Regolith/Assets/RawMusic.h"
 
 
 namespace Regolith

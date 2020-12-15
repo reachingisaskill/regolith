@@ -61,7 +61,7 @@ namespace Regolith
     protected:
       // Pop the next unrendered surface for the rendering thread.
       // Should use something like a private visitor/mediator object to control access to specific functions
-      RawTexture* popRenderTexture();
+      Texture* popRenderTexture();
 
 
     public:

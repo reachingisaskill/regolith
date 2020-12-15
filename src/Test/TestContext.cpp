@@ -65,6 +65,11 @@ namespace Regolith
     INFO_STREAM << "TestContext::onStart " << _name << " : Starting test context.";
 
     _timer.reset();
+
+    if ( _isLoadScreen )
+    {
+      Manager::getInstance()->getContextManager().loadNextContextGroup();
+    }
   }
 
 

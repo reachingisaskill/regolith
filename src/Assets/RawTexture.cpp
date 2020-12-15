@@ -12,8 +12,7 @@ namespace Regolith
     height( 0 ),
     rows( 0 ),
     columns( 0 ),
-    cells( 0 ),
-    update( false )
+    cells( 0 )
   {
   }
 
@@ -25,8 +24,7 @@ namespace Regolith
     height( h ),
     rows( r ),
     columns( c ),
-    cells( r*c ),
-    update( false )
+    cells( r*c )
   {
   }
 
@@ -38,8 +36,7 @@ namespace Regolith
     height( h ),
     rows( r ),
     columns( c ),
-    cells( n ),
-    update( false )
+    cells( n )
   {
   }
 
@@ -53,42 +50,8 @@ namespace Regolith
   }
 
 
-  void Texture::setColor( Uint8 red, Uint8 green, Uint8 blue )
-  {
-    SDL_SetTextureColorMod( _rawTexture->sdl_texture, red, green, blue );
-  }
-
-
-  void Texture::setAlpha( Uint8 alpha )
-  {
-    SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, alpha );
-  }
-
-
-  void Texture::setBlendMode( SDL_BlendMode blendmode )
-  {
-    SDL_SetTextureBlendMode( _rawTexture->sdl_texture, blendmode );
-  }
-
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Texture creation functions
-
-  SDL_Surface* loadSurfaceFromString( std::string textureString, TTF_Font* font, const SDL_Color& color )
-  {
-    SDL_Surface* textSurface = TTF_RenderText_Solid( font, textureString.c_str(), color );
-    if ( textSurface == nullptr )
-    {
-      Exception ex( "loadSurfaceFromString()", "Could not render text", true );
-      ex.addDetail( "Text string", textureString );
-      ex.addDetail( "SDL_ttf error", TTF_GetError() );
-      throw ex;
-    }
-
-    return textSurface;
-  }
-
 
   SDL_Surface* loadSurfaceFromFile( std::string path, const SDL_Color& key )
   {

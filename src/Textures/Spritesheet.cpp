@@ -39,33 +39,12 @@ namespace Regolith
     }
 
     _rawTexture->sdl_texture = t;
-    this->setUpdate( false );
   }
 
 
   void Spritesheet::clearSDLTexture()
   {
     SDL_DestroyTexture( _rawTexture->sdl_texture );
-  }
-
-
-  void Spritesheet::setNewSurface( SDL_Surface* surface )
-  {
-    if ( _rawTexture == nullptr )
-    {
-      SDL_FreeSurface( surface );
-    }
-    else if ( _rawTexture->surface != nullptr )
-    {
-      SDL_FreeSurface( _rawTexture->surface );
-      _rawTexture->surface = surface;
-      this->setUpdate( true );
-    }
-    else
-    {
-      _rawTexture->surface = surface;
-      this->setUpdate( true );
-    }
   }
 
 

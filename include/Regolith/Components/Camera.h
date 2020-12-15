@@ -9,6 +9,7 @@ namespace Regolith
 {
   class PhysicalObject;
   class Window;
+  class Texture;
 
   class Camera
   {
@@ -54,6 +55,10 @@ namespace Regolith
 
 
       // Render a specific raw texture
+      void renderRawTexture( RawTexture* );
+
+
+      // Render a texture that has been updated
       void renderTexture( Texture& );
 
 

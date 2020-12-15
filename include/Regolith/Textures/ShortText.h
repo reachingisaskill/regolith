@@ -15,7 +15,10 @@ namespace Regolith
   {
     private:
       RawFont* _rawFont;
-      RawText* _rawText;
+//      RawText* _rawText;
+
+      // Flag to signal the text has changed and must be re-rendered
+      bool _update;
 
       SDL_Texture* _theTexture;
       SDL_Surface* _theSurface;
@@ -61,6 +64,9 @@ namespace Regolith
 
       // Virtual Destructor
       virtual ~ShortText() {}
+
+      // Return true if a surface needs to be rendered during the rendering cycle
+      virtual bool update() const { return _update; }
 
       // Force the derived classes to configure themselves
       virtual void configure( Json::Value&, DataHandler& ) override;

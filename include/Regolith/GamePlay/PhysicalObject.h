@@ -183,6 +183,10 @@ namespace Regolith
       float getRotation() const { return _rotation; }
       void setRotation( float r ) { _rotation = r; }
 
+      // Flip state
+      SDL_RendererFlip getFlipFlag() const { return _flipFlag; }
+      void setFlipFlag( SDL_RendererFlip f ) { _flipFlag = f; }
+
       // Preferred methods for changing position/rotation
       void move( Vector m ) { _position += m; }
       void rotate( float r ) { _rotation += r; }

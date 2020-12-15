@@ -295,7 +295,7 @@ namespace Regolith
   }
 
 
-  RawTexture* DataHandler::popRenderTexture()
+  Texture* DataHandler::popRenderTexture()
   {
     RawTexture* temp = nullptr;
 

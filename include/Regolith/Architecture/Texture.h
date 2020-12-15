@@ -31,8 +31,6 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Private member variables
     private:
-      // Keep track on whether the current texture is up to date
-      bool _update;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -66,11 +64,6 @@ namespace Regolith
       virtual void clearSDLTexture() = 0;
 
 
-      // Set the value of the update flag
-      void setUpdate( bool up ) { _update = up; }
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
       // Public member functions
     public:
@@ -84,7 +77,7 @@ namespace Regolith
       virtual void configure( Json::Value&, DataHandler& ) = 0;
 
       // Return true if a surface needs to be rendered during the rendering cycle
-      bool update() { return _update; }
+      virtual bool update() const = 0;
   };
 }
 
