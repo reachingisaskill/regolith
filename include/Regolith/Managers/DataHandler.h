@@ -18,20 +18,17 @@
 
 namespace Regolith
 {
-  // Forward Declaration
-  class DataManager;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Data Handler
 
   class DataHandler
   {
-    // Rendering thread is a friend so that it can render SDL surfaces in the background
-    friend void engineRenderingThread();
-
-    typedef std::queue< RawTexture* > SurfaceRenderQueue;
 
     private:
+      // Pointer to the data manager. Slightly faster this way.
+      DataManager* _manager;
+
       // List of all the textures
       RawTextureMap _rawTextures;
 
@@ -47,45 +44,25 @@ namespace Regolith
       // List of all the fonts
       RawTextMap _rawTexts;
 
-      // Queue of surfaces to render in the engine.
-      SurfaceRenderQueue _surfaceRenderQueue;
-
-
-      // Stores a flag to record whether the data is in memory or not
-      bool _isLoaded;
-      std::atomic<bool> _isRendered;
-
-      // Mutex controls load/unload/flag access and operations
-      mutable std::mutex _loadingMutex;
-
-    protected:
-      // Pop the next unrendered surface for the rendering thread.
-      // Should use something like a private visitor/mediator object to control access to specific functions
-      Texture* popRenderTexture();
-
 
     public:
       DataHandler();
 
       ~DataHandler();
 
-      // Data handlers must be non-copyable, etc. Ensures DataManager knows who is using what asset
+      // Data handlers must be non-copyable, etc.
       DataHandler( const DataHandler& ) = delete;
       DataHandler( DataHandler&& ) = delete;
       DataHandler& operator=( const DataHandler& ) = delete;
       DataHandler& operator=( DataHandler&& ) = delete;
 
-////////////////////////////////////////////////////////////////////////////////
-      // State information
 
-      bool isLoaded() const;
+      // Deletes all the loaded data
+      void clear();
 
-      void load();
-
-      void unload();
 
 ////////////////////////////////////////////////////////////////////////////////
-      // Raw Textures
+      // Inferfaces to request proxies to the asset data
 
       // Get an texture with a given name
       RawTexture* getRawTexture( std::string );

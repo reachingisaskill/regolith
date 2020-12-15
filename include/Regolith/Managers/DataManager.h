@@ -33,30 +33,12 @@ namespace Regolith
    */
   class DataManager
   {
-    // Make these functions friends to make loading/unloading data easier in the Data Manager Thread
-    friend void dataManagerLoadingThread();
-    friend void dataLoadFunction();
-    friend void dataUnloadFunction();
-
     private:
-      // Flag to indicate the loading thread is active
-      bool _loading;
-      mutable std::mutex _loadFlagMutex;
-
       // Path to the list of all texture files and their modifiers
       std::string _indexFile;
 
       // Map of all the assets that can be used
       AssetMap _assets;
-
-      // Loading queue
-      MutexedBuffer< DataHandler* > _loadQueue;
-
-      // Unloading queue
-      MutexedBuffer< DataHandler* > _unloadQueue;
-
-    protected:
-      void setLoading( bool );
 
     public:
       // Con/de-struction
@@ -68,19 +50,6 @@ namespace Regolith
 
       // Basic configuration of manager and build the global objects
       void configure( Json::Value& );
-
-
-////////////////////////////////////////////////////////////////////////////////
-      // Dynamic loading/unloading
-
-      // Load all the data in a specific handler
-      void load( DataHandler* );
-
-      // Unload all the data in a specific handler
-      void unload( DataHandler* );
-
-      // Return true if the loading thread is active
-      bool isLoading() const;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,22 +76,6 @@ namespace Regolith
 
       // Build a raw text object with null pointer for a data handler
       RawText buildRawText( std::string ) const;
-
-
-      // Load a raw texture object
-      void loadRawTexture( std::string, RawTexture& ) const;
-
-      // Load a raw music object
-      void loadRawMusic( std::string, RawMusic& ) const;
-
-      // Load a raw sound object
-      void loadRawSound( std::string, RawSound& ) const;
-
-      // Load a raw font object
-      void loadRawFont( std::string, RawFont& ) const;
-
-      // Load a raw text object
-      void loadRawText( std::string, RawText& ) const;
 
   };
 

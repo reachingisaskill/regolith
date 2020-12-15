@@ -24,19 +24,13 @@ namespace Regolith
     unsigned short int rows;
     unsigned short int columns;
     unsigned short cells;
-
-    RawTexture();
-    RawTexture( SDL_Texture*, int, int, unsigned short, unsigned short );
-    RawTexture( SDL_Texture*, int, int, unsigned short, unsigned short, unsigned short );
-
-    ~RawTexture();
   };
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Surface creation functions
 
-  SDL_Surface* loadSurfaceFromFile( std::string, const SDL_Color& );
+  RawTexture loadRawTexture( ImageDetail );
 }
 
 #endif // REGOLITH_ASSETS_RAW_TEXTURE_H_

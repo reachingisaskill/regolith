@@ -21,7 +21,8 @@ namespace Regolith
     _spawnBuffers(),
 //    _onLoadOperations(),
     _entryPoint( nullptr ),
-    _isLoaded( false )
+    _isLoaded( false ),
+    _loadProgress( 0.0 )
   {
   }
 
@@ -32,6 +33,34 @@ namespace Regolith
 
     if ( _isLoaded ) this->unload();
     _contexts.clear();
+  }
+
+
+  void ContextGroup::setLoadProgress( unsigned int progress )
+  {
+    LockGuard lg( _mutexProgress );
+    _loadProgress = progress;
+  }
+
+
+  void ContextGroup::loadElement()
+  {
+    LockGuard lg( _mutexProgress );
+    _loadProgress += 1;
+  }
+
+
+  bool ContextGroup::isLoaded() const
+  {
+    LockGuard lg( _mutexProgress );
+    return _isLoaded;
+  }
+
+
+  float ContextGroup::getLoadProgress() const
+  {
+    LockGuard lg( _mutexProgress );
+    return (float) _loadProgress / _loadTotal;
   }
 
 
@@ -137,6 +166,9 @@ namespace Regolith
       }
       _entryPoint = &found->second;
     }
+
+    // Set the total number of elements to load (used for progress bars)
+    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 1;
   }
 
 
@@ -147,6 +179,11 @@ namespace Regolith
       WARN_LOG( "ContextGroup::load : Attempting to load a context group that is already loaded" );
       return;
     }
+
+    setLoadProgress( 0 );
+    unsigned int total_number = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 1;
+    unsigned int counter = 0;
+
 
     DEBUG_LOG( "ContextGroup::load : Loading" );
     // Load Json Data
@@ -185,6 +222,8 @@ namespace Regolith
         ex.addDetail( "Object Name", obj_name );
         throw ex;
       }
+
+      loadElement();
     }
 
 
@@ -197,6 +236,8 @@ namespace Regolith
       unsigned int number = b_it->asInt();
 
       _spawnBuffers[ buffer_name ].fill( number, _gameObjects[ buffer_name ] );
+
+      loadElement();
     }
 
 
@@ -232,12 +273,14 @@ namespace Regolith
         ex.addDetail( "Context Name", cont_name );
         throw ex;
       }
+
+      loadElement();
     }
 
 
     DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
-    // Make sure the sounds each have their channels allocated and ready
     _theAudio.configure();
+    loadElement();
 
 
 //    DEBUG_LOG( "ContextGroup::load : Performing on-load operations" );
@@ -248,20 +291,26 @@ namespace Regolith
 //      _onLoadOperations.pop();
 //    }
 
-    DEBUG_LOG( "ContextGroup::load : Loading Data Handler" );
-    _theData.load();
 
-    _isLoaded = true;
+
+
+    // NEED TO WAIT FOR ENGINE RENDERING HERE!!!
+
+
+
 
     DEBUG_LOG( "ContextGroup::load : Complete" );
+    _isLoaded = true;
   }
 
 
   void ContextGroup::unload()
   {
     _isLoaded = false;
+    setLoadProgress( 0.0 );
+
     INFO_LOG( "ContextGroup::unload : Unloading Data" );
-    _theData.unload();
+    _theData.clear();
 
     INFO_LOG( "ContextGroup::unload : Unloading Contexts" );
     for ( ContextMap::iterator it = _contexts.begin(); it != _contexts.end(); ++it )

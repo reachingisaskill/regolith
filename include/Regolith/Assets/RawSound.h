@@ -8,18 +8,15 @@
 namespace Regolith
 {
 
-  // Function that loads the sound file into the Mix_Chunk object
-  Mix_Chunk* loadSound( std::string );
-
-
   // Structure that owns the pointer to the Mix_Chunk object
   struct RawSound
   {
     Mix_Chunk* sound;
-    int channel;
-
-    RawSound( Mix_Chunk* s = nullptr, int c = 0 ) : sound( s ), channel( c ) {}
   };
+
+
+  // Function that loads the sound file into the RawSound proxy
+  RawSound loadRawSound( SoundDetail );
 
 }
 

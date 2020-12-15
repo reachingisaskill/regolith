@@ -18,7 +18,6 @@ namespace Regolith
 
   ContextManager::ContextManager() :
     _loaded( false ),
-    _progress( 0.0 ),
     _globalContextGroup(),
     _contextGroups(),
     _currentContextGroup( nullptr ),
@@ -62,7 +61,7 @@ namespace Regolith
 
   void ContextManager::setLoaded( bool value )
   {
-    std::lock_guard<std::mutex> lg( _loadedMutex );
+    LockGuard lg( _loadedMutex );
 
     _loaded = value;
   }
@@ -70,25 +69,16 @@ namespace Regolith
 
   bool ContextManager::isLoaded() const
   {
-    std::lock_guard<std::mutex> lg( _loadedMutex );
+    LockGuard lg( _loadedMutex );
 
     return _loaded;
   }
 
 
-  void ContextManager::setProgress( float value )
-  {
-    std::lock_guard<std::mutex> lg( _progressMutex );
-
-    _progress = value;
-  }
-
-
   float ContextManager::loadingProgress() const
   {
-    std::lock_guard<std::mutex> lg( _progressMutex );
-
-    return _progress;
+    LockGuard lg( _loadedMutex );
+    return _currentContextGroup->getLoadProgress();
   }
 
 
@@ -143,6 +133,8 @@ namespace Regolith
 
   void ContextManager::loadEntryPoint()
   {
+    LockGuard lg( _loadedMutex );
+
     _currentContextGroup = _nextContextGroup;
     _nextContextGroup = nullptr;
 
@@ -208,7 +200,8 @@ namespace Regolith
     // Set up references
     ContextManager& manager = Manager::getInstance()->getContextManager();
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
-    std::unique_lock<std::mutex> contextLock( contextUpdate.mutex );
+    UniqueLock contextLock( contextUpdate.mutex );
+    UniqueLock loadingLock( manager._loadedMutex );
 
 
     // Update the thread status
@@ -229,14 +222,18 @@ namespace Regolith
           {
             manager._currentContextGroup->unload();
           }
+
+          // Lock the loading mutex while where swap the current context group
+          loadingLock.lock();
           manager._currentContextGroup = manager._nextContextGroup;
           manager._nextContextGroup = nullptr;
+          loadingLock.unlock();
+
           manager._currentContextGroup->load();
         }
 
         // Signal that the context group has been loaded
         contextUpdate.data = false;
-        manager.setProgress( 1.0 );
         manager.setLoaded( true );
 
         contextUpdate.variable.notify_all();

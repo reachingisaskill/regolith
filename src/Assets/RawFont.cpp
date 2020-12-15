@@ -5,21 +5,23 @@
 namespace Regolith
 {
 
-  TTF_Font* loadFont( std::string filename, int fontsize )
+  RawFont loadRawFont( FontDetail details )
   {
-    TTF_Font* theFont = TTF_OpenFont( filename.c_str(), fontsize );
+    RawFont raw_font;
+    raw_font.colour = details.colour;
 
-    if ( theFont == nullptr ) // Failed to open
+    raw_font.ttf_font = TTF_OpenFont( details.filename.c_str(), details.size );
+
+    if ( raw_font.ttf_font == nullptr ) // Failed to open
     {
-      ERROR_STREAM << "loadFont()" << filename;
-      Exception ex( "Manager::_loadFonts()", "Failed to load font" );
-      ex.addDetail( "Font Name", filename );
-      ex.addDetail( "Font Size", fontsize );
+      Exception ex( "loadRawFont()", "Failed to load font" );
+      ex.addDetail( "Font Name", details.filename );
+      ex.addDetail( "Font Size", details.size );
       ex.addDetail( "TTF Error", TTF_GetError() );
       throw ex;
     }
 
-    return theFont;
+    return raw_font;
   }
 
 }

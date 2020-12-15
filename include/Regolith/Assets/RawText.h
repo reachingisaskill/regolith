@@ -8,17 +8,15 @@
 namespace Regolith
 {
 
-  // Function that loads the text from the text file
-  std::string* loadText( std::string );
-
-
   // Owns the pointer to the text string that is loaded
   struct RawText
   {
     std::string* text;
-
-    RawText() : text( nullptr ) {}
   };
+
+
+  // Function that loads the text from the text file into the RawText proxy
+  RawText loadRawText( TextDetail );
 
 }
 

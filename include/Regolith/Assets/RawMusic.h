@@ -8,17 +8,15 @@
 namespace Regolith
 {
 
-  // Function to load the Mix_Music object from the music file
-  Mix_Music* loadMusic( std::string );
-
-
   // Raw music structure. Owns the pointer to the Mix_Music object
   struct RawMusic
   {
     Mix_Music* music;
-
-    RawMusic( Mix_Music* m = nullptr ) : music( m ) {}
   };
+
+
+  // Function to load the Mix_Music object from the music file
+  RawMusic loadRawMusic( MusicDetail );
 
 }
 

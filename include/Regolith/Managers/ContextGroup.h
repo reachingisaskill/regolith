@@ -43,9 +43,8 @@ namespace Regolith
       // Audio handlers are local to the context group
       AudioHandler _theAudio;
 
-      // List of data handlers that can be individually loaded/unloaded
+      // Data handler that owns the asset raw data
       DataHandler _theData;
-//      DataHandlerMap _dataHandlers;
 
       // File name to load
       std::string _fileName;
@@ -70,6 +69,17 @@ namespace Regolith
 
       // Flag to indicate the group is loaded
       bool _isLoaded;
+      unsigned int _loadProgress;
+      unsigned int _loadTotal;
+      mutable std::mutex _mutexProgress;
+
+
+////////////////////////////////////////////////////////////////////////////////
+    protected:
+      // Lock the mutex before setting the load progress
+      void setLoadProgress( unsigned int );
+      void loadElement();
+
 
 ////////////////////////////////////////////////////////////////////////////////
     public:
@@ -97,7 +107,8 @@ namespace Regolith
 
 
       // Return a flag to indicate the group is loaded into memory
-      bool isLoaded() const { return _isLoaded; }
+      bool isLoaded() const;
+      float getLoadProgress() const;
 
       // Flag to indicate this is the global context group. Don't unload accidentally!
       bool isGlobal() const { return _isGlobalGroup; }

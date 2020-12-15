@@ -5,20 +5,21 @@
 namespace Regolith
 {
 
-  Mix_Chunk* loadSound( std::string filename )
+  RawSound loadRawSound( SoundDetail details )
   {
-    Mix_Chunk* new_chunk = Mix_LoadWAV( filename.c_str() );
+    RawSound raw_sound;
 
-    if ( new_chunk == nullptr )
+    raw_sound.sound = Mix_LoadWAV( details.filename.c_str() );
+
+    if ( raw_sound.sound == nullptr )
     {
-      std::string error = Mix_GetError();
-      Exception ex( "loadSound()", "Failed to load sound file" );
+      Exception ex( "loadRawSound()", "Failed to load sound file" );
       ex.addDetail( "Path", filename );
-      ex.addDetail( "Mix Error", error );
+      ex.addDetail( "Mix Error", Mix_GetError() );
       throw ex;
     }
 
-    return new_chunk;
+    return raw_sound;
   }
 
 }

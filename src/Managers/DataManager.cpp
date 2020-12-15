@@ -18,17 +18,9 @@
 namespace Regolith
 {
 
-  void dataLoadFunction();
-  void dataUnloadFunction();
-
-
   DataManager::DataManager() :
-    _loading( false ),
-    _loadFlagMutex(),
     _indexFile(),
     _assets(),
-    _loadQueue(),
-    _unloadQueue()
   {
   }
 
@@ -42,51 +34,6 @@ namespace Regolith
   void DataManager::clear()
   {
     INFO_LOG( "DataManager::clear : Clearing Data Manager." );
-
-    _loadQueue.clear();
-    _unloadQueue.clear();
-  }
-
-
-  void DataManager::setLoading( bool value )
-  {
-    std::lock_guard<std::mutex> gl( _loadFlagMutex );
-
-    _loading = value;
-  }
-
-
-  void DataManager::load( DataHandler* handler )
-  {
-    DEBUG_LOG( "DataManager::load : Loading handler" );
-    _loadQueue.push( handler );
-
-    {
-      std::lock_guard<std::mutex>( Manager::getInstance()->getThreadManager().DataUpdate.mutex );
-      Manager::getInstance()->getThreadManager().DataUpdate.data = true;
-    }
-    Manager::getInstance()->getThreadManager().DataUpdate.variable.notify_all();
-  }
-
-
-  void DataManager::unload( DataHandler* handler )
-  {
-    DEBUG_LOG( "DataManager::unload : Unloading Handler" );
-    _unloadQueue.push( handler );
-
-    {
-      std::lock_guard<std::mutex>( Manager::getInstance()->getThreadManager().DataUpdate.mutex );
-      Manager::getInstance()->getThreadManager().DataUpdate.data = true;
-    }
-    Manager::getInstance()->getThreadManager().DataUpdate.variable.notify_all();
-  }
-
-
-  bool DataManager::isLoading() const
-  {
-    std::lock_guard<std::mutex> gl( _loadFlagMutex );
-
-    return _loading;
   }
 
 
@@ -116,7 +63,7 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_IMAGE :
-        return RawTexture( nullptr, asset_found->second.imageDetail.width, asset_found->second.imageDetail.height, asset_found->second.imageDetail.rows, asset_found->second.imageDetail.columns );
+        return loadRawTexture( asset_found->second.imageDetail );
         break;
 
       default :
@@ -143,7 +90,7 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_AUDIO :
-        return RawMusic();
+        return loadRawMusic( asset_found->second.audioDetail );
         break;
 
       default :
@@ -170,7 +117,7 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_AUDIO :
-        return RawSound();
+        return loadRawSound( asset_found->second.audioDetail );
         break;
 
       default :
@@ -197,7 +144,7 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_FONT :
-        return RawFont();
+        return loadRawFont( asset_found->second.fontDetail );
         break;
 
       default :
@@ -216,7 +163,7 @@ namespace Regolith
     AssetMap::const_iterator asset_found = _assets.find( name );
     if ( asset_found == _assets.end() )
     {
-      Exception ex( "DataManager::buildRawFont()", "Asset does not exist" );
+      Exception ex( "DataManager::buildRawText()", "Asset does not exist" );
       ex.addDetail( "Asset Name", name );
       throw ex;
     }
@@ -224,149 +171,11 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_TEXT :
-        return RawText();
+        return loadRawText( asset_found->second.textDetail );
         break;
 
       default :
         Exception ex( "DataManager::buildRawText()", "Asset is not a text" );
-        ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_TEXT" );
-        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
-        throw ex;
-        break;
-    }
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Load raw asset functions
-
-  void DataManager::loadRawTexture( std::string name, RawTexture& texture ) const
-  {
-    AssetMap::const_iterator asset_found = _assets.find( name );
-    if ( asset_found == _assets.end() )
-    {
-      Exception ex( "DataManager::loadRawTexture()", "Asset does not exist" );
-      ex.addDetail( "Asset Name", name );
-      throw ex;
-    }
-
-    switch ( asset_found->second.type )
-    {
-      case ASSET_IMAGE :
-        texture.surface = loadSurfaceFromFile( asset_found->second.imageDetail.filename, asset_found->second.imageDetail.colourkey );
-        break;
-
-      default :
-        Exception ex( "DataManager::loadRawTexture()", "Asset is not a texture" );
-        ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_IMAGE or ASSET_TEXT" );
-        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
-        throw ex;
-        break;
-    }
-  }
-
-
-  void DataManager::loadRawMusic( std::string name, RawMusic& music ) const
-  {
-    AssetMap::const_iterator asset_found = _assets.find( name );
-    if ( asset_found == _assets.end() )
-    {
-      Exception ex( "DataManager::buildRawMusic()", "Asset does not exist" );
-      ex.addDetail( "Asset Name", name );
-      throw ex;
-    }
-
-    switch ( asset_found->second.type )
-    {
-      case ASSET_AUDIO :
-        music.music = loadMusic( asset_found->second.audioDetail.filename );
-        break;
-
-      default :
-        Exception ex( "DataManager::loadRawMusic()", "Asset is not a music track" );
-        ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_AUDIO" );
-        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
-        throw ex;
-        break;
-    }
-  }
-
-
-  void DataManager::loadRawSound( std::string name, RawSound& sound ) const
-  {
-    AssetMap::const_iterator asset_found = _assets.find( name );
-    if ( asset_found == _assets.end() )
-    {
-      Exception ex( "DataManager::loadRawSound()", "Asset does not exist" );
-      ex.addDetail( "Asset Name", name );
-      throw ex;
-    }
-
-    switch ( asset_found->second.type )
-    {
-      case ASSET_AUDIO :
-        sound.sound = loadSound( asset_found->second.audioDetail.filename );
-        break;
-
-      default :
-        Exception ex( "DataManager::loadRawSound()", "Asset is not a sound file" );
-        ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_AUDIO" );
-        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
-        throw ex;
-        break;
-    }
-  }
-
-
-  void DataManager::loadRawFont( std::string name, RawFont& font ) const
-  {
-    AssetMap::const_iterator asset_found = _assets.find( name );
-    if ( asset_found == _assets.end() )
-    {
-      Exception ex( "DataManager::loadRawFont()", "Asset does not exist" );
-      ex.addDetail( "Asset Name", name );
-      throw ex;
-    }
-
-    switch ( asset_found->second.type )
-    {
-      case ASSET_FONT :
-        font.ttf_font = loadFont( asset_found->second.fontDetail.filename, asset_found->second.fontDetail.size );
-        break;
-
-      default :
-        Exception ex( "DataManager::loadRawFont()", "Asset is not a font file" );
-        ex.addDetail( "Asset Name", name );
-        ex.addDetail( "Expected", "ASSET_FONT" );
-        ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
-        throw ex;
-        break;
-    }
-  }
-
-
-  void DataManager::loadRawText( std::string name, RawText& text ) const
-  {
-    AssetMap::const_iterator asset_found = _assets.find( name );
-    if ( asset_found == _assets.end() )
-    {
-      Exception ex( "DataManager::loadRawText()", "Asset does not exist" );
-      ex.addDetail( "Asset Name", name );
-      throw ex;
-    }
-
-    switch ( asset_found->second.type )
-    {
-      case ASSET_TEXT :
-        text.text = loadText( asset_found->second.textDetail.filename );
-        break;
-
-      default :
-        Exception ex( "DataManager::loadRawText()", "Asset is not a text file" );
         ex.addDetail( "Asset Name", name );
         ex.addDetail( "Expected", "ASSET_TEXT" );
         ex.addDetail( "Found", AssetTypeNames[asset_found->second.type] );
@@ -466,123 +275,6 @@ namespace Regolith
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "DataManager::configure : Asset Sound: " << name;
-    }
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Loading/unloading thread
-
-  void dataManagerLoadingThread()
-  {
-    ThreadHandler threadHandler( "DataManagerThread", REGOLITH_THREAD_DATA );
-
-    // Wait on the start condition
-    threadHandler.start();
-
-
-    // Get references to required data
-    DataManager& manager = Manager::getInstance()->getDataManager();
-    Condition<bool>& dataUpdate = Manager::getInstance()->getThreadManager().DataUpdate;
-    std::unique_lock<std::mutex> dataLock( dataUpdate.mutex );
-
-
-    // Update the thread status
-    threadHandler.running();
-
-    try
-    {
-      while( threadHandler.isGood() )
-      {
-        dataUpdate.variable.wait( dataLock, [&]()->bool{ return (! threadHandler.isGood()) || dataUpdate.data; } );
-
-        manager.setLoading( true );
-
-        DEBUG_LOG( "dataManagerLoadingThread : Working..." );
-        do
-        {
-          dataUpdate.data = false;
-
-          dataLock.unlock();
-
-          dataUnloadFunction();
-          dataLoadFunction();
-
-          dataLock.lock();
-
-        } while( dataUpdate.data == true );
-        DEBUG_LOG( "dataManagerLoadingThread : Finished" );
-
-        dataUpdate.variable.notify_all();
-      }
-
-      dataLock.unlock();
-    }
-    catch ( Exception& ex )
-    {
-      if ( dataLock.owns_lock() )
-      {
-        dataUpdate.variable.notify_all();
-        dataLock.unlock();
-      }
-      threadHandler.throwError( ex );
-      return;
-    }
-    catch( std::exception& ex )
-    {
-      if ( dataLock.owns_lock() )
-      {
-        dataUpdate.variable.notify_all();
-        dataLock.unlock();
-      }
-      threadHandler.throwError( ex );
-      return;
-    }
-
-    threadHandler.closing();
-
-    // Do any closing operations here
-
-    threadHandler.stop();
-  }
-
-
-  void dataLoadFunction()
-  {
-    DataManager& manager = Manager::getInstance()->getDataManager();
-    DataHandler* temp_handler;
-
-    while ( manager._loadQueue.pop( temp_handler ) )
-    {
-      try
-      {
-        temp_handler->load();
-      }
-      catch( Exception& ex )
-      {
-        std::cerr << ex.elucidate();
-        Manager::getInstance()->getThreadManager().error();
-      }
-    }
-  }
-
-
-  void dataUnloadFunction()
-  {
-    DataManager& manager = Manager::getInstance()->getDataManager();
-    DataHandler* temp_handler;
-
-    while ( manager._unloadQueue.pop( temp_handler ) )
-    {
-      try
-      {
-        temp_handler->unload();
-      }
-      catch( Exception& ex )
-      {
-        std::cerr << ex.elucidate();
-        Manager::getInstance()->getThreadManager().error();
-      }
     }
   }
 

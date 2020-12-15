@@ -23,10 +23,6 @@ namespace Regolith
       bool _loaded;
       mutable std::mutex _loadedMutex;
 
-      // Progress counter!
-      float _progress;
-      mutable std::mutex _progressMutex;
-
       // The data that exists in the global scope
       ContextGroup _globalContextGroup;
 
@@ -42,9 +38,6 @@ namespace Regolith
     protected:
       // Set whether the context group is loaded
       void setLoaded( bool );
-
-      // Set the current loading progress
-      void setProgress( float );
 
     public:
       // Con/Destructors

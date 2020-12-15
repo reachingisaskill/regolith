@@ -5,72 +5,35 @@
 namespace Regolith
 {
 
-  RawTexture::RawTexture() :
-    sdl_texture( nullptr ),
-    surface( nullptr ),
-    width( 0 ),
-    height( 0 ),
-    rows( 0 ),
-    columns( 0 ),
-    cells( 0 )
-  {
-  }
-
-
-  RawTexture::RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c ) :
-    sdl_texture( t ),
-    surface( nullptr ),
-    width( w ),
-    height( h ),
-    rows( r ),
-    columns( c ),
-    cells( r*c )
-  {
-  }
-
-
-  RawTexture::RawTexture( SDL_Texture* t, int w, int h, unsigned short r, unsigned short c, unsigned short n ) :
-    sdl_texture( t ),
-    surface( nullptr ),
-    width( w ),
-    height( h ),
-    rows( r ),
-    columns( c ),
-    cells( n )
-  {
-  }
-
-
-  RawTexture::~RawTexture()
-  {
-    if ( surface != nullptr )
-    {
-      SDL_FreeSurface( surface );
-    }
-  }
-
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Texture creation functions
+  // Raw Texture creation function
 
-  SDL_Surface* loadSurfaceFromFile( std::string path, const SDL_Color& key )
+  RawTexture loadRawTexture( ImageDetail details )
   {
+    RawTexture raw_texture;
+
+    raw_texture.width = details.width;
+    raw_texture.height = details.height;
+    raw_texture.rows = details.rows;
+    raw_texture.columns = details.columns;
+    raw_texture.cells = details.rows * details.columns;
+
     // Load the image into a surface
-    SDL_Surface* loadedSurface = IMG_Load( path.c_str() );
-    if ( loadedSurface == nullptr )
+    raw_texture.surface = IMG_Load( path.c_str() );
+    if ( raw_texture.surface == nullptr )
     {
-      Exception ex( "loadSurfaceFromFile()", "Could not load image data", false );
+      Exception ex( "loadRawTexture()", "Could not load image data", false );
       ex.addDetail( "Image path", path );
-      ex.addDetail( "SDL_img error", IMG_GetError() );
+      ex.addDetail( "SDL IMG error", IMG_GetError() );
       throw ex;
     }
 
-    if ( key.a != 0 )
+    if ( details.colourkey.a != 0 )
     {
-      SDL_SetColorKey( loadedSurface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, key.r, key.g, key.b ) );
+      SDL_SetColorKey( raw_texture.surface, SDL_TRUE, SDL_MapRGB( loadedSurface->format, details.colourkey.r, details.colourkey.g, details.colourkey.b ) );
     }
 
-    return loadedSurface;
+    return raw_texture;
   }
 
 }

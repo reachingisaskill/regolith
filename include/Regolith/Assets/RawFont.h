@@ -8,18 +8,16 @@
 namespace Regolith
 {
 
-  // Function that creates the TTF_Font object on the heap
-  TTF_Font* loadFont( std::string, int );
-
-
   // Proxy object for the SDL TTF_Font pointer
   struct RawFont
   {
     TTF_Font* ttf_font;
     SDL_Color colour;
-
-    RawFont( TTF_Font* f = nullptr ) : ttf_font( f ) {}
   };
+
+
+  // Function that creates the raw font proxy
+  RawFont loadRawFont( FontDetail );
 
 }
 
