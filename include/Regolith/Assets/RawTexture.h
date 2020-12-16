@@ -3,6 +3,7 @@
 #define REGOLITH_ASSETS_RAW_TEXTURE_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Assets/RawObjectDetails.h"
 
 
 namespace Regolith

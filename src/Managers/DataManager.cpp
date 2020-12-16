@@ -20,7 +20,7 @@ namespace Regolith
 
   DataManager::DataManager() :
     _indexFile(),
-    _assets(),
+    _assets()
   {
   }
 

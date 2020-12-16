@@ -5,7 +5,7 @@
 namespace Regolith
 {
 
-  RawSound loadRawSound( SoundDetail details )
+  RawSound loadRawSound( AudioDetail details )
   {
     RawSound raw_sound;
 
@@ -14,7 +14,7 @@ namespace Regolith
     if ( raw_sound.sound == nullptr )
     {
       Exception ex( "loadRawSound()", "Failed to load sound file" );
-      ex.addDetail( "Path", filename );
+      ex.addDetail( "Path", details.filename );
       ex.addDetail( "Mix Error", Mix_GetError() );
       throw ex;
     }

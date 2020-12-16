@@ -155,9 +155,6 @@ namespace Regolith
       // Return a pointer to the current active context - may become invalid after rendering!
       Context* getCurrentContext() { return _theEngine.currentContext(); }
 
-      // Gives the DataHandler pointer the engine to allow it to render the loaded surfaces
-      void renderSurfaces( DataHandler* );
-
 
       ////////////////////////////////////////////////////////////////////////////////
       // Access default constants

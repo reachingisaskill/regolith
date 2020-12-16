@@ -3,6 +3,7 @@
 #define REGOLITH_ASSETS_RAW_SOUND_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Assets/RawObjectDetails.h"
 
 
 namespace Regolith
@@ -16,7 +17,7 @@ namespace Regolith
 
 
   // Function that loads the sound file into the RawSound proxy
-  RawSound loadRawSound( SoundDetail );
+  RawSound loadRawSound( AudioDetail );
 
 }
 

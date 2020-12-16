@@ -10,7 +10,7 @@ namespace Regolith
   ShortText::ShortText() :
     _rawFont( nullptr ),
 //    _rawText( nullptr ),
-    _udpate( false ),
+    _update( false ),
     _theTexture( nullptr ),
     _theSurface( nullptr ),
     _clip( { 0, 0, 0, 0 } ),
@@ -33,7 +33,7 @@ namespace Regolith
     _theTexture = texture;
 
     // Change the update flag
-    _udpate = false;
+    _update = false;
   }
 
 

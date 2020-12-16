@@ -5,7 +5,7 @@
 namespace Regolith
 {
 
-  RawMusic loadRawMusic( MusicDetail details )
+  RawMusic loadRawMusic( AudioDetail details )
   {
     RawMusic raw_music;
 
@@ -14,7 +14,7 @@ namespace Regolith
     if ( raw_music.music == nullptr )
     {
       Exception ex( "loadRawMusic()", "Failed to load music file" );
-      ex.addDetail( "Path", filename );
+      ex.addDetail( "Path", details.filename );
       ex.addDetail( "Mix Error", Mix_GetError() );
       throw ex;
     }

@@ -37,6 +37,10 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////
     private:
+      // Set the number of objects to render per frame when loading this group
+      unsigned int _renderRate;
+
+
       // Flag to indicate that this is the global context group
       bool _isGlobalGroup;
 
@@ -67,17 +71,29 @@ namespace Regolith
       // Starting point when this context group is loaded
       Context** _entryPoint;
 
+////////////////////////////////////////////////////////////////////////////////
+      // Flags and variables to interface with loading functions
+
       // Flag to indicate the group is loaded
       bool _isLoaded;
+      bool _loadingState;
       unsigned int _loadProgress;
       unsigned int _loadTotal;
       mutable std::mutex _mutexProgress;
+
+      // Iterator to track the current rendering position
+      bool _canRender;
+      PhysicalObjectMap::iterator _renderPosition;
+      mutable std::mutex _mutexRender;
+
+      // Indicates the engine has finished rendering/destroying textures
+      Condition<bool> _renderCondition;
 
 
 ////////////////////////////////////////////////////////////////////////////////
     protected:
       // Lock the mutex before setting the load progress
-      void setLoadProgress( unsigned int );
+      void resetProgress();
       void loadElement();
 
 
@@ -112,6 +128,10 @@ namespace Regolith
 
       // Flag to indicate this is the global context group. Don't unload accidentally!
       bool isGlobal() const { return _isGlobalGroup; }
+
+
+      // Rendering thread asks to render object textures in the background
+      void engineRenderLoadedObjects( Camera& );
 
 
 ////////////////////////////////////////////////////////////////////////////////

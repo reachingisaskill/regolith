@@ -111,5 +111,11 @@ namespace Regolith
     SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), texture.getTextureCenter(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
   }
 
+
+  void Camera::clearTexture( Texture& texture )
+  {
+    texture.clearSDLTexture();
+  }
+
 }
 

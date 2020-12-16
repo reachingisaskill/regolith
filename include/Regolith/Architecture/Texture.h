@@ -68,7 +68,7 @@ namespace Regolith
       // Public member functions
     public:
       // Trivial constructor
-      Texture() : _update( false ) {}
+      Texture() {}
 
       // Virtual Destructor
       virtual ~Texture() {}

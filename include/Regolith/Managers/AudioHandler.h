@@ -61,7 +61,7 @@ namespace Regolith
 
 
       // Play a sound effect in the local context
-      void playSound( RawSound* );
+      void playSound( RawSound*, int );
 
 
       // Pause all sound effects

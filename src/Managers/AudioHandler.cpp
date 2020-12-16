@@ -165,15 +165,15 @@ namespace Regolith
   }
 
 
-  void AudioHandler::playSound( RawSound* sound )
+  void AudioHandler::playSound( RawSound* sound, int channel )
   {
-    if ( Mix_Playing( sound->channel ) ) // Sound already playing
+    if ( Mix_Playing( channel ) ) // Sound already playing
     {
       return;
     }
 
     // Play the chunk exactly once on the first free channel
-    Mix_PlayChannel( sound->channel, sound->sound, 0 );
+    Mix_PlayChannel( channel, sound->sound, 0 );
   }
 
 }

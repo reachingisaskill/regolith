@@ -3,6 +3,7 @@
 #define REGOLITH_ASSETS_RAW_MUSIC_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Assets/RawObjectDetails.h"
 
 
 namespace Regolith
@@ -16,7 +17,7 @@ namespace Regolith
 
 
   // Function to load the Mix_Music object from the music file
-  RawMusic loadRawMusic( MusicDetail );
+  RawMusic loadRawMusic( AudioDetail );
 
 }
 

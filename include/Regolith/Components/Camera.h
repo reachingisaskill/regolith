@@ -64,6 +64,10 @@ namespace Regolith
 
       // Render a physical object
       void renderPhysicalObject( PhysicalObject*, Vector& );
+
+
+      // Destroys the sdl texture object
+      void clearTexture( Texture& );
   };
 
 }

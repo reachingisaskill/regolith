@@ -19,10 +19,6 @@ namespace Regolith
     typedef std::map<std::string, ContextGroup*> ContextGroupMap;
 
     private:
-      // Flag to indcate if everything is loaded
-      bool _loaded;
-      mutable std::mutex _loadedMutex;
-
       // The data that exists in the global scope
       ContextGroup _globalContextGroup;
 
@@ -31,9 +27,12 @@ namespace Regolith
 
       // Record of the currently loaded context group
       ContextGroup* _currentContextGroup;
+      mutable std::mutex _currentGroupMutex;
 
       // Pointer to the next context group to load
       ContextGroup* _nextContextGroup;
+      mutable std::mutex _nextGroupMutex;
+
 
     protected:
       // Set whether the context group is loaded
@@ -68,7 +67,7 @@ namespace Regolith
 
 
       // Return a pointer to the currently loaded context group
-      ContextGroup* getCurrentContextGroup() { return _currentContextGroup; }
+      ContextGroup* getCurrentContextGroup();
 
       // Return a pointer to the global context group
       ContextGroup* getGlobalContextGroup() { return &_globalContextGroup; }

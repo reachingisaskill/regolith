@@ -51,10 +51,6 @@ namespace Regolith
 
       bool _pause;
 
-      std::mutex _renderQueueMutex;
-      unsigned int _queueRenderRate;
-      DataHandler* _currentDataHandler;
-
     protected:
       // Function which checks the current context stack and performs the queued operations
       bool performStackOperations();
@@ -65,9 +61,6 @@ namespace Regolith
 
       // Just in case I decided to inherit from here in the future...
       virtual ~Engine();
-
-      // Mutex-controlled rendering function. Turns surfaces into textures for a data handler.
-      void renderTextures( DataHandler* );
 
       // Start the engine running. In order to stop it the quit() function must be used.
       void run();

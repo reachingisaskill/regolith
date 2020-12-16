@@ -22,7 +22,12 @@ namespace Regolith
 //    _onLoadOperations(),
     _entryPoint( nullptr ),
     _isLoaded( false ),
-    _loadProgress( 0.0 )
+    _loadingState( false ),
+    _loadProgress( 0 ),
+    _loadTotal( 0 ),
+    _canRender( false ),
+    _renderPosition( _gameObjects.end() ),
+    _renderCondition( false )
   {
   }
 
@@ -36,30 +41,30 @@ namespace Regolith
   }
 
 
-  void ContextGroup::setLoadProgress( unsigned int progress )
+  void ContextGroup::resetProgress()
   {
-    LockGuard lg( _mutexProgress );
-    _loadProgress = progress;
+    GuardLock lg( _mutexProgress );
+    _loadProgress = 0;
   }
 
 
   void ContextGroup::loadElement()
   {
-    LockGuard lg( _mutexProgress );
+    GuardLock lg( _mutexProgress );
     _loadProgress += 1;
   }
 
 
   bool ContextGroup::isLoaded() const
   {
-    LockGuard lg( _mutexProgress );
+    GuardLock lg( _mutexProgress );
     return _isLoaded;
   }
 
 
   float ContextGroup::getLoadProgress() const
   {
-    LockGuard lg( _mutexProgress );
+    GuardLock lg( _mutexProgress );
     return (float) _loadProgress / _loadTotal;
   }
 
@@ -174,16 +179,18 @@ namespace Regolith
 
   void ContextGroup::load()
   {
-    if ( _isLoaded ) 
     {
-      WARN_LOG( "ContextGroup::load : Attempting to load a context group that is already loaded" );
-      return;
+      GuardLock lg( _mutexProgress );
+      if ( _isLoaded ) 
+      {
+        WARN_LOG( "ContextGroup::load : Attempting to load a context group that is already loaded" );
+        return;
+      }
+      // Group is loading
+      _loadingState = true;
     }
 
-    setLoadProgress( 0 );
-    unsigned int total_number = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 1;
-    unsigned int counter = 0;
-
+    resetProgress();
 
     DEBUG_LOG( "ContextGroup::load : Loading" );
     // Load Json Data
@@ -226,6 +233,12 @@ namespace Regolith
       loadElement();
     }
 
+    {
+      // Set the iterator position
+      GuardLock itLock( _mutexRender );
+      _renderPosition = _gameObjects.begin();
+      _canRender = true;
+    }
 
     DEBUG_LOG( "ContextGroup::load : Filling the spawn buffers" );
     // Fill spawn buffers
@@ -292,22 +305,53 @@ namespace Regolith
 //    }
 
 
-
-
-    // NEED TO WAIT FOR ENGINE RENDERING HERE!!!
-
-
-
+    // Wait for engine rendering process
+    UniqueLock renderLock( _renderCondition.mutex );
+    if ( ! _renderCondition.data )
+    {
+      _renderCondition.variable.wait( renderLock, [&]()->bool{ return _renderCondition.data || ThreadManager::ErrorFlag || ThreadManager::QuitFlag; } );
+    }
+    _renderCondition.data = false;
+    renderLock.unlock();
 
     DEBUG_LOG( "ContextGroup::load : Complete" );
-    _isLoaded = true;
+    {
+      GuardLock lg( _mutexProgress );
+      _isLoaded = false;
+    }
   }
 
 
   void ContextGroup::unload()
   {
-    _isLoaded = false;
-    setLoadProgress( 0.0 );
+    {
+      GuardLock lg( _mutexProgress );
+      if ( !_isLoaded ) 
+      {
+        WARN_LOG( "ContextGroup::unload : Attempting to unload a context group that is not loaded" );
+        return;
+      }
+      // Something is changing
+      _isLoaded = false;
+      // Group is unloading
+      _loadingState = false;
+      // Set the iterator position
+      GuardLock itLock( _mutexRender );
+      _renderPosition = _gameObjects.begin();
+      _canRender = true;
+    }
+
+    resetProgress();
+
+    // Wait for engine rendering process
+    UniqueLock renderLock( _renderCondition.mutex );
+    if ( ! _renderCondition.data )
+    {
+      _renderCondition.variable.wait( renderLock, [&]()->bool{ return _renderCondition.data || ThreadManager::ErrorFlag || ThreadManager::QuitFlag; } );
+    }
+    _renderCondition.data = false;
+    renderLock.unlock();
+
 
     INFO_LOG( "ContextGroup::unload : Unloading Data" );
     _theData.clear();
@@ -331,8 +375,68 @@ namespace Regolith
       delete it->second;
       it->second = nullptr;
     }
+
   }
 
+
+  void ContextGroup::engineRenderLoadedObjects( Camera& camera )
+  {
+    {
+      GuardLock lg( _mutexProgress );
+      if ( _isLoaded ) return;
+    }
+
+    // See if we're4 allowed to do things
+    GuardLock lock( _mutexRender );
+    if ( ! _canRender ) return;
+
+
+    if ( _loadingState ) // Loading objects
+    {
+      for ( unsigned int i = 0; i < _renderRate; ++i )
+      {
+        if ( ++_renderPosition == _gameObjects.end() )
+        {
+          _canRender = false;
+
+          UniqueLock lock( _renderCondition.mutex );
+          _renderCondition.data = true;
+          lock.unlock();
+          _renderCondition.variable.notify_all();
+          return;
+        }
+
+        if ( _renderPosition->second->hasTexture() )
+        {
+          if ( _renderPosition->second->getTexture().update() )
+          {
+            camera.renderTexture( _renderPosition->second->getTexture() );
+          }
+        }
+      }
+    }
+    else // Unloading objects
+    {
+      for ( unsigned int i = 0; i < _renderRate; ++i )
+      {
+        if ( ++_renderPosition == _gameObjects.end() )
+        {
+          _canRender = false;
+
+          UniqueLock lock( _renderCondition.mutex );
+          _renderCondition.data = true;
+          lock.unlock();
+          _renderCondition.variable.notify_all();
+          return;
+        }
+
+        if ( _renderPosition->second->hasTexture() )
+        {
+          camera.clearTexture( _renderPosition->second->getTexture() );
+        }
+      }
+    }
+  }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

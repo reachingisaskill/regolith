@@ -17,7 +17,6 @@ namespace Regolith
   // Con/Destruction
 
   ContextManager::ContextManager() :
-    _loaded( false ),
     _globalContextGroup(),
     _contextGroups(),
     _currentContextGroup( nullptr ),
@@ -59,25 +58,16 @@ namespace Regolith
   }
 
 
-  void ContextManager::setLoaded( bool value )
-  {
-    LockGuard lg( _loadedMutex );
-
-    _loaded = value;
-  }
-
-
   bool ContextManager::isLoaded() const
   {
-    LockGuard lg( _loadedMutex );
-
-    return _loaded;
+    GuardLock lg( _currentGroupMutex );
+    return _currentContextGroup->isLoaded();
   }
 
 
   float ContextManager::loadingProgress() const
   {
-    LockGuard lg( _loadedMutex );
+    GuardLock lg( _currentGroupMutex );
     return _currentContextGroup->getLoadProgress();
   }
 
@@ -133,10 +123,14 @@ namespace Regolith
 
   void ContextManager::loadEntryPoint()
   {
-    LockGuard lg( _loadedMutex );
+    UniqueLock lock1( _currentGroupMutex );
+    UniqueLock lock2( _nextGroupMutex );
 
     _currentContextGroup = _nextContextGroup;
     _nextContextGroup = nullptr;
+
+    lock2.unlock();
+    lock1.unlock();
 
     INFO_LOG( "ContextManager::loadEntryPoint : Loading global context group" );
     _globalContextGroup.load();
@@ -161,18 +155,27 @@ namespace Regolith
   }
 
 
+  ContextGroup* ContextManager::getCurrentContextGroup()
+  {
+    GuardLock lg( _currentGroupMutex );
+
+    return _currentContextGroup;
+  }
+
+
   void ContextManager::setNextContextGroup( ContextGroup* cg )
   {
-    setLoaded( false );
-    setProgress( 0.0 );
-    DEBUG_LOG( "ContextManager::setNextContextGroup : Setting next context group." );
+    GuardLock lg( _nextGroupMutex );
 
+    DEBUG_LOG( "ContextManager::setNextContextGroup : Setting next context group." );
     _nextContextGroup = cg;
   }
 
 
   void ContextManager::loadNextContextGroup()
   {
+    GuardLock lg( _nextGroupMutex );
+
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
     std::unique_lock<std::mutex> lock( contextUpdate.mutex );
 
@@ -201,7 +204,8 @@ namespace Regolith
     ContextManager& manager = Manager::getInstance()->getContextManager();
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
     UniqueLock contextLock( contextUpdate.mutex );
-    UniqueLock loadingLock( manager._loadedMutex );
+    UniqueLock currentPointerLock( manager._currentGroupMutex );
+    UniqueLock nextPointerLock( manager._nextGroupMutex );
 
 
     // Update the thread status
@@ -224,10 +228,12 @@ namespace Regolith
           }
 
           // Lock the loading mutex while where swap the current context group
-          loadingLock.lock();
+          currentPointerLock.lock();
+          nextPointerLock.lock();
           manager._currentContextGroup = manager._nextContextGroup;
           manager._nextContextGroup = nullptr;
-          loadingLock.unlock();
+          nextPointerLock.unlock();
+          currentPointerLock.unlock();
 
           manager._currentContextGroup->load();
         }
