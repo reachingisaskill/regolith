@@ -75,7 +75,6 @@ namespace Regolith
   enum ThreadName : char
   {
     REGOLITH_THREAD_RENDERING,
-    REGOLITH_THREAD_DATA,
     REGOLITH_THREAD_CONTEXT,
     REGOLITH_THREAD_TOTAL
   };

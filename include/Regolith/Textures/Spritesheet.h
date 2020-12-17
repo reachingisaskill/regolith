@@ -63,7 +63,7 @@ namespace Regolith
 
       virtual ~Spritesheet();
 
-      // Return true if a surface needs to be rendered during the rendering cycle
+      // Return true if a surface needs to be rendered
       virtual bool update() const { return ( _rawTexture != nullptr ) && ( _rawTexture->sdl_texture == nullptr ); }
 
 

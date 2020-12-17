@@ -21,9 +21,6 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // List of all threads
 
-  // Data Manager loading thread
-  void dataManagerLoadingThread();
-
   // Context Manager loading thread
   void contextManagerLoadingThread();
 
@@ -41,9 +38,6 @@ namespace Regolith
       typedef std::map< ThreadName, ThreadStatus > StatusMap;
 
     private:
-      // Data manager thread container
-      std::thread _dataManagerThread;
-
       // Context manager thread container
       std::thread _contextManagerThread;
 

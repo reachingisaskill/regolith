@@ -42,17 +42,23 @@ namespace Regolith
     {
       if ( it->second->isLoaded() )
       {
+        DEBUG_LOG( "ContextManager::clear : Unloading context group" );
         it->second->unload();
       }
       delete it->second;
     }
     _contextGroups.clear();
 
+    DEBUG_LOG( "ContextManager::clear : Context groups unloaded." );
+
     // Unload the global context group
     if ( _globalContextGroup.isLoaded() )
     {
+      DEBUG_LOG( "ContextManager::clear : Unloading global context group." );
       _globalContextGroup.unload();
     }
+
+    DEBUG_LOG( "ContextManager::clear : Complete." );
 
     lock.unlock();
   }
@@ -204,8 +210,8 @@ namespace Regolith
     ContextManager& manager = Manager::getInstance()->getContextManager();
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
     UniqueLock contextLock( contextUpdate.mutex );
-    UniqueLock currentPointerLock( manager._currentGroupMutex );
-    UniqueLock nextPointerLock( manager._nextGroupMutex );
+    UniqueLock currentPointerLock( manager._currentGroupMutex, std::defer_lock );
+    UniqueLock nextPointerLock( manager._nextGroupMutex, std::defer_lock );
 
 
     // Update the thread status
@@ -216,6 +222,8 @@ namespace Regolith
       while( threadHandler.isGood() )
       {
         contextUpdate.variable.wait( contextLock, [&]()->bool{ return (! threadHandler.isGood() ) || contextUpdate.data; } );
+
+        if ( ! threadHandler.isGood() ) break;
 
         DEBUG_STREAM << "ContextManagerLoadingThread : WORKING";
 
@@ -240,7 +248,6 @@ namespace Regolith
 
         // Signal that the context group has been loaded
         contextUpdate.data = false;
-        manager.setLoaded( true );
 
         contextUpdate.variable.notify_all();
       }

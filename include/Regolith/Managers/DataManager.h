@@ -45,6 +45,11 @@ namespace Regolith
       DataManager();
       ~DataManager();
 
+      DataManager( const DataManager& ) = delete;
+      DataManager( DataManager&& ) = delete;
+      DataManager operator=( const DataManager& ) = delete;
+      DataManager operator=( DataManager&& ) = delete;
+
       // Clear all the stored data
       void clear();
 

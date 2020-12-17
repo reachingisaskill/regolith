@@ -108,7 +108,7 @@ namespace Regolith
     RawTextureMap::iterator found = _rawTextures.find( name );
     if ( found == _rawTextures.end() )
     {
-      RawTexture new_texture = _manager->buildRawTexture( name );
+      RawTexture new_texture = Manager::getInstance()->getDataManager().buildRawTexture( name );
       found = _rawTextures.insert( std::make_pair( name, new_texture ) ).first;
     }
 
@@ -121,7 +121,7 @@ namespace Regolith
     RawSoundMap::iterator found = _rawSounds.find( name );
     if ( found == _rawSounds.end() )
     {
-      RawSound new_sound = _manager->buildRawSound( name );
+      RawSound new_sound = Manager::getInstance()->getDataManager().buildRawSound( name );
       found = _rawSounds.insert( std::make_pair( name, new_sound ) ).first;
     }
 
@@ -134,7 +134,7 @@ namespace Regolith
     RawMusicMap::iterator found = _rawMusic.find( name );
     if ( found == _rawMusic.end() )
     {
-      RawMusic new_music = _manager->buildRawMusic( name );
+      RawMusic new_music = Manager::getInstance()->getDataManager().buildRawMusic( name );
       found = _rawMusic.insert( std::make_pair( name, new_music ) ).first;
     }
 
@@ -147,7 +147,7 @@ namespace Regolith
     RawFontMap::iterator found = _rawFonts.find( name );
     if ( found == _rawFonts.end() )
     {
-      RawFont new_font = _manager->buildRawFont( name );
+      RawFont new_font = Manager::getInstance()->getDataManager().buildRawFont( name );
       found = _rawFonts.insert( std::make_pair( name, new_font ) ).first;
     }
 
@@ -160,7 +160,7 @@ namespace Regolith
     RawTextMap::iterator found = _rawTexts.find( name );
     if ( found == _rawTexts.end() )
     {
-      RawText new_text = _manager->buildRawText( name );
+      RawText new_text = Manager::getInstance()->getDataManager().buildRawText( name );
       found = _rawTexts.insert( std::make_pair( name, new_text ) ).first;
     }
 

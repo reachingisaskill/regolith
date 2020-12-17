@@ -34,10 +34,6 @@ namespace Regolith
       mutable std::mutex _nextGroupMutex;
 
 
-    protected:
-      // Set whether the context group is loaded
-      void setLoaded( bool );
-
     public:
       // Con/Destructors
       ContextManager();

@@ -2,16 +2,13 @@
   "fonts": 
   {
   },
-  "sounds": 
+  "audio": 
   {
   },
-  "music": 
+  "text": 
   {
   },
-  "strings": 
-  {
-  },
-  "textures": 
+  "images": 
   {
   }
 }

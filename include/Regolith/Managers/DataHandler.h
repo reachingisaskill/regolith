@@ -29,9 +29,6 @@ namespace Regolith
   {
 
     private:
-      // Pointer to the data manager. Slightly faster this way.
-      DataManager* _manager;
-
       // List of all the textures
       RawTextureMap _rawTextures;
 

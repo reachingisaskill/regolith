@@ -5,6 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Managers/AudioManager.h"
 #include "Regolith/Utilities/ProxyMap.h"
+#include "Regolith/GamePlay/Sound.h"
 
 
 namespace Regolith
@@ -47,7 +48,7 @@ namespace Regolith
       void configure();
 
       // Allocates a channel for the provided sound
-      void requestChannel( RawSound* );
+      void requestChannel( Sound& );
 
 
       // Play a track immediately
@@ -61,7 +62,7 @@ namespace Regolith
 
 
       // Play a sound effect in the local context
-      void playSound( RawSound*, int );
+      void playSound( Sound& );
 
 
       // Pause all sound effects

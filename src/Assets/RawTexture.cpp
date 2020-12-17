@@ -12,6 +12,7 @@ namespace Regolith
   {
     RawTexture raw_texture;
 
+    raw_texture.sdl_texture = nullptr;
     raw_texture.width = details.width;
     raw_texture.height = details.height;
     raw_texture.rows = details.rows;

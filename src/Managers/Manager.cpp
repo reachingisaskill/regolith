@@ -114,53 +114,60 @@ namespace Regolith
 
   void Manager::run()
   {
-    // Start all the waiting threads
-    INFO_LOG( "Manager::run : Starting worker threads" );
-    _theThreads.startAll();
-
-
     try
     {
-      // Load the first context group blocking this thread until completion
-      INFO_LOG( "Manager::run : Loading entry point" );
-      _theContexts.loadEntryPoint();
+      // Start all the waiting threads
+      INFO_LOG( "Manager::run : Starting worker threads" );
+      _theThreads.startAll();
 
-      // Reset the stack to the first context
-      INFO_LOG( "Manager::run : Loading the first context" );
-      this->openEntryPoint();
 
-      // Start the engine!
-      INFO_LOG( "Manager::run : Starting the engine." );
-      _theEngine.run();
+      try
+      {
+        // Load the first context group blocking this thread until completion
+        INFO_LOG( "Manager::run : Loading entry point" );
+        _theContexts.loadEntryPoint();
+
+        // Reset the stack to the first context
+        INFO_LOG( "Manager::run : Loading the first context" );
+        this->openEntryPoint();
+
+        // Start the engine!
+        INFO_LOG( "Manager::run : Starting the engine." );
+        _theEngine.run();
+      }
+      catch ( Exception& ex )
+      {
+        ERROR_LOG( "Manager::run : A Regolith error occured during runtime" );
+        ERROR_STREAM << ex.elucidate();
+        std::cerr << ex.elucidate();
+      }
+
+
+      try
+      {
+        // Unload everything
+        INFO_LOG( "Manager::run : Unloading data" );
+        _theContexts.clear();
+      }
+      catch ( Exception& ex )
+      {
+        ERROR_LOG( "Manager::run : A Regolith exception occured unloading data" );
+        ERROR_STREAM << ex.elucidate();
+        std::cerr << ex.elucidate();
+        return;
+      }
+
+        // Stop all the threads
+      INFO_LOG( "Manager::run : Stopping all worker threads" );
+      _theThreads.stopAll();
+
     }
-    catch ( Exception& ex )
+    catch ( std::exception& ex )
     {
-      ERROR_LOG( "Manager::run : A Regolith error occured during runtime" );
-      ERROR_STREAM << ex.elucidate();
-      std::cerr << ex.elucidate();
+      ERROR_LOG( "Manager::run : A unexpected exception occured." );
+      ERROR_STREAM << ex.what();
+      _theThreads.error();
     }
-
-
-      // Stop all the threads
-    INFO_LOG( "Manager::run : Stopping all worker threads" );
-    _theThreads.stopAll();
-
-
-    try
-    {
-      // Unload everything
-      INFO_LOG( "Manager::run : Unloading data" );
-      _theContexts.clear();
-      _theData.clear();
-    }
-    catch ( Exception& ex )
-    {
-      ERROR_LOG( "Manager::run : A Regolith exception occured unloading data" );
-      ERROR_STREAM << ex.elucidate();
-      std::cerr << ex.elucidate();
-      return;
-    }
-
 
     // Join all the threads
     INFO_LOG( "Manager::run : Joining all worker threads" );

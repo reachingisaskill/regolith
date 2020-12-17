@@ -44,7 +44,11 @@ namespace Regolith
 
   void Spritesheet::clearSDLTexture()
   {
-    SDL_DestroyTexture( _rawTexture->sdl_texture );
+    if ( _rawTexture->sdl_texture != nullptr )
+    {
+      SDL_DestroyTexture( _rawTexture->sdl_texture );
+      _rawTexture->sdl_texture = nullptr;
+    }
   }
 
 

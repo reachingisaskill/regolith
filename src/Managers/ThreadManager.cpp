@@ -17,7 +17,6 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
   ThreadManager::ThreadManager() :
-    _dataManagerThread(),
     _contextManagerThread(),
     _engineRenderingThread(),
     _threadStatus(),
@@ -112,7 +111,6 @@ namespace Regolith
 
   void ThreadManager::startAll()
   {
-    _dataManagerThread = std::thread( dataManagerLoadingThread );
     _contextManagerThread = std::thread( contextManagerLoadingThread );
     _engineRenderingThread = std::thread( engineRenderingThread );
 
@@ -180,8 +178,6 @@ namespace Regolith
     waitThreadStatus( THREAD_STOP );
 
     // Wait for all the threads to re-join
-    INFO_LOG( "ThreadManager::~ThreadManager : Joining data manager thread" );
-    _dataManagerThread.join();
     INFO_LOG( "ThreadManager::~ThreadManager : Joining context manager thread" );
     _contextManagerThread.join();
     INFO_LOG( "ThreadManager::~ThreadManager : Joining engine rendering thread" );

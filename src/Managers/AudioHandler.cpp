@@ -2,7 +2,6 @@
 
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/ThreadManager.h"
-#include "Regolith/Assets/RawSound.h"
 #include "Regolith/Assets/RawMusic.h"
 
 
@@ -39,10 +38,10 @@ namespace Regolith
   }
 
 
-  void AudioHandler::requestChannel( RawSound* sound )
+  void AudioHandler::requestChannel( Sound& sound )
   {
     _channelPauses.push_back( 0 );
-    sound->channel = _channelPauses.size()-1;
+    sound.registerChannel( _channelPauses.size()-1 );
   }
 
 
@@ -165,15 +164,15 @@ namespace Regolith
   }
 
 
-  void AudioHandler::playSound( RawSound* sound, int channel )
+  void AudioHandler::playSound( Sound& sound )
   {
-    if ( Mix_Playing( channel ) ) // Sound already playing
+    if ( Mix_Playing( sound._channel ) ) // Sound already playing
     {
       return;
     }
 
     // Play the chunk exactly once on the first free channel
-    Mix_PlayChannel( channel, sound->sound, 0 );
+    Mix_PlayChannel( sound.getChannel(), sound.getMIXSound(), 0 );
   }
 
 }

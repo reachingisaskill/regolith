@@ -222,6 +222,7 @@ namespace Regolith
       detail.colour.a = data["colour"][3].asInt();
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
+      DEBUG_STREAM << "DataManager::configure : Asset Font: " << name;
     }
 
     // Load details of all the image assets
@@ -276,6 +277,8 @@ namespace Regolith
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "DataManager::configure : Asset Sound: " << name;
     }
+
+    DEBUG_STREAM << "DataManager::configure : Built asset map. Size = " << _assets.size();
   }
 
 }
