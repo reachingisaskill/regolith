@@ -1,9 +1,9 @@
 
 #include "Regolith/Components/Camera.h"
 
+#include "Regolith/Architecture/DrawableObject.h"
 #include "Regolith/Architecture/Texture.h"
 #include "Regolith/Assets/RawTexture.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
 #include "Regolith/Components/Window.h"
 
 
@@ -92,7 +92,7 @@ namespace Regolith
   }
 
 
-  void Camera::renderPhysicalObject( PhysicalObject* object, Vector& camera_position )
+  void Camera::renderDrawableObject( DrawableObject* object, Vector& camera_position )
   {
     _targetRect.x = ( object->getPosition().x() - camera_position.x() ) * _scaleX;
     _targetRect.y = ( object->getPosition().y() - camera_position.y() ) * _scaleY;

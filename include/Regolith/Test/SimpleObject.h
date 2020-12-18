@@ -1,16 +1,18 @@
 
-#ifndef REGOLITH_SIMPLE_OBJECT_H_
-#define REGOLITH_SIMPLE_OBJECT_H_
+#ifndef REGOLITH_TEST_SIMPLE_OBJECT_H_
+#define REGOLITH_TEST_SIMPLE_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Architecture/DrawableObject.h"
+#include "Regolith/Architecture/CollidableObject.h"
+#include "Regolith/GamePlay/Collision.h"
 #include "Regolith/Textures/Spritesheet.h"
 
 
 namespace Regolith
 {
 
-  class SimpleObject : public PhysicalObject
+  class SimpleObject : public DrawableObject, public CollidableObject
   {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -20,12 +22,6 @@ namespace Regolith
 
       // Collision for the object
       Collision _collision;
-
-      // Update period for the texture and collision
-      float _updatePeriod;
-      float _count;
-      unsigned int _numberFrames;
-      unsigned int _currentFrame;
 
     protected :
       // Copy constructor - protected so only way to duplicate objects is through the "clone" function
@@ -43,7 +39,7 @@ namespace Regolith
 
       // Function to create to an copied instance at the specified position
       // ALL derived classes my override this function with the copy-constructor for that class!
-      virtual SimpleObject* clone() const { return new SimpleObject( *this ); }
+      virtual PhysicalObject* clone() const override { return (PhysicalObject*) new SimpleObject( *this ); }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -55,20 +51,21 @@ namespace Regolith
       // Resets the object to it's initial configuration to allow reusing of objects
       virtual void reset() override;
 
+
 ////////////////////////////////////////////////////////////////////////////////
       // Specifc functions for enabling physics and rendering on the object
-
-      // Perform an update to all the animations
-      virtual void update( float timestep ) override;
 
       // For the camera to request the current renderable texture
       virtual Texture& getTexture() override;
 
       // For the collision handler to request the current hitboxes
       virtual Collision& getCollision() override;
+
+      // Resolve the collision that was found
+      void onCollision( Contact&, CollidableObject* );
   };
 
 }
 
-#endif // REGOLITH_SIMPLE_OBJECT_H_
+#endif // REGOLITH_TEST_SIMPLE_OBJECT_H_
 

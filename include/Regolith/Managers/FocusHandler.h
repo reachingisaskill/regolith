@@ -3,7 +3,7 @@
 #define REGOLITH_MANAGERS_FOCUS_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/ButtonInterface.h"
+#include "Regolith/Architecture/ButtonObject.h"
 
 #include <vector>
 #include <map>
@@ -20,8 +20,8 @@ namespace Regolith
   class FocusHandler
   {
     
-    typedef std::vector< ButtonInterface* > ButtonVector;
-    typedef std::map< ButtonInterface*, size_t > ButtonMap;
+    typedef std::vector< ButtonObject* > ButtonVector;
+    typedef std::map< ButtonObject*, size_t > ButtonMap;
 
     private:
       ButtonVector _buttons;
@@ -34,7 +34,7 @@ namespace Regolith
       virtual ~FocusHandler();
 
       // Add an object to the handler
-      void addObject( ButtonInterface* );
+      void addObject( ButtonObject* );
 
       // Pass focus to the next object
       void next();
@@ -43,7 +43,7 @@ namespace Regolith
       void previous();
 
       // Forcibly request focus
-      void requestFocus( ButtonInterface* );
+      void requestFocus( ButtonObject* );
 
   };
 

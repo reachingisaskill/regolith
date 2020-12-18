@@ -2,7 +2,7 @@
 #ifndef REGOLITH_ARCHITECTURE_COMPOSITE_OBJECT_H_
 #define REGOLITH_ARCHITECTURE_COMPOSITE_OBJECT_H_
 
-#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 
 
 namespace Regolith
@@ -12,7 +12,7 @@ namespace Regolith
   class PhysicObjectVector;
 
 
-  class CompositeObject : virtual public GameObject
+  class CompositeObject : virtual public PhysicalObject
   {
     private:
 

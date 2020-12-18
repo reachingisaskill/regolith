@@ -3,14 +3,16 @@
 #define REGOLITH_STATE_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Architecture/CollidableObject.h"
+#include "Regolith/Architecture/DrawableObject.h"
+#include "Regolith/Architecture/AnimatedObject.h"
 #include "Regolith/Textures/Spritesheet.h"
 
 
 namespace Regolith
 {
 
-  class StateObject : public PhysicalObject
+  class StateObject : public CollidableObject, public DrawableObject, public AnimatedObject
   {
 ////////////////////////////////////////////////////////////////////////////////
     // Info required for each state
@@ -83,7 +85,7 @@ namespace Regolith
 
       // Function to create to an copied instance at the specified position
       // ALL derived classes my override this function with the copy-constructor for that class!
-      virtual StateObject* clone() const { return new StateObject( *this ); }
+      virtual PhysicalObject* clone() const { return new StateObject( *this ); }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -107,6 +109,9 @@ namespace Regolith
 
       // For the collision handler to request the current hitboxes
       virtual Collision& getCollision() override { return _currentState->collision; }
+
+      // Call back function for when this object collides with another
+      virtual void onCollision( Contact&, CollidableObject* ) {}
 
 
 ////////////////////////////////////////////////////////////////////////////////

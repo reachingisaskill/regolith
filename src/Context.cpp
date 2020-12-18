@@ -1,11 +1,15 @@
 
 #include "Regolith/Context.h"
 
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Architecture/DrawableObject.h"
 #include "Regolith/Architecture/NoisyObject.h"
+#include "Regolith/Architecture/CollidableObject.h"
 #include "Regolith/Architecture/ButtonObject.h"
+#include "Regolith/Architecture/AnimatedObject.h"
+#include "Regolith/Architecture/ControllableObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Camera.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
 #include "Regolith/GamePlay/ContextLayer.h"
 
 
@@ -135,7 +139,7 @@ namespace Regolith
             // If the object is animated, update the animation
             if ( (*obj_it)->hasAnimation() )
             {
-              (*obj_it)->update( time );
+              dynamic_cast<AnimatedObject*>(*obj_it)->update( time );
             }
 
             if ( (*obj_it)->hasPhysics() )
@@ -177,7 +181,7 @@ namespace Regolith
           ++it2;
           while ( it2 != end )
           {
-            _theCollision.collides( (*it1), (*it2) );
+            _theCollision.collides( dynamic_cast<CollidableObject*>((*it1)), dynamic_cast<CollidableObject*>((*it2)) );
             ++it2;
           }
           ++it1;
@@ -205,7 +209,7 @@ namespace Regolith
         {
           for ( PhysicalObjectList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
           {
-            _theCollision.collides( (*it1), (*it2) );
+            _theCollision.collides( dynamic_cast<CollidableObject*>((*it1)), dynamic_cast<CollidableObject*>((*it2)) );
           }
         }
       }
@@ -231,7 +235,7 @@ namespace Regolith
         {
           for ( PhysicalObjectList::iterator it2 = team2.begin(); it2 != end2; ++it2 )
           {
-            _theCollision.contains( (*it1), (*it2) );
+            _theCollision.contains( dynamic_cast<CollidableObject*>( *it1 ), dynamic_cast<CollidableObject*>( *it2 ) );
           }
         }
       }
@@ -259,7 +263,7 @@ namespace Regolith
           // If the object can be drawn, render it to the back buffer
           if ( (*it)->hasTexture() )
           {
-            camera.renderPhysicalObject( (*it), camera_position );
+            camera.renderDrawableObject( dynamic_cast<DrawableObject*>(*it), camera_position );
           }
         }
       }
@@ -372,8 +376,22 @@ namespace Regolith
           throw ex;
         }
 
+        // If the object is a button add it to the focus handler
+        if ( object->hasButton() )
+        {
+          _theFocus.addObject( dynamic_cast< ButtonObject* >( object ) );
+        }
+
+        // If the object expects input register it with the input handler
+        if ( object->hasInput() )
+        {
+          dynamic_cast< ControllableObject* >( object )->registerActions( _theInput );
+        }
+
+        // Configure the location of the object within the specified layer
         configureObject( _layers[ layer_name ], object, object_data[i] );
 
+        // and insert!
         _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
       }
 
@@ -408,41 +426,25 @@ namespace Regolith
           throw ex;
         }
 
+//        // If the object is a button add it to the focus handler. Should spawnable objects have a focus property?
+//        if ( object->hasButton() )
+//        {
+//          _theFocus.addObject( dynamic_cast< ButtonObject* >( object ) );
+//        }
+
+        // If the object expects input register it with the input handler
+        if ( object->hasInput() )
+        {
+          dynamic_cast< ControllableObject* >( object )->registerActions( _theInput );
+        }
+
+        // Configure the location of the object within the specified layer
         configureObject( _layers[ layer_name ], object, spawn_data[j] );
 
+        // and insert!
         _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
       }
     }
-
-
-    /*
-    // Configure the camera
-    Json::Value camera_data = json_data["camera"];
-    Utilities::validateJson( camera_data, "lower_limit", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( camera_data, "upper_limit", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( camera_data["lower_limit"], 2, Utilities::JSON_TYPE_FLOAT );
-    Utilities::validateJsonArray( camera_data["upper_limit"], 2, Utilities::JSON_TYPE_FLOAT );
-
-    // Set the camera follow if provided
-    if ( ( ! camera_data["follow"].isNull() ) && Utilities::validateJson( camera_data, "follow", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      std::string camera_follow = camera_data["follow"].asString();
-
-      if ( Utilities::validateJson( camera_data, "global", Utilities::JSON_TYPE_BOOLEAN, false ) && camera_data["global"].asBool() )
-      {
-        PhysicalObject* followee = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getPhysicalObject( camera_follow );
-        INFO_STREAM << "Setting camera to follow global object : " << camera_follow << " @ " << followee;
-        _theCamera.followMe( followee );
-      }
-      else
-      {
-        PhysicalObject* followee = _owner->getPhysicalObject( camera_follow );
-        INFO_STREAM << "Setting camera to follow : " << camera_follow << " @ " << followee;
-        _theCamera.followMe( followee );
-      }
-    }
-    */
-
 
 
 //    // Let the focus handler register input actions

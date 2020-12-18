@@ -2,13 +2,15 @@
 #ifndef REGOLITH_ARCHITECTURE_DRAWABLE_OBJECT_H_
 #define REGOLITH_ARCHITECTURE_DRAWABLE_OBJECT_H_
 
-#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 
 
 namespace Regolith
 {
+  // Forward declaration
+  class Texture;
 
-  class DrawableObject : virtual public GameObject
+  class DrawableObject : virtual public PhysicalObject
   {
     private:
 

@@ -4,6 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/FactoryTemplate.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Managers/AudioManager.h"
@@ -14,7 +15,6 @@
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Components/Window.h"
 #include "Regolith/Components/Engine.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
 #include "Regolith/GamePlay/Signal.h"
 #include "Regolith/Context.h"
 #include "Regolith/Utilities/Singleton.h"

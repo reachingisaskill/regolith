@@ -18,6 +18,7 @@ namespace Regolith
    * Animation => Animated
    * Texture => Drawable
    * Children => Composite
+   * Collision => Collidable
    */
   class GameObject : public MassProduceable< ContextGroup& >
   {
@@ -32,6 +33,7 @@ namespace Regolith
       virtual bool hasAnimation() const { return false; }
       virtual bool hasTexture() const { return false; }
       virtual bool hasChildren() const { return false; }
+      virtual bool hasCollision() const { return false; }
   };
 
 }

@@ -7,7 +7,7 @@
 
 namespace Regolith
 {
-  class PhysicalObject;
+  class DrawableObject;
   class Window;
   class Texture;
 
@@ -63,7 +63,7 @@ namespace Regolith
 
 
       // Render a physical object
-      void renderPhysicalObject( PhysicalObject*, Vector& );
+      void renderDrawableObject( DrawableObject*, Vector& );
 
 
       // Destroys the sdl texture object

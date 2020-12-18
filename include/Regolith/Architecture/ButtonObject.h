@@ -2,7 +2,7 @@
 #ifndef REGOLITH_ARCHITECTURE_BUTTON_OBJECT_H_
 #define REGOLITH_ARCHITECTURE_BUTTON_OBJECT_H_
 
-#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 
 
 namespace Regolith
@@ -13,7 +13,7 @@ namespace Regolith
   /*
    * The class that defines an interface for anything that could act like a button.
    */
-  class ButtonObject : virtual public GameObject
+  class ButtonObject : virtual public PhysicalObject
   {
     private:
       FocusHandler* _handler;

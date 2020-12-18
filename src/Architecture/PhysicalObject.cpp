@@ -35,8 +35,6 @@ namespace Regolith
   PhysicalObject::PhysicalObject( const PhysicalObject& other ) :
     _destroyMe( other._destroyMe ),
     _hasMoveable( other._hasMoveable ),
-    _hasTexture( other._hasTexture ),
-    _hasAnimation( other._hasAnimation ),
     _hasPhysics( other._hasPhysics ),
     _position( other._position ),
     _rotation( other._rotation ),
@@ -183,15 +181,6 @@ namespace Regolith
     // Update complete - reset forces
     _forces.zero();
     DEBUG_STREAM << "PhysicalObject::step : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
-  }
-
-
-  void PhysicalObject::onCollision( Contact& contact, PhysicalObject* /*other_object*/)
-  {
-    DEBUG_STREAM << "PhysicalObject::onCollision : " << contact.overlap << " | " << contact.impulse;
-    this->move( contact.inertiaRatio * contact.overlap );
-    this->kick( contact.impulse );
-    DEBUG_STREAM << "PhysicalObject::onCollision : Position : " << _position << ", Vel : " << _velocity;
   }
 
 }

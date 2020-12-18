@@ -3,7 +3,7 @@
 #define REGOLITH_ARCHITECTURE_CONTEXT_LAYER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 
 #include <list>
 #include <set>

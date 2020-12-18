@@ -129,23 +129,16 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////
-      // Specifc functions for enabling physics and rendering on the object
+      // Specifc functions for enabling physics
 
 
       // Perform the time integration for movement of this object
       virtual void step( float );
 
-      // For the collision handler to request the current hitboxes. Derived class must define the collision object!
-      virtual const Collision* getCollision() { return nullptr; }
-
-      // Call back function for when this object collides with another
-      virtual void onCollision( Contact&, PhysicalObject* );
-
 
 
 ////////////////////////////////////////////////////////////////////////////////
       // Object property accessors and modifiers
-
 
       // For derived classes to impose a force
       void addForce( Vector f ) { _forces += f; }

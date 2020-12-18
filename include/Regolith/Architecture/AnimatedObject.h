@@ -2,13 +2,13 @@
 #ifndef REGOLITH_ARCHITECTURE_ANIMATED_OBJECT_H_
 #define REGOLITH_ARCHITECTURE_ANIMATED_OBJECT_H_
 
-#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 
 
 namespace Regolith
 {
 
-  class AnimatedObject : virtual public GameObject
+  class AnimatedObject : virtual public PhysicalObject
   {
     private:
 

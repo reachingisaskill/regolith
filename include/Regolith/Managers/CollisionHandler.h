@@ -31,6 +31,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
   // Forward declarations
   class PhysicalObject;
+  class CollidableObject;
   class ContextLayer;
 
 
@@ -64,7 +65,7 @@ namespace Regolith
 
     protected:
       // Used to handle the function calls the two objects that have collided.
-      inline void callback( PhysicalObject*, PhysicalObject* );
+      inline void callback( CollidableObject*, CollidableObject* );
 
     public:
       // Const iterators - no changing!
@@ -110,9 +111,9 @@ namespace Regolith
       PairIterator containerEnd() const { return _containers.end(); }
 
       // Do two object collide
-      void collides( PhysicalObject*, PhysicalObject* );
+      void collides( CollidableObject*, CollidableObject* );
       // Does the first object contain the second
-      void contains( PhysicalObject*, PhysicalObject* );
+      void contains( CollidableObject*, CollidableObject* );
 
   };
 

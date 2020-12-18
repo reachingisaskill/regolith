@@ -3,7 +3,7 @@
 #define REGOLITH_ARCHITECTURE_NOISY_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/NoisyInterface.h"
 
 
@@ -12,7 +12,7 @@ namespace Regolith
   /*
    * Defines the intferface for classes that can trigger sounds effects to be played.
    */
-  class NoisyObject : public NoisyInterface, virtual public GameObject
+  class NoisyObject : public NoisyInterface, virtual public PhysicalObject
   {
     public:
       // Simple contructor
