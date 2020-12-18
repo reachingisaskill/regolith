@@ -1,5 +1,5 @@
 
-#include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
@@ -13,8 +13,6 @@ namespace Regolith
   PhysicalObject::PhysicalObject() :
     _destroyMe( false ),
     _hasMoveable( false ),
-    _hasTexture( false ),
-    _hasAnimation( false ),
     _hasPhysics( false ),
     _position(),
     _rotation( 0.0 ),
@@ -26,6 +24,8 @@ namespace Regolith
     _height( 0.0 ),
     _velocity(),
     _forces(),
+    _angularVel( 0.0 ),
+    _torques( 0.0 ),
     _collisionTeam( 0 )
   {
   }
@@ -48,6 +48,8 @@ namespace Regolith
     _height( other._height ),
     _velocity( other._velocity ),
     _forces(),
+    _angularVel( other._angularVel ),
+    _torques( 0.0 ),
     _collisionTeam( other._collisionTeam )
   {
   }
@@ -65,14 +67,10 @@ namespace Regolith
   void PhysicalObject::configure( Json::Value& json_data, ContextGroup& /*cg*/ )
   {
     Utilities::validateJson( json_data, "has_moveable", Utilities::JSON_TYPE_BOOLEAN );
-    Utilities::validateJson( json_data, "has_texture", Utilities::JSON_TYPE_BOOLEAN );
-    Utilities::validateJson( json_data, "has_animation", Utilities::JSON_TYPE_BOOLEAN );
     Utilities::validateJson( json_data, "has_physics", Utilities::JSON_TYPE_BOOLEAN );
 
-    // Configure the basic properties of the object
+    // Configure the flags of physical object
     _hasMoveable = json_data["has_moveable"].asBool();
-    _hasTexture = json_data["has_texture"].asBool();
-    _hasAnimation = json_data["has_animation"].asBool();
     _hasPhysics = json_data["has_physics"].asBool();
 
 

@@ -7,7 +7,6 @@
 namespace Regolith
 {
   class ContextGroup;
-  class DataHandler;
 
   /*
    * The base class for all objects that can appear (event without a drawable interface) within the game)
@@ -18,21 +17,21 @@ namespace Regolith
    * Button => Focusable
    * Animation => Animated
    * Texture => Drawable
-   * Movement => Movable
+   * Children => Composite
    */
   class GameObject : public MassProduceable< ContextGroup& >
   {
     public:
       virtual ~GameObject() {}
 
+      virtual bool isPhysical() const { return false; }
+
       virtual bool hasAudio() const { return false; }
       virtual bool hasInput() const { return false; }
       virtual bool hasButton() const { return false; }
       virtual bool hasAnimation() const { return false; }
-      virtual bool hasPhysics() const { return false; }
       virtual bool hasTexture() const { return false; }
-      virtual bool hasMovement() const { return false; }
-      virtual bool isPhysical() const { return false; }
+      virtual bool hasChildren() const { return false; }
   };
 
 }

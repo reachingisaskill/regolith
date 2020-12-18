@@ -1,10 +1,9 @@
 
-#ifndef REGOLITH_GAMEPLAY_PHYSICAL_OBJECT_H_
-#define REGOLITH_GAMEPLAY_PHYSICAL_OBJECT_H_
+#ifndef REGOLITH_ARCHITECTURE_PHYSICAL_OBJECT_H_
+#define REGOLITH_ARCHITECTURE_PHYSICAL_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
-#include "Regolith/Architecture/Texture.h"
 #include "Regolith/GamePlay/Collision.h"
 
 namespace Regolith
@@ -24,12 +23,9 @@ namespace Regolith
     private:
       // Flag that this object is to be removed from the scene
       bool _destroyMe;
+
       // Flag to indicate this object can be moved by physics processes
       bool _hasMoveable;
-      // Flag to indicate this object has a texture to render to the window
-      bool _hasTexture;
-      // Flag to indicate this object has animation
-      bool _hasAnimation;
       // Flag to indicate this object responds to global physics
       bool _hasPhysics;
 
@@ -53,7 +49,12 @@ namespace Regolith
       Vector _velocity;
       Vector _forces;
 
-      // Used to configure the collision logic
+      // Rotation physics variables (Not yet implemented!)
+      float _angularVel;
+      float _torques;
+
+
+      // Used to organise objects and configure the collision logic
       CollisionTeam _collisionTeam;
 
 
@@ -61,11 +62,18 @@ namespace Regolith
       // Copy constructor - protected so only way to duplicate objects is through the "clone" function
       PhysicalObject( const PhysicalObject& );
 
+
 ////////////////////////////////////////////////////////////////////////////////
       // Property modifiers
 
       // For derived classes to update the mass. Sets both mass and it's inverse
       void setMass( float );
+
+      // For derived classes to set the moveable flag
+      void setMoveable( bool m ) { _hasMoveable = m; }
+
+      // For derived classes to set whether this object is affected by global physics effects
+      void setPhysics( bool p ) { _hasPhysics = p; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -101,16 +109,10 @@ namespace Regolith
 
 
       // Tells the caller that the object is moveable. i.e. the velocity may be non-zero
-      virtual bool hasMovement() const override { return _hasMoveable; }
-
-      // Tells the caller that the object can be rendered.
-      virtual bool hasTexture() const override { return _hasTexture; }
+      virtual bool hasMovement() const { return _hasMoveable; }
 
       // Tells the caller that the is animated for every frame
-      virtual bool hasAnimation() const override { return _hasAnimation; }
-
-      // Tells the caller that the is animated for every frame
-      virtual bool hasPhysics() const override { return _hasPhysics; }
+      virtual bool hasPhysics() const { return _hasPhysics; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -130,20 +132,15 @@ namespace Regolith
       // Specifc functions for enabling physics and rendering on the object
 
 
-      // For the camera to request the current renderable texture
-      virtual Texture& getTexture() = 0;
-
-      // For the collision handler to request the current hitboxes
-      virtual const Collision& getCollision() = 0;
-
-      // Perform an update to all the animations
-      virtual void update( float ) = 0;
-
       // Perform the time integration for movement of this object
       virtual void step( float );
 
+      // For the collision handler to request the current hitboxes. Derived class must define the collision object!
+      virtual const Collision* getCollision() { return nullptr; }
+
       // Call back function for when this object collides with another
       virtual void onCollision( Contact&, PhysicalObject* );
+
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -198,5 +195,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_GAMEPLAY_PHYSICAL_OBJECT_H_
+#endif // REGOLITH_ARCHITECTURE_PHYSICAL_OBJECT_H_
 
