@@ -8,6 +8,20 @@
 namespace Regolith
 {
 
+  // Struct holding all the info required for resolving a collision.
+  struct Contact
+  {
+    Contact* other;
+
+    float inertiaRatio;
+    Vector impulse;
+    Vector overlap;
+    Vector normal;
+    CollisionType type;
+  };
+
+
+
   class CollidableObject : virtual public PhysicalObject
   {
     private:

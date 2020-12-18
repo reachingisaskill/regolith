@@ -1,7 +1,8 @@
 
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Architecture/DrawableObject.h"
 #include "Regolith/Architecture/NoisyObject.h"
 #include "Regolith/Context.h"
 #include "Regolith/Utilities/JsonValidation.h"
@@ -393,10 +394,10 @@ namespace Regolith
 
         if ( _renderPosition->second->hasTexture() )
         {
-          if ( _renderPosition->second->getTexture().update() )
+          if ( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture().update() )
           {
-            DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : RENDERING" );
-            camera.renderTexture( _renderPosition->second->getTexture() );
+            DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Rendering" );
+            camera.renderTexture( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture() );
           }
         }
       }
@@ -415,7 +416,11 @@ namespace Regolith
 
         if ( _renderPosition->second->hasTexture() )
         {
-          camera.clearTexture( _renderPosition->second->getTexture() );
+          if ( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture().update() )
+          {
+            DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Clearing" );
+            camera.renderTexture( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture() );
+          }
         }
       }
     }

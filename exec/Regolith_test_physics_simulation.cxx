@@ -1,7 +1,8 @@
 
 #include "Regolith.h"
 #include "Regolith/Test/EmptyContext.h"
-#include "Regolith/SimpleObject.h"
+#include "Regolith/Test/SimpleObject.h"
+#include "Regolith/Test/ContainerObject.h"
 
 #include "logtastic.h"
 
@@ -24,6 +25,7 @@ int main( int, char** )
 
   INFO_LOG( "Main : Creating test builders" );
   man->getObjectFactory().addBuilder< SimpleObject >( "simple_object" );
+  man->getObjectFactory().addBuilder< ContainerObject >( "container_object" );
   man->getContextFactory().addBuilder< EmptyContext >( "empty_context" );
 
   try

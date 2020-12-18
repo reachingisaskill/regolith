@@ -3,7 +3,7 @@
 #define REGOLITH_COLLISION_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Utilities/Contact.h"
+#include "Regolith/Architecture/CollidableObject.h"
 
 #include <vector>
 #include <utility>
@@ -31,7 +31,6 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
   // Forward declarations
   class PhysicalObject;
-  class CollidableObject;
   class ContextLayer;
 
 

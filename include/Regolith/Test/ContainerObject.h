@@ -3,14 +3,14 @@
 #define REGOLITH_TEST_CONTAINER_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
-#include "Regolith/Textures/Spritesheet.h"
+#include "Regolith/Architecture/CollidableObject.h"
+#include "Regolith/GamePlay/Collision.h"
 
 
 namespace Regolith
 {
 
-  class ContainerObject : public PhysicalObject
+  class ContainerObject : public CollidableObject
   {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ namespace Regolith
 
       // Function to create to an copied instance at the specified position
       // ALL derived classes my override this function with the copy-constructor for that class!
-      virtual PhysicalObject* clone() const { return new (PhysicalObject*) ContainerObject( *this ); }
+      virtual PhysicalObject* clone() const { return (PhysicalObject*) new ContainerObject( *this ); }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -51,6 +51,9 @@ namespace Regolith
 
       // For the collision handler to request the current hitboxes
       virtual Collision& getCollision() override;
+
+      // call back function for when this object collides with another
+      virtual void onCollision( Contact&, CollidableObject* ) override;
   };
 
 }

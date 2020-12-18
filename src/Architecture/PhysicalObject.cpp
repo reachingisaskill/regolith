@@ -3,7 +3,6 @@
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
-#include "Regolith/Utilities/Contact.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 

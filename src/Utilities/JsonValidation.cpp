@@ -14,7 +14,7 @@ namespace Regolith
       {
         if ( isRequired )
         {
-          FAILURE_STREAM << "Utilities::validateJson : Json data failed validation. Expected key: " << name;
+          ERROR_STREAM << "Utilities::validateJson : Json data failed validation. Expected key: " << name;
           Exception ex( "validateJson()", "Key not found", false );
           ex.addDetail( "Key name", name );
           throw ex;
@@ -75,7 +75,7 @@ namespace Regolith
             break;
         }
 
-        FAILURE_STREAM << "Utilities::validateJson : Json data failed validation. Could not resolve type ID: " << type;
+        ERROR_STREAM << "Utilities::validateJson : Json data failed validation. Could not resolve type ID: " << type;
         Exception ex( "validateJson()", "Wong data type", false );
         ex.addDetail( "Type ID", type );
         throw ex;
@@ -87,7 +87,7 @@ namespace Regolith
     {
       if ( ! json_data.isArray() )
       {
-        FAILURE_LOG( "Utilities::validateJsonArray : Json data failed validation. Expected array type" );
+        ERROR_LOG( "Utilities::validateJsonArray : Json data failed validation. Expected array type" );
         Exception ex( "validateJsonArray()", "Json object is not an array", false );
         throw ex;
       }
@@ -95,7 +95,7 @@ namespace Regolith
       Json::ArrayIndex size = json_data.size();
       if ( size < length )
       {
-        FAILURE_STREAM << "Utilities::validateJsonArray : Json data failed validation. Expected array of at least size : " << length << " Found size : " << size;
+        ERROR_STREAM << "Utilities::validateJsonArray : Json data failed validation. Expected array of at least size : " << length << " Found size : " << size;
         Exception ex( "validateJsonArray()", "Array is incorrect size", false );
         ex.addDetail( "Expected", length );
         ex.addDetail( "Found", size );
@@ -139,7 +139,7 @@ namespace Regolith
 
       if ( ! success )
       {
-        FAILURE_STREAM << "Utilities::validateJsonArray : Json data failed validation. Expected array of type: " << type;
+        ERROR_STREAM << "Utilities::validateJsonArray : Json data failed validation. Expected array of type: " << type;
         Exception ex( "validateJsonArray()", "Wong data type", false );
         ex.addDetail( "Type ID", type );
         throw ex;

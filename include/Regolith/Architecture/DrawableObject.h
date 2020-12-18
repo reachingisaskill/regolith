@@ -3,6 +3,7 @@
 #define REGOLITH_ARCHITECTURE_DRAWABLE_OBJECT_H_
 
 #include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Architecture/Texture.h"
 
 
 namespace Regolith

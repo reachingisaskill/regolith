@@ -73,7 +73,7 @@ namespace Regolith
     DEBUG_STREAM << "PhysicalObject::onCollision : " << contact.overlap << " | " << contact.impulse;
     this->move( contact.inertiaRatio * contact.overlap );
     this->kick( contact.impulse );
-    DEBUG_STREAM << "PhysicalObject::onCollision : Position : " << _position << ", Vel : " << _velocity;
+    DEBUG_STREAM << "PhysicalObject::onCollision : Position : " << this->getPosition() << ", Vel : " << this->getVelocity();
   }
 
 }

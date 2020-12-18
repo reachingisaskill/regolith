@@ -1,6 +1,5 @@
 
 #include "Regolith/Test/ContainerObject.h"
-#include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -30,6 +29,8 @@ namespace Regolith
   {
     // Configure the parent class first
     PhysicalObject::configure( json_data, cg);
+
+    DEBUG_LOG( "ContainerObject::configure : Configuring ContainerObject" );
     
     // Hitbox details
     if ( Utilities::validateJson( json_data, "collision", Utilities::JSON_TYPE_OBJECT ) )
@@ -49,6 +50,10 @@ namespace Regolith
   Collision& ContainerObject::getCollision()
   {
     return _collision;
+  }
+
+  void ContainerObject::onCollision( Contact&, CollidableObject* )
+  {
   }
 
 }

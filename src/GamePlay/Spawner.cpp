@@ -1,7 +1,6 @@
 
 #include "Regolith/GamePlay/Spawner.h"
-
-#include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/GamePlay/ContextLayer.h"
 
 

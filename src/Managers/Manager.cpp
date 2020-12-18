@@ -1,6 +1,6 @@
 
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/GamePlay/PhysicalObject.h"
+#include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Components/Window.h"
 

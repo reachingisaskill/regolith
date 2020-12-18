@@ -49,17 +49,6 @@ namespace Regolith
   }
 
 
-  void Window::configure( std::string title, int width, int height )
-  {
-    _title = title;
-
-    _width = width;
-    _height = height;
-    _resolutionWidth = width;
-    _resolutionHeight = height;
-  }
-
-
   void Window::configure( Json::Value& json_data )
   {
     Utilities::validateJson( json_data, "screen_width", Utilities::JSON_TYPE_INTEGER );
@@ -67,9 +56,11 @@ namespace Regolith
     Utilities::validateJson( json_data, "title", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "v-sync", Utilities::JSON_TYPE_BOOLEAN );
 
-    // Load the window configuration before we start loading texture data
+    // Load the window configuration
     _width = json_data["screen_width"].asInt();
     _height = json_data["screen_height"].asInt();
+    _resolutionWidth = _width;
+    _resolutionHeight = _height;
     _title = json_data["title"].asString();
     _vsyncOn = json_data["v-sync"].asBool();
   }
@@ -204,7 +195,7 @@ namespace Regolith
     if ( updateCaption )
     {
       std::stringstream text;
-      text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" ) << " : " << _width << "x" << _height;
+      text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" ) << " : " << _width << "x" << _height << " SCALE: " << _scaleX << ", " << _scaleY;
 
       SDL_SetWindowTitle( _theWindow, text.str().c_str() );
 

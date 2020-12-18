@@ -10,8 +10,6 @@
     {
       "type" : "simple_object",
       "has_moveable" : true,
-      "has_texture" : true,
-      "has_animation" : false,
       "has_physics" : true,
       "mass" : 10.0,
       "elasticity" : 1.0,
@@ -43,8 +41,6 @@
     {
       "type" : "simple_object",
       "has_moveable" : true,
-      "has_texture" : true,
-      "has_animation" : false,
       "has_physics" : true,
       "mass" : 100.0,
       "elasticity" : 1.0,
@@ -76,8 +72,6 @@
     {
       "type" : "simple_object",
       "has_moveable" : false,
-      "has_texture" : true,
-      "has_animation" : false,
       "has_physics" : true,
       "mass" : 0.0,
       "elasticity" : 1.0,
@@ -107,10 +101,8 @@
 
     "environment_container" :
     {
-      "type" : "simple_object",
+      "type" : "container_object",
       "has_moveable" : false,
-      "has_texture" : false,
-      "has_animation" : false,
       "has_physics" : false,
       "mass" : 0.0,
       "elasticity" : 1.0,
