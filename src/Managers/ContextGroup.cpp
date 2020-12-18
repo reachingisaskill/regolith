@@ -26,9 +26,8 @@ namespace Regolith
     _loadingState( false ),
     _loadProgress( 0 ),
     _loadTotal( 0 ),
-    _canRender( false ),
-    _renderPosition( _gameObjects.end() ),
-    _renderCondition( false )
+    _renderPosition( _gameObjects.begin() ),
+    _isRendered( false )
   {
   }
 
@@ -233,17 +232,8 @@ namespace Regolith
 
       loadElement();
     }
+    _renderPosition = _gameObjects.begin();
 
-    UniqueLock renderLock( _renderCondition.mutex );
-    _renderCondition.data = false;
-    renderLock.unlock();
-
-    {
-      // Set the iterator position
-      GuardLock itLock( _mutexRender );
-      _renderPosition = _gameObjects.begin();
-      _canRender = true;
-    }
 
     DEBUG_LOG( "ContextGroup::load : Filling the spawn buffers" );
     // Fill spawn buffers
@@ -311,13 +301,8 @@ namespace Regolith
 
 
     // Wait for engine rendering process
-    renderLock.lock();
-    if ( ! _renderCondition.data )
-    {
-      _renderCondition.variable.wait( renderLock, [&]()->bool{ return _renderCondition.data || ThreadManager::ErrorFlag || ThreadManager::QuitFlag; } );
-    }
-    _renderCondition.data = false;
-    renderLock.unlock();
+    Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+
 
     DEBUG_LOG( "ContextGroup::load : Complete" );
     {
@@ -342,28 +327,15 @@ namespace Regolith
       _loadingState = false;
     }
 
-    UniqueLock renderLock( _renderCondition.mutex );
-    _renderCondition.data = false;
-    renderLock.unlock();
-
     resetProgress();
 
-    {
-      // Set the iterator position
-      GuardLock itLock( _mutexRender );
-      _renderPosition = _gameObjects.begin();
-      _canRender = true;
-    }
 
-    // Wait for engine rendering process
-    renderLock.lock();
-    if ( ! _renderCondition.data )
-    {
-      INFO_LOG( "ContextGroup::unload : Waiting on engine." );
-      _renderCondition.variable.wait( renderLock, [&]()->bool{ return _renderCondition.data || ThreadManager::ErrorFlag || ThreadManager::QuitFlag; } );
-    }
-    _renderCondition.data = false;
-    renderLock.unlock();
+    _renderPosition = _gameObjects.begin();
+    _isRendered = false;
+
+
+    // Wait for the engine to clear all the textures
+    Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
 
 
     INFO_LOG( "ContextGroup::unload : Unloading Data" );
@@ -392,23 +364,16 @@ namespace Regolith
   }
 
 
-  void ContextGroup::engineRenderLoadedObjects( Camera& camera )
+  bool ContextGroup::engineRenderLoadedObjects( Camera& camera )
   {
     {
       GuardLock lg( _mutexProgress );
       if ( _isLoaded )
       {
+        // This should never happen!
         DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Nothing to do." );
-        return;
+        return true;
       }
-    }
-
-    // See if we're4 allowed to do things
-    GuardLock lock( _mutexRender );
-    if ( ! _canRender )
-    {
-      DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Can't render." );
-      return;
     }
 
 
@@ -419,14 +384,9 @@ namespace Regolith
       {
         if ( ++_renderPosition == _gameObjects.end() )
         {
-          _canRender = false;
           DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Loading complete" );
-
-          UniqueLock lock( _renderCondition.mutex );
-          _renderCondition.data = true;
-          lock.unlock();
-          _renderCondition.variable.notify_all();
-          return;
+          _isRendered = true;
+          return true;
         }
 
         DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Checking Object" );
@@ -448,18 +408,9 @@ namespace Regolith
       {
         if ( ++_renderPosition == _gameObjects.end() )
         {
-          _canRender = false;
           DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Unloading complete" );
-
-          UniqueLock lock( _renderCondition.mutex );
-          DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : HERE1" );
-          _renderCondition.data = true;
-          DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : HERE2" );
-          lock.unlock();
-          DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : HERE3" );
-          _renderCondition.variable.notify_all();
-          DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : HERE4" );
-          return;
+          _isRendered = true;
+          return true;
         }
 
         if ( _renderPosition->second->hasTexture() )
@@ -468,6 +419,8 @@ namespace Regolith
         }
       }
     }
+
+    return false;
   }
 
 

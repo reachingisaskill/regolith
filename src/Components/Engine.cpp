@@ -357,7 +357,7 @@ namespace Regolith
 
         DEBUG_LOG( "engineRenderingThread : ------ FRAME ------" );
 
-        contextManager.getCurrentContextGroup()->engineRenderLoadedObjects( camera );
+        contextManager.renderContextGroup( camera );
 
       }
 

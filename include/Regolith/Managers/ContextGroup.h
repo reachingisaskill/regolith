@@ -82,12 +82,10 @@ namespace Regolith
       mutable std::mutex _mutexProgress;
 
       // Iterator to track the current rendering position
-      bool _canRender;
       PhysicalObjectMap::iterator _renderPosition;
-      mutable std::mutex _mutexRender;
 
       // Indicates the engine has finished rendering/destroying textures
-      Condition<bool> _renderCondition;
+      bool _isRendered;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -126,12 +124,14 @@ namespace Regolith
       bool isLoaded() const;
       float getLoadProgress() const;
 
+      bool isRendered() const { return _isRendered; }
+
       // Flag to indicate this is the global context group. Don't unload accidentally!
       bool isGlobal() const { return _isGlobalGroup; }
 
 
       // Rendering thread asks to render object textures in the background
-      void engineRenderLoadedObjects( Camera& );
+      bool engineRenderLoadedObjects( Camera& );
 
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -33,6 +33,10 @@ namespace Regolith
       ContextGroup* _nextContextGroup;
       mutable std::mutex _nextGroupMutex;
 
+      // Pointer to the next context group to be rendered
+      Condition< ContextGroup* > _renderContextGroup;
+      mutable std::mutex _renderGroupMutex;
+
 
     public:
       // Con/Destructors
@@ -68,6 +72,12 @@ namespace Regolith
       // Return a pointer to the global context group
       ContextGroup* getGlobalContextGroup() { return &_globalContextGroup; }
 
+
+      // Requests the rendering of the provided context group. Thread execution is halted until it is complete.
+      void requestRenderContextGroup( ContextGroup* );
+
+      // Performs rendering operations on a context group. For the engine to use.
+      void renderContextGroup( Camera& );
 
 //////////////////////////////////////////////////////////////////////////////// 
       // Loading thread interactions

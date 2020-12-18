@@ -20,7 +20,8 @@ namespace Regolith
     _globalContextGroup(),
     _contextGroups(),
     _currentContextGroup( nullptr ),
-    _nextContextGroup( nullptr )
+    _nextContextGroup( nullptr ),
+    _renderContextGroup( nullptr )
   {
   }
 
@@ -146,6 +147,9 @@ namespace Regolith
   }
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Accessors
+
   ContextGroup* ContextManager::getContextGroup( std::string name )
   {
     ContextGroupMap::iterator found = _contextGroups.find( name );
@@ -191,6 +195,41 @@ namespace Regolith
     DEBUG_LOG( "ContextManager::loadNextContextGroup : Triggering condition variable." );
 
     contextUpdate.variable.notify_all();
+  }
+
+
+  void ContextManager::requestRenderContextGroup( ContextGroup* context_group )
+  {
+    // Only one may be rendered at a time
+    GuardLock render_lock( _renderGroupMutex );
+
+    // Lock the pointer mutex while we edit it
+    UniqueLock pointer_lock( _renderContextGroup.mutex );
+
+    // Set the pointer
+    _renderContextGroup.data = context_group;
+
+    // Wait for group to be come rendered.
+    _renderContextGroup.variable.wait( pointer_lock, [&]()->bool{ return _renderContextGroup.data->isRendered() || ThreadManager::ErrorFlag; } );
+
+    // Clear the pointer
+    _renderContextGroup.data = nullptr;
+
+    // Clean up
+    pointer_lock.unlock();
+  }
+
+
+  void ContextManager::renderContextGroup( Camera& camera )
+  {
+    GuardLock lg( _renderContextGroup.mutex );
+    if ( _renderContextGroup.data != nullptr )
+    {
+      if ( _renderContextGroup.data->engineRenderLoadedObjects( camera ) )
+      {
+        _renderContextGroup.variable.notify_all();
+      }
+    }
   }
 
 
