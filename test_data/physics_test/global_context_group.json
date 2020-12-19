@@ -8,7 +8,7 @@
   {
     "red_box" : 
     {
-      "type" : "simple_object",
+      "type" : "bonk_object",
       "has_moveable" : true,
       "has_physics" : true,
       "mass" : 10.0,
@@ -26,6 +26,10 @@
       {
         "texture_name" : "coloured_boxes",
         "start_number" : 0
+      },
+      "bonk" :
+      {
+        "sound_name" : "bonk"
       },
       "collision" :
       {

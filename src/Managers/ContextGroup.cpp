@@ -223,7 +223,20 @@ namespace Regolith
       try
       {
         GameObject* obj = obj_factory.build( object_data, *this );
-        _gameObjects[ obj_name ] = dynamic_cast< PhysicalObject* >( obj );
+        PhysicalObject* phys_obj = dynamic_cast< PhysicalObject* >( obj );
+
+        if ( phys_obj == nullptr )
+        {
+          Exception ex( "ContextGroup::load()", "Created an object that is not physical. Cannot add to context group." );
+          throw ex;
+        }
+
+        if ( phys_obj->hasAudio() )
+        {
+          dynamic_cast< NoisyObject* >( phys_obj )->registerSounds( &_theAudio );
+        }
+
+        _gameObjects[ obj_name ] = phys_obj;;
       }
       catch ( Exception& ex )
       {
@@ -244,7 +257,7 @@ namespace Regolith
       std::string buffer_name = b_it.key().asString();
       unsigned int number = b_it->asInt();
 
-      _spawnBuffers[ buffer_name ].fill( number, _gameObjects[ buffer_name ] );
+      _spawnBuffers[ buffer_name ].fill( number, _gameObjects[ buffer_name ], &_theAudio );
 
       loadElement();
     }

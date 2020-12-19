@@ -4,6 +4,7 @@
   },
   "audio": 
   {
+    "bonk" : { "path" : "test_data/physics_test/sound_bonk.wav" }
   },
   "text": 
   {

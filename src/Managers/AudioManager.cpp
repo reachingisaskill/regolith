@@ -173,8 +173,8 @@ namespace Regolith
 
     INFO_STREAM << "AudioManager::configure : Initialised Audio Device: " << _frequency << "Hz, " << _channels << " channels, " << _chunkSize << "byte chunks.";
 
-    _volumeMusic = json_data["music_volume"].asFloat();
-    _volumeChunk = json_data["effect_volume"].asFloat();
+    this->setVolumeMusic( json_data["music_volume"].asFloat() );
+    this->setVolumeEffects( json_data["effect_volume"].asFloat() );
   }
 
 

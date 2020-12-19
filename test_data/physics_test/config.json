@@ -28,7 +28,7 @@
     "audio_channels" : 2,
     "chunk_size" : 1024,
     "music_volume" : 0.1,
-    "effect_volume" : 0.5
+    "effect_volume" : 0.8
   },
 
 

@@ -24,6 +24,8 @@ namespace Regolith
     int size = _channelPauses.size();
     int result = Mix_AllocateChannels( size );
 
+    DEBUG_STREAM << "AudioHandler::configure : Configured " << result << " audio channels.";
+
     if ( result != size )
     {
       std::string error = Mix_GetError();
@@ -40,6 +42,7 @@ namespace Regolith
   {
     _channelPauses.push_back( 0 );
     sound.registerChannel( _channelPauses.size()-1 );
+    DEBUG_STREAM << "AudioHandler::requestChannel : Channel provided : " << _channelPauses.size()-1;
   }
 
 
@@ -164,7 +167,7 @@ namespace Regolith
 
   void AudioHandler::playSound( Sound& sound )
   {
-    if ( Mix_Playing( sound._channel ) ) // Sound already playing
+    if ( Mix_Playing( sound.getChannel() ) ) // Sound already playing
     {
       return;
     }

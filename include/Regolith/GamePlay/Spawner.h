@@ -12,6 +12,7 @@ namespace Regolith
   // Forward declarations
   class ContextLayer;
   class PhysicalObject;
+  class AudioHandler;
   class SpawnBuffer;
 
 
@@ -70,7 +71,7 @@ namespace Regolith
       ~SpawnBuffer();
 
       // Specify the number to cache and the base object
-      void fill( unsigned int, PhysicalObject* );
+      void fill( unsigned int, PhysicalObject*, AudioHandler* );
 
       // Empty the buffer
       void clear();

@@ -20,6 +20,8 @@ namespace Regolith
     std::string sound_name = json_data["sound_name"].asString();
 
     _rawSound = handler.getRawSound( sound_name );
+
+    DEBUG_STREAM << "Sound::configure : " << "Loaded sound : " << sound_name << " @ " << _rawSound << " -> " << _rawSound->sound;
   }
 
 }

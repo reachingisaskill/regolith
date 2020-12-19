@@ -19,6 +19,8 @@ namespace Regolith
       throw ex;
     }
 
+    DEBUG_STREAM << "loadRawSound : Successful : " << details.filename;
+
     return raw_sound;
   }
 
