@@ -3,7 +3,7 @@
 #define REGOLITH_MANAGERS_FOCUS_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/ButtonObject.h"
+#include "Regolith/ObjectInterfaces/ButtonObject.h"
 
 #include <vector>
 #include <map>

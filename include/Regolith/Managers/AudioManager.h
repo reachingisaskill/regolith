@@ -12,6 +12,7 @@ namespace Regolith
   // Forward declarations
   class AudioManager;
   class AudioHandler;
+  class Music;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +27,7 @@ namespace Regolith
   class AudioManager
   {
     // Typedefs for the music queuing system
-    typedef std::pair< Mix_Music*, unsigned int > QueueElement;
+    typedef std::pair< Music*, unsigned int > QueueElement;
     typedef MutexedBuffer< QueueElement > MusicQueue;
 
     // Make the play-next function a friend
@@ -45,7 +46,7 @@ namespace Regolith
 
       // Queue of upcoming music tracks
       static MusicQueue _musicQueue;
-      static Mix_Music* _currentTrack;
+      static Music* _currentTrack;
 
     public :
       // Contstructor
@@ -75,8 +76,8 @@ namespace Regolith
 
 
       // Music interface
-      void queueTrack( Mix_Music*, unsigned int );
-      void playTrack( Mix_Music*, unsigned int );
+      void queueTrack( Music*, unsigned int );
+      void playTrack( Music*, unsigned int );
       void clearQueue();
       void stopTrack();
       void stopNextTrack();

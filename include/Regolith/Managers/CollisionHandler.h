@@ -3,7 +3,7 @@
 #define REGOLITH_COLLISION_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/CollidableObject.h"
+#include "Regolith/ObjectInterfaces/CollidableObject.h"
 
 #include <vector>
 #include <utility>

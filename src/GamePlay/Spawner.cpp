@@ -1,7 +1,7 @@
 
 #include "Regolith/GamePlay/Spawner.h"
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/GamePlay/ContextLayer.h"
+#include "Regolith/Contexts/ContextLayer.h"
 
 
 namespace Regolith

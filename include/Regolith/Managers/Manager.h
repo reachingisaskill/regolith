@@ -16,7 +16,7 @@
 #include "Regolith/Components/Window.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/GamePlay/Signal.h"
-#include "Regolith/Context.h"
+#include "Regolith/Contexts/Context.h"
 #include "Regolith/Utilities/Singleton.h"
 
 #include <vector>

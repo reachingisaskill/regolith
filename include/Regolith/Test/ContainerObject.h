@@ -3,8 +3,8 @@
 #define REGOLITH_TEST_CONTAINER_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/CollidableObject.h"
-#include "Regolith/GamePlay/Collision.h"
+#include "Regolith/ObjectInterfaces/CollidableObject.h"
+#include "Regolith/Collisions/Collision.h"
 
 
 namespace Regolith

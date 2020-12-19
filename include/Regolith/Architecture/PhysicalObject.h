@@ -4,7 +4,6 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
-#include "Regolith/GamePlay/Collision.h"
 
 namespace Regolith
 {

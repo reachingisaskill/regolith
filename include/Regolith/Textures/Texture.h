@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_ARCHITECTURE_TEXTURE_H_
-#define REGOLITH_ARCHITECTURE_TEXTURE_H_
+#ifndef REGOLITH_TEXTURES_TEXTURE_H_
+#define REGOLITH_TEXTURES_TEXTURE_H_
 
 #include "Regolith/Global/Global.h"
 
@@ -81,5 +81,5 @@ namespace Regolith
   };
 }
 
-#endif // REGOLITH_ARCHITECTURE_TEXTURE_H_
+#endif // REGOLITH_TEXTURES_TEXTURE_H_
 

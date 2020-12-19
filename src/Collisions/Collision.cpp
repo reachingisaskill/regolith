@@ -1,5 +1,5 @@
 
-#include "Regolith/GamePlay/Collision.h"
+#include "Regolith/Collisions/Collision.h"
 
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Utilities/JsonValidation.h"

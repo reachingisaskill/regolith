@@ -1,8 +1,8 @@
 
 #include "Regolith/Components/Camera.h"
 
-#include "Regolith/Architecture/DrawableObject.h"
-#include "Regolith/Architecture/Texture.h"
+#include "Regolith/ObjectInterfaces/DrawableObject.h"
+#include "Regolith/Textures/Texture.h"
 #include "Regolith/Assets/RawTexture.h"
 #include "Regolith/Components/Window.h"
 

@@ -2,9 +2,9 @@
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/DrawableObject.h"
-#include "Regolith/Architecture/NoisyObject.h"
-#include "Regolith/Context.h"
+#include "Regolith/ObjectInterfaces/DrawableObject.h"
+#include "Regolith/ObjectInterfaces/NoisyObject.h"
+#include "Regolith/Contexts/Context.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 

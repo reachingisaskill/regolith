@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_COLLISION_H_
-#define REGOLITH_COLLISION_H_
+#ifndef REGOLITH_COLLISIONS_COLLISION_H_
+#define REGOLITH_COLLISIONS_COLLISION_H_
 
 #include "Regolith/Global/Global.h"
 
@@ -83,5 +83,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_COLLISION_H_
+#endif // REGOLITH_COLLISIONS_COLLISION_H_
 

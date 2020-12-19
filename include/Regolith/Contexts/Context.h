@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_CONTEXT_H_
-#define REGOLITH_CONTEXT_H_
+#ifndef REGOLITH_CONTEXTS_CONTEXT_H_
+#define REGOLITH_CONTEXTS_CONTEXT_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/MassProduceable.h"
@@ -10,7 +10,7 @@
 #include "Regolith/Managers/FocusHandler.h"
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/ContextGroup.h"
-#include "Regolith/GamePlay/ContextLayer.h"
+#include "Regolith/Contexts/ContextLayer.h"
 
 #include <map>
 
@@ -51,7 +51,7 @@ namespace Regolith
       CollisionHandler _theCollision;
 
       // Pointer to an optional track to play on load
-      RawMusic* _defaultTrack;
+      Music _defaultTrack;
 
       // Details for using the camera
       Vector _cameraPosition;
@@ -155,5 +155,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_CONTEXT_H_
+#endif // REGOLITH_CONTEXTS_CONTEXT_H_
 

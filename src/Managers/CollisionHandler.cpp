@@ -1,9 +1,8 @@
 
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Architecture/CollidableObject.h"
-#include "Regolith/Architecture/CollidableObject.h"
-#include "Regolith/GamePlay/ContextLayer.h"
+#include "Regolith/ObjectInterfaces/CollidableObject.h"
+#include "Regolith/Contexts/ContextLayer.h"
 
 
 namespace Regolith

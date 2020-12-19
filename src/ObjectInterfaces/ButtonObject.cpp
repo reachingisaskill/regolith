@@ -1,6 +1,5 @@
-#define LOGTASTIC_DEBUG_OFF
 
-#include "Regolith/Architecture/ButtonObject.h"
+#include "Regolith/ObjectInterfaces/ButtonObject.h"
 #include "Regolith/Managers/FocusHandler.h"
 
 

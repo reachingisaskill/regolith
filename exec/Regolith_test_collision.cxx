@@ -1,7 +1,7 @@
 #define TESTASS_APPROX_LIMIT 1.0E-6
 
 #include "Regolith.h"
-#include "Regolith/GamePlay/Collision.h"
+#include "Regolith/Collisions/Collision.h"
 
 #include "testass.h"
 #include "logtastic.h"

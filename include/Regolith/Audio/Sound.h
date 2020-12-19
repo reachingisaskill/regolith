@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_GAME_PLAY_SOUND_H_
-#define REGOLITH_GAME_PLAY_SOUND_H_
+#ifndef REGOLITH_AUDIO_SOUND_H_
+#define REGOLITH_AUDIO_SOUND_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Assets/RawSound.h"
@@ -41,5 +41,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_GAME_PLAY_SOUND_H_
+#endif // REGOLITH_AUDIO_SOUND_H_
 

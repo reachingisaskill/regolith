@@ -1,8 +1,9 @@
 
-#ifndef REGOLITH_ARCHITECTURE_COLLIDABLE_OBJECT_H_
-#define REGOLITH_ARCHITECTURE_COLLIDABLE_OBJECT_H_
+#ifndef REGOLITH_OBJECT_INTERFACES_COLLIDABLE_OBJECT_H_
+#define REGOLITH_OBJECT_INTERFACES_COLLIDABLE_OBJECT_H_
 
 #include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Collisions/Collision.h"
 
 
 namespace Regolith
@@ -46,5 +47,5 @@ namespace Regolith
 }
 
 
-#endif // REGOLITH_ARCHITECTURE_COLLIDABLE_OBJECT_H_
+#endif // REGOLITH_OBJECT_INTERFACES_COLLIDABLE_OBJECT_H_
 

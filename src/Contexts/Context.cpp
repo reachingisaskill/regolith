@@ -1,16 +1,16 @@
 
-#include "Regolith/Context.h"
+#include "Regolith/Contexts/Context.h"
 
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/DrawableObject.h"
-#include "Regolith/Architecture/NoisyObject.h"
-#include "Regolith/Architecture/CollidableObject.h"
-#include "Regolith/Architecture/ButtonObject.h"
-#include "Regolith/Architecture/AnimatedObject.h"
-#include "Regolith/Architecture/ControllableObject.h"
+#include "Regolith/ObjectInterfaces/DrawableObject.h"
+#include "Regolith/ObjectInterfaces/NoisyObject.h"
+#include "Regolith/ObjectInterfaces/CollidableObject.h"
+#include "Regolith/ObjectInterfaces/ButtonObject.h"
+#include "Regolith/ObjectInterfaces/AnimatedObject.h"
+#include "Regolith/ObjectInterfaces/ControllableObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Camera.h"
-#include "Regolith/GamePlay/ContextLayer.h"
+#include "Regolith/Contexts/ContextLayer.h"
 
 
 namespace Regolith
@@ -29,7 +29,7 @@ namespace Regolith
     _theInput(),
     _theFocus(),
     _theCollision(),
-    _defaultTrack( nullptr ),
+    _defaultTrack(),
     _closed( false ),
     _paused( false ),
     _pauseable( false ),
@@ -64,9 +64,9 @@ namespace Regolith
 
   void Context::startContext()
   {
-    if ( _defaultTrack != nullptr )
+    if ( ! _defaultTrack.isSilent() )
     {
-      _owner->getAudioHandler().playSong( _defaultTrack );
+      _owner->getAudioHandler().playSong( &_defaultTrack );
     }
     this->onStart();
   }
@@ -74,7 +74,7 @@ namespace Regolith
 
   void Context::stopContext()
   {
-    if ( _defaultTrack != nullptr )
+    if ( ! _defaultTrack.isSilent() )
     {
       _owner->getAudioHandler().stopSong();
     }
@@ -301,11 +301,10 @@ namespace Regolith
 
 
     // Default music
-    if ( Utilities::validateJson( json_data, "music_track", Utilities::JSON_TYPE_STRING, false ) )
+    if ( Utilities::validateJson( json_data, "music", Utilities::JSON_TYPE_STRING, false ) )
     {
-      std::string track_name = json_data["music_track"].asString();
-      _defaultTrack = handler.getDataHandler().getRawMusic( track_name );
-      DEBUG_STREAM << "Context::configure : Default music track : " << track_name;
+      _defaultTrack.configure( json_data["music"], handler.getDataHandler() );
+      DEBUG_LOG( "Context::configure : Configured music" );
     }
 
 

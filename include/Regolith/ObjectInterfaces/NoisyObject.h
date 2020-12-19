@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_ARCHITECTURE_NOISY_OBJECT_H_
-#define REGOLITH_ARCHITECTURE_NOISY_OBJECT_H_
+#ifndef REGOLITH_OBJECT_INTERFACES_NOISY_OBJECT_H_
+#define REGOLITH_OBJECT_INTERFACES_NOISY_OBJECT_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/PhysicalObject.h"
@@ -28,5 +28,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_ARCHITECTURE_NOISY_OBJECT_H_
+#endif // REGOLITH_OBJECT_INTERFACES_NOISY_OBJECT_H_
 

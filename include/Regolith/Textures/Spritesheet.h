@@ -3,7 +3,7 @@
 #define REGOLITH_TEXTURES_SPRITESHEET_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Architecture/Texture.h"
+#include "Regolith/Textures/Texture.h"
 #include "Regolith/Assets/RawTexture.h"
 
 #include <iostream>

@@ -1,9 +1,9 @@
 
-#ifndef REGOLITH_ARCHITECTURE_DRAWABLE_OBJECT_H_
-#define REGOLITH_ARCHITECTURE_DRAWABLE_OBJECT_H_
+#ifndef REGOLITH_OBJECT_INTERFACES_DRAWABLE_OBJECT_H_
+#define REGOLITH_OBJECT_INTERFACES_DRAWABLE_OBJECT_H_
 
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/Texture.h"
+#include "Regolith/Textures/Texture.h"
 
 
 namespace Regolith
@@ -32,5 +32,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_ARCHITECTURE_DRAWABLE_OBJECT_H_
+#endif // REGOLITH_OBJECT_INTERFACES_DRAWABLE_OBJECT_H_
 

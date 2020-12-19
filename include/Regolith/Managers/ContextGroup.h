@@ -8,7 +8,6 @@
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/GamePlay/Spawner.h"
-#include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
 #include <list>

@@ -1,8 +1,6 @@
-//#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/ThreadManager.h"
-#include "Regolith/Assets/RawMusic.h"
 
 
 namespace Regolith
@@ -146,15 +144,15 @@ namespace Regolith
   }
 
 
-  void AudioHandler::playSong( RawMusic* music, unsigned int N )
+  void AudioHandler::playSong( Music* music, unsigned int N )
   {
-    _manager.playTrack( music->music, N );
+    _manager.playTrack( music, N );
   }
 
 
-  void AudioHandler::queueSong( RawMusic* music, unsigned int N )
+  void AudioHandler::queueSong( Music* music, unsigned int N )
   {
-    _manager.queueTrack( music->music, N );
+    _manager.queueTrack( music, N );
   }
 
 

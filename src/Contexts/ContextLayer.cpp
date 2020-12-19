@@ -1,8 +1,8 @@
 
-#include "Regolith/GamePlay/ContextLayer.h"
+#include "Regolith/Contexts/ContextLayer.h"
 
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Context.h"
+#include "Regolith/Contexts/Context.h"
 
 
 namespace Regolith

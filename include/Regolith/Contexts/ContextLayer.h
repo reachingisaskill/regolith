@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_ARCHITECTURE_CONTEXT_LAYER_H_
-#define REGOLITH_ARCHITECTURE_CONTEXT_LAYER_H_
+#ifndef REGOLITH_CONTEXTS_CONTEXT_LAYER_H_
+#define REGOLITH_CONTEXTS_CONTEXT_LAYER_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/PhysicalObject.h"
@@ -58,5 +58,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_ARCHITECTURE_CONTEXT_LAYER_H_
+#endif // REGOLITH_CONTEXTS_CONTEXT_LAYER_H_
 

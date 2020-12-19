@@ -5,7 +5,8 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Managers/AudioManager.h"
 #include "Regolith/Utilities/ProxyMap.h"
-#include "Regolith/GamePlay/Sound.h"
+#include "Regolith/Audio/Sound.h"
+#include "Regolith/Audio/Music.h"
 
 
 namespace Regolith
@@ -52,10 +53,10 @@ namespace Regolith
 
 
       // Play a track immediately
-      void playSong( RawMusic*, unsigned int N = 0 );
+      void playSong( Music*, unsigned int N = 0 );
 
       // Queue a track to play next
-      void queueSong( RawMusic*, unsigned int N = 0 );
+      void queueSong( Music*, unsigned int N = 0 );
 
       // Stop the music playing
       void stopSong();
