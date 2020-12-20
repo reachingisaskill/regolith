@@ -7,7 +7,7 @@ namespace Regolith
 {
 
   TestObject::TestObject() :
-    GameObject(),
+    PhysicalObject(),
     _someData(1000)
   {
     INFO_LOG( "TestObject::TestObject : Creating null object" );

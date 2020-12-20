@@ -11,6 +11,7 @@ namespace Regolith
     Context(),
     _cg_load( nullptr ),
     _timer(),
+    _deathTimer(),
     _isLoadScreen( false )
   {
     INFO_LOG( "TestContext::TestContext : Null Context Created" );
@@ -54,6 +55,8 @@ namespace Regolith
     {
       _isLoadScreen = tests["load_screen"].asBool();
     }
+
+    _deathTimer.configure( 5000.0, 1 ); // Kill self after 5 seconds
   }
 
 
@@ -65,6 +68,8 @@ namespace Regolith
     INFO_STREAM << "TestContext::onStart " << _name << " : Starting test context.";
 
     _timer.reset();
+
+    _deathTimer.reset();
 
     if ( _isLoadScreen )
     {
@@ -100,6 +105,11 @@ namespace Regolith
         this->stopContext();
       }
 
+    }
+
+    if ( _deathTimer.trigger( timestep ) )
+    {
+      this->stopContext();
     }
   }
 

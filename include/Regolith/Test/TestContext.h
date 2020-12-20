@@ -18,6 +18,7 @@ namespace Regolith
       std::string _name;
       ContextGroup* _cg_load;
       CountdownTimer _timer;
+      CountdownTimer _deathTimer;
       bool _isLoadScreen;
 
     protected:
