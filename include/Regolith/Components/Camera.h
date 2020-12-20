@@ -7,8 +7,9 @@
 
 namespace Regolith
 {
-  class PhysicalObject;
+  class DrawableObject;
   class Window;
+  class Texture;
 
   class Camera
   {
@@ -54,11 +55,19 @@ namespace Regolith
 
 
       // Render a specific raw texture
-      void renderRawTexture( RawTexture* ) const;
+      void renderRawTexture( RawTexture* );
+
+
+      // Render a texture that has been updated
+      void renderTexture( Texture& );
 
 
       // Render a physical object
-      void renderPhysicalObject( PhysicalObject*, Vector& ) const;
+      void renderDrawableObject( DrawableObject*, Vector& );
+
+
+      // Destroys the sdl texture object
+      void clearTexture( Texture& );
   };
 
 }

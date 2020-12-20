@@ -1,8 +1,8 @@
 
 #include "Regolith/Managers/CollisionHandler.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/GamePlay/ContextLayer.h"
+#include "Regolith/ObjectInterfaces/CollidableObject.h"
+#include "Regolith/Contexts/ContextLayer.h"
 
 
 namespace Regolith
@@ -179,7 +179,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Collision algorithm
 
-  void CollisionHandler::collides( PhysicalObject* object1, PhysicalObject* object2 )
+  void CollisionHandler::collides( CollidableObject* object1, CollidableObject* object2 )
   {
     _object_pos1 = object1->position();
     _object_pos2 = object2->position();
@@ -354,7 +354,7 @@ namespace Regolith
   }
 
 
-  void CollisionHandler::contains( PhysicalObject* object1, PhysicalObject* object2 )
+  void CollisionHandler::contains( CollidableObject* object1, CollidableObject* object2 )
   {
 //    DEBUG_LOG( "CollisionHandler::contains : Checking containment" );
 
@@ -469,7 +469,7 @@ namespace Regolith
   }
 
 
-  void CollisionHandler::callback( PhysicalObject* object1, PhysicalObject* object2 )
+  void CollisionHandler::callback( CollidableObject* object1, CollidableObject* object2 )
   {
     _coef_restitution = 1.0 + 0.5 * ( object1->getElasticity() + object2->getElasticity() );
 

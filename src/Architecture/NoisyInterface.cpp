@@ -28,7 +28,7 @@ namespace Regolith
   }
 
 
-  void NoisyInterface::playSound( RawSound* sound ) const
+  void NoisyInterface::playSound( Sound& sound ) const
   {
     _handler->playSound( sound );
   }

@@ -19,7 +19,7 @@ namespace Regolith
   }
 
 
-  void FocusHandler::addObject( ButtonInterface* object )
+  void FocusHandler::addObject( ButtonObject* object )
   {
     if ( _numberLookup.find( object ) != _numberLookup.end() )
     {
@@ -56,7 +56,7 @@ namespace Regolith
   }
 
 
-  void FocusHandler::requestFocus( ButtonInterface* object )
+  void FocusHandler::requestFocus( ButtonObject* object )
   {
     _buttons[ _currentFocus ]->takeFocus();
     _currentFocus = _numberLookup[ object ];

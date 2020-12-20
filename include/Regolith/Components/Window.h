@@ -71,11 +71,7 @@ namespace Regolith
       // Configuration
 
       // Configure the window
-      void configure( std::string, int, int );
       void configure( Json::Value& );
-
-//      // Return the SDL window pointer
-//      SDL_Window* getSDLWindow() const { return _theWindow; }
 
       // Create the window and return the camera
       Camera& create();

@@ -1,5 +1,6 @@
 
 #include "Regolith/Managers/AudioManager.h"
+#include "Regolith/Audio/Music.h"
 #include "Regolith/Utilities/Exception.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -15,7 +16,7 @@ namespace Regolith
 
   // Static member variables
   AudioManager::MusicQueue AudioManager::_musicQueue;
-  Mix_Music* AudioManager::_currentTrack = nullptr;
+  Music* AudioManager::_currentTrack = nullptr;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,7 +93,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Music interface
 
-  void AudioManager::queueTrack( Mix_Music* music, unsigned int N )
+  void AudioManager::queueTrack( Music* music, unsigned int N )
   {
     if ( Mix_PlayingMusic() == 1 )
     {
@@ -100,14 +101,14 @@ namespace Regolith
     }
     else
     {
-      Mix_PlayMusic( music, (signed int)N );
+      Mix_PlayMusic( music->getMIXMusic(), (signed int)N );
     }
 
     Mix_HookMusicFinished( playNextTrack );
   }
 
 
-  void AudioManager::playTrack( Mix_Music* music, unsigned int N )
+  void AudioManager::playTrack( Music* music, unsigned int N )
   {
     // Stop if playing
     if ( Mix_PlayingMusic() == 1 )
@@ -116,7 +117,7 @@ namespace Regolith
     }
 
     // Jump the queue and play this
-    Mix_PlayMusic( music, (signed int)N );
+    Mix_PlayMusic( music->getMIXMusic(), (signed int)N );
   }
 
 
@@ -172,8 +173,8 @@ namespace Regolith
 
     INFO_STREAM << "AudioManager::configure : Initialised Audio Device: " << _frequency << "Hz, " << _channels << " channels, " << _chunkSize << "byte chunks.";
 
-    _volumeMusic = json_data["music_volume"].asFloat();
-    _volumeChunk = json_data["effect_volume"].asFloat();
+    this->setVolumeMusic( json_data["music_volume"].asFloat() );
+    this->setVolumeEffects( json_data["effect_volume"].asFloat() );
   }
 
 
@@ -184,18 +185,18 @@ namespace Regolith
   {
     // Static reference to the music queue
     static AudioManager::MusicQueue& queue = AudioManager::_musicQueue;
-    static Mix_Music*& current = AudioManager::_currentTrack;
+    static Music*& current = AudioManager::_currentTrack;
     AudioManager::QueueElement element;
 
     if ( queue.empty() )
     {
-      Mix_PlayMusic( current, 0 );
+      Mix_PlayMusic( current->getMIXMusic(), 0 );
     }
     else
     {
       queue.pop( element );
       current = element.first;
-      Mix_PlayMusic( current, (signed int)element.second );
+      Mix_PlayMusic( current->getMIXMusic(), (signed int)element.second );
     }
 
   }

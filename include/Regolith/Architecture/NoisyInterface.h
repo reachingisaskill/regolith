@@ -7,7 +7,7 @@ namespace Regolith
 {
   // Forward declarations
   class AudioHandler;
-  class RawSound;
+  class Sound;
 
 
   class NoisyInterface
@@ -34,7 +34,7 @@ namespace Regolith
 
 
       // Play a registered sound
-      void playSound( RawSound* s ) const;
+      void playSound( Sound& s ) const;
 
   };
 

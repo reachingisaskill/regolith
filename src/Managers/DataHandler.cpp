@@ -14,10 +14,8 @@ namespace Regolith
     _rawTextures(),
     _rawSounds(),
     _rawMusic(),
-    _surfaceRenderQueue(),
-    _isLoaded( false ),
-    _isRendered( true ),
-    _loadingMutex()
+    _rawFonts(),
+    _rawTexts()
   {
   }
 
@@ -26,116 +24,54 @@ namespace Regolith
   {
     INFO_LOG( "Destroying Data Handler" );
 
-    if ( _isLoaded )
-    {
-      this->unload();
-    }
-
     _rawTextures.clear();
-    _rawMusic.clear();
     _rawSounds.clear();
+    _rawMusic.clear();
+    _rawFonts.clear();
+    _rawTexts.clear();
   }
 
 
-  bool DataHandler::isLoaded() const
+  void DataHandler::clear()
   {
-    GuardLock lg( _loadingMutex );
-    return _isLoaded;
-  }
-
-
-  void DataHandler::load()
-  {
-    INFO_LOG( "Loading Data Handler" );
-
-    GuardLock lg( _loadingMutex );
-    if ( _isLoaded ) return;
-
-    _isRendered = false;
-
-    DataManager& manager = Manager::getInstance()->getDataManager();
-
-    RawTextureMap::iterator texture_end = _rawTextures.end();
-    for ( RawTextureMap::iterator it = _rawTextures.begin(); it != texture_end; ++it )
-    {
-      std::string name = it->first;
-      try
-      {
-        manager.loadRawTexture( name, it->second );
-        _surfaceRenderQueue.push( &it->second );
-        DEBUG_STREAM << "Loaded Surface: " << name << " - " << it->second.width << ", " << it->second.height << ", " << it->second.cells << " @ " << it->second.texture;
-      }
-      catch( Exception& ex )
-      {
-        ex.addDetail( "Texture Name", name );
-        throw ex;
-      }
-    }
-
-    // Tell the engine to render the surfaces into textures on the rendering thread
-    Manager::getInstance()->renderSurfaces( this );
-
-
-    RawMusicMap::iterator music_end = _rawMusic.end();
-    for ( RawMusicMap::iterator it = _rawMusic.begin(); it != music_end; ++it )
-    {
-      std::string name = it->first;
-      try
-      {
-        manager.loadRawMusic( name, it->second );
-        DEBUG_STREAM << "Loaded Music: " << name << " @ " << it->second.music;
-      }
-      catch( Exception& ex )
-      {
-        ex.addDetail( "Music Name", name );
-        throw ex;
-      }
-    }
-
-    RawSoundMap::iterator sound_end = _rawSounds.end();
-    for ( RawSoundMap::iterator it = _rawSounds.begin(); it != sound_end; ++it )
-    {
-      std::string name = it->first;
-      try
-      {
-        manager.loadRawSound( name, it->second );
-        DEBUG_STREAM << "Loaded Sound: " << name << " @ " << it->second.sound;
-      }
-      catch( Exception& ex )
-      {
-        ex.addDetail( "Sound Name", name );
-        throw ex;
-      }
-    }
-
-
-    // Block the current thread while we wait for the engine to render all the textures
-    while ( ! _isRendered )
-    {
-      std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
-    }
-
-    _isLoaded = true;
-  }
-
-
-  void DataHandler::unload()
-  {
-    INFO_LOG( "Unloading Data Handler" );
-
-    GuardLock lg( _loadingMutex );
-    if ( ! _isLoaded ) return;
+    INFO_LOG( "DataHandler::clear : Clearing the Data Handler" );
 
     RawTextureMap::iterator textures_end = _rawTextures.end();
     for ( RawTextureMap::iterator it = _rawTextures.begin(); it != textures_end; ++it )
     {
       std::string name = it->first;
 
-      if ( it->second.texture != nullptr )
+      if ( it->second.surface != nullptr )
       {
-        DEBUG_STREAM << "Unloaded texture: " << name << " @ " << it->second.texture;
-        SDL_DestroyTexture( it->second.texture );
-        it->second.texture = nullptr;
+        DEBUG_STREAM << "Unloaded texture: " << name << " @ " << it->second.sdl_texture;
+        SDL_FreeSurface( it->second.surface );
+        it->second.surface = nullptr;
+      }
+    }
+
+    RawFontMap::iterator font_end = _rawFonts.end();
+    for ( RawFontMap::iterator it = _rawFonts.begin(); it != font_end; ++it )
+    {
+      std::string name = it->first;
+
+      if ( it->second.ttf_font != nullptr )
+      {
+        DEBUG_STREAM << "Unloaded font: " << name << " @ " << it->second.ttf_font;
+        TTF_CloseFont( it->second.ttf_font );
+        it->second.ttf_font = nullptr;
+      }
+    }
+
+    RawTextMap::iterator texts_end = _rawTexts.end();
+    for ( RawTextMap::iterator it = _rawTexts.begin(); it != texts_end; ++it )
+    {
+      std::string name = it->first;
+
+      if ( it->second.text != nullptr )
+      {
+        DEBUG_STREAM << "Unloaded text: " << name;
+        delete it->second.text;
+        it->second.text = nullptr;
       }
     }
 
@@ -150,7 +86,6 @@ namespace Regolith
         Mix_FreeMusic( it->second.music );
         it->second.music = nullptr;
       }
-
     }
 
     RawSoundMap::iterator sounds_end = _rawSounds.end();
@@ -164,10 +99,7 @@ namespace Regolith
         Mix_FreeChunk( it->second.sound );
         it->second.sound = nullptr;
       }
-
     }
-
-    _isLoaded = false;
   }
 
 
@@ -210,21 +142,29 @@ namespace Regolith
   }
 
 
-  RawTexture* DataHandler::popRenderTexture()
+  RawFont* DataHandler::getRawFont( std::string name )
   {
-    RawTexture* temp = nullptr;
-
-    if ( ! _surfaceRenderQueue.empty() )
+    RawFontMap::iterator found = _rawFonts.find( name );
+    if ( found == _rawFonts.end() )
     {
-      temp = _surfaceRenderQueue.front();
-      _surfaceRenderQueue.pop();
-    }
-    else
-    {
-      _isRendered = true;
+      RawFont new_font = Manager::getInstance()->getDataManager().buildRawFont( name );
+      found = _rawFonts.insert( std::make_pair( name, new_font ) ).first;
     }
 
-    return temp;
+    return &(found->second);
+  }
+
+
+  RawText* DataHandler::getRawText( std::string name )
+  {
+    RawTextMap::iterator found = _rawTexts.find( name );
+    if ( found == _rawTexts.end() )
+    {
+      RawText new_text = Manager::getInstance()->getDataManager().buildRawText( name );
+      found = _rawTexts.insert( std::make_pair( name, new_text ) ).first;
+    }
+
+    return &(found->second);
   }
 
 }

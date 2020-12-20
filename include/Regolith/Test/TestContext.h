@@ -2,7 +2,7 @@
 #ifndef REGOLITH_TEST_TEST_CONTEXT_H_
 #define REGOLITH_TEST_TEST_CONTEXT_H_
 
-#include "Regolith/GamePlay/Context.h"
+#include "Regolith/Contexts/Context.h"
 #include "Regolith/GamePlay/Timers.h"
 
 
@@ -18,6 +18,7 @@ namespace Regolith
       std::string _name;
       ContextGroup* _cg_load;
       CountdownTimer _timer;
+      CountdownTimer _deathTimer;
       bool _isLoadScreen;
 
     protected:
@@ -45,6 +46,9 @@ namespace Regolith
 
       // Updates the camera position
       virtual Vector updateCamera( float ) const override { return Vector(); }
+
+      // Called for each object that is flagged to have global physics
+      virtual void updatePhysics( PhysicalObject*, float ) const {}
 
 
 //////////////////////////////////////////////////

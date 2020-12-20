@@ -30,6 +30,8 @@ namespace Regolith
   class RawTexture;
   class RawSound;
   class RawMusic;
+  class RawFont;
+  class RawText;
 
   class AnimatedObject;
   class PhysicalObject;
@@ -49,6 +51,8 @@ namespace Regolith
   typedef std::map< std::string, RawTexture > RawTextureMap;
   typedef std::map< std::string, RawSound > RawSoundMap;
   typedef std::map< std::string, RawMusic > RawMusicMap;
+  typedef std::map< std::string, RawFont > RawFontMap;
+  typedef std::map< std::string, RawText > RawTextMap;
 
 
   typedef std::unique_lock< std::mutex > UniqueLock;
@@ -71,7 +75,6 @@ namespace Regolith
   enum ThreadName : char
   {
     REGOLITH_THREAD_RENDERING,
-    REGOLITH_THREAD_DATA,
     REGOLITH_THREAD_CONTEXT,
     REGOLITH_THREAD_TOTAL
   };

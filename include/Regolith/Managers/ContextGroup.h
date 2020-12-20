@@ -7,9 +7,7 @@
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/DataHandler.h"
-#include "Regolith/GamePlay/Context.h"
 #include "Regolith/GamePlay/Spawner.h"
-#include "Regolith/Utilities/NamedVector.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
 #include <list>
@@ -20,6 +18,11 @@
 
 namespace Regolith
 {
+
+  class Context;
+  class Camera;
+
+////////////////////////////////////////////////////////////////////////////////
 
   class ContextGroup
   {
@@ -34,15 +37,18 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////
     private:
+      // Set the number of objects to render per frame when loading this group
+      unsigned int _renderRate;
+
+
       // Flag to indicate that this is the global context group
       bool _isGlobalGroup;
 
       // Audio handlers are local to the context group
       AudioHandler _theAudio;
 
-      // List of data handlers that can be individually loaded/unloaded
+      // Data handler that owns the asset raw data
       DataHandler _theData;
-//      DataHandlerMap _dataHandlers;
 
       // File name to load
       std::string _fileName;
@@ -65,8 +71,29 @@ namespace Regolith
       // Starting point when this context group is loaded
       Context** _entryPoint;
 
+////////////////////////////////////////////////////////////////////////////////
+      // Flags and variables to interface with loading functions
+
       // Flag to indicate the group is loaded
       bool _isLoaded;
+      bool _loadingState;
+      unsigned int _loadProgress;
+      unsigned int _loadTotal;
+      mutable std::mutex _mutexProgress;
+
+      // Iterator to track the current rendering position
+      PhysicalObjectMap::iterator _renderPosition;
+
+      // Indicates the engine has finished rendering/destroying textures
+      bool _isRendered;
+
+
+////////////////////////////////////////////////////////////////////////////////
+    protected:
+      // Lock the mutex before setting the load progress
+      void resetProgress();
+      void loadElement();
+
 
 ////////////////////////////////////////////////////////////////////////////////
     public:
@@ -94,10 +121,17 @@ namespace Regolith
 
 
       // Return a flag to indicate the group is loaded into memory
-      bool isLoaded() const { return _isLoaded; }
+      bool isLoaded() const;
+      float getLoadProgress() const;
+
+      bool isRendered() const { return _isRendered; }
 
       // Flag to indicate this is the global context group. Don't unload accidentally!
       bool isGlobal() const { return _isGlobalGroup; }
+
+
+      // Rendering thread asks to render object textures in the background
+      bool engineRenderLoadedObjects( Camera& );
 
 
 ////////////////////////////////////////////////////////////////////////////////

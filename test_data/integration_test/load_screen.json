@@ -5,6 +5,7 @@
 
   "collision_handling" :
   {
+    "team_collision" : [],
     "collision_rules" : [],
     "container_rules" : []
   },

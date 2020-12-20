@@ -1,15 +1,18 @@
 
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Utilities/JsonValidation.h"
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Architecture/NoisyObject.h"
+#include "Regolith/ObjectInterfaces/DrawableObject.h"
+#include "Regolith/ObjectInterfaces/NoisyObject.h"
+#include "Regolith/Contexts/Context.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 
 namespace Regolith
 {
 
   ContextGroup::ContextGroup() :
+    _renderRate( 10 ),
     _isGlobalGroup( false ),
     _theAudio( Manager::getInstance()->getAudioManager() ),
     _theData(),
@@ -20,7 +23,12 @@ namespace Regolith
     _spawnBuffers(),
 //    _onLoadOperations(),
     _entryPoint( nullptr ),
-    _isLoaded( false )
+    _isLoaded( false ),
+    _loadingState( false ),
+    _loadProgress( 0 ),
+    _loadTotal( 0 ),
+    _renderPosition( _gameObjects.begin() ),
+    _isRendered( false )
   {
   }
 
@@ -31,6 +39,34 @@ namespace Regolith
 
     if ( _isLoaded ) this->unload();
     _contexts.clear();
+  }
+
+
+  void ContextGroup::resetProgress()
+  {
+    GuardLock lg( _mutexProgress );
+    _loadProgress = 0;
+  }
+
+
+  void ContextGroup::loadElement()
+  {
+    GuardLock lg( _mutexProgress );
+    _loadProgress += 1;
+  }
+
+
+  bool ContextGroup::isLoaded() const
+  {
+    GuardLock lg( _mutexProgress );
+    return _isLoaded;
+  }
+
+
+  float ContextGroup::getLoadProgress() const
+  {
+    GuardLock lg( _mutexProgress );
+    return (float) _loadProgress / _loadTotal;
   }
 
 
@@ -136,16 +172,26 @@ namespace Regolith
       }
       _entryPoint = &found->second;
     }
+
+    // Set the total number of elements to load (used for progress bars)
+    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 1;
   }
 
 
   void ContextGroup::load()
   {
-    if ( _isLoaded ) 
     {
-      WARN_LOG( "ContextGroup::load : Attempting to load a context group that is already loaded" );
-      return;
+      GuardLock lg( _mutexProgress );
+      if ( _isLoaded ) 
+      {
+        WARN_LOG( "ContextGroup::load : Attempting to load a context group that is already loaded" );
+        return;
+      }
+      // Group is loading
+      _loadingState = true;
     }
+
+    resetProgress();
 
     DEBUG_LOG( "ContextGroup::load : Loading" );
     // Load Json Data
@@ -177,14 +223,30 @@ namespace Regolith
       try
       {
         GameObject* obj = obj_factory.build( object_data, *this );
-        _gameObjects[ obj_name ] = dynamic_cast< PhysicalObject* >( obj );
+        PhysicalObject* phys_obj = dynamic_cast< PhysicalObject* >( obj );
+
+        if ( phys_obj == nullptr )
+        {
+          Exception ex( "ContextGroup::load()", "Created an object that is not physical. Cannot add to context group." );
+          throw ex;
+        }
+
+        if ( phys_obj->hasAudio() )
+        {
+          dynamic_cast< NoisyObject* >( phys_obj )->registerSounds( &_theAudio );
+        }
+
+        _gameObjects[ obj_name ] = phys_obj;;
       }
       catch ( Exception& ex )
       {
         ex.addDetail( "Object Name", obj_name );
         throw ex;
       }
+
+      loadElement();
     }
+    _renderPosition = _gameObjects.begin();
 
 
     DEBUG_LOG( "ContextGroup::load : Filling the spawn buffers" );
@@ -195,7 +257,9 @@ namespace Regolith
       std::string buffer_name = b_it.key().asString();
       unsigned int number = b_it->asInt();
 
-      _spawnBuffers[ buffer_name ].fill( number, _gameObjects[ buffer_name ] );
+      _spawnBuffers[ buffer_name ].fill( number, _gameObjects[ buffer_name ], &_theAudio );
+
+      loadElement();
     }
 
 
@@ -231,12 +295,14 @@ namespace Regolith
         ex.addDetail( "Context Name", cont_name );
         throw ex;
       }
+
+      loadElement();
     }
 
 
     DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
-    // Make sure the sounds each have their channels allocated and ready
     _theAudio.configure();
+    loadElement();
 
 
 //    DEBUG_LOG( "ContextGroup::load : Performing on-load operations" );
@@ -247,20 +313,47 @@ namespace Regolith
 //      _onLoadOperations.pop();
 //    }
 
-    DEBUG_LOG( "ContextGroup::load : Loading Data Handler" );
-    _theData.load();
 
-    _isLoaded = true;
+    // Wait for engine rendering process
+    Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+
 
     DEBUG_LOG( "ContextGroup::load : Complete" );
+    {
+      GuardLock lg( _mutexProgress );
+      _isLoaded = true;
+    }
   }
 
 
   void ContextGroup::unload()
   {
-    _isLoaded = false;
+    {
+      GuardLock lg( _mutexProgress );
+      if ( !_isLoaded ) 
+      {
+        WARN_LOG( "ContextGroup::unload : Attempting to unload a context group that is not loaded" );
+        return;
+      }
+      // Something is changing
+      _isLoaded = false;
+      // Group is unloading
+      _loadingState = false;
+    }
+
+    resetProgress();
+
+
+    _renderPosition = _gameObjects.begin();
+    _isRendered = false;
+
+
+    // Wait for the engine to clear all the textures
+    Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+
+
     INFO_LOG( "ContextGroup::unload : Unloading Data" );
-    _theData.unload();
+    _theData.clear();
 
     INFO_LOG( "ContextGroup::unload : Unloading Contexts" );
     for ( ContextMap::iterator it = _contexts.begin(); it != _contexts.end(); ++it )
@@ -281,8 +374,72 @@ namespace Regolith
       delete it->second;
       it->second = nullptr;
     }
+
   }
 
+
+  bool ContextGroup::engineRenderLoadedObjects( Camera& camera )
+  {
+    {
+      GuardLock lg( _mutexProgress );
+      if ( _isLoaded )
+      {
+        // This should never happen!
+        DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Nothing to do." );
+        return true;
+      }
+    }
+
+
+    if ( _loadingState ) // Loading objects
+    {
+      DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : State = Loading" );
+      for ( unsigned int i = 0; i < _renderRate; ++i )
+      {
+        if ( ++_renderPosition == _gameObjects.end() )
+        {
+          DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Loading complete" );
+          _isRendered = true;
+          return true;
+        }
+
+        DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Checking Object" );
+
+        if ( _renderPosition->second->hasTexture() )
+        {
+          if ( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture().update() )
+          {
+            DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Rendering" );
+            camera.renderTexture( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture() );
+          }
+        }
+      }
+    }
+    else // Unloading objects
+    {
+      DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : State = Unloading" );
+      for ( unsigned int i = 0; i < _renderRate; ++i )
+      {
+        if ( ++_renderPosition == _gameObjects.end() )
+        {
+          DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Unloading complete" );
+          _isRendered = true;
+          return true;
+        }
+
+        if ( _renderPosition->second->hasTexture() )
+        {
+          if ( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture().update() )
+          {
+            DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Clearing" );
+            camera.renderTexture( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture() );
+          }
+        }
+      }
+    }
+
+    return false;
+  }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

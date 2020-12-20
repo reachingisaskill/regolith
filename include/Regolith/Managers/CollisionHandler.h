@@ -3,7 +3,7 @@
 #define REGOLITH_COLLISION_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/Utilities/Contact.h"
+#include "Regolith/ObjectInterfaces/CollidableObject.h"
 
 #include <vector>
 #include <utility>
@@ -64,7 +64,7 @@ namespace Regolith
 
     protected:
       // Used to handle the function calls the two objects that have collided.
-      inline void callback( PhysicalObject*, PhysicalObject* );
+      inline void callback( CollidableObject*, CollidableObject* );
 
     public:
       // Const iterators - no changing!
@@ -110,9 +110,9 @@ namespace Regolith
       PairIterator containerEnd() const { return _containers.end(); }
 
       // Do two object collide
-      void collides( PhysicalObject*, PhysicalObject* );
+      void collides( CollidableObject*, CollidableObject* );
       // Does the first object contain the second
-      void contains( PhysicalObject*, PhysicalObject* );
+      void contains( CollidableObject*, CollidableObject* );
 
   };
 

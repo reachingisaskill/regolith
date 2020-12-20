@@ -1,8 +1,9 @@
 
 #include "Regolith/Components/Camera.h"
 
-#include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/Managers/Manager.h"
+#include "Regolith/ObjectInterfaces/DrawableObject.h"
+#include "Regolith/Textures/Texture.h"
+#include "Regolith/Assets/RawTexture.h"
 #include "Regolith/Components/Window.h"
 
 
@@ -42,51 +43,78 @@ namespace Regolith
   }
 
 
-  void Camera::renderRawTexture( RawTexture* texture ) const
+  void Camera::renderRawTexture( RawTexture* raw_texture )
   {
-    // If it's already renderered
-    if ( texture->texture != nullptr )
-    {
-      return;
-    }
-
     // Create the texture
-    texture->texture = SDL_CreateTextureFromSurface( _theRenderer, texture->surface );
-
-    DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << texture->texture;
+    raw_texture->sdl_texture = SDL_CreateTextureFromSurface( _theRenderer, raw_texture->surface );
+    DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << raw_texture->sdl_texture;
 
     // Check that it worked
-    if ( texture->texture == nullptr )
+    if ( raw_texture->sdl_texture == nullptr )
     {
-      SDL_FreeSurface( texture->surface );
-      texture->surface = nullptr;
-      Exception ex( "RawTexture::renderTexture", "Could not convert surface to texture" );
+      Exception ex( "RawTexture::renderRawTexture", "Could not convert surface to texture" );
       ex.addDetail( "SDL error", SDL_GetError() );
       throw ex;
     }
 
-    // Delete the surface data
-    SDL_FreeSurface( texture->surface );
-    texture->surface = nullptr;
+//      SDL_SetTextureColorMod( _rawTexture->sdl_texture, raw_texture->colourMod.r, raw_texture->colourMod.g, raw_texture->colourMod.b );
+//      SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, raw_texture->alpha );
+//      SDL_SetTextureBlendMode( _rawTexture->sdl_texture, raw_texture->blendmode );
   }
 
 
-  void Camera::renderPhysicalObject( PhysicalObject* object, Vector& camera_position ) const
+  void Camera::renderTexture( Texture& texture )
+  {
+    while ( texture.update() )
+    {
+      // Get the base surface
+      SDL_Surface* temp_surface = texture.getUpdateSurface();
+
+      // Create the texture
+      SDL_Texture* temp_texture = SDL_CreateTextureFromSurface( _theRenderer, temp_surface );
+      DEBUG_STREAM << "Camera::renderTexture : SDL_Texture @ " << temp_texture;
+
+      // Check that it worked
+      if ( temp_texture == nullptr )
+      {
+        Exception ex( "RawTexture::renderTexture", "Could not convert surface to texture" );
+        ex.addDetail( "SDL error", SDL_GetError() );
+        throw ex;
+      }
+
+//      SDL_SetTextureColorMod( _rawTexture->sdl_texture, red, green, blue );
+//      SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, alpha );
+//      SDL_SetTextureBlendMode( _rawTexture->sdl_texture, blendmode );
+
+      // Update the texture with the new SDL_Texture
+      texture.setRenderedTexture( temp_texture );
+    }
+  }
+
+
+  void Camera::renderDrawableObject( DrawableObject* object, Vector& camera_position )
   {
     _targetRect.x = ( object->getPosition().x() - camera_position.x() ) * _scaleX;
     _targetRect.y = ( object->getPosition().y() - camera_position.y() ) * _scaleY;
     _targetRect.w = object->getWidth() * _scaleX;
     _targetRect.h = object->getHeight() * _scaleY;
 
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : Physical Object @ " << object;
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : Position: " << _targetRect.x << ", " << _targetRect.y << " | " << _targetRect.w << ", " << _targetRect.h;
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : Scales: " << _scaleX << ", " << _scaleY;
+    Texture& texture = object->getTexture();
 
-    const Texture& texture = object->getTexture();
+    // If a new surface has been provided, re-render the texture
+    if ( texture.update() )
+    {
+      renderTexture( texture );
+    }
 
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : SDL_Texture @ " << texture._theTexture->texture;
-//    DEBUG_STREAM << "Camera::renderPhysicalObject : Clip : " << texture._clip.x << ", " << texture._clip.y << ", " << texture._clip.w << ", " << texture._clip.h;
-    SDL_RenderCopyEx( _theRenderer, texture._theTexture->texture, &texture._clip, &_targetRect, object->getRotation(), nullptr, texture._flipFlag );
+    // Render to the back bufer
+    SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), texture.getTextureCenter(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
+  }
+
+
+  void Camera::clearTexture( Texture& texture )
+  {
+    texture.clearSDLTexture();
   }
 
 }

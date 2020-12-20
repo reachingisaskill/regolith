@@ -25,11 +25,9 @@ namespace Regolith
     _objectFactory(),
     _contextFactory(),
     _signalFactory(),
-    _fonts(),
     _teamNames(),
     _typeNames(),
     _title(),
-    _defaultFont( nullptr ),
     _defaultColor( { 255, 255, 255, 255 } ),
     _eventStartIndex(0),
     _gameEvents(),
@@ -50,13 +48,6 @@ namespace Regolith
   Manager::~Manager()
   {
     DEBUG_LOG( "Manager::~Manager : Destruction" );
-
-    INFO_LOG( "Manager::~Manager : Removing each of the fonts and clearing the map" );
-    for ( FontMap::iterator it = _fonts.begin(); it != _fonts.end(); ++it )
-    {
-      TTF_CloseFont( it->second );
-    }
-    _fonts.clear();
 
 //    INFO_LOG( "Manager::~Manager : Clearing context manager" );
 //    _theContexts.clear();
@@ -113,7 +104,8 @@ namespace Regolith
     _theEngine.openContextGroup( *cg->getLoadScreen() );
 
     // Tell the context manager that we can trigger the load thread
-    _theContexts.loadNextContextGroup();
+//    _theContexts.loadNextContextGroup();
+    // This funtion MUST be called when the loadscreen context is opened!
   }
 
 
@@ -122,57 +114,64 @@ namespace Regolith
 
   void Manager::run()
   {
-    // Start all the waiting threads
-    INFO_LOG( "Manager::run : Starting worker threads" );
-    _theThreads.startAll();
-
-    // Load the first context group blocking this thread until completion
-    INFO_LOG( "Manager::run : Loading entry point" );
-    _theContexts.loadEntryPoint();
-
-    // Reset the stack to the first context
-    INFO_LOG( "Manager::run : Loading the first context" );
-    this->openEntryPoint();
+    try
+    {
+      // Start all the waiting threads
+      INFO_LOG( "Manager::run : Starting worker threads" );
+      _theThreads.startAll();
 
 
-    // Start the engine!
-    INFO_LOG( "Manager::run : Starting the engine." );
-    _theEngine.run();
+      try
+      {
+        // Load the first context group blocking this thread until completion
+        INFO_LOG( "Manager::run : Loading entry point" );
+        _theContexts.loadEntryPoint();
+
+        // Reset the stack to the first context
+        INFO_LOG( "Manager::run : Loading the first context" );
+        this->openEntryPoint();
+
+        // Start the engine!
+        INFO_LOG( "Manager::run : Starting the engine." );
+        _theEngine.run();
+      }
+      catch ( Exception& ex )
+      {
+        ERROR_LOG( "Manager::run : A Regolith error occured during runtime" );
+        ERROR_STREAM << ex.elucidate();
+        std::cerr << ex.elucidate();
+      }
 
 
+      try
+      {
+        // Unload everything
+        INFO_LOG( "Manager::run : Unloading data" );
+        _theContexts.clear();
+      }
+      catch ( Exception& ex )
+      {
+        ERROR_LOG( "Manager::run : A Regolith exception occured unloading data" );
+        ERROR_STREAM << ex.elucidate();
+        std::cerr << ex.elucidate();
+        return;
+      }
 
-    // Stop all the threads
-    INFO_LOG( "Manager::run : Stopping all worker threads" );
-    _theThreads.stopAll();
+        // Stop all the threads
+      INFO_LOG( "Manager::run : Stopping all worker threads" );
+      _theThreads.stopAll();
 
-    DEBUG_STREAM << "Manager::run : HERE : " << ThreadManager::StopCondition.data;
-
-    // Unload everything
-    INFO_LOG( "Manager::run : Unloading data" );
-    _theContexts.clear();
-    _theData.clear();
+    }
+    catch ( std::exception& ex )
+    {
+      ERROR_LOG( "Manager::run : A unexpected exception occured." );
+      ERROR_STREAM << ex.what();
+      _theThreads.error();
+    }
 
     // Join all the threads
     INFO_LOG( "Manager::run : Joining all worker threads" );
     _theThreads.join();
-  }
-
-
-  TTF_Font* Manager::getFontPointer( std::string name )
-  {
-    FontMap::iterator find = _fonts.find( name );
-    if ( find == _fonts.end() )
-    {
-      ERROR_STREAM << "Manager::getFontPointer : Could not find requested font : " << name;
-      return _defaultFont;
-    }
-    return find->second;
-  }
-
-
-  void Manager::renderSurfaces( DataHandler* handler )
-  {
-    _theEngine.renderTextures( handler );
   }
 
 
@@ -253,11 +252,6 @@ namespace Regolith
   {
     FAILURE_STREAM << "DEATHSIGNAL : Regolith received signal: " << signal;
     FAILURE_LOG( "DEATHSIGNAL : Trying to die gracefully..." );
-
-    ERROR_STREAM << "Last SDL Error : " << SDL_GetError();
-    ERROR_STREAM << "Last IMG Error : " << IMG_GetError();
-    ERROR_STREAM << "Last TTF Error : " << TTF_GetError();
-    ERROR_STREAM << "Last MIX Error : " << Mix_GetError();
 
 #ifdef __linux__
     void* array[20];

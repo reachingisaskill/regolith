@@ -1,8 +1,9 @@
 
 #include "Regolith/GamePlay/Spawner.h"
-
 #include "Regolith/Architecture/PhysicalObject.h"
-#include "Regolith/GamePlay/ContextLayer.h"
+#include "Regolith/ObjectInterfaces/NoisyObject.h"
+#include "Regolith/Contexts/ContextLayer.h"
+#include "Regolith/Managers/AudioHandler.h"
 
 
 namespace Regolith
@@ -67,7 +68,7 @@ namespace Regolith
   }
 
 
-  void SpawnBuffer::fill( unsigned int num, PhysicalObject* master )
+  void SpawnBuffer::fill( unsigned int num, PhysicalObject* master, AudioHandler* audioHandler )
   {
     if ( num == 0 )
     {
@@ -94,6 +95,12 @@ namespace Regolith
       new_item->object = master->clone();
       new_item->next = _start;
       new_item->object->destroy();
+
+      // Make sure the clones can make noises if they want
+      if ( new_item->object->hasAudio() )
+      {
+        dynamic_cast< NoisyObject* >( new_item->object )->registerSounds( audioHandler );
+      }
 
       DEBUG_STREAM << "SpawnBuffer::fill : Clone @ " << new_item->object;
 

@@ -15,8 +15,8 @@
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Components/Window.h"
 #include "Regolith/Components/Engine.h"
-#include "Regolith/GamePlay/Context.h"
 #include "Regolith/GamePlay/Signal.h"
+#include "Regolith/Contexts/Context.h"
 #include "Regolith/Utilities/Singleton.h"
 
 #include <vector>
@@ -27,9 +27,6 @@
 
 namespace Regolith
 {
-
-  // Container typedefs
-  typedef std::map< std::string, TTF_Font* > FontMap;
 
   // Factory typedefs
   typedef FactoryTemplate< Signal, ContextGroup& > SignalFactory;
@@ -60,16 +57,12 @@ namespace Regolith
       ContextFactory _contextFactory;
       SignalFactory _signalFactory;
 
-      // Owned memory for objects, contexts, etc
-      FontMap _fonts;
-
       // Maps of the collision team and type names
       TeamNameMap _teamNames;
       TypeNameMap _typeNames;
 
       // Useful global constants
       std::string _title;
-      TTF_Font* _defaultFont;
       SDL_Color _defaultColor;
 
       // Info for SDL user events
@@ -89,8 +82,6 @@ namespace Regolith
       void _loadInput( Json::Value& );
       // Load the input device configuration
       void _loadAudio( Json::Value& );
-      // Load the required fonts
-      void _loadFonts( Json::Value& );
       // Configure the window
       void _loadWindow( Json::Value& );
       // Load map of collision teams
@@ -114,10 +105,6 @@ namespace Regolith
 
       // Load the first scene into the engine and give it control
       void run();
-
-
-//      // Set the atomic quit flag
-//      void quit() { _theThreads.quit(); }
 
 
       // Sends quit an error flags to all threads and rejoins them if possible
@@ -146,9 +133,6 @@ namespace Regolith
       // Get the reference to the engine
       Engine& getEngine() { return _theEngine; }
 
-      // Return a pointer to the required font data
-      TTF_Font* getFontPointer( std::string );
-
       // Return a reference to the thread manager
       ThreadManager& getThreadManager() { return _theThreads; }
 
@@ -171,15 +155,9 @@ namespace Regolith
       // Return a pointer to the current active context - may become invalid after rendering!
       Context* getCurrentContext() { return _theEngine.currentContext(); }
 
-      // Gives the DataHandler pointer the engine to allow it to render the loaded surfaces
-      void renderSurfaces( DataHandler* );
-
 
       ////////////////////////////////////////////////////////////////////////////////
-      // Access Fonts and Colours
-
-      // Return the default font
-      TTF_Font* getDefaultFont() { return _defaultFont; }
+      // Access default constants
 
       // Return the default colour
       SDL_Color& getDefaultColour() { return _defaultColor; }

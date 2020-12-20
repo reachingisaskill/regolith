@@ -3,8 +3,11 @@
 #define REGOLITH_MANAGERS_DATA_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
-#include "Regolith/GamePlay/Texture.h"
-#include "Regolith/GamePlay/Noises.h"
+#include "Regolith/Assets/RawTexture.h"
+#include "Regolith/Assets/RawSound.h"
+#include "Regolith/Assets/RawMusic.h"
+#include "Regolith/Assets/RawFont.h"
+#include "Regolith/Assets/RawText.h"
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
@@ -15,17 +18,15 @@
 
 namespace Regolith
 {
-  // Forward Declaration
+  // Forward declarations
   class DataManager;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Data Handler
 
   class DataHandler
   {
-    friend void engineRenderingThread();
-
-    typedef std::queue< RawTexture* > SurfaceRenderQueue;
 
     private:
       // List of all the textures
@@ -37,19 +38,11 @@ namespace Regolith
       // List of all the music
       RawMusicMap _rawMusic;
 
-      // Queue of surfaces to render in the engine.
-      SurfaceRenderQueue _surfaceRenderQueue;
+      // List of all the fonts
+      RawFontMap _rawFonts;
 
-
-      // Stores a flag to record whether the data is in memory or not
-      bool _isLoaded;
-      std::atomic<bool> _isRendered;
-
-      // Mutex controls load/unload/flag access and operations
-      mutable std::mutex _loadingMutex;
-
-    protected:
-      RawTexture* popRenderTexture();
+      // List of all the fonts
+      RawTextMap _rawTexts;
 
 
     public:
@@ -57,14 +50,19 @@ namespace Regolith
 
       ~DataHandler();
 
-      bool isLoaded() const;
+      // Data handlers must be non-copyable, etc.
+      DataHandler( const DataHandler& ) = delete;
+      DataHandler( DataHandler&& ) = delete;
+      DataHandler& operator=( const DataHandler& ) = delete;
+      DataHandler& operator=( DataHandler&& ) = delete;
 
-      void load();
 
-      void unload();
+      // Deletes all the loaded data
+      void clear();
+
 
 ////////////////////////////////////////////////////////////////////////////////
-      // Raw Textures
+      // Inferfaces to request proxies to the asset data
 
       // Get an texture with a given name
       RawTexture* getRawTexture( std::string );
@@ -74,6 +72,12 @@ namespace Regolith
 
       // Get an texture with a given name
       RawMusic* getRawMusic( std::string );
+
+      // Get a font with a given name
+      RawFont* getRawFont( std::string );
+
+      // Get a font with a given name
+      RawText* getRawText( std::string );
 
   };
 

@@ -1,7 +1,9 @@
 
 #include "Regolith.h"
 #include "Regolith/Test/EmptyContext.h"
-#include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Test/SimpleObject.h"
+#include "Regolith/Test/ContainerObject.h"
+#include "Regolith/Test/BonkObject.h"
 
 #include "logtastic.h"
 
@@ -23,7 +25,9 @@ int main( int, char** )
   logtastic::start( "Regolith - Full Physics Simulation Test", REGOLITH_VERSION_NUMBER );
 
   INFO_LOG( "Main : Creating test builders" );
-  man->getObjectFactory().addBuilder< PhysicalObject >( "physical_object" );
+  man->getObjectFactory().addBuilder< SimpleObject >( "simple_object" );
+  man->getObjectFactory().addBuilder< ContainerObject >( "container_object" );
+  man->getObjectFactory().addBuilder< BonkObject >( "bonk_object" );
   man->getContextFactory().addBuilder< EmptyContext >( "empty_context" );
 
   try
@@ -34,11 +38,6 @@ int main( int, char** )
     INFO_LOG( "Main : Starting Regolith" );
     man->run();
 
-  }
-  catch ( Exception& ex )
-  {
-    FAILURE_LOG( ex.what() );
-    std::cerr << ex.elucidate();
   }
   catch ( std::exception& ex )
   {

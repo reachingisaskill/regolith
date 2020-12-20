@@ -1,4 +1,3 @@
-//#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/ThreadManager.h"
@@ -25,6 +24,8 @@ namespace Regolith
     int size = _channelPauses.size();
     int result = Mix_AllocateChannels( size );
 
+    DEBUG_STREAM << "AudioHandler::configure : Configured " << result << " audio channels.";
+
     if ( result != size )
     {
       std::string error = Mix_GetError();
@@ -37,10 +38,11 @@ namespace Regolith
   }
 
 
-  void AudioHandler::requestChannel( RawSound* sound )
+  void AudioHandler::requestChannel( Sound& sound )
   {
     _channelPauses.push_back( 0 );
-    sound->channel = _channelPauses.size()-1;
+    sound.registerChannel( _channelPauses.size()-1 );
+    DEBUG_STREAM << "AudioHandler::requestChannel : Channel provided : " << _channelPauses.size()-1;
   }
 
 
@@ -145,15 +147,15 @@ namespace Regolith
   }
 
 
-  void AudioHandler::playSong( RawMusic* music, unsigned int N )
+  void AudioHandler::playSong( Music* music, unsigned int N )
   {
-    _manager.playTrack( music->music, N );
+    _manager.playTrack( music, N );
   }
 
 
-  void AudioHandler::queueSong( RawMusic* music, unsigned int N )
+  void AudioHandler::queueSong( Music* music, unsigned int N )
   {
-    _manager.queueTrack( music->music, N );
+    _manager.queueTrack( music, N );
   }
 
 
@@ -163,15 +165,15 @@ namespace Regolith
   }
 
 
-  void AudioHandler::playSound( RawSound* sound )
+  void AudioHandler::playSound( Sound& sound )
   {
-    if ( Mix_Playing( sound->channel ) ) // Sound already playing
+    if ( Mix_Playing( sound.getChannel() ) ) // Sound already playing
     {
       return;
     }
 
     // Play the chunk exactly once on the first free channel
-    Mix_PlayChannel( sound->channel, sound->sound, 0 );
+    Mix_PlayChannel( sound.getChannel(), sound.getMIXSound(), 0 );
   }
 
 }

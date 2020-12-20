@@ -4,8 +4,6 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
-#include "Regolith/GamePlay/Texture.h"
-#include "Regolith/GamePlay/Collision.h"
 
 namespace Regolith
 {
@@ -19,50 +17,23 @@ namespace Regolith
    */
   class PhysicalObject : virtual public GameObject
   {
-////////////////////////////////////////////////////////////////////////////////
-    // Info required for each state
-    public:
-      class StateDetails
-      {
-        private:
-          float _count;
-          unsigned int _numberFrames;
-
-        public:
-          // Public member variables
-          unsigned int id;
-          float updatePeriod;
-          Texture texture;
-          Collision collision;
-          unsigned int currentFrame;
-//          PhysicalObjectVector children;
-
-          // Constructor
-          StateDetails();
-
-          // Update the frame number
-          void update( float );
-
-      };
-
-      typedef std::map< std::string, StateDetails > StateMap;
-
 
 ////////////////////////////////////////////////////////////////////////////////
     private:
       // Flag that this object is to be removed from the scene
       bool _destroyMe;
+
       // Flag to indicate this object can be moved by physics processes
       bool _hasMoveable;
-      // Flag to indicate this object has a texture to render to the window
-      bool _hasTexture;
-      // Flag to indicate this object has animation
-      bool _hasAnimation;
+      // Flag to indicate this object responds to global physics
+      bool _hasPhysics;
 
       // Position with respect to the parent object
       Vector _position;
       // Rotation with respect to the parent object
       float _rotation;
+      // Flip flag
+      SDL_RendererFlip _flipFlag;
 
       // Used to determine collision and movement properties
       float _mass;
@@ -77,26 +48,19 @@ namespace Regolith
       Vector _velocity;
       Vector _forces;
 
-      // Used to configure the collision logic
+      // Rotation physics variables (Not yet implemented!)
+      float _angularVel;
+      float _torques;
+
+
+      // Used to organise objects and configure the collision logic
       CollisionTeam _collisionTeam;
-
-//      // Map of all the children
-//      PhysicalObjectMap _children;
-
-      // Map of all the possible states
-      StateMap _stateMap;
-
-      // When reset is called return to this state
-      std::string _startState;
-      StateDetails* _startStatePointer;
-
-      // Reference to the current state
-      StateDetails* _currentState;
 
 
     protected :
       // Copy constructor - protected so only way to duplicate objects is through the "clone" function
       PhysicalObject( const PhysicalObject& );
+
 
 ////////////////////////////////////////////////////////////////////////////////
       // Property modifiers
@@ -104,27 +68,11 @@ namespace Regolith
       // For derived classes to update the mass. Sets both mass and it's inverse
       void setMass( float );
 
-      // For derived classes to impose a force
-      void addForce( Vector f ) { _forces += f; }
+      // For derived classes to set the moveable flag
+      void setMoveable( bool m ) { _hasMoveable = m; }
 
-      // Forces an immediate movement of the object. Used mostly to prevent overlap during collisions.
-      void kick( Vector& j ) { _velocity += j; }
-
-
-////////////////////////////////////////////////////////////////////////////////
-      // State interface functions
-
-      // Gets a reference to a state
-      StateDetails& getState( std::string name ) { return _stateMap[ name ]; }
-
-      // Sets the current state to the reference
-      void setState( StateDetails* state ) { _currentState = state; }
-
-//      // Return the vector of children used in the current state
-//      PhysicalObjectVector& getChildren() { return _currentState.children; }
-
-      // Return the texture being used in the current state
-//      Texture& getTexture() { return _currentState.texture; }
+      // For derived classes to set whether this object is affected by global physics effects
+      void setPhysics( bool p ) { _hasPhysics = p; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -144,7 +92,7 @@ namespace Regolith
 
       // Function to create to an copied instance at the specified position
       // ALL derived classes my override this function with the copy-constructor for that class!
-      virtual PhysicalObject* clone() const { return new PhysicalObject( *this ); }
+      virtual PhysicalObject* clone() const = 0;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,9 +101,6 @@ namespace Regolith
       // Perform the basic configuration
       void configure( Json::Value&, ContextGroup& ) override;
 
-      // Resets the object to it's initial configuration to allow reusing of objects
-      virtual void reset();
-
 
       // Tells the caller that derived classes come from a physical object.
       // Warning: overriding this function change the value may prevent items from being added to context layers
@@ -163,13 +108,10 @@ namespace Regolith
 
 
       // Tells the caller that the object is moveable. i.e. the velocity may be non-zero
-      virtual bool hasMovement() const override { return _hasMoveable; }
-
-      // Tells the caller that the object can be rendered.
-      virtual bool hasTexture() const override { return _hasTexture; }
+      virtual bool hasMovement() const { return _hasMoveable; }
 
       // Tells the caller that the is animated for every frame
-      virtual bool hasAnimation() const override { return _hasAnimation; }
+      virtual bool hasPhysics() const { return _hasPhysics; }
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -181,37 +123,29 @@ namespace Regolith
       // set the flag to remove the object
       void destroy() { _destroyMe = true; }
 
+      // Resets the object to it's initial configuration to allow reusing of objects
+      virtual void reset();
+
 
 ////////////////////////////////////////////////////////////////////////////////
-      // Specifc functions for enabling physics and rendering on the object
-
-//      // Returns the vector of children that are active for the current state
-//      const PhysicalObjectVector& getChildren() const { return _currentState.children; }
-
-
-      // For the camera to request the current renderable texture
-      constexpr const Texture& getTexture() const { return _currentState->texture; }
-
-      // For the collision handler to request the current hitboxes
-      constexpr const Collision& getCollision() const { return _currentState->collision; }
+      // Specifc functions for enabling physics
 
 
       // Perform the time integration for movement of this object
       virtual void step( float );
 
-      // Perform an update to all the animations
-      virtual void update( float );
-
-      // Call back function for when this object collides with another
-      virtual void onCollision( Contact&, PhysicalObject* );
 
 
 ////////////////////////////////////////////////////////////////////////////////
       // Object property accessors and modifiers
 
-      // Return the current state of the object
-      unsigned int getState() const { return _currentState->id; }
-      
+      // For derived classes to impose a force
+      void addForce( Vector f ) { _forces += f; }
+
+      // Forces an immediate movement of the object. Used mostly to prevent overlap during collisions.
+      void kick( Vector& j ) { _velocity += j; }
+
+
       // Return the assigned collision team
       CollisionTeam getCollisionTeam() const { return _collisionTeam; }
 
@@ -238,7 +172,11 @@ namespace Regolith
       float getRotation() const { return _rotation; }
       void setRotation( float r ) { _rotation = r; }
 
-      // Preferred methods for changing positin/rotation
+      // Flip state
+      SDL_RendererFlip getFlipFlag() const { return _flipFlag; }
+      void setFlipFlag( SDL_RendererFlip f ) { _flipFlag = f; }
+
+      // Preferred methods for changing position/rotation
       void move( Vector m ) { _position += m; }
       void rotate( float r ) { _rotation += r; }
 

@@ -2,7 +2,7 @@
 #ifndef REGOLITH_TEST_EMPTY_CONTEXT_H_
 #define REGOLITH_TEST_EMPTY_CONTEXT_H_
 
-#include "Regolith/GamePlay/Context.h"
+#include "Regolith/Contexts/Context.h"
 
 
 namespace Regolith
@@ -31,6 +31,10 @@ namespace Regolith
 
       // Updates the camera position
       virtual Vector updateCamera( float ) const override { return Vector(); }
+
+
+      // Called for each object that is flagged to have global physics
+      virtual void updatePhysics( PhysicalObject*, float ) const {}
 
 
       // Updates the internal state of the context. Nothing to do here.

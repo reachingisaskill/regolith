@@ -17,12 +17,11 @@ namespace Regolith
   // Con/Destruction
 
   ContextManager::ContextManager() :
-    _loaded( false ),
-    _progress( 0.0 ),
     _globalContextGroup(),
     _contextGroups(),
     _currentContextGroup( nullptr ),
-    _nextContextGroup( nullptr )
+    _nextContextGroup( nullptr ),
+    _renderContextGroup( nullptr )
   {
   }
 
@@ -44,51 +43,39 @@ namespace Regolith
     {
       if ( it->second->isLoaded() )
       {
+        DEBUG_LOG( "ContextManager::clear : Unloading context group" );
         it->second->unload();
       }
       delete it->second;
     }
     _contextGroups.clear();
 
+    DEBUG_LOG( "ContextManager::clear : Context groups unloaded." );
+
     // Unload the global context group
     if ( _globalContextGroup.isLoaded() )
     {
+      DEBUG_LOG( "ContextManager::clear : Unloading global context group." );
       _globalContextGroup.unload();
     }
+
+    DEBUG_LOG( "ContextManager::clear : Complete." );
 
     lock.unlock();
   }
 
 
-  void ContextManager::setLoaded( bool value )
-  {
-    std::lock_guard<std::mutex> lg( _loadedMutex );
-
-    _loaded = value;
-  }
-
-
   bool ContextManager::isLoaded() const
   {
-    std::lock_guard<std::mutex> lg( _loadedMutex );
-
-    return _loaded;
-  }
-
-
-  void ContextManager::setProgress( float value )
-  {
-    std::lock_guard<std::mutex> lg( _progressMutex );
-
-    _progress = value;
+    GuardLock lg( _currentGroupMutex );
+    return _currentContextGroup->isLoaded();
   }
 
 
   float ContextManager::loadingProgress() const
   {
-    std::lock_guard<std::mutex> lg( _progressMutex );
-
-    return _progress;
+    GuardLock lg( _currentGroupMutex );
+    return _currentContextGroup->getLoadProgress();
   }
 
 
@@ -143,8 +130,14 @@ namespace Regolith
 
   void ContextManager::loadEntryPoint()
   {
+    UniqueLock lock1( _currentGroupMutex );
+    UniqueLock lock2( _nextGroupMutex );
+
     _currentContextGroup = _nextContextGroup;
     _nextContextGroup = nullptr;
+
+    lock2.unlock();
+    lock1.unlock();
 
     INFO_LOG( "ContextManager::loadEntryPoint : Loading global context group" );
     _globalContextGroup.load();
@@ -153,6 +146,9 @@ namespace Regolith
     DEBUG_LOG( "ContextManager::loadEntryPoint : Completed" );
   }
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Accessors
 
   ContextGroup* ContextManager::getContextGroup( std::string name )
   {
@@ -169,18 +165,27 @@ namespace Regolith
   }
 
 
+  ContextGroup* ContextManager::getCurrentContextGroup()
+  {
+    GuardLock lg( _currentGroupMutex );
+
+    return _currentContextGroup;
+  }
+
+
   void ContextManager::setNextContextGroup( ContextGroup* cg )
   {
-    setLoaded( false );
-    setProgress( 0.0 );
-    DEBUG_LOG( "ContextManager::setNextContextGroup : Setting next context group." );
+    GuardLock lg( _nextGroupMutex );
 
+    DEBUG_LOG( "ContextManager::setNextContextGroup : Setting next context group." );
     _nextContextGroup = cg;
   }
 
 
   void ContextManager::loadNextContextGroup()
   {
+    GuardLock lg( _nextGroupMutex );
+
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
     std::unique_lock<std::mutex> lock( contextUpdate.mutex );
 
@@ -190,6 +195,41 @@ namespace Regolith
     DEBUG_LOG( "ContextManager::loadNextContextGroup : Triggering condition variable." );
 
     contextUpdate.variable.notify_all();
+  }
+
+
+  void ContextManager::requestRenderContextGroup( ContextGroup* context_group )
+  {
+    // Only one may be rendered at a time
+    GuardLock render_lock( _renderGroupMutex );
+
+    // Lock the pointer mutex while we edit it
+    UniqueLock pointer_lock( _renderContextGroup.mutex );
+
+    // Set the pointer
+    _renderContextGroup.data = context_group;
+
+    // Wait for group to be come rendered.
+    _renderContextGroup.variable.wait( pointer_lock, [&]()->bool{ return _renderContextGroup.data->isRendered() || ThreadManager::ErrorFlag; } );
+
+    // Clear the pointer
+    _renderContextGroup.data = nullptr;
+
+    // Clean up
+    pointer_lock.unlock();
+  }
+
+
+  void ContextManager::renderContextGroup( Camera& camera )
+  {
+    GuardLock lg( _renderContextGroup.mutex );
+    if ( _renderContextGroup.data != nullptr )
+    {
+      if ( _renderContextGroup.data->engineRenderLoadedObjects( camera ) )
+      {
+        _renderContextGroup.variable.notify_all();
+      }
+    }
   }
 
 
@@ -208,7 +248,9 @@ namespace Regolith
     // Set up references
     ContextManager& manager = Manager::getInstance()->getContextManager();
     Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
-    std::unique_lock<std::mutex> contextLock( contextUpdate.mutex );
+    UniqueLock contextLock( contextUpdate.mutex );
+    UniqueLock currentPointerLock( manager._currentGroupMutex, std::defer_lock );
+    UniqueLock nextPointerLock( manager._nextGroupMutex, std::defer_lock );
 
 
     // Update the thread status
@@ -220,6 +262,8 @@ namespace Regolith
       {
         contextUpdate.variable.wait( contextLock, [&]()->bool{ return (! threadHandler.isGood() ) || contextUpdate.data; } );
 
+        if ( ! threadHandler.isGood() ) break;
+
         DEBUG_STREAM << "ContextManagerLoadingThread : WORKING";
 
         if ( manager._nextContextGroup != nullptr )
@@ -229,15 +273,20 @@ namespace Regolith
           {
             manager._currentContextGroup->unload();
           }
+
+          // Lock the loading mutex while where swap the current context group
+          currentPointerLock.lock();
+          nextPointerLock.lock();
           manager._currentContextGroup = manager._nextContextGroup;
           manager._nextContextGroup = nullptr;
+          nextPointerLock.unlock();
+          currentPointerLock.unlock();
+
           manager._currentContextGroup->load();
         }
 
         // Signal that the context group has been loaded
         contextUpdate.data = false;
-        manager.setProgress( 1.0 );
-        manager.setLoaded( true );
 
         contextUpdate.variable.notify_all();
       }

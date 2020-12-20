@@ -50,7 +50,6 @@ namespace Regolith
 
       // Validate the required keys
       Utilities::validateJson( json_data, "window", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "fonts", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "input_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
@@ -67,10 +66,6 @@ namespace Regolith
 
       // Load the audio device configuration
       this->_loadAudio( json_data["audio_device"] );
-
-
-      // Load the Font data
-      this->_loadFonts( json_data["fonts"] );
 
 
       // Configure the window
@@ -95,7 +90,7 @@ namespace Regolith
     }
     catch ( std::ios_base::failure& f ) // Thrown by ifstream
     {
-      Exception ex( "Manager::init()", "Default font not found", false );
+      Exception ex( "Manager::init()", "IO-Stream Failure", false );
       ex.addDetail( "What", f.what() );
       throw ex;
     }
@@ -138,67 +133,6 @@ namespace Regolith
       Exception ex( "Manager::_loadAudio()", "Json reading failure" );
       ex.addDetail( "What", rt.what() );
       throw ex;
-    }
-  }
-
-
-  void Manager::_loadFonts( Json::Value& json_data )
-  {
-    Utilities::validateJson( json_data, "font_list", Utilities::JSON_TYPE_ARRAY );
-
-    // Load the listed fonts
-    Json::Value font_data = json_data["font_list"];
-    Json::ArrayIndex fonts_size = font_data.size();
-    INFO_STREAM << "Loading " << fonts_size << " fonts";
-    for ( Json::ArrayIndex i = 0; i < fonts_size; ++i )
-    {
-      Utilities::validateJson( font_data[i], "name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( font_data[i], "path", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( font_data[i], "size", Utilities::JSON_TYPE_INTEGER );
-
-      // Load the font details
-      std::string font_name = font_data[i]["name"].asString();
-      std::string font_path = font_data[i]["path"].asString();
-      int font_size = font_data[i]["size"].asInt();
-
-
-      INFO_STREAM << "Opening TTF file from: " << font_path;
-      // Try to open the TTF File
-      TTF_Font* theFont = TTF_OpenFont( font_path.c_str(), font_size );
-      if ( theFont == nullptr ) // Failed to open
-      {
-        FAILURE_STREAM << "Manager::_loadFonts() : Failed to load font : " << font_name;
-        Exception ex( "Manager::_loadFonts()", "Can not load font" );
-        ex.addDetail( "Font Name", font_name );
-        ex.addDetail( "Font Path", font_path );
-        ex.addDetail( "TTF Error", TTF_GetError() );
-        throw ex;
-      }
-      _fonts[ font_name ] = theFont;
-      INFO_STREAM << "Added font: " << font_name;
-    }
-
-
-    if ( Utilities::validateJson( json_data, "default_font", Utilities::JSON_TYPE_STRING, false ) )
-    {
-      // Find out what the default font is called
-      std::string default_font = json_data["default_font"].asString();
-
-      if ( _fonts.find( default_font ) == _fonts.end() ) // Default font must be loaded correctly
-      {
-        FAILURE_LOG( "Manager::_loadFonts() : The default font is not loaded by the config file" );
-        Exception ex( "Manager::_loadFonts()", "Default font not found" );
-        ex.addDetail( "Font name", default_font );
-        throw ex;
-      }
-
-      // Set the default font pointer
-      _defaultFont = _fonts[ default_font ];
-      INFO_STREAM << "Default font, " << default_font << " identified " << _defaultFont;
-    }
-    else
-    {
-      WARN_LOG( "Manager::_loadFonts : No default font specified. Attempts to use will result in a segfault" );
     }
   }
 

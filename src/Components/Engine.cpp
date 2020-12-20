@@ -21,10 +21,7 @@ namespace Regolith
     _openContext( nullptr ),
     _openContextGroup( nullptr ),
     _frameTimer(),
-    _pause( false ),
-    _renderQueueMutex(),
-    _queueRenderRate( 1 ),
-    _currentDataHandler( nullptr )
+    _pause( false )
   {
   }
 
@@ -168,17 +165,21 @@ namespace Regolith
     }
 
 
-    // This is a loop because contexts can open children as soon as they are started.
-    while ( _openContext != nullptr )
+    // Only permit new contexts to open when there isn't a context group queued for loading
+    if ( _openContextGroup == nullptr )
     {
-      modified = true;
+      // This is a loop because contexts can open children as soon as they are started.
+      while ( _openContext != nullptr )
+      {
+        modified = true;
 
-      DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
-      // Push onto stack
-      _contextStack.push_front( _openContext );
-      _openContext = nullptr;
-      // Trigger the start hooks
-      _contextStack.front()->startContext();
+        DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
+        // Push onto stack
+        _contextStack.push_front( _openContext );
+        _openContext = nullptr;
+        // Trigger the start hooks
+        _contextStack.front()->startContext();
+      }
     }
 
 
@@ -256,30 +257,7 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////V
-  // Useful functions for external communication
-
-  void Engine::renderTextures( DataHandler* handler )
-  {
-    // Block current thread while the an existing DataHandler is rendered
-    UniqueLock lock( _renderQueueMutex, std::defer_lock );
-    while ( true )
-    {
-      lock.lock();
-      if ( _currentDataHandler == nullptr )
-      {
-        break;
-      }
-      lock.unlock();
-
-      std::this_thread::sleep_for( std::chrono::milliseconds( 10 ) );
-    }
-
-    DEBUG_STREAM << "Engine::renderTextures : New data handler @ " << handler;
-    _currentDataHandler = handler;
-
-    lock.unlock();
-  }
-
+  // Event registration and actions
 
   void Engine::registerEvents( InputManager& manager )
   {
@@ -328,6 +306,7 @@ namespace Regolith
     // Wait on the start condition
     threadHandler.start();
 
+
     // Get a reference to the engine
     Engine& engine = Manager::getInstance()->getEngine();
 
@@ -335,14 +314,10 @@ namespace Regolith
     Camera& camera = Manager::getInstance()->requestCamera();
     ContextStack::reverse_iterator& visibleStackStart = engine._visibleStackStart;
     ContextStack::reverse_iterator& visibleStackEnd = engine._visibleStackEnd;
-    DataHandler*& currentDataHandler = engine._currentDataHandler;
-    unsigned int& queueRenderRate = engine._queueRenderRate;
+    ContextManager& contextManager = Manager::getInstance()->getContextManager();
 
     // Control access to the contexts
     std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex, std::defer_lock );
-
-    // Control access to the DataHandler being loaded
-    std::unique_lock<std::mutex> queueLock( engine._renderQueueMutex, std::defer_lock );
 
 
     // Update the thread status
@@ -382,37 +357,7 @@ namespace Regolith
 
         DEBUG_LOG( "engineRenderingThread : ------ FRAME ------" );
 
-
-        if ( queueLock.owns_lock() || queueLock.try_lock() )
-        {
-          if ( currentDataHandler != nullptr )
-          {
-            // Render some of the texture queue for the remaing frame time
-            unsigned int counter = 0;
-            while ( counter < queueRenderRate )
-            {
-              // Check if there are any surfaces to render
-              DEBUG_STREAM << "engineRenderingThread : ------ TexRend @ " << currentDataHandler;
-              RawTexture* rawTexture = currentDataHandler->popRenderTexture();
-              if ( rawTexture != nullptr )
-              {
-                // Perform the rendering
-                camera.renderRawTexture( rawTexture );
-              }
-              else
-              {
-                // Remove the DataHandler pointer
-                currentDataHandler = nullptr;
-                queueLock.unlock();
-                break;
-              }
-            }
-          }
-          else
-          {
-            queueLock.unlock();
-          }
-        }
+        contextManager.renderContextGroup( camera );
 
       }
 
@@ -423,10 +368,6 @@ namespace Regolith
       {
         renderLock.unlock();
       }
-      if ( queueLock.owns_lock() )
-      {
-        queueLock.unlock();
-      }
       threadHandler.throwError( ex );
       return;
     }
@@ -435,10 +376,6 @@ namespace Regolith
       if ( renderLock.owns_lock() )
       {
         renderLock.unlock();
-      }
-      if ( queueLock.owns_lock() )
-      {
-        queueLock.unlock();
       }
       threadHandler.throwError( ex );
       return;

@@ -2,16 +2,14 @@
   "fonts": 
   {
   },
-  "sounds": 
+  "audio": 
+  {
+    "bonk" : { "path" : "test_data/physics_test/sound_bonk.wav" }
+  },
+  "text": 
   {
   },
-  "music": 
-  {
-  },
-  "strings": 
-  {
-  },
-  "textures": 
+  "images": 
   {
     "coloured_boxes": { "path": "test_data/physics_test/coloured_boxes.bmp", "rows": 2, "columns": 2, "width": 40, "height": 40 }
   }
