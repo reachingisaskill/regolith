@@ -26,7 +26,7 @@ namespace Regolith
 
 
       // Returns the vector of children that are active for the current state
-      const PhysicalObjectVector& getChildren() const = 0;
+      virtual const PhysicalObjectVector& getChildren() const = 0;
 
   };
 

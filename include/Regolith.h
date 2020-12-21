@@ -7,5 +7,22 @@
 #include "Regolith/Managers/Manager.h"
 
 
+// Include the headers that user will most likely need. Stops them rummaging through the code base
+
+// Object Interfaces
+#include "Regolith/ObjectInterfaces/DrawableObject.h"
+#include "Regolith/ObjectInterfaces/CollidableObject.h"
+#include "Regolith/ObjectInterfaces/AnimatedObject.h"
+#include "Regolith/ObjectInterfaces/ButtonObject.h"
+#include "Regolith/ObjectInterfaces/CompositeObject.h"
+#include "Regolith/ObjectInterfaces/ControllableObject.h"
+#include "Regolith/ObjectInterfaces/NoisyObject.h"
+
+// Useful handlers
+
+#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Managers/DataHandler.h"
+
+
 #endif // REGOLITH_REGOLITH_H_
 

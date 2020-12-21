@@ -20,6 +20,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
     private:
       Context* _owner;
+      std::string _name;
       Vector _position; // Can be considered as the offset wrt to the camera
       Vector _movementScale; // Movement wrt the camera position
       float _width;
@@ -34,7 +35,11 @@ namespace Regolith
       ~ContextLayer();
 
       // Configure with position, movement scale, width and height
-      void configure( Context*, Vector, Vector, float, float );
+      void configure( Context*, std::string, Vector, Vector, float, float );
+
+
+      // Return the name of the layer
+      std::string getName() const { return _name; }
 
 
       // Map all objects organised by collision team

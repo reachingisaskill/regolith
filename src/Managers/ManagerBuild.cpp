@@ -53,6 +53,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "input_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
+      Utilities::validateJson( json_data, "font_data", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "game_data", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
 
@@ -82,6 +83,10 @@ namespace Regolith
 
       // Load all the game objects files
       this->_loadData( json_data["game_data"] );
+
+
+      // Load all the game objects files
+      this->_loadFonts( json_data["font_data"] );
 
 
       // Load all the contexts
@@ -186,6 +191,14 @@ namespace Regolith
     INFO_LOG( "Manager::_loadData : Loading game data" );
 
     _theData.configure( game_data );
+  }
+
+
+  void Manager::_loadFonts( Json::Value& font_data )
+  {
+    INFO_LOG( "Manager::_loadFonts : Loading font data" );
+
+    _theFonts.configure( font_data );
   }
 
 

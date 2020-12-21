@@ -36,7 +36,17 @@
   {
     "scene_boundary" : 0,
     "environment" : 1,
-    "object" : 2
+    "object" : 2,
+    "hud" : 3
+  },
+
+
+  "font_data" :
+  {
+    "fonts" :
+    [
+      "the_font"
+    ]
   },
 
 

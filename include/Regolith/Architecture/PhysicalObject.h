@@ -64,6 +64,12 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////
       // Property modifiers
+      
+      // Set the width of the the object
+      void setWidth( float w ) { _width = w; }
+
+      // Set the height of the the object
+      void setHeight( float h ) { _height = h; }
 
       // For derived classes to update the mass. Sets both mass and it's inverse
       void setMass( float );

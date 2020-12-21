@@ -73,8 +73,8 @@ namespace Regolith
 
 
       // Accessors
-      int getWidth() const { return _clip.w; }
-      int getHeight() const { return _clip.h; }
+      virtual float getWidth() const override { return _clip.w; } 
+      virtual float getHeight() const override { return _clip.h; }
 
 
       // Update which cell of the sprite sheet should be displayed

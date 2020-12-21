@@ -4,6 +4,7 @@
 #include "Regolith/Test/SimpleObject.h"
 #include "Regolith/Test/ContainerObject.h"
 #include "Regolith/Test/BonkObject.h"
+#include "Regolith/Test/FPSString.h"
 
 #include "logtastic.h"
 
@@ -28,6 +29,8 @@ int main( int, char** )
   man->getObjectFactory().addBuilder< SimpleObject >( "simple_object" );
   man->getObjectFactory().addBuilder< ContainerObject >( "container_object" );
   man->getObjectFactory().addBuilder< BonkObject >( "bonk_object" );
+  man->getObjectFactory().addBuilder< FPSString >( "fps_string" );
+
   man->getContextFactory().addBuilder< EmptyContext >( "empty_context" );
 
   try

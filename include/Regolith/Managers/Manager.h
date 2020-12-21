@@ -12,6 +12,7 @@
 #include "Regolith/Managers/DataManager.h"
 #include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/ContextManager.h"
+#include "Regolith/Managers/FontManager.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Components/Window.h"
 #include "Regolith/Components/Engine.h"
@@ -50,6 +51,7 @@ namespace Regolith
       HardwareManager _theHardware;
       DataManager _theData;
       ContextManager _theContexts;
+      FontManager _theFonts;
       Engine _theEngine;
 
       // Factories to provide object/context creation
@@ -90,6 +92,8 @@ namespace Regolith
       void _loadTypes( Json::Value& );
       // Load all the data manager
       void _loadData( Json::Value& );
+      // Load all the requested fonts
+      void _loadFonts( Json::Value& );
       // Load all the resources
       void _loadGlobalGameObjects( Json::Value& );
       // Load all the contexts
@@ -144,6 +148,9 @@ namespace Regolith
 
       // Return a reference to the data manager
       DataManager& getDataManager() { return _theData; }
+
+      // Return a reference to the data manager
+      FontManager& getFontManager() { return _theFonts; }
 
       // Return a reference to the data manager
       ContextManager& getContextManager() { return _theContexts; }

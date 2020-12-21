@@ -10,7 +10,6 @@
 #include "Regolith/ObjectInterfaces/ControllableObject.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Components/Camera.h"
-#include "Regolith/Contexts/ContextLayer.h"
 
 
 namespace Regolith
@@ -48,14 +47,18 @@ namespace Regolith
 
   ContextLayer& Context::getLayer( std::string name )
   {
-    ContextLayerMap::iterator found = _layers.find( name );
-    if ( found == _layers.end() )
+    ContextLayerList::iterator it = _layers.begin();
+
+    while ( it->getName() != name ) ++it;
+
+    if ( it == _layers.end() )
     {
       Exception ex( "Context::getLayer()", "Requested context layer not found" );
       ex.addDetail( "Name", name );
       throw ex;
     }
-    return found->second;
+
+    return *it;
   }
 
 
@@ -112,10 +115,10 @@ namespace Regolith
     DEBUG_LOG( "Context::update : Context Update" );
 
     // Update all the animated objects
-    ContextLayerMap::iterator layer_end = _layers.end();
-    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    ContextLayerList::iterator layer_end = _layers.end();
+    for ( ContextLayerList::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      for ( LayerGraph::iterator team_it = layer_it->second.layerGraph.begin(); team_it != layer_it->second.layerGraph.end(); ++team_it )
+      for ( LayerGraph::iterator team_it = layer_it->layerGraph.begin(); team_it != layer_it->layerGraph.end(); ++team_it )
       {
         DEBUG_STREAM << "Context::update : Updating " << team_it->second.size() << " objects.";
         for ( PhysicalObjectList::iterator obj_it = team_it->second.begin(); obj_it != team_it->second.end(); /*++obj_it*/ )
@@ -164,11 +167,11 @@ namespace Regolith
     DEBUG_STREAM << "Context::update : Starting Team Collision";
     CollisionHandler::SetIterator team_end = _theCollision.teamCollisionEnd();
 
-    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    for ( ContextLayerList::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
       for ( CollisionHandler::SetIterator rule_it = _theCollision.teamCollisionBegin(); rule_it != team_end; ++rule_it )
       {
-        PhysicalObjectList& team = layer_it->second.layerGraph[ *rule_it ];
+        PhysicalObjectList& team = layer_it->layerGraph[ *rule_it ];
         if ( team.size() < 2 ) continue;
 
         PhysicalObjectList::iterator end = team.end();
@@ -193,13 +196,13 @@ namespace Regolith
     DEBUG_STREAM << "Context::update : Starting Layer Collision";
     CollisionHandler::PairIterator collides_end = _theCollision.collisionEnd();
 
-    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    for ( ContextLayerList::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
       for ( CollisionHandler::PairIterator rule_it = _theCollision.collisionBegin(); rule_it != collides_end; ++rule_it )
       {
-        PhysicalObjectList& team1 = layer_it->second.layerGraph[ rule_it->first ];
+        PhysicalObjectList& team1 = layer_it->layerGraph[ rule_it->first ];
         if ( team1.size() == 0 ) continue;
-        PhysicalObjectList& team2 = layer_it->second.layerGraph[ rule_it->second ];
+        PhysicalObjectList& team2 = layer_it->layerGraph[ rule_it->second ];
         if ( team2.size() == 0 ) continue;
 
         PhysicalObjectList::iterator end1 = team1.end();
@@ -219,13 +222,13 @@ namespace Regolith
     DEBUG_STREAM << "Context::update : Starting Layer Containment";
     collides_end = _theCollision.containerEnd();
 
-    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    for ( ContextLayerList::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
       for ( CollisionHandler::PairIterator rule_it = _theCollision.containerBegin(); rule_it != collides_end; ++rule_it )
       {
-        PhysicalObjectList& team1 = layer_it->second.layerGraph[ rule_it->first ];
+        PhysicalObjectList& team1 = layer_it->layerGraph[ rule_it->first ];
         if ( team1.size() == 0 ) continue;
-        PhysicalObjectList& team2 = layer_it->second.layerGraph[ rule_it->second ];
+        PhysicalObjectList& team2 = layer_it->layerGraph[ rule_it->second ];
         if ( team2.size() == 0 ) continue;
 
         PhysicalObjectList::iterator end1 = team1.end();
@@ -246,16 +249,16 @@ namespace Regolith
   void Context::render( Camera& camera )
   {
     DEBUG_LOG( "Context::render : Context Render" );
-    ContextLayerMap::iterator layer_end = _layers.end();
-    for ( ContextLayerMap::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
+    ContextLayerList::iterator layer_end = _layers.end();
+    for ( ContextLayerList::iterator layer_it = _layers.begin(); layer_it != layer_end; ++layer_it )
     {
-      const Vector& layer_position = layer_it->second.getPosition();
-      const Vector& movement_scale = layer_it->second.getMovementScale();
+      const Vector& layer_position = layer_it->getPosition();
+      const Vector& movement_scale = layer_it->getMovementScale();
 
       // % - Directional dot-product
       Vector camera_position = ( _cameraPosition - layer_position ) % movement_scale;
 
-      for ( LayerGraph::iterator team_it = layer_it->second.layerGraph.begin(); team_it != layer_it->second.layerGraph.end(); ++team_it )
+      for ( LayerGraph::iterator team_it = layer_it->layerGraph.begin(); team_it != layer_it->layerGraph.end(); ++team_it )
       {
         DEBUG_STREAM << "Context::render : Rendering team : " << team_it->first;
         for ( PhysicalObjectList::iterator it = team_it->second.begin(); it != team_it->second.end(); ++it )
@@ -338,12 +341,15 @@ namespace Regolith
       float w = layer_data["width"].asFloat();
       float h = layer_data["height"].asFloat();
 
-      // Creates it if it doesn't already exist
-      _layers[ layer_name ].configure( this, Vector( x, y ), Vector( dx, dy ), w, h );
+      // Create the layer
+      _layers.emplace_back();
+      ContextLayer& the_layer = _layers.back();
+
+      the_layer.configure( this, layer_name, Vector( x, y ), Vector( dx, dy ), w, h );
 
 
       // Tell the collision handler to create the map of expected collision teams in the new layer
-      _theCollision.setupEmptyLayer( _layers[ layer_name ] );
+      _theCollision.setupEmptyLayer( the_layer );
 
 
       // Find and place all the requested elements
@@ -388,10 +394,10 @@ namespace Regolith
         }
 
         // Configure the location of the object within the specified layer
-        configureObject( _layers[ layer_name ], object, object_data[i] );
+        configureObject( the_layer, object, object_data[i] );
 
         // and insert!
-        _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
+        the_layer.layerGraph[ object->getCollisionTeam() ].push_back( object );
       }
 
 
@@ -438,10 +444,10 @@ namespace Regolith
         }
 
         // Configure the location of the object within the specified layer
-        configureObject( _layers[ layer_name ], object, spawn_data[j] );
+        configureObject( the_layer, object, spawn_data[j] );
 
         // and insert!
-        _layers[ layer_name ].layerGraph[ object->getCollisionTeam() ].push_back( object );
+        the_layer.layerGraph[ object->getCollisionTeam() ].push_back( object );
       }
     }
 
