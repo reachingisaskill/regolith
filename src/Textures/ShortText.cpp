@@ -22,6 +22,16 @@ namespace Regolith
   }
 
 
+  ShortText::~ShortText()
+  {
+    if ( _theSurface != nullptr )
+    {
+      SDL_FreeSurface( _theSurface );
+      _theSurface = nullptr;
+    }
+  }
+
+
   void ShortText::setRenderedTexture( SDL_Texture* texture )
   {
     // Destroy if one already exists
@@ -43,6 +53,7 @@ namespace Regolith
     if ( _theTexture != nullptr )
     {
       SDL_DestroyTexture( _theTexture );
+      _theTexture = nullptr;
     }
   }
 

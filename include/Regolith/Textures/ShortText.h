@@ -63,7 +63,7 @@ namespace Regolith
       ShortText();
 
       // Virtual Destructor
-      virtual ~ShortText() {}
+      virtual ~ShortText();
 
       // Return true if a surface needs to be rendered during the rendering cycle
       virtual bool update() const { return _update; }

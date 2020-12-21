@@ -49,11 +49,8 @@ namespace Regolith
   {
     DEBUG_LOG( "Manager::~Manager : Destruction" );
 
-//    INFO_LOG( "Manager::~Manager : Clearing context manager" );
-//    _theContexts.clear();
-
-//    INFO_LOG( "Manager::~Manager : Clearing data manager" );
-//    _theData.clear();
+    INFO_LOG( "Manager::~Manager : Clearing font data" );
+    _theFonts.clear();
 
     INFO_LOG( "Manager::~Manager : Clearing audio manager" );
     _theAudio.clear();
