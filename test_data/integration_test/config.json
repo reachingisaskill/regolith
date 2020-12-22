@@ -46,10 +46,11 @@
 
     "context_groups" : 
     {
-      "test_context_group" : "test_data/integration_test/test_context_group.json"
+      "test_context_group" : "test_data/integration_test/test_context_group.json",
+      "empty_context_group" : "test_data/integration_test/empty_context_group.json"
     },
 
-    "entry_point" : null
+    "entry_point" : "test_context_group"
   }
 
 }

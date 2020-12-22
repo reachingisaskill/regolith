@@ -396,7 +396,7 @@ namespace Regolith
       DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : State = Loading" );
       for ( unsigned int i = 0; i < _renderRate; ++i )
       {
-        if ( ++_renderPosition == _gameObjects.end() )
+        if ( _renderPosition == _gameObjects.end() )
         {
           DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Loading complete" );
           _isRendered = true;
@@ -413,6 +413,8 @@ namespace Regolith
             camera.renderTexture( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture() );
           }
         }
+
+        ++_renderPosition;
       }
     }
     else // Unloading objects
@@ -420,7 +422,7 @@ namespace Regolith
       DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : State = Unloading" );
       for ( unsigned int i = 0; i < _renderRate; ++i )
       {
-        if ( ++_renderPosition == _gameObjects.end() )
+        if ( _renderPosition == _gameObjects.end() )
         {
           DEBUG_LOG( "ContextGroup::engineRenderLoadedObjects : Unloading complete" );
           _isRendered = true;
@@ -435,6 +437,8 @@ namespace Regolith
             camera.renderTexture( dynamic_cast<DrawableObject*>( _renderPosition->second )->getTexture() );
           }
         }
+
+        ++_renderPosition;
       }
     }
 
