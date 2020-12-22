@@ -4,7 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Textures/Texture.h"
-#include "Regolith/Assets/RawFont.h"
+#include "Regolith/Assets/RawText.h"
 #include "Regolith/GamePlay/Pen.h"
 
 
@@ -15,7 +15,10 @@ namespace Regolith
   class ShortText : public Texture
   {
     private:
+      // Pen that applies the font
       Pen _pen;
+      // Raw text proxy.
+      RawText* _rawText;
 
       // Flag to signal the text has changed and must be re-rendered
       bool _update;

@@ -10,7 +10,7 @@ namespace Regolith
 
   ShortText::ShortText() :
     _pen(),
-//    _rawText( nullptr ),
+    _rawText( nullptr ),
     _update( false ),
     _theTexture( nullptr ),
     _theSurface( nullptr ),
@@ -58,11 +58,8 @@ namespace Regolith
   }
 
 
-  void ShortText::configure( Json::Value& json_data, DataHandler& /*handler*/ )
+  void ShortText::configure( Json::Value& json_data, DataHandler& handler )
   {
-//    Utilities::validateJson( json_data, "text_name", Utilities::JSON_TYPE_STRING );
-//    _rawText = handler.getRawText( json_data["text_name"].asString() );
-
     Utilities::validateJson( json_data, "font", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "size", Utilities::JSON_TYPE_INTEGER );
     Utilities::validateJson( json_data, "colour", Utilities::JSON_TYPE_ARRAY );
@@ -78,6 +75,22 @@ namespace Regolith
     font_colour.a = json_data["colour"][3].asInt();
 
     _pen = Manager::getInstance()->getFontManager().requestPen( font_name, font_size, font_colour );
+
+
+    // If a Text asset is requested
+    if ( Utilities::validateJson( json_data, "text_name", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      // Find the proxy
+      _rawText = handler.getRawText( json_data["text_name"].asString() );
+    } 
+    // Is a default string provided
+    else if ( Utilities::validateJson( json_data, "string", Utilities::JSON_TYPE_STRING, false ) )
+    {
+      std::string string = json_data["string"].asString();
+      // Write it
+      this->writeText( string );
+    }
+
   }
 
 
