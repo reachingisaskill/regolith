@@ -254,7 +254,7 @@ namespace Regolith
       TextDetail detail;
 
       std::string name = it.key().asString();
-      detail.filename = data["filename"].asString();
+      detail.filename = data["path"].asString();
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "DataManager::configure : Asset String: " << name;

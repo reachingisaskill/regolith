@@ -19,9 +19,13 @@
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
 
 // Useful handlers
-
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/DataHandler.h"
+
+// In game assets
+#include "Regolith/Textures/Texture.h"
+#include "Regolith/Textures/ShortText.h"
+#include "Regolith/Textures/Spritesheet.h"
 
 
 #endif // REGOLITH_REGOLITH_H_
