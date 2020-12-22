@@ -25,7 +25,7 @@
 // In game assets
 #include "Regolith/Textures/Texture.h"
 #include "Regolith/Textures/ShortText.h"
-#include "Regolith/Textures/SpriteSheet.h"
+#include "Regolith/Textures/Spritesheet.h"
 
 
 #endif // REGOLITH_REGOLITH_H_

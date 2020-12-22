@@ -15,7 +15,6 @@ namespace Regolith
     private:
       ShortText _texture;
 
-      std::string _defaultString;
       std::string _string;
 
       float _timeElapsed;

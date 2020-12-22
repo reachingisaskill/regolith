@@ -8,8 +8,7 @@ namespace Regolith
 
   FPSString::FPSString() :
     _texture(),
-    _defaultString( "Calculating..." ),
-    _string( _defaultString ),
+    _string(),
     _timeElapsed( 0.0 ),
     _numberFrames( 0 )
   {
@@ -27,8 +26,6 @@ namespace Regolith
 
     _texture.configure( json_data, cg.getDataHandler() );
 
-    _texture.writeText( _defaultString );
-
     this->setWidth( _texture.getWidth() );
     this->setHeight( _texture.getHeight() );
 
@@ -40,8 +37,6 @@ namespace Regolith
   {
     _timeElapsed = 0.0;
     _numberFrames = 0;
-
-    _texture.writeText( _defaultString );
 
     this->setWidth( _texture.getWidth() );
     this->setHeight( _texture.getHeight() );

@@ -82,6 +82,8 @@ namespace Regolith
     {
       // Find the proxy
       _rawText = handler.getRawText( json_data["text_name"].asString() );
+      DEBUG_STREAM << "ShortText::configure : Writing string : " << *_rawText->text;
+      this->writeText( *_rawText->text );
     } 
     // Is a default string provided
     else if ( Utilities::validateJson( json_data, "string", Utilities::JSON_TYPE_STRING, false ) )
