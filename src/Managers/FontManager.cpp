@@ -80,9 +80,8 @@ namespace Regolith
     FontFileMap::iterator file_found = _fontFiles.find( font_name );
     if ( file_found == _fontFiles.end() )
     {
-      Exception ex( "FontManager::requestPen()", "Could not find requested font. Is it local to this context group?" );
-      ex.addDetail( "Font Name", font_name );
-      throw ex;
+      RawFont raw_font = Manager::getInstance()->getDataManager().buildRawFont( font_name );
+      file_found = _fontFiles.insert( std::make_pair( font_name, raw_font ) ).first;
     }
 
     FontMap::iterator font_found = _fonts.find( font_name );
