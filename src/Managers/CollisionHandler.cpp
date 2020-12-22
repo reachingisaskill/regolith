@@ -91,7 +91,7 @@ namespace Regolith
 
   void CollisionHandler::configure( Json::Value& json_data )
   {
-    INFO_LOG( "Configuring Collision Handler" );
+    INFO_LOG( "CollisionHandler::configure : Configuring Collision Handler" );
 
     Utilities::validateJson( json_data, "team_collision", Utilities::JSON_TYPE_ARRAY );
     Utilities::validateJsonArray( json_data["collision_rules"], 0, Utilities::JSON_TYPE_STRING );
