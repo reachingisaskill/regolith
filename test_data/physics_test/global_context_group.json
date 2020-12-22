@@ -6,6 +6,22 @@
 
   "game_objects" : 
   {
+    "fps_string" :
+    {
+      "type" : "fps_string",
+      "has_moveable" : false,
+      "has_physics" : false,
+      "bounding_box" :
+      {
+        "width" : 0.0,
+        "height" : 0.0,
+        "collision_team" : "hud"
+      },
+      "font" : "the_font",
+      "size" : 16,
+      "colour" : [ 255, 255, 255, 255]
+    },
+
     "red_box" : 
     {
       "type" : "bonk_object",

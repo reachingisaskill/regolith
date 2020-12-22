@@ -49,6 +49,8 @@ namespace Regolith
       }
     }
 
+    // Nothing to do - font memory is handled by the FontHandler.
+    /*
     RawFontMap::iterator font_end = _rawFonts.end();
     for ( RawFontMap::iterator it = _rawFonts.begin(); it != font_end; ++it )
     {
@@ -56,11 +58,13 @@ namespace Regolith
 
       if ( it->second.ttf_font != nullptr )
       {
+
         DEBUG_STREAM << "Unloaded font: " << name << " @ " << it->second.ttf_font;
         TTF_CloseFont( it->second.ttf_font );
         it->second.ttf_font = nullptr;
       }
     }
+    */
 
     RawTextMap::iterator texts_end = _rawTexts.end();
     for ( RawTextMap::iterator it = _rawTexts.begin(); it != texts_end; ++it )

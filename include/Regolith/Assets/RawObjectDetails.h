@@ -46,8 +46,6 @@ namespace Regolith
   struct FontDetail
   {
     std::string filename;
-    unsigned int size;
-    SDL_Color colour;
   };
 
 

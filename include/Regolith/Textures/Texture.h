@@ -78,6 +78,10 @@ namespace Regolith
 
       // Return true if a surface needs to be rendered during the rendering cycle
       virtual bool update() const = 0;
+
+      // Return the dimensions of the clip
+      virtual float getWidth() const = 0;
+      virtual float getHeight() const = 0;
   };
 }
 

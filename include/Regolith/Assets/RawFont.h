@@ -12,13 +12,9 @@ namespace Regolith
   // Proxy object for the SDL TTF_Font pointer
   struct RawFont
   {
-    TTF_Font* ttf_font;
-    SDL_Color colour;
+    std::string filename;
   };
 
-
-  // Function that creates the raw font proxy
-  RawFont loadRawFont( FontDetail );
 
 }
 

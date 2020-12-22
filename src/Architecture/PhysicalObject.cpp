@@ -179,7 +179,7 @@ namespace Regolith
 
     // Update complete - reset forces
     _forces.zero();
-    DEBUG_STREAM << "PhysicalObject::step : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
+//    DEBUG_STREAM << "PhysicalObject::step : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
   }
 
 }

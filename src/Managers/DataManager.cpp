@@ -144,7 +144,7 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_FONT :
-        return loadRawFont( asset_found->second.fontDetail );
+        return RawFont( { asset_found->second.fontDetail.filename } );
         break;
 
       default :
@@ -215,11 +215,6 @@ namespace Regolith
 
       std::string name = it.key().asString();
       detail.filename = data["path"].asString();
-      detail.size = data["size"].asInt();
-      detail.colour.r = data["colour"][0].asInt();
-      detail.colour.g = data["colour"][1].asInt();
-      detail.colour.b = data["colour"][2].asInt();
-      detail.colour.a = data["colour"][3].asInt();
 
       _assets.insert( std::make_pair( name, Asset( detail ) ) );
       DEBUG_STREAM << "DataManager::configure : Asset Font: " << name;

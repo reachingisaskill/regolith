@@ -47,7 +47,6 @@ namespace Regolith
   {
     // Create the texture
     raw_texture->sdl_texture = SDL_CreateTextureFromSurface( _theRenderer, raw_texture->surface );
-    DEBUG_STREAM << "Camera::renderRawTexture : SDL_Texture @ " << raw_texture->sdl_texture;
 
     // Check that it worked
     if ( raw_texture->sdl_texture == nullptr )
@@ -72,7 +71,6 @@ namespace Regolith
 
       // Create the texture
       SDL_Texture* temp_texture = SDL_CreateTextureFromSurface( _theRenderer, temp_surface );
-      DEBUG_STREAM << "Camera::renderTexture : SDL_Texture @ " << temp_texture;
 
       // Check that it worked
       if ( temp_texture == nullptr )

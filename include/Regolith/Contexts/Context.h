@@ -40,7 +40,7 @@ namespace Regolith
     Context( const Context& ) = delete;
     Context& operator=( const Context& ) = delete;
 
-    typedef std::map< std::string, ContextLayer > ContextLayerMap;
+    typedef std::list< ContextLayer > ContextLayerList;
 
 //////////////////////////////////////////////////////////////////////////////// 
     private:
@@ -67,7 +67,7 @@ namespace Regolith
       bool _pauseable;
 
       // Named vector of all the layers owned by the current context
-      ContextLayerMap _layers;
+      ContextLayerList _layers;
 
 
 //////////////////////////////////////////////////////////////////////////////// 

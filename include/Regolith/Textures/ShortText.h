@@ -5,6 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Textures/Texture.h"
 #include "Regolith/Assets/RawFont.h"
+#include "Regolith/GamePlay/Pen.h"
 
 
 namespace Regolith
@@ -14,8 +15,7 @@ namespace Regolith
   class ShortText : public Texture
   {
     private:
-      RawFont* _rawFont;
-//      RawText* _rawText;
+      Pen _pen;
 
       // Flag to signal the text has changed and must be re-rendered
       bool _update;
@@ -63,13 +63,17 @@ namespace Regolith
       ShortText();
 
       // Virtual Destructor
-      virtual ~ShortText() {}
+      virtual ~ShortText();
 
       // Return true if a surface needs to be rendered during the rendering cycle
       virtual bool update() const { return _update; }
 
       // Force the derived classes to configure themselves
       virtual void configure( Json::Value&, DataHandler& ) override;
+
+      // Return the dimensions of the clip
+      virtual float getWidth() const override { return _clip.w; }
+      virtual float getHeight() const override { return _clip.h; }
 
       // Use the font and default settings to write the text onto a surface and set the update flag
       void writeText( std::string& );

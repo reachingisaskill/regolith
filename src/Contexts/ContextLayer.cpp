@@ -10,6 +10,7 @@ namespace Regolith
 
   ContextLayer::ContextLayer() :
     _owner( nullptr ),
+    _name( "" ),
     _position( 0.0 ),
     _movementScale( 0.0 ),
     _width( 0.0 ),
@@ -25,9 +26,10 @@ namespace Regolith
   }
 
 
-  void ContextLayer::configure( Context* owner, Vector pos, Vector move_scale, float width, float height )
+  void ContextLayer::configure( Context* owner, std::string name, Vector pos, Vector move_scale, float width, float height )
   {
     _owner = owner;
+    _name = name;
     _position = pos;
     _movementScale = move_scale;
     _width = width;
