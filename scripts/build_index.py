@@ -281,7 +281,7 @@ if __name__ == "__main__" :
 
 
   for text_name in json_data["text"].keys() :
-    text_data = json_data["text"][string_name]
+    text_data = json_data["text"][text_name]
 
     if "path" not in text_data :
       warnings.append( "WARNING: Text \"" + text_name + "\" has entry in index, but no \"path\" value and no associated file. Removed!" )
