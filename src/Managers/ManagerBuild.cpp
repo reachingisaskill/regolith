@@ -53,7 +53,7 @@ namespace Regolith
       Utilities::validateJson( json_data, "input_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "font_data", Utilities::JSON_TYPE_OBJECT );
+//      Utilities::validateJson( json_data, "font_data", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "game_data", Utilities::JSON_TYPE_OBJECT );
       Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
 
@@ -85,8 +85,9 @@ namespace Regolith
       this->_loadData( json_data["game_data"] );
 
 
-      // Load all the game objects files
-      this->_loadFonts( json_data["font_data"] );
+      // Currently Font Manager requires no global configuration
+//      // Load all the game objects files
+//      this->_loadFonts( json_data["font_data"] );
 
 
       // Load all the contexts

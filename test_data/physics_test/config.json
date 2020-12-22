@@ -41,15 +41,6 @@
   },
 
 
-  "font_data" :
-  {
-    "fonts" :
-    [
-      "the_font"
-    ]
-  },
-
-
   "collision_types" :
   {
     "basic" : 0
