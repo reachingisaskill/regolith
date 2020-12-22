@@ -46,7 +46,7 @@ namespace Regolith
 
       // Queue of upcoming music tracks
       static MusicQueue _musicQueue;
-      static Music* _currentTrack;
+      static QueueElement _currentTrack;
 
     public :
       // Contstructor
@@ -76,11 +76,21 @@ namespace Regolith
 
 
       // Music interface
+
+      // Add a track to the back of the queue
       void queueTrack( Music*, unsigned int );
+
+      // Clear the current queue and play this track instead
       void playTrack( Music*, unsigned int );
+
+      // Clear the queue
       void clearQueue();
+
+      // Stop the the audio if its playing
       void stopTrack();
-      void stopNextTrack();
+
+      // Stop the current track and move on to the next one in the queue
+      void nextTrack();
   };
 
 }

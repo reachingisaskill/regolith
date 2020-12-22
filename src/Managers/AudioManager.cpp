@@ -16,7 +16,7 @@ namespace Regolith
 
   // Static member variables
   AudioManager::MusicQueue AudioManager::_musicQueue;
-  Music* AudioManager::_currentTrack = nullptr;
+  AudioManager::QueueElement AudioManager::_currentTrack = std::make_pair( nullptr, 0 );
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,7 +27,7 @@ namespace Regolith
     _format( 0 ),
     _channels( 0 ),
     _chunkSize( 0 ),
-    _fadeTime( 200 ),
+    _fadeTime( 0 ),
     _playbackChannelCounter( 0 ),
     _volumeMusic( 1.0 ), // Defaults to full volume
     _volumeChunk( 1.0 ) // Defaults to full volume
@@ -44,8 +44,13 @@ namespace Regolith
   {
     INFO_LOG( "AudioManager::clear : Clearing the audio manager" );
 
-    Mix_HookMusicFinished( nullptr );
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      Mix_HaltMusic();
+    }
     _musicQueue.clear();
+
+    Mix_HookMusicFinished( nullptr );
 
     Mix_CloseAudio();
   }
@@ -95,29 +100,36 @@ namespace Regolith
 
   void AudioManager::queueTrack( Music* music, unsigned int N )
   {
-    if ( Mix_PlayingMusic() == 1 )
-    {
-      _musicQueue.push( std::make_pair( music, N ) );
-    }
-    else
-    {
-      Mix_PlayMusic( music->getMIXMusic(), (signed int)N );
-    }
+    _musicQueue.push( std::make_pair( music, N ) );
 
-    Mix_HookMusicFinished( playNextTrack );
+    // If nothing's playing
+    if ( Mix_PlayingMusic() == 0 )
+    {
+      // Trigger the next track algorithm manually
+      playNextTrack();
+    }
   }
 
 
   void AudioManager::playTrack( Music* music, unsigned int N )
   {
-    // Stop if playing
+    // Clear the queue, this takes precedent
+    _musicQueue.clear();
+
+    // Push this music to the queue
+    _musicQueue.push( std::make_pair( music, N ) );
+
+    // If music is playing
     if ( Mix_PlayingMusic() == 1 )
     {
-      Mix_HaltMusic();
+      // Tell it to stop
+      Mix_FadeOutMusic( _fadeTime );
     }
-
-    // Jump the queue and play this
-    Mix_PlayMusic( music->getMIXMusic(), (signed int)N );
+    else // Not playing
+    {
+      // Trigger the next track algorithm manually
+      playNextTrack();
+    }
   }
 
 
@@ -129,13 +141,22 @@ namespace Regolith
 
   void AudioManager::stopTrack()
   {
-    Mix_FadeOutMusic( _fadeTime );
-    Mix_HookMusicFinished( nullptr );
+    _musicQueue.clear();
+
+    if ( Mix_PlayingMusic() == 1 )
+    {
+//      Mix_FadeOutMusic( _fadeTime );
+      Mix_HaltMusic();
+    }
   }
 
 
-  void AudioManager::stopNextTrack()
+  void AudioManager::nextTrack()
   {
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      Mix_HaltMusic();
+    }
   }
 
 
@@ -157,7 +178,7 @@ namespace Regolith
     _channels = json_data["audio_channels"].asInt();
     _chunkSize = json_data["chunk_size"].asInt();
 
-    if ( Utilities::validateJson( json_data, "chunk_size", Utilities::JSON_TYPE_INTEGER, false ) )
+    if ( Utilities::validateJson( json_data, "fade_time", Utilities::JSON_TYPE_INTEGER, false ) )
       _fadeTime = json_data["fade_time"].asInt();
 
     if ( Mix_OpenAudio( _frequency, _format, _channels, _chunkSize ) == -1 )
@@ -175,6 +196,9 @@ namespace Regolith
 
     this->setVolumeMusic( json_data["music_volume"].asFloat() );
     this->setVolumeEffects( json_data["effect_volume"].asFloat() );
+
+    // Set this once and leave it
+    Mix_HookMusicFinished( playNextTrack );
   }
 
 
@@ -185,20 +209,52 @@ namespace Regolith
   {
     // Static reference to the music queue
     static AudioManager::MusicQueue& queue = AudioManager::_musicQueue;
-    static Music*& current = AudioManager::_currentTrack;
-    AudioManager::QueueElement element;
+    static AudioManager::QueueElement current = AudioManager::_currentTrack;
 
-    if ( queue.empty() )
+    // Nothing currently playing
+    if ( current.first == nullptr )
     {
-      Mix_PlayMusic( current->getMIXMusic(), 0 );
-    }
-    else
-    {
-      queue.pop( element );
-      current = element.first;
-      Mix_PlayMusic( current->getMIXMusic(), (signed int)element.second );
+      // If queue has elements
+      if ( ! queue.empty() )
+      {
+        // Update current music
+        queue.pop( current );
+      }
     }
 
+    // If there is something to do
+    if ( current.first != nullptr )
+    {
+      // If repeats to come
+      if ( current.second > 1 )
+      {
+        --current.second;
+        Mix_PlayMusic( current.first->getMIXMusic(), 1 );
+
+        // If this is the last play through
+        if ( current.second == 1 )
+        {
+          if ( ! queue.empty() ) // Elements in queue
+          {
+            // Update current track 
+            queue.pop( current );
+          }
+          else
+          {
+            // Nothing to play
+            current.first = nullptr;
+            current.second = 0;
+          }
+        }
+      }
+      else // Playing on repeat
+      {
+        Mix_PlayMusic( current.first->getMIXMusic(), 1 );
+      }
+    }
+
+
+    Mix_HookMusicFinished( playNextTrack );
   }
 
 

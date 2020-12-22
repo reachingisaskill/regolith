@@ -304,7 +304,7 @@ namespace Regolith
 
 
     // Default music
-    if ( Utilities::validateJson( json_data, "music", Utilities::JSON_TYPE_STRING, false ) )
+    if ( Utilities::validateJson( json_data, "music", Utilities::JSON_TYPE_OBJECT, false ) )
     {
       _defaultTrack.configure( json_data["music"], handler.getDataHandler() );
       DEBUG_LOG( "Context::configure : Configured music" );
