@@ -1,0 +1,18 @@
+{
+  "fonts": 
+  {
+    "the_font" : { "path" : "test_data/music_test/crap_font.ttf" }
+  },
+  "audio": 
+  {
+    "track1": { "path": "test_data/music_test/track1.wav" }
+  },
+  "text": 
+  {
+    
+  },
+  "images": 
+  {
+    
+  }
+}

@@ -147,15 +147,15 @@ namespace Regolith
   }
 
 
-  void AudioHandler::playSong( Music* music, unsigned int N )
+  void AudioHandler::playSong( Music* music )
   {
-    _manager.playTrack( music, N );
+    _manager.playTrack( music );
   }
 
 
-  void AudioHandler::queueSong( Music* music, unsigned int N )
+  void AudioHandler::queueSong( Music* music )
   {
-    _manager.queueTrack( music, N );
+    _manager.queueTrack( music );
   }
 
 

@@ -1,0 +1,83 @@
+{
+  "type" : "jukebox",
+
+  "input_mapping" : "empty",
+
+  "status_string" : "status",
+
+  "music" :
+  {
+    "playlist" :
+    [
+      {
+        "music_track" : "track1",
+        "play_count" : 0
+      },
+      {
+        "music_track" : "track2",
+        "play_count" : 0
+      },
+      {
+        "music_track" : "track3",
+        "play_count" : 0
+      },
+      {
+        "music_track" : "track1",
+        "play_count" : 3
+      },
+      {
+        "music_track" : "track2",
+        "play_count" : 0
+      },
+      {
+        "music_track" : "track3",
+        "play_count" : 0
+      },
+      {
+        "music_track" : "track1",
+        "play_count" : 0
+      },
+      {
+        "music_track" : "track2",
+        "play_count" : 0
+      },
+      {
+        "music_track" : "track3",
+        "play_count" : 0
+      }
+    ]
+  },
+
+  "collision_handling" :
+  {
+    "team_collision" : [],
+    "collision_rules" : [],
+    "container_rules" : []
+  },
+
+  "layers" :
+  {
+    "the_layer" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024.0,
+      "height" : 768.0,
+      "movement_scale" : [ 1.0, 1.0 ],
+      "objects" :
+      [
+        {
+          "name" : "status",
+          "position" : [ 20, -30 ],
+          "velocity" : [ 0.0, 0.0],
+          "alignment" : [ "left", "bottom" ]
+        }
+      ],
+      "spawns" :
+      [
+      ]
+    }
+  }
+
+  }
+}
+

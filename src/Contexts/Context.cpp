@@ -28,7 +28,6 @@ namespace Regolith
     _theInput(),
     _theFocus(),
     _theCollision(),
-    _defaultTrack(),
     _closed( false ),
     _paused( false ),
     _pauseable( false ),
@@ -67,20 +66,12 @@ namespace Regolith
 
   void Context::startContext()
   {
-    if ( ! _defaultTrack.isSilent() )
-    {
-      _owner->getAudioHandler().playSong( &_defaultTrack );
-    }
     this->onStart();
   }
 
 
   void Context::stopContext()
   {
-    if ( ! _defaultTrack.isSilent() )
-    {
-      _owner->getAudioHandler().stopSong();
-    }
     this->onStop();
   }
 
@@ -282,7 +273,6 @@ namespace Regolith
     _owner = &handler;
 
     Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "camera", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "collision_handling", Utilities::JSON_TYPE_OBJECT );
 
     // Configure the collision rules
@@ -300,14 +290,6 @@ namespace Regolith
     {
       _pauseable = json_data["pauseable"].asBool();
       DEBUG_STREAM << "Context::configure : Context " << ( _pauseable ? "is" : "is not" ) << " pauseable";
-    }
-
-
-    // Default music
-    if ( Utilities::validateJson( json_data, "music", Utilities::JSON_TYPE_OBJECT, false ) )
-    {
-      _defaultTrack.configure( json_data["music"], handler.getDataHandler() );
-      DEBUG_LOG( "Context::configure : Configured music" );
     }
 
 

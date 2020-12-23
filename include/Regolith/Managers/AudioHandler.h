@@ -53,10 +53,10 @@ namespace Regolith
 
 
       // Play a track immediately
-      void playSong( Music*, unsigned int N = 0 );
+      void playSong( Music* );
 
       // Queue a track to play next
-      void queueSong( Music*, unsigned int N = 0 );
+      void queueSong( Music* );
 
       // Stop the music playing
       void stopSong();

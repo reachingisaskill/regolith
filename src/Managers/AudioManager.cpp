@@ -17,6 +17,8 @@ namespace Regolith
   // Static member variables
   AudioManager::MusicQueue AudioManager::_musicQueue;
   AudioManager::QueueElement AudioManager::_currentTrack = std::make_pair( nullptr, 0 );
+  AudioManager::MusicOperation AudioManager::_operation = AudioManager::MusicOperation::PLAY;
+  std::mutex AudioManager::_operationMutex;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -98,36 +100,37 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Music interface
 
-  void AudioManager::queueTrack( Music* music, unsigned int N )
+  void AudioManager::queueTrack( Music* music )
   {
-    _musicQueue.push( std::make_pair( music, N ) );
-
-    // If nothing's playing
-    if ( Mix_PlayingMusic() == 0 )
-    {
-      // Trigger the next track algorithm manually
-      playNextTrack();
-    }
+    DEBUG_LOG( "AudioManager::queueTrack : Here" );
+    _musicQueue.push( std::make_pair( music, music->getPlayCount() ) );
   }
 
 
-  void AudioManager::playTrack( Music* music, unsigned int N )
+  void AudioManager::playTrack( Music* music )
   {
+    DEBUG_LOG( "AudioManager::playTrack : Here" );
     // Clear the queue, this takes precedent
     _musicQueue.clear();
 
     // Push this music to the queue
-    _musicQueue.push( std::make_pair( music, N ) );
+    _musicQueue.push( std::make_pair( music, music->getPlayCount() ) );
 
     // If music is playing
     if ( Mix_PlayingMusic() == 1 )
     {
       // Tell it to stop
-      Mix_FadeOutMusic( _fadeTime );
+      UniqueLock lock( _operationMutex );
+      _operation = MusicOperation::NEXT;
+      lock.unlock();
+      Mix_HaltMusic();
     }
     else // Not playing
     {
       // Trigger the next track algorithm manually
+      UniqueLock lock( _operationMutex );
+      _operation = MusicOperation::NEXT;
+      lock.unlock();
       playNextTrack();
     }
   }
@@ -135,28 +138,91 @@ namespace Regolith
 
   void AudioManager::clearQueue()
   {
+    DEBUG_LOG( "AudioManager::clearQueue : Here" );
     _musicQueue.clear();
   }
 
 
   void AudioManager::stopTrack()
   {
-    _musicQueue.clear();
+    DEBUG_LOG( "AudioManager::stopTrack : Here" );
+
+    UniqueLock lock( _operationMutex );
+    _operation = MusicOperation::STOP;
+    lock.unlock();
 
     if ( Mix_PlayingMusic() == 1 )
     {
-//      Mix_FadeOutMusic( _fadeTime );
       Mix_HaltMusic();
+    }
+  }
+
+
+  void AudioManager::pauseTrack()
+  {
+    DEBUG_LOG( "AudioManager::pauseTrack : Here" );
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      Mix_PauseMusic();
+    }
+  }
+
+
+  void AudioManager::resumeTrack()
+  {
+    DEBUG_LOG( "AudioManager::resumeTrack : Here" );
+
+    if ( Mix_PlayingMusic() && Mix_PausedMusic() )
+    {
+      Mix_ResumeMusic();
+    }
+    else
+    {
+      UniqueLock lock( _operationMutex );
+      _operation = MusicOperation::NEXT;
+      lock.unlock();
+
+      playNextTrack();
+    }
+  }
+
+
+  void AudioManager::stopRepeatTrack()
+  {
+    DEBUG_LOG( "AudioManager::stopRepeatTrack : Here" );
+    if ( Mix_PlayingMusic() == 1 )
+    {
+      UniqueLock lock( _operationMutex );
+      _operation = MusicOperation::STOP;
+      lock.unlock();
     }
   }
 
 
   void AudioManager::nextTrack()
   {
+    DEBUG_LOG( "AudioManager::nextTrack : Here" );
+    UniqueLock lock( _operationMutex );
+    _operation = MusicOperation::NEXT;
+    lock.unlock();
+
     if ( Mix_PlayingMusic() == 1 )
     {
       Mix_HaltMusic();
     }
+    else
+    {
+      playNextTrack();
+    }
+  }
+
+
+  void AudioManager::nextRepeatTrack()
+  {
+    DEBUG_LOG( "AudioManager::nextRepeatTrack : Here" );
+    UniqueLock lock( _operationMutex );
+    _operation = MusicOperation::NEXT;
+    lock.unlock();
   }
 
 
@@ -209,25 +275,57 @@ namespace Regolith
   {
     // Static reference to the music queue
     static AudioManager::MusicQueue& queue = AudioManager::_musicQueue;
-    static AudioManager::QueueElement current = AudioManager::_currentTrack;
+    static AudioManager::QueueElement& current = AudioManager::_currentTrack;
+    static std::mutex& operation_mutex = AudioManager::_operationMutex;
+    static AudioManager::MusicOperation& operation = AudioManager::_operation;
 
-    // Nothing currently playing
-    if ( current.first == nullptr )
+    // Copy the next operation
+    UniqueLock lock( operation_mutex );
+
+    switch ( operation )
     {
-      // If queue has elements
-      if ( ! queue.empty() )
-      {
-        // Update current music
-        queue.pop( current );
-      }
+      // Keep playing the current track
+      case AudioManager::MusicOperation::PLAY :
+        DEBUG_LOG( "playNextTrack : Operation PLAY" );
+        break;
+
+      //Try to play the next track in the queue
+      case AudioManager::MusicOperation::NEXT :
+        DEBUG_LOG( "playNextTrack : Operation NEXT" );
+        // If queue has elements
+        if ( ! queue.empty() )
+        {
+          // Update current music
+          queue.pop( current );
+        }
+        else // Nothing to do
+        {
+          current.first = nullptr;
+          current.second = 0;
+        }
+        break;
+
+      // Stop the current playback
+      case AudioManager::MusicOperation::STOP :
+        DEBUG_LOG( "playNextTrack : Operation STOP" );
+        current.first = nullptr;
+        current.second = 0;
+        break;
     }
 
-    // If there is something to do
+    // The default state
+    operation = AudioManager::MusicOperation::PLAY;
+    lock.unlock();
+
+
+    // If the current track is valid
     if ( current.first != nullptr )
     {
+      DEBUG_LOG( "playNextTrack : Current Valid" );
       // If repeats to come
       if ( current.second > 1 )
       {
+        DEBUG_LOG( "playNextTrack : Counting down" );
         --current.second;
         Mix_PlayMusic( current.first->getMIXMusic(), 1 );
 
@@ -249,12 +347,13 @@ namespace Regolith
       }
       else // Playing on repeat
       {
+        DEBUG_LOG( "playNextTrack : Repeating" );
         Mix_PlayMusic( current.first->getMIXMusic(), 1 );
       }
     }
 
 
-    Mix_HookMusicFinished( playNextTrack );
+//    Mix_HookMusicFinished( playNextTrack );
   }
 
 

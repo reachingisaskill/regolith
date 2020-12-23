@@ -15,7 +15,7 @@ namespace Regolith
 
     private:
       RawMusic* _rawMusic;
-      bool _silence;
+      unsigned int _playCount;
 
     public:
       // Trivial construction
@@ -28,12 +28,11 @@ namespace Regolith
       void configure( Json::Value&, DataHandler& );
 
 
-      // Flag to indicate no music
-      virtual bool isSilent() const { return _silence; }
-
-
       // Return the sound to play
       virtual Mix_Music* getMIXMusic() { return _rawMusic->music; }
+
+      // Return the number of times to play the music (zero = infinite loop)
+      virtual unsigned int getPlayCount() { return _playCount; }
 
   };
 

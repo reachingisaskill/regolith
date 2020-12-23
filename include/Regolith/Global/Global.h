@@ -30,8 +30,8 @@
 // Logtastic configuration
 #ifdef LOGTASTIC_FUNCTION_NAME
 #undef LOGTASTIC_FUNCTION_NAME
-#define LOGTASTIC_FUNCTION_NAME ""
 #endif
+#define LOGTASTIC_FUNCTION_NAME ""
 #include "logtastic.h"
 
 
