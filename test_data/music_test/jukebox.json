@@ -7,7 +7,7 @@
 
   "music" :
   {
-    "playlist" :
+    "tracks" :
     [
       {
         "music_track" : "track1",

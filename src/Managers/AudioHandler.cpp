@@ -1,6 +1,8 @@
 
 #include "Regolith/Managers/AudioHandler.h"
+#include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/ThreadManager.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 
 namespace Regolith
@@ -19,8 +21,33 @@ namespace Regolith
   }
 
 
-  void AudioHandler::configure()
+  void AudioHandler::configure( Json::Value& json_data, DataHandler& handler )
   {
+    // Configure any playlists
+    if ( Utilities::validateJson( json_data, "playlists", Utilities::JSON_TYPE_OBJECT, false ) )
+    {
+      Json::Value& playlist_data = json_data["playlists"];
+      for ( Json::Value::iterator it = playlist_data.begin(); it != playlist_data.end(); ++it )
+      {
+        std::string name = it.key().asString();
+
+        if ( _playlists.find( name ) != _playlists.end() )
+        {
+          WARN_STREAM << "AudioHandler::configure : Cannot add playlist found with existing name : " << name;
+          continue;
+        }
+
+        _playlists[ name ] = Playlist();
+        _playlists[ name ].configure( (*it), handler );
+      }
+    }
+
+  }
+
+
+  void AudioHandler::initialise()
+  {
+    // Allocate audio channels for objects
     int size = _channelPauses.size();
     int result = Mix_AllocateChannels( size );
 
@@ -43,6 +70,20 @@ namespace Regolith
     _channelPauses.push_back( 0 );
     sound.registerChannel( _channelPauses.size()-1 );
     DEBUG_STREAM << "AudioHandler::requestChannel : Channel provided : " << _channelPauses.size()-1;
+  }
+
+
+  Playlist& AudioHandler::getPlaylist( std::string name )
+  {
+    PlaylistMap::iterator found = _playlists.find( name );
+    if ( found == _playlists.end() )
+    {
+      Exception ex( "AudioHandler::getPlaylist()", "Could not find requested playlist" );
+      ex.addDetail( "Name", name );
+      throw ex;
+    }
+
+    return found->second;
   }
 
 

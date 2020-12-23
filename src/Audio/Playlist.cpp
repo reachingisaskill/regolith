@@ -22,16 +22,15 @@ namespace Regolith
 
   void Playlist::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Utilities::validateJson( json_data, "playlist", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["playlist"], 0, Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( json_data, "tracks", Utilities::JSON_TYPE_ARRAY );
+    Utilities::validateJsonArray( json_data["tracks"], 0, Utilities::JSON_TYPE_OBJECT );
 
-    Json::Value& playlist_data = json_data["playlist"];
-
-    for ( Json::ArrayIndex i = 0; i < playlist_data.size(); ++i )
+    Json::Value& tracks = json_data["tracks"];
+    for ( Json::ArrayIndex i = 0; i < tracks.size(); ++i )
     {
       DEBUG_LOG( "Playlist::configure : Adding track to playlist" );
       Music new_music;
-      new_music.configure( playlist_data[i], handler );
+      new_music.configure( tracks[i], handler );
       _musics.push_back( new_music );
     }
   }

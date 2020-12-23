@@ -174,7 +174,7 @@ namespace Regolith
     }
 
     // Set the total number of elements to load (used for progress bars)
-    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 1;
+    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 2;
   }
 
 
@@ -197,6 +197,11 @@ namespace Regolith
     // Load Json Data
     Json::Value json_data;
     Utilities::loadJsonData( json_data, _fileName );
+
+
+    DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
+    _theAudio.configure( json_data, _theData );
+    loadElement();
 
 
     DEBUG_LOG( "ContextGroup::load : Loading the objects" );
@@ -300,8 +305,8 @@ namespace Regolith
     }
 
 
-    DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
-    _theAudio.configure();
+    DEBUG_LOG( "ContextGroup::load : Initialising audio handler" );
+    _theAudio.initialise();
     loadElement();
 
 
