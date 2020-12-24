@@ -1,0 +1,51 @@
+{
+  "window" :
+  {
+    "screen_width" : 1024,
+    "screen_height" : 768,
+    "default_colour" : [ 150, 150, 500, 255 ],
+    "title" : "Regolith Integration Test",
+    "v-sync" : true
+  },
+
+  "input_device" :
+  {
+    "require" : [],
+    "keymappings" : []
+  },
+
+  "audio_device" :
+  {
+    "sample_frequency" : 22050,
+    "audio_channels" : 2,
+    "chunk_size" : 1024,
+    "music_volume" : 0.1,
+    "effect_volume" : 0.5
+  },
+
+
+  "collision_teams" :
+  {
+    "null" : 0
+  },
+
+
+  "game_data" :
+  {
+    "resource_index_file" : "test_data/music_test/index.json"
+  },
+
+  "contexts" :
+  {
+    "global" : "test_data/music_test/global_context_group.json",
+
+    "context_groups" : 
+    {
+      "music_group" : "test_data/music_test/music_context_group.json"
+    },
+
+    "entry_point" :"music_group"
+  }
+
+}
+

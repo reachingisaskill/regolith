@@ -1,0 +1,27 @@
+{
+  "load_screen" : null,
+
+  "entry_point" : null,
+
+  "music" :
+  {
+  },
+
+
+  "game_objects" : 
+  {
+  },
+
+
+  "spawn_buffers" :
+  {
+  },
+
+
+  "contexts" :
+  {
+    "load_screen" : "test_data/music_test/load_screen.json"
+  }
+
+}
+

@@ -50,9 +50,6 @@ namespace Regolith
       FocusHandler _theFocus;
       CollisionHandler _theCollision;
 
-      // Pointer to an optional track to play on load
-      Music _defaultTrack;
-
       // Details for using the camera
       Vector _cameraPosition;
       Vector _cameraOffset;

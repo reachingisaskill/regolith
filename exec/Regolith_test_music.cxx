@@ -1,13 +1,14 @@
 
 #include "Regolith.h"
-#include "Regolith/Test/TestContext.h"
-#include "Regolith/Test/TestObject.h"
+#include "Regolith/Test/JukeboxContext.h"
+#include "Regolith/Test/StatusString.h"
+#include "Regolith/Test/LoadScreen.h"
 
 #include "testass.h"
 #include "logtastic.h"
 
 
-const char* test_config = "test_data/integration_test/config.json";
+const char* test_config = "test_data/music_test/config.json";
 
 
 using namespace Regolith;
@@ -16,10 +17,10 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_integration.log" );
+  logtastic::addLogFile( "tests_music.log" );
   logtastic::setPrintToScreenLimit( logtastic::error );
 
-  testass::control::init( "Regolith", "Integration Test" );
+  testass::control::init( "Regolith", "Music Interface" );
   testass::control::get()->setVerbosity( testass::control::verb_short );
 
   bool success = false;
@@ -27,11 +28,13 @@ int main( int, char** )
   // Create the manager first so that it can register signal handlers
   Manager* man = Manager::createInstance();
 
-  logtastic::start( "Regolith - Integration Test", REGOLITH_VERSION_NUMBER );
+  logtastic::start( "Regolith - Music Functionality Test", REGOLITH_VERSION_NUMBER );
 
   INFO_LOG( "Main : Creating test builders" );
-  man->getObjectFactory().addBuilder< TestObject >( "null" );
-  man->getContextFactory().addBuilder< TestContext >( "null" );
+  man->getObjectFactory().addBuilder< StatusString >( "status_string" );
+
+  man->getContextFactory().addBuilder< JukeboxContext >( "jukebox" );
+  man->getContextFactory().addBuilder< LoadScreen >( "load_screen" );
 
   try
   {
@@ -42,11 +45,6 @@ int main( int, char** )
     man->run();
 
     success = true;
-  }
-  catch ( Exception& ex )
-  {
-    FAILURE_LOG( ex.what() );
-    std::cerr << ex.elucidate();
   }
   catch ( std::exception& ex )
   {
@@ -66,4 +64,5 @@ int main( int, char** )
   logtastic::stop();
   return 0;
 }
+
 

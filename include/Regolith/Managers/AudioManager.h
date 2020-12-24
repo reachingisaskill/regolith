@@ -30,6 +30,8 @@ namespace Regolith
     typedef std::pair< Music*, unsigned int > QueueElement;
     typedef MutexedBuffer< QueueElement > MusicQueue;
 
+    enum class MusicOperation { PLAY, STOP, NEXT };
+
     // Make the play-next function a friend
     friend void playNextTrack();
 
@@ -46,7 +48,9 @@ namespace Regolith
 
       // Queue of upcoming music tracks
       static MusicQueue _musicQueue;
-      static Music* _currentTrack;
+      static QueueElement _currentTrack;
+      static MusicOperation _operation;
+      static std::mutex _operationMutex;
 
     public :
       // Contstructor
@@ -76,11 +80,33 @@ namespace Regolith
 
 
       // Music interface
-      void queueTrack( Music*, unsigned int );
-      void playTrack( Music*, unsigned int );
+
+      // Add a track to the back of the queue
+      void queueTrack( Music* );
+
+      // Clear the current queue and play this track instead
+      void playTrack( Music* );
+
+      // Clear the queue
       void clearQueue();
+
+      // Stop the the audio if its playing
       void stopTrack();
-      void stopNextTrack();
+
+      // Pause the the audio if its playing
+      void pauseTrack();
+
+      // Resume the paused audio
+      void resumeTrack();
+
+      // Stop the infinitely repeating track
+      void stopRepeatTrack();
+
+      // Stop the current track and move on to the next one in the queue
+      void nextTrack();
+
+      // Skip to the next track at the end of the current repeat
+      void nextRepeatTrack();
   };
 
 }

@@ -3,6 +3,11 @@
 
   "input_mapping" : "empty",
 
+  "music" :
+  {
+    "music_track" : "music"
+  },
+
   "collision_handling" :
   {
     "team_collision" : [ "object" ],

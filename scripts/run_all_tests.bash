@@ -8,3 +8,6 @@
 ./bin/Regolith_test_game_data
 ./bin/Regolith_test_factory_template
 ./bin/Regolith_test_integration
+./bin/Regolith_test_music
+./bin/Regolith_test_physics_simulation
+

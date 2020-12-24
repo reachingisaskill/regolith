@@ -7,10 +7,12 @@
 #include "Regolith/Utilities/ProxyMap.h"
 #include "Regolith/Audio/Sound.h"
 #include "Regolith/Audio/Music.h"
+#include "Regolith/Audio/Playlist.h"
 
 
 namespace Regolith
 {
+  class DataHandler;
 
   /*
    * Handler for specific context
@@ -22,6 +24,8 @@ namespace Regolith
   class AudioHandler
   {
     typedef std::vector<int> ChannelPauses;
+    typedef std::map<std::string, Playlist> PlaylistMap;
+
     private:
       // Reference to the manager
       AudioManager& _manager;
@@ -31,6 +35,9 @@ namespace Regolith
 
       // Vector to rememeber the individual channel statuses
       ChannelPauses _channelPauses;
+
+      // Map of all playlists
+      PlaylistMap _playlists;
 
     protected:
       void _pauseAll();
@@ -45,18 +52,26 @@ namespace Regolith
       ~AudioHandler();
 
 
-      // Tell the handler it has control of this effect
-      void configure();
+      // Load all playlists, etc
+      void configure( Json::Value&, DataHandler& );
+
+      // Allocate audio channels for the objects
+      void initialise();
+
 
       // Allocates a channel for the provided sound
       void requestChannel( Sound& );
 
 
+      // Returns a reference to a playlist
+      Playlist* getPlaylist( std::string );
+
+
       // Play a track immediately
-      void playSong( Music*, unsigned int N = 0 );
+      void playSong( Music* );
 
       // Queue a track to play next
-      void queueSong( Music*, unsigned int N = 0 );
+      void queueSong( Music* );
 
       // Stop the music playing
       void stopSong();

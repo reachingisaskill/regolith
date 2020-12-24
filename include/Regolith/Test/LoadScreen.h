@@ -1,9 +1,8 @@
 
-#ifndef REGOLITH_TEST_EMPTY_CONTEXT_H_
-#define REGOLITH_TEST_EMPTY_CONTEXT_H_
+#ifndef REGOLITH_TEST_LOAD_SCREEN_H_
+#define REGOLITH_TEST_LOAD_SCREEN_H_
 
 #include "Regolith/Contexts/Context.h"
-#include "Regolith/GamePlay/Timers.h"
 
 
 namespace Regolith
@@ -12,21 +11,21 @@ namespace Regolith
   /*
    * Provides a context that does nothing for the integration test to use
    */
-  class EmptyContext : public Context
+  class LoadScreen : public Context
   {
     private:
-      CountdownTimer _death;
 
     protected:
-      // Configure the death timer.
+
+      // Trigger the loading process
       virtual void onStart() override;
 
     public:
       // Trivial Constructor
-      EmptyContext();
+      LoadScreen();
 
       // Trivial Destructor
-      ~EmptyContext();
+      ~LoadScreen();
 
 
       // Title Scenes take ownership of the display.
@@ -34,7 +33,7 @@ namespace Regolith
 
 
       // Updates the camera position
-      virtual Vector updateCamera( float ) const override { return Vector(); }
+      virtual Vector updateCamera( float ) const override { return zeroVector; }
 
 
       // Called for each object that is flagged to have global physics
@@ -47,4 +46,4 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_TEST_EMPTY_CONTEXT_H_
+#endif // REGOLITH_TEST_LOAD_SCREEN_H_

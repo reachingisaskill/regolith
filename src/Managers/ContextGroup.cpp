@@ -85,6 +85,7 @@ namespace Regolith
     Utilities::validateJson( json_data, "game_objects", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "spawn_buffers", Utilities::JSON_TYPE_OBJECT );
     Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
+    Utilities::validateJson( json_data, "music", Utilities::JSON_TYPE_OBJECT );
 
 
     // Global groups don't have a load-screen
@@ -174,7 +175,7 @@ namespace Regolith
     }
 
     // Set the total number of elements to load (used for progress bars)
-    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 1;
+    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 2;
   }
 
 
@@ -197,6 +198,11 @@ namespace Regolith
     // Load Json Data
     Json::Value json_data;
     Utilities::loadJsonData( json_data, _fileName );
+
+
+    DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
+    _theAudio.configure( json_data["music"], _theData );
+    loadElement();
 
 
     DEBUG_LOG( "ContextGroup::load : Loading the objects" );
@@ -300,8 +306,8 @@ namespace Regolith
     }
 
 
-    DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
-    _theAudio.configure();
+    DEBUG_LOG( "ContextGroup::load : Initialising audio handler" );
+    _theAudio.initialise();
     loadElement();
 
 
@@ -350,7 +356,6 @@ namespace Regolith
 
     // Wait for the engine to clear all the textures
     Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
-
 
     INFO_LOG( "ContextGroup::unload : Unloading Data" );
     _theData.clear();

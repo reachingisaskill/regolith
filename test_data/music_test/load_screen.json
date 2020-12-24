@@ -1,0 +1,19 @@
+{
+  "type" : "load_screen",
+
+  "input_mapping" : "empty",
+
+  "status_string" : "status",
+
+  "collision_handling" :
+  {
+    "team_collision" : [],
+    "collision_rules" : [],
+    "container_rules" : []
+  },
+
+  "layers" :
+  {
+  }
+}
+
