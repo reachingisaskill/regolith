@@ -2,7 +2,9 @@
 #include "Regolith.h"
 #include "Regolith/Test/JukeboxContext.h"
 #include "Regolith/Test/StatusString.h"
+#include "Regolith/Test/LoadScreen.h"
 
+#include "testass.h"
 #include "logtastic.h"
 
 
@@ -16,6 +18,12 @@ int main( int, char** )
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_music.log" );
+  logtastic::setPrintToScreenLimit( logtastic::error );
+
+  testass::control::init( "Regolith", "Music Interface" );
+  testass::control::get()->setVerbosity( testass::control::verb_short );
+
+  bool success = false;
 
   // Create the manager first so that it can register signal handlers
   Manager* man = Manager::createInstance();
@@ -26,6 +34,7 @@ int main( int, char** )
   man->getObjectFactory().addBuilder< StatusString >( "status_string" );
 
   man->getContextFactory().addBuilder< JukeboxContext >( "jukebox" );
+  man->getContextFactory().addBuilder< LoadScreen >( "load_screen" );
 
   try
   {
@@ -35,6 +44,7 @@ int main( int, char** )
     INFO_LOG( "Main : Starting Regolith" );
     man->run();
 
+    success = true;
   }
   catch ( std::exception& ex )
   {
@@ -42,6 +52,14 @@ int main( int, char** )
     FAILURE_STREAM << ex.what();
   }
 
+  ASSERT_TRUE( success );
+
+  if ( ! testass::control::summarize() )
+  {
+    testass::control::printReport( std::cout );
+  }
+
+  testass::control::kill();
   Manager::killInstance();
   logtastic::stop();
   return 0;

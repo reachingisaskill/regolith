@@ -8,7 +8,7 @@ namespace Regolith
 {
 
   JukeboxContext::JukeboxContext() :
-    _playlist(),
+    _playlist( nullptr ),
     _status( nullptr ),
     _skipTimer1(),
     _skipTimer2(),
@@ -32,8 +32,8 @@ namespace Regolith
     // Configure the base class
     Context::configure( json_data, cg );
 
-    Utilities::validateJson( json_data, "music", Utilities::JSON_TYPE_OBJECT );
-    _playlist.configure( json_data["music"], cg.getDataHandler() );
+    Utilities::validateJson( json_data, "playlist", Utilities::JSON_TYPE_STRING );
+    _playlist = cg.getAudioHandler().getPlaylist( json_data["playlist"].asString() );
 
 
     Utilities::validateJson( json_data, "status_string", Utilities::JSON_TYPE_STRING );
@@ -56,13 +56,14 @@ namespace Regolith
     _stopRepeatTimer.configure(   30000, 1 );
     _closeTimer.configure(  45000, 1 );
 
+
     _status->setStatus( "Loading" );
   }
 
 
    void JukeboxContext::onStart()
    {
-     _playlist.play();
+     _playlist->play();
 
      this->setClosed( false );
    }

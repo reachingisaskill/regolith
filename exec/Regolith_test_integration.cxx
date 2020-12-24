@@ -3,6 +3,7 @@
 #include "Regolith/Test/TestContext.h"
 #include "Regolith/Test/TestObject.h"
 
+#include "testass.h"
 #include "logtastic.h"
 
 
@@ -16,6 +17,12 @@ int main( int, char** )
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_integration.log" );
+  logtastic::setPrintToScreenLimit( logtastic::error );
+
+  testass::control::init( "Regolith", "Integration Test" );
+  testass::control::get()->setVerbosity( testass::control::verb_short );
+
+  bool success = false;
 
   // Create the manager first so that it can register signal handlers
   Manager* man = Manager::createInstance();
@@ -34,6 +41,7 @@ int main( int, char** )
     INFO_LOG( "Main : Starting Regolith" );
     man->run();
 
+    success = true;
   }
   catch ( Exception& ex )
   {
@@ -46,6 +54,14 @@ int main( int, char** )
     FAILURE_STREAM << ex.what();
   }
 
+  ASSERT_TRUE( success );
+
+  if ( ! testass::control::summarize() )
+  {
+    testass::control::printReport( std::cout );
+  }
+
+  testass::control::kill();
   Manager::killInstance();
   logtastic::stop();
   return 0;

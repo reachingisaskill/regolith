@@ -73,7 +73,7 @@ namespace Regolith
   }
 
 
-  Playlist& AudioHandler::getPlaylist( std::string name )
+  Playlist* AudioHandler::getPlaylist( std::string name )
   {
     PlaylistMap::iterator found = _playlists.find( name );
     if ( found == _playlists.end() )
@@ -83,7 +83,7 @@ namespace Regolith
       throw ex;
     }
 
-    return found->second;
+    return &found->second;
   }
 
 

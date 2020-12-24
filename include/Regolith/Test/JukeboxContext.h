@@ -15,7 +15,7 @@ namespace Regolith
   class JukeboxContext : public Context
   {
     private:
-      Playlist _playlist;
+      Playlist* _playlist;
 
       StatusString* _status;
 

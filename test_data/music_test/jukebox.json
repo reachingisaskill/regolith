@@ -5,48 +5,7 @@
 
   "status_string" : "status",
 
-  "music" :
-  {
-    "tracks" :
-    [
-      {
-        "music_track" : "track1",
-        "play_count" : 0
-      },
-      {
-        "music_track" : "track2",
-        "play_count" : 0
-      },
-      {
-        "music_track" : "track3",
-        "play_count" : 0
-      },
-      {
-        "music_track" : "track1",
-        "play_count" : 3
-      },
-      {
-        "music_track" : "track2",
-        "play_count" : 0
-      },
-      {
-        "music_track" : "track3",
-        "play_count" : 0
-      },
-      {
-        "music_track" : "track1",
-        "play_count" : 0
-      },
-      {
-        "music_track" : "track2",
-        "play_count" : 0
-      },
-      {
-        "music_track" : "track3",
-        "play_count" : 0
-      }
-    ]
-  },
+  "playlist" : "default",
 
   "collision_handling" :
   {

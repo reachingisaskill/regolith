@@ -3,6 +3,9 @@
 
   "entry_point" : "context_1",
 
+  "music" :
+  {
+  },
 
   "game_objects" :
   {

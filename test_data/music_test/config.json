@@ -10,7 +10,7 @@
 
   "input_device" :
   {
-    "require" : [ ],
+    "require" : [],
     "keymappings" : []
   },
 
@@ -41,9 +41,10 @@
 
     "context_groups" : 
     {
+      "music_group" : "test_data/music_test/music_context_group.json"
     },
 
-    "entry_point" : null
+    "entry_point" :"music_group"
   }
 
 }

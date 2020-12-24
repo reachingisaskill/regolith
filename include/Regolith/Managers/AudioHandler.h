@@ -64,7 +64,7 @@ namespace Regolith
 
 
       // Returns a reference to a playlist
-      Playlist& getPlaylist( std::string );
+      Playlist* getPlaylist( std::string );
 
 
       // Play a track immediately
