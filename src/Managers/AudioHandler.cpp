@@ -24,7 +24,7 @@ namespace Regolith
   void AudioHandler::configure( Json::Value& json_data, DataHandler& handler )
   {
     // Configure any playlists
-    if ( Utilities::validateJson( json_data, "playlists", Utilities::JSON_TYPE_OBJECT, false ) )
+    if ( validateJson( json_data, "playlists", JsonType::OBJECT, false ) )
     {
       Json::Value& playlist_data = json_data["playlists"];
       for ( Json::Value::iterator it = playlist_data.begin(); it != playlist_data.end(); ++it )

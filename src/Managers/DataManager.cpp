@@ -193,18 +193,18 @@ namespace Regolith
     INFO_LOG( "DataManager::configure : Configuring the Data Manager." );
 
     // Load the json data
-    Utilities::validateJson( json_data, "resource_index_file", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "resource_index_file", JsonType::STRING );
 
     // Find the texture index file
     _indexFile = json_data["resource_index_file"].asString();
 
     // Load and validate the index file
     Json::Value index_data;
-    Utilities::loadJsonData( index_data, _indexFile );
-    Utilities::validateJson( index_data, "fonts", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( index_data, "images", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( index_data, "text", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( index_data, "audio", Utilities::JSON_TYPE_OBJECT );
+    loadJsonData( index_data, _indexFile );
+    validateJson( index_data, "fonts", JsonType::OBJECT );
+    validateJson( index_data, "images", JsonType::OBJECT );
+    validateJson( index_data, "text", JsonType::OBJECT );
+    validateJson( index_data, "audio", JsonType::OBJECT );
 
 
     // Load details of all the font assets

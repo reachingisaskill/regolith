@@ -16,7 +16,7 @@ namespace Regolith
 
   void Sound::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Utilities::validateJson( json_data, "sound_name", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "sound_name", JsonType::STRING );
     std::string sound_name = json_data["sound_name"].asString();
 
     _rawSound = handler.getRawSound( sound_name );

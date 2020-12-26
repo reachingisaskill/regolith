@@ -91,8 +91,8 @@ namespace Regolith
     Manager::getInstance()->getThreadManager().registerCondition( &_renderContextGroup.variable );
 
     // Validate expected json values
-    Utilities::validateJson( json_data, "global", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_OBJECT );
+    validateJson( json_data, "global", JsonType::STRING );
+    validateJson( json_data, "context_groups", JsonType::OBJECT );
 
     // Load the global contexts and data first
     INFO_LOG( "ContextManager::configure : Configuring Global Context Group" );
@@ -105,7 +105,7 @@ namespace Regolith
     Json::Value& groups = json_data["context_groups"];
     for ( Json::Value::iterator it = groups.begin(); it != groups.end(); ++it )
     {
-      Utilities::validateJson( *it, Utilities::JSON_TYPE_STRING );
+      validateJson( *it, JsonType::STRING );
 
       std::string name = it.key().asString();
       std::string file = it->asString();
@@ -118,7 +118,7 @@ namespace Regolith
 
 
     INFO_LOG( "ContextManager::configure : Locating entry point" );
-    if ( Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING, false ) )
+    if ( validateJson( json_data, "entry_point", JsonType::STRING, false ) )
     {
       // Find the starting context group and load it
       std::string entry_point = json_data["entry_point"].asString();

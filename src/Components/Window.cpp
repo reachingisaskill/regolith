@@ -51,10 +51,10 @@ namespace Regolith
 
   void Window::configure( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "screen_width", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "screen_height", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "title", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "v-sync", Utilities::JSON_TYPE_BOOLEAN );
+    validateJson( json_data, "screen_width", JsonType::INTEGER );
+    validateJson( json_data, "screen_height", JsonType::INTEGER );
+    validateJson( json_data, "title", JsonType::STRING );
+    validateJson( json_data, "v-sync", JsonType::BOOLEAN );
 
     // Load the window configuration
     _width = json_data["screen_width"].asInt();

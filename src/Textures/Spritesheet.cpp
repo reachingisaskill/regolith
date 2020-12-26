@@ -67,7 +67,7 @@ namespace Regolith
 
   void Spritesheet::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Utilities::validateJson( json_data, "texture_name", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "texture_name", JsonType::STRING );
 
     std::string texture_name = json_data["texture_name"].asString();
     _rawTexture = handler.getRawTexture( texture_name );
@@ -78,31 +78,31 @@ namespace Regolith
     _clip.w = _rawTexture->width / _rawTexture->columns;
     _clip.h = _rawTexture->height / _rawTexture->rows;
 
-    if ( Utilities::validateJson( json_data, "center", Utilities::JSON_TYPE_ARRAY, false ) )
+    if ( validateJson( json_data, "center", JsonType::ARRAY, false ) )
     {
-      Utilities::validateJsonArray( json_data["center"], 2, Utilities::JSON_TYPE_INTEGER );
+      validateJsonArray( json_data["center"], 2, JsonType::INTEGER );
 
       _centerOffset.x = json_data["center"].asInt();
       _centerOffset.y = json_data["center"].asInt();
     }
 
-    if ( Utilities::validateJson( json_data, "rotation", Utilities::JSON_TYPE_FLOAT, false ) )
+    if ( validateJson( json_data, "rotation", JsonType::FLOAT, false ) )
     {
       _rotation = json_data["rotation"].asFloat();
     }
 
-    if ( Utilities::validateJson( json_data, "flip_horizontal", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    if ( validateJson( json_data, "flip_horizontal", JsonType::BOOLEAN, false ) )
     {
       if ( json_data["flip_horizontal"].asBool() )
         _flipFlag = (SDL_RendererFlip) (_flipFlag ^ SDL_FLIP_HORIZONTAL);
     }
-    if ( Utilities::validateJson( json_data, "flip_vertical", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    if ( validateJson( json_data, "flip_vertical", JsonType::BOOLEAN, false ) )
     {
       if ( json_data["flip_vertical"].asBool() )
         _flipFlag = (SDL_RendererFlip) (_flipFlag ^ SDL_FLIP_VERTICAL);
     }
 
-    if ( Utilities::validateJson( json_data, "start_number", Utilities::JSON_TYPE_INTEGER, false ) )
+    if ( validateJson( json_data, "start_number", JsonType::INTEGER, false ) )
     {
       setFrameNumber( json_data["start_number"].asInt() );
     }

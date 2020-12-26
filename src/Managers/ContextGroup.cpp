@@ -79,19 +79,19 @@ namespace Regolith
 
     // Load Json Data
     Json::Value json_data;
-    Utilities::loadJsonData( json_data, _fileName );
+    loadJsonData( json_data, _fileName );
 
     // Validate top-level objects
-    Utilities::validateJson( json_data, "game_objects", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "spawn_buffers", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "music", Utilities::JSON_TYPE_OBJECT );
+    validateJson( json_data, "game_objects", JsonType::OBJECT );
+    validateJson( json_data, "spawn_buffers", JsonType::OBJECT );
+    validateJson( json_data, "contexts", JsonType::OBJECT );
+    validateJson( json_data, "music", JsonType::OBJECT );
 
 
     // Global groups don't have a load-screen
     if ( ! _isGlobalGroup )
     {
-      Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING );
+      validateJson( json_data, "load_screen", JsonType::STRING );
       _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContextPointer( json_data["load_screen"].asString() );
     }
 
@@ -162,7 +162,7 @@ namespace Regolith
 
 
     // Set the default entry point. Optional if this is the global context group
-    if ( Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING, (!_isGlobalGroup) ) )
+    if ( validateJson( json_data, "entry_point", JsonType::STRING, (!_isGlobalGroup) ) )
     {
       ContextMap::iterator found = _contexts.find( json_data["entry_point"].asString() );
 
@@ -197,7 +197,7 @@ namespace Regolith
     DEBUG_LOG( "ContextGroup::load : Loading" );
     // Load Json Data
     Json::Value json_data;
-    Utilities::loadJsonData( json_data, _fileName );
+    loadJsonData( json_data, _fileName );
 
 
     DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
@@ -219,7 +219,7 @@ namespace Regolith
       // If object details are in a separate file, load them
       if ( o_it->isString() )
       {
-        Utilities::loadJsonData( object_data, o_it->asString() );
+        loadJsonData( object_data, o_it->asString() );
       }
       else
       {
@@ -284,7 +284,7 @@ namespace Regolith
       // Load the context data from another file if a string is provided
       if ( c_it->isString() )
       {
-        Utilities::loadJsonData( context_data, c_it->asString() );
+        loadJsonData( context_data, c_it->asString() );
       }
       else
       {

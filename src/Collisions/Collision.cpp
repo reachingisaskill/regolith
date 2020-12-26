@@ -21,11 +21,11 @@ namespace Regolith
 
   void Collision::configure( Json::Value& json_data )
   {
-    if ( Utilities::validateJson( json_data, "hit_boxes", Utilities::JSON_TYPE_ARRAY, false ) )
+    if ( validateJson( json_data, "hit_boxes", JsonType::ARRAY, false ) )
     {
       DEBUG_LOG( "Collision::configure : Loading hitboxes from array of frames" );
 
-      Utilities::validateJsonArray( json_data["hit_boxes"], 1, Utilities::JSON_TYPE_ARRAY );
+      validateJsonArray( json_data["hit_boxes"], 1, JsonType::ARRAY );
 
       // Reserve space for the number of frames in the animation
       _collisionFrames.reserve( (size_t)json_data["hit_boxes"].size() );
@@ -38,7 +38,7 @@ namespace Regolith
         _collisionFrames.push_back( HitBoxVector() );
 
         Json::Value& frame_hitboxes = json_data["hit_boxes"][frame_num];
-        Utilities::validateJsonArray( frame_hitboxes, 0, Utilities::JSON_TYPE_OBJECT );
+        validateJsonArray( frame_hitboxes, 0, JsonType::OBJECT );
 
         // Allocate space for the number of hit boxes in this frame
         _collisionFrames[frame_num].reserve( (size_t)frame_hitboxes.size() );
@@ -49,11 +49,11 @@ namespace Regolith
 
           Json::Value& hitbox_data = frame_hitboxes[hitbox_num];
 
-          Utilities::validateJson( hitbox_data, "position", Utilities::JSON_TYPE_ARRAY );
-          Utilities::validateJsonArray( hitbox_data["position"], 2, Utilities::JSON_TYPE_INTEGER );
-          Utilities::validateJson( hitbox_data, "width", Utilities::JSON_TYPE_INTEGER );
-          Utilities::validateJson( hitbox_data, "height", Utilities::JSON_TYPE_INTEGER );
-          Utilities::validateJson( hitbox_data, "type", Utilities::JSON_TYPE_STRING );
+          validateJson( hitbox_data, "position", JsonType::ARRAY );
+          validateJsonArray( hitbox_data["position"], 2, JsonType::INTEGER );
+          validateJson( hitbox_data, "width", JsonType::INTEGER );
+          validateJson( hitbox_data, "height", JsonType::INTEGER );
+          validateJson( hitbox_data, "type", JsonType::STRING );
 
           HitBox hb;
           hb.position.x() = hitbox_data["position"][0].asInt();
@@ -73,7 +73,7 @@ namespace Regolith
 
       DEBUG_LOG( "Collision::configure : Loaded all hitboxes" );
     }
-    else if ( Utilities::validateJson( json_data, "hit_box_file", Utilities::JSON_TYPE_STRING, false ) )
+    else if ( validateJson( json_data, "hit_box_file", JsonType::STRING, false ) )
     {
       Exception ex( "Collision::configure()", "Hit box files not yet supported" );
       throw ex;

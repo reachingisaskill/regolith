@@ -93,14 +93,14 @@ namespace Regolith
   {
     INFO_LOG( "CollisionHandler::configure : Configuring Collision Handler" );
 
-    Utilities::validateJson( json_data, "team_collision", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["collision_rules"], 0, Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "team_collision", JsonType::ARRAY );
+    validateJsonArray( json_data["collision_rules"], 0, JsonType::STRING );
 
-    Utilities::validateJson( json_data, "collision_rules", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["collision_rules"], 0, Utilities::JSON_TYPE_ARRAY );
+    validateJson( json_data, "collision_rules", JsonType::ARRAY );
+    validateJsonArray( json_data["collision_rules"], 0, JsonType::ARRAY );
 
-    Utilities::validateJson( json_data, "container_rules", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["container_rules"], 0, Utilities::JSON_TYPE_ARRAY );
+    validateJson( json_data, "container_rules", JsonType::ARRAY );
+    validateJsonArray( json_data["container_rules"], 0, JsonType::ARRAY );
 
 
     // Load the team collision rules
@@ -118,7 +118,7 @@ namespace Regolith
     Json::Value& collision_rules = json_data["collision_rules"];
     for ( Json::ArrayIndex i = 0; i < collision_rules.size(); ++i )
     {
-      Utilities::validateJsonArray( collision_rules[i], 2, Utilities::JSON_TYPE_STRING );
+      validateJsonArray( collision_rules[i], 2, JsonType::STRING );
 
       std::string team_name1 = collision_rules[i][0].asString();
       std::string team_name2 = collision_rules[i][1].asString();
@@ -134,7 +134,7 @@ namespace Regolith
     Json::Value& container_rules = json_data["container_rules"];
     for ( Json::ArrayIndex i = 0; i < container_rules.size(); ++i )
     {
-      Utilities::validateJsonArray( container_rules[i], 2, Utilities::JSON_TYPE_STRING );
+      validateJsonArray( container_rules[i], 2, JsonType::STRING );
 
       std::string team_name1 = container_rules[i][0].asString();
       std::string team_name2 = container_rules[i][1].asString();

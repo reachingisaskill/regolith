@@ -394,8 +394,8 @@ namespace Regolith
 
   void InputManager::configure( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "require", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "keymappings", Utilities::JSON_TYPE_ARRAY );
+    validateJson( json_data, "require", JsonType::ARRAY );
+    validateJson( json_data, "keymappings", JsonType::ARRAY );
 
 
     // Configure the input objects
@@ -416,8 +416,8 @@ namespace Regolith
     Json::ArrayIndex keymaps_size = keymaps.size();
     for ( Json::ArrayIndex i = 0; i != keymaps_size; ++i )
     {
-      Utilities::validateJson( keymaps[i], "name", Utilities::JSON_TYPE_STRING );
-      Utilities::validateJson( keymaps[i], "keymapping", Utilities::JSON_TYPE_ARRAY );
+      validateJson( keymaps[i], "name", JsonType::STRING );
+      validateJson( keymaps[i], "keymapping", JsonType::ARRAY );
 
       std::string mapping_name = keymaps[i]["name"].asString();
       Json::Value keymapping = keymaps[i]["keymapping"];
@@ -431,8 +431,8 @@ namespace Regolith
       Json::ArrayIndex keymapping_size = keymapping.size();
       for ( Json::ArrayIndex j = 0; j != keymapping_size; ++j )
       {
-        Utilities::validateJson( keymapping[j], "type", Utilities::JSON_TYPE_STRING );
-        Utilities::validateJson( keymapping[j], "mapping", Utilities::JSON_TYPE_OBJECT );
+        validateJson( keymapping[j], "type", JsonType::STRING );
+        validateJson( keymapping[j], "mapping", JsonType::OBJECT );
 
         std::string type = keymapping[j]["type"].asString();
         Json::Value keys = keymapping[j]["mapping"];
@@ -472,7 +472,7 @@ namespace Regolith
           INFO_LOG( "InputManager::configure : Loading Mouse Movement." );
 
           // Only require the movement input - it must be present if a mouse movement mapping is provided
-          Utilities::validateJson( keys, "movement", Utilities::JSON_TYPE_STRING );
+          validateJson( keys, "movement", JsonType::STRING );
 
           unsigned code = 0; // Dummy variable - only one thing to map with mouse movement!
           InputAction action = getActionID( keys["movement"].asString() );

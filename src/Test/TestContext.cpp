@@ -30,19 +30,19 @@ namespace Regolith
     Context::configure( json_data, group );
 
     // Perform some tests specfied in the "tests" sectino
-    Utilities::validateJson( json_data, "tests", Utilities::JSON_TYPE_OBJECT );
+    validateJson( json_data, "tests", JsonType::OBJECT );
     Json::Value& tests = json_data["tests"];
 
     // Load the name of this context
-    Utilities::validateJson( tests, "name", Utilities::JSON_TYPE_STRING );
+    validateJson( tests, "name", JsonType::STRING );
     _name = tests["name"].asString();
 
     // Test loading another context group
-    if ( Utilities::validateJson( tests, "context_group_loading", Utilities::JSON_TYPE_OBJECT, false ) )
+    if ( validateJson( tests, "context_group_loading", JsonType::OBJECT, false ) )
     {
       Json::Value& cg_loading_data = tests["context_group_loading"];
-      Utilities::validateJson( cg_loading_data, "wait_for", Utilities::JSON_TYPE_INTEGER );
-      Utilities::validateJson( cg_loading_data, "context_group", Utilities::JSON_TYPE_STRING );
+      validateJson( cg_loading_data, "wait_for", JsonType::INTEGER );
+      validateJson( cg_loading_data, "context_group", JsonType::STRING );
 
       INFO_STREAM << "TestContext::configure : Testing the context group loading functionality, Context Group : " << cg_loading_data["context_group"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " seconds.";
 
@@ -51,7 +51,7 @@ namespace Regolith
     }
 
     // If this iteration is acting as a load_screen
-    if ( Utilities::validateJson( tests, "load_screen", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    if ( validateJson( tests, "load_screen", JsonType::BOOLEAN, false ) )
     {
       _isLoadScreen = tests["load_screen"].asBool();
     }

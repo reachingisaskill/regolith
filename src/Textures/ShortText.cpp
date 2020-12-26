@@ -60,10 +60,10 @@ namespace Regolith
 
   void ShortText::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Utilities::validateJson( json_data, "font", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "size", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "colour", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["colour"], 4, Utilities::JSON_TYPE_INTEGER );
+    validateJson( json_data, "font", JsonType::STRING );
+    validateJson( json_data, "size", JsonType::INTEGER );
+    validateJson( json_data, "colour", JsonType::ARRAY );
+    validateJsonArray( json_data["colour"], 4, JsonType::INTEGER );
 
     std::string font_name = json_data["font"].asString();
     unsigned int font_size = json_data["size"].asInt();
@@ -78,7 +78,7 @@ namespace Regolith
 
 
     // If a Text asset is requested
-    if ( Utilities::validateJson( json_data, "text_name", Utilities::JSON_TYPE_STRING, false ) )
+    if ( validateJson( json_data, "text_name", JsonType::STRING, false ) )
     {
       // Find the proxy
       _rawText = handler.getRawText( json_data["text_name"].asString() );
@@ -86,7 +86,7 @@ namespace Regolith
       this->writeText( *_rawText->text );
     } 
     // Is a default string provided
-    else if ( Utilities::validateJson( json_data, "string", Utilities::JSON_TYPE_STRING, false ) )
+    else if ( validateJson( json_data, "string", JsonType::STRING, false ) )
     {
       std::string string = json_data["string"].asString();
       // Write it

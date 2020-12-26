@@ -22,8 +22,8 @@ namespace Regolith
 
   void Playlist::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Utilities::validateJson( json_data, "tracks", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["tracks"], 0, Utilities::JSON_TYPE_OBJECT );
+    validateJson( json_data, "tracks", JsonType::ARRAY );
+    validateJsonArray( json_data["tracks"], 0, JsonType::OBJECT );
 
     Json::Value& tracks = json_data["tracks"];
     for ( Json::ArrayIndex i = 0; i < tracks.size(); ++i )

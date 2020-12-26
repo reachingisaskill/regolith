@@ -16,8 +16,8 @@ namespace Regolith
 
   void Music::configure( Json::Value& json_data, DataHandler& handler )
   {
-    Utilities::validateJson( json_data, "music_track", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "play_count", Utilities::JSON_TYPE_INTEGER );
+    validateJson( json_data, "music_track", JsonType::STRING );
+    validateJson( json_data, "play_count", JsonType::INTEGER );
 
     std::string music_name = json_data["music_track"].asString();
     _rawMusic = handler.getRawMusic( music_name );

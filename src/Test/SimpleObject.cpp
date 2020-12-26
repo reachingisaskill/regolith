@@ -36,13 +36,13 @@ namespace Regolith
     PhysicalObject::configure( json_data, cg);
 
     // Texture details
-    if ( Utilities::validateJson( json_data, "texture", Utilities::JSON_TYPE_OBJECT ) )
+    if ( validateJson( json_data, "texture", JsonType::OBJECT ) )
     {
       _texture.configure( json_data["texture"], cg.getDataHandler() );
     }
     
     // Hitbox details
-    if ( Utilities::validateJson( json_data, "collision", Utilities::JSON_TYPE_OBJECT ) )
+    if ( validateJson( json_data, "collision", JsonType::OBJECT ) )
     {
       _collision.configure( json_data["collision"] );
     }

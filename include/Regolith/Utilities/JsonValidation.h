@@ -11,31 +11,28 @@ namespace Regolith
   class Drawable;
   class Camera;
 
-  namespace Utilities
+  enum class JsonType
   {
-    enum JsonType
-    {
-      JSON_TYPE_NULL,
-      JSON_TYPE_OBJECT,
-      JSON_TYPE_ARRAY,
-      JSON_TYPE_STRING,
-      JSON_TYPE_FLOAT,
-      JSON_TYPE_INTEGER,
-      JSON_TYPE_BOOLEAN,
-      JSON_TYPE_TOTAL
-    };
+    NONE,
+    OBJECT,
+    ARRAY,
+    STRING,
+    FLOAT,
+    INTEGER,
+    BOOLEAN,
+    TOTAL
+  };
 
-    bool validateJson( Json::Value&, const char*, JsonType type = JSON_TYPE_NULL, bool required = true );
+  bool validateJson( Json::Value&, const char*, JsonType type = JsonType::NONE, bool required = true );
 
-    void validateJson( Json::Value&, JsonType type = JSON_TYPE_NULL );
+  void validateJson( Json::Value&, JsonType type = JsonType::NONE );
 
-    void validateJsonArray( Json::Value&, unsigned int, JsonType type = JSON_TYPE_NULL );
+  void validateJsonArray( Json::Value&, unsigned int, JsonType type = JsonType::NONE );
 
-    void jsonProcessPosition( Json::Value&, Drawable*, Camera* );
+  void jsonProcessPosition( Json::Value&, Drawable*, Camera* );
 
-    void loadJsonData( Json::Value&, std::string );
+  void loadJsonData( Json::Value&, std::string );
 
-  }
 }
 
 #endif // REGOLITH_UTILITIES_JSON_VALIDATION_H_
