@@ -65,7 +65,6 @@ namespace Regolith
 
       // Useful global constants
       std::string _title;
-      SDL_Color _defaultColor;
 
       // Info for SDL user events
       Uint32 _eventStartIndex;
@@ -154,15 +153,8 @@ namespace Regolith
       ////////////////////////////////////////////////////////////////////////////////
       // Contexts and Data
 
-      // Return a pointer to the current active context - may become invalid after rendering!
+      // Return a pointer to the current active context - this is only  valid for the frame on which it is called
       Context* getCurrentContext() { return _theEngine.currentContext(); }
-
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // Access default constants
-
-      // Return the default colour
-      SDL_Color& getDefaultColour() { return _defaultColor; }
 
 
       ////////////////////////////////////////////////////////////////////////////////

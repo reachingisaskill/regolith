@@ -28,7 +28,6 @@ namespace Regolith
     _teamNames(),
     _typeNames(),
     _title(),
-    _defaultColor( { 255, 255, 255, 255 } ),
     _eventStartIndex(0),
     _gameEvents()
   {

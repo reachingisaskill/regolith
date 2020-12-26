@@ -32,6 +32,8 @@ namespace Regolith
 
       // Basic details
       std::string _title;
+      SDL_Color _defaultColour;
+
       int _width;
       int _height;
       int _resolutionWidth;

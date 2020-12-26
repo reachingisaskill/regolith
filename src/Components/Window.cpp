@@ -16,6 +16,7 @@ namespace Regolith
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
     _title(),
+    _defaultColour( { 0, 0, 0, 255 } ),
     _width( 0 ),
     _height( 0 ),
     _resolutionWidth( 0 ),
@@ -63,6 +64,19 @@ namespace Regolith
     _resolutionHeight = _height;
     _title = json_data["title"].asString();
     _vsyncOn = json_data["v-sync"].asBool();
+
+
+    // Set the default colour
+    if( validateJson( json_data, "default_colour", JsonType::ARRAY, false ) )
+    {
+      validateJsonArray( json_data["default_colour"], 4, JsonType::INTEGER );
+
+      Json::Value color = json_data["default_color"];
+      _defaultColour.r = color[0].asInt();
+      _defaultColour.g = color[1].asInt();
+      _defaultColour.b = color[2].asInt();
+      _defaultColour.a = color[3].asInt();
+    }
   }
 
 

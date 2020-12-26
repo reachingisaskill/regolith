@@ -37,17 +37,24 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
     // Class members
     private:
+      // This manager handles input events
       InputManager& _inputManager;
+
+      // Stack of all contexts that are curent rendereable
       ContextStack _contextStack;
 
+      // Queue up pointers to the next context or context group to load. Context groups take priority
       Context* _openContext;
       Context* _openContextGroup;
 
+      // Only draw the context stack between these two iterators
       ContextStack::reverse_iterator _visibleStackStart;
       ContextStack::reverse_iterator _visibleStackEnd;
 
+      // Count the frame times. Provide update time for loops and estimate FPS.
       FrameTimer _frameTimer;
 
+      // Store the pause state
       bool _pause;
 
 

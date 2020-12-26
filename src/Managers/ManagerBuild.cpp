@@ -150,16 +150,6 @@ namespace Regolith
 
     // Register the regolith events with the input manager
     _theWindow.registerEvents( _theInput );
-
-    // Set the default colour
-    validateJson( json_data, "default_colour", JsonType::ARRAY );
-    validateJsonArray( json_data["default_colour"], 4, JsonType::INTEGER );
-
-    Json::Value color = json_data["default_color"];
-    _defaultColor.r = color[0].asInt();
-    _defaultColor.g = color[1].asInt();
-    _defaultColor.b = color[2].asInt();
-    _defaultColor.a = color[3].asInt();
   }
 
 
