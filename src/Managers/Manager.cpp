@@ -30,9 +30,7 @@ namespace Regolith
     _title(),
     _defaultColor( { 255, 255, 255, 255 } ),
     _eventStartIndex(0),
-    _gameEvents(),
-    _gravityConst( 0.0, 0.01 ),
-    _dragConst( 0.005 )
+    _gameEvents()
   {
     DEBUG_LOG( "Manager::Manager : Contruction" );
     // Set up signal handlers
@@ -99,10 +97,6 @@ namespace Regolith
 
     // Tell the engine to queue the load screen for the context group
     _theEngine.openContextGroup( *cg->getLoadScreen() );
-
-    // Tell the context manager that we can trigger the load thread
-//    _theContexts.loadNextContextGroup();
-    // This funtion MUST be called when the loadscreen context is opened!
   }
 
 

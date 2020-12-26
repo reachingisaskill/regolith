@@ -352,21 +352,7 @@ namespace Regolith
       }
     }
 
-
-//    Mix_HookMusicFinished( playNextTrack );
   }
-
-
-//    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
-//    GuardLock lk( musicUpdate.mutex );
-//
-//    DEBUG_LOG( "playNextTrack : Playing next track" );
-//    if ( musicUpdate.data != nullptr )
-//    {
-//      Mix_PlayMusic( musicUpdate.data, -1 );
-//      musicUpdate.data = nullptr;
-//    }
-//  }
 
 
 }

@@ -40,7 +40,7 @@ namespace Regolith
     _pause = false;
 
     // Synchronise access to the contexts
-    std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex );
+    std::unique_lock<std::mutex> renderLock( _renderMutex );
 
 
     DEBUG_LOG( "Engine::run : Engine now running" );
@@ -317,7 +317,7 @@ namespace Regolith
     ContextManager& contextManager = Manager::getInstance()->getContextManager();
 
     // Control access to the contexts
-    std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex, std::defer_lock );
+    std::unique_lock<std::mutex> renderLock( engine._renderMutex, std::defer_lock );
 
 
     // Update the thread status

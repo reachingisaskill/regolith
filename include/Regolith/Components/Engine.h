@@ -6,7 +6,6 @@
 #include "Regolith/Architecture/Component.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/GamePlay/Timers.h"
-#include "Regolith/Utilities/Condition.h"
 
 #include <mutex>
 
@@ -50,6 +49,11 @@ namespace Regolith
       FrameTimer _frameTimer;
 
       bool _pause;
+
+
+      // Mutex to control access to contexts
+      mutable std::mutex _renderMutex;
+
 
     protected:
       // Function which checks the current context stack and performs the queued operations

@@ -3,6 +3,7 @@
 #define REGOLITH_MANAGERS_CONTEXT_MANAGER_H_
 
 #include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Utilities/Condition.h"
 
 #include <thread>
 #include <atomic>
@@ -36,6 +37,10 @@ namespace Regolith
       // Pointer to the next context group to be rendered
       Condition< ContextGroup* > _renderContextGroup;
       mutable std::mutex _renderGroupMutex;
+
+
+      // Signals a ContextGroup is ready to be loaded
+      Condition<bool> _contextUpdate;
 
 
     public:
@@ -74,6 +79,7 @@ namespace Regolith
 
 
       // Requests the rendering of the provided context group. Thread execution is halted until it is complete.
+      // This function is for context groups, during loading/unloading, to wait on the redering process from the engine.
       void requestRenderContextGroup( ContextGroup* );
 
       // Performs rendering operations on a context group. For the engine to use.

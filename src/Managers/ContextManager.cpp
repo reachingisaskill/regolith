@@ -21,7 +21,8 @@ namespace Regolith
     _contextGroups(),
     _currentContextGroup( nullptr ),
     _nextContextGroup( nullptr ),
-    _renderContextGroup( nullptr )
+    _renderContextGroup( nullptr ),
+    _contextUpdate( false )
   {
   }
 
@@ -35,8 +36,7 @@ namespace Regolith
   void ContextManager::clear()
   {
     // Hold this mutex in case the loading thread is active
-    Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
-    std::unique_lock<std::mutex> lock( contextUpdate.mutex );
+    std::unique_lock<std::mutex> lock( _contextUpdate.mutex );
 
     // Unload and then delete all the context groups
     for ( ContextGroupMap::iterator it = _contextGroups.begin(); it != _contextGroups.end(); ++it )
@@ -86,6 +86,11 @@ namespace Regolith
   {
     INFO_LOG( "ContextManager::configure : Configuring" );
 
+    // Register condition variables that can block thread execution
+    Manager::getInstance()->getThreadManager().registerCondition( &_contextUpdate.variable );
+    Manager::getInstance()->getThreadManager().registerCondition( &_renderContextGroup.variable );
+
+    // Validate expected json values
     Utilities::validateJson( json_data, "global", Utilities::JSON_TYPE_STRING );
     Utilities::validateJson( json_data, "context_groups", Utilities::JSON_TYPE_OBJECT );
 
@@ -186,15 +191,14 @@ namespace Regolith
   {
     GuardLock lg( _nextGroupMutex );
 
-    Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
-    std::unique_lock<std::mutex> lock( contextUpdate.mutex );
+    std::unique_lock<std::mutex> lock( _contextUpdate.mutex );
 
-    contextUpdate.data = true;
+    _contextUpdate.data = true;
 
     lock.unlock();
     DEBUG_LOG( "ContextManager::loadNextContextGroup : Triggering condition variable." );
 
-    contextUpdate.variable.notify_all();
+    _contextUpdate.variable.notify_all();
   }
 
 
@@ -247,7 +251,7 @@ namespace Regolith
 
     // Set up references
     ContextManager& manager = Manager::getInstance()->getContextManager();
-    Condition<bool>& contextUpdate = Manager::getInstance()->getThreadManager().ContextUpdate;
+    Condition<bool>& contextUpdate = manager._contextUpdate;
     UniqueLock contextLock( contextUpdate.mutex );
     UniqueLock currentPointerLock( manager._currentGroupMutex, std::defer_lock );
     UniqueLock nextPointerLock( manager._nextGroupMutex, std::defer_lock );

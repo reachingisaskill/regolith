@@ -27,6 +27,9 @@
 #include "Regolith/Textures/ShortText.h"
 #include "Regolith/Textures/Spritesheet.h"
 
+// Utilities
+#include "Regolith/Utilities/JsonValidation.h"
+
 
 #endif // REGOLITH_REGOLITH_H_
 

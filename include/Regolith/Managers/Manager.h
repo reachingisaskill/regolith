@@ -71,14 +71,9 @@ namespace Regolith
       Uint32 _eventStartIndex;
       SDL_Event _gameEvents[REGOLITH_EVENT_TOTAL];
 
-      // Global Physics info
-      Vector _gravityConst;
-      float _dragConst;
-
 
     protected:
       Manager();
-
 
       // Load the input device configuration
       void _loadInput( Json::Value& );
@@ -215,15 +210,6 @@ namespace Regolith
       // Open a new context in place of the current one
       void openContextGroup( ContextGroup* );
 
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // Global Physics functions
-
-      // Return the constant g
-      inline Vector getGravity() { return _gravityConst; }
-
-      // Return the drag
-      inline float getDrag() { return _dragConst; }
   };
 
 }

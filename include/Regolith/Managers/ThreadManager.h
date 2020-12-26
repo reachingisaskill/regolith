@@ -36,6 +36,7 @@ namespace Regolith
 
     private:
       typedef std::map< ThreadName, ThreadStatus > StatusMap;
+      typedef std::list< std::condition_variable* > ConditionList;
 
     private:
       // Context manager thread container
@@ -47,6 +48,11 @@ namespace Regolith
 
       // Set of thread handlers that are current active
       Condition< StatusMap > _threadStatus;
+
+
+      // List of all the condition variables that can be blocking threads.
+      // If an error is called we must be able to trigger all of them!
+      ConditionList _conditionVariables;
 
 
     protected:
@@ -81,6 +87,10 @@ namespace Regolith
       void waitThreadStatus( ThreadName, ThreadStatus );
 
 
+      // Register a condition variable so that it can be triggered in the event of an error
+      void registerCondition( std::condition_variable* );
+
+
 ////////////////////////////////////////////////////////////////////////////////
       // Conditions for threads to interact with
 
@@ -95,20 +105,6 @@ namespace Regolith
 
       // Every thread that sees this flag MUST end
       static std::atomic<bool> ErrorFlag;
-
-
-
-      // Signals data in the DataManager Queue
-      Condition<bool> DataUpdate;
-
-      // Signals a ContextGroup to be loaded in the ContextManager
-      Condition<bool> ContextUpdate;
-
-      // Signals a change of song in the AudioManager
-      Condition<Mix_Music*> MusicUpdate;
-
-      // Mutex to control access to contexts
-      std::mutex RenderMutex;
 
   };
 
