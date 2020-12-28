@@ -3,6 +3,8 @@
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/ThreadHandler.h"
+#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Contexts/Context.h"
 
 
 namespace Regolith
@@ -140,6 +142,7 @@ namespace Regolith
     bool modified = false;
 
 
+    // Pop the closed contexts first
     while ( ( ! _contextStack.empty() ) && _contextStack.front()->closed() )
     {
       modified = true;
@@ -150,36 +153,53 @@ namespace Regolith
     }
 
 
-    // If the stack is empty and a new group is queued, we load that.
-    if ( _contextStack.empty() && _openContextGroup != nullptr )
+    if ( _openContextGroup != nullptr ) // New Context group is queued
     {
-      modified = true;
-
-      DEBUG_LOG( "Engine::performStackOperations : Push context from new context group" );
-      // Push context pointer onto the empty stack
-      _contextStack.push_front( _openContextGroup );
-      _openContextGroup = nullptr;
-
-      // Trigger the on start hooks
-      _contextStack.front()->startContext();
+      if ( _openContextGroup->isLoaded() )
+      {
+        _openContextStack = _openContextGroup->getEntryPoint();
+        _openContextGroup = nullptr;
+      }
     }
 
 
-    // Only permit new contexts to open when there isn't a context group queued for loading
-    if ( _openContextGroup == nullptr )
+    if ( _openContextStack != nullptr ) // New stack base is queued
     {
-      // This is a loop because contexts can open children as soon as they are started.
-      while ( _openContext != nullptr )
+      if ( _contextStack.empty() )
       {
-        modified = true;
+        // If the context groups change
+        if ( _openContextStack->owner() != _currentContextGroup )
+        {
+          if ( _currentContextGroup != nullptr )
+          {
+            _currentContextGroup->close();
+            Manager::getInstance()->getContextManager().unloadContextGroup( _currentContextGroup );
+          }
+          _currentContextGroup = _openContextStack->owner();
+          _currentContextGroup->open();
+        }
 
-        DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
-        // Push onto stack
-        _contextStack.push_front( _openContext );
-        _openContext = nullptr;
-        // Trigger the start hooks
+        // Push the new base context
+        _contextStack.push_front( _openContextStack );
+        _openContextStack = nullptr;
+
         _contextStack.front()->startContext();
       }
+    }
+
+
+    
+    // Open any queued contexts
+    while ( _openContext != nullptr )
+    {
+      modified = true;
+
+      DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
+      // Push onto stack
+      _contextStack.push_front( _openContext );
+      _openContext = nullptr;
+      // Trigger the start hooks
+      _contextStack.front()->startContext();
     }
 
 
@@ -225,6 +245,92 @@ namespace Regolith
       return false;
     }
 
+
+
+
+
+
+    /*
+
+    // Pop the closed contexts first
+    while ( ( ! _contextStack.empty() ) && _contextStack.front()->closed() )
+    {
+      modified = true;
+
+      DEBUG_LOG( "Engine::performStackOperations : Popping closed context" );
+      // Pop the context
+      _contextStack.pop_front();
+    }
+
+
+    if ( _openContextGroup != nullptr ) // Changing context group
+    {
+      // If the stack is empty
+      if ( _contextStack.empty() )
+      {
+        if ( _loadScreen != nullptr ) // Load screen is waiting
+        {
+          modified = true;
+
+          DEBUG_LOG( "Engine::performStackOperations : Opening Load Screen" );
+          _contextStack.push_front( _loadScreen );
+          _contextStack.front()->startContext();
+          _loadScreen = nullptr;
+        }
+        else if ( _openContextGroup->isLoaded() ) // Context Group is loaded
+        {
+          modified = true;
+
+          // Loaded => just open the entry point
+          _contextStack.push_front( _openContextGroup->getEntryPoint() );
+          _contextStack.front()->startContext();
+          _openContextGroup = nullptr;
+        }
+        else // Open whatever is queued
+        {
+          while ( _openContext != nullptr )
+          {
+            modified = true;
+
+            DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
+            // Push onto stack
+            _contextStack.push_front( _openContext );
+            _openContext = nullptr;
+            // Trigger the start hooks
+            _contextStack.front()->startContext();
+          }
+        }
+      }
+      else // Context stack not empty
+      {
+        if ( _openContextGroup->isLoaded() ) // If the new context group has loaded
+        {
+          // Close everything so we can open it
+          for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
+          {
+            (*it)->stopContext();
+          }
+        }
+      }
+    }
+    else // Only permit new contexts to open when there isn't a context group queued for loading
+    {
+      // This is a loop because contexts can open children as soon as they are started.
+      while ( _openContext != nullptr )
+      {
+        modified = true;
+
+        DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
+        // Push onto stack
+        _contextStack.push_front( _openContext );
+        _openContext = nullptr;
+        // Trigger the start hooks
+        _contextStack.front()->startContext();
+      }
+    }
+
+  */
+
   }
 
 
@@ -234,15 +340,35 @@ namespace Regolith
   // Tells the engine to push the context pointer to the top of the stack
   void Engine::openContext( Context* c )
   {
-    _openContext = c;
+    if ( c->owner() != _currentContextGroup )
+    {
+      WARN_LOG( "Engine::openContext : Cannot stack contexts from different groups." );
+    }
+    else
+    {
+      _openContext = c;
+    }
+  }
+
+
+  // Tells the engine to push the context pointer to the bottom of the stack once its empty
+  void Engine::openContextStack( Context* c )
+  {
+    _openContextStack = c;
   }
 
 
   // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
-  void Engine::openContextGroup( Context* c )
+  void Engine::openContextGroup( ContextGroup* cg )
   {
+    if ( _openContextGroup != nullptr ) 
+    {
+      WARN_LOG( "Engine::openContextGroup : Attempting to load two context groups at once" );
+      return;
+    }
+
     // Set the pointer
-    _openContextGroup = c;
+    _openContextGroup = cg;
 
     // Tell everything that is running to stop
     for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
@@ -250,9 +376,11 @@ namespace Regolith
       (*it)->stopContext();
     }
 
-    // Opening a context group takes priority so clear up this
-    _openContext = nullptr;
+    // Queue the load screen
+    _openContextStack = *cg->getLoadScreen();
 
+    // Tell the context manager to load and unload the context groups
+    Manager::getInstance()->getContextManager().loadContextGroup( _openContextGroup );
   }
 
 

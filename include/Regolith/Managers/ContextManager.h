@@ -26,15 +26,19 @@ namespace Regolith
       // Vector of the individual context handlers
       ContextGroupMap _contextGroups;
 
-      // Record of the currently loaded context group
+      // Entry point on load
+      ContextGroup* _entryPoint;
+
+      // Pointer to the next context groups to load/unload
+      ContextGroup* _loadContextGroup;
+      ContextGroup* _unloadContextGroup;
+      mutable std::mutex _loadGroupMutex;
+
+      // Pointer to the current context group being loaded
       ContextGroup* _currentContextGroup;
       mutable std::mutex _currentGroupMutex;
 
-      // Pointer to the next context group to load
-      ContextGroup* _nextContextGroup;
-      mutable std::mutex _nextGroupMutex;
-
-      // Pointer to the next context group to be rendered
+      // Pointer to the context group to be rendered
       Condition< ContextGroup* > _renderContextGroup;
       mutable std::mutex _renderGroupMutex;
 
@@ -55,7 +59,7 @@ namespace Regolith
       void clear();
 
       // Load the first configuration - halts the calling thread until completion
-      void loadEntryPoint();
+      ContextGroup* loadEntryPoint();
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -64,18 +68,13 @@ namespace Regolith
       // Return a pointer to a specific context group
       ContextGroup* getContextGroup( std::string );
 
-      // Set a specific context group to load
-      void setNextContextGroup( ContextGroup* );
-
-      // Signal the manager to start the loading process. Should only be called by a global context!
-      void loadNextContextGroup();
-
-
-      // Return a pointer to the currently loaded context group
-      ContextGroup* getCurrentContextGroup();
-
       // Return a pointer to the global context group
       ContextGroup* getGlobalContextGroup() { return &_globalContextGroup; }
+
+      
+      // Load/unload new context group
+      void loadContextGroup( ContextGroup* );
+      void unloadContextGroup( ContextGroup* );
 
 
       // Requests the rendering of the provided context group. Thread execution is halted until it is complete.
@@ -85,14 +84,12 @@ namespace Regolith
       // Performs rendering operations on a context group. For the engine to use.
       void renderContextGroup( Camera& );
 
+
 //////////////////////////////////////////////////////////////////////////////// 
-      // Loading thread interactions
+      // Interaction with the loading thread
 
-      // Return false while a context group is being loaded
-      bool isLoaded() const;
-
-      // Return a float value representing the loading progress
-      float loadingProgress() const;
+      // Return true when the loading thread is active
+      bool isLoading() const;
   };
 
 }

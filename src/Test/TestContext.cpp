@@ -71,10 +71,10 @@ namespace Regolith
 
     _deathTimer.reset();
 
-    if ( _isLoadScreen )
-    {
-      Manager::getInstance()->getContextManager().loadNextContextGroup();
-    }
+//    if ( _isLoadScreen )
+//    {
+//      Manager::getInstance()->getContextManager().loadNextContextGroup();
+//    }
   }
 
 
@@ -96,16 +96,16 @@ namespace Regolith
       Manager::getInstance()->openContextGroup( _cg_load );
     }
 
-    if ( _isLoadScreen )
-    {
-      if ( manager->getContextManager().isLoaded() )
-      {
-        DEBUG_STREAM <<  "TestContext::updateContext " << _name << " : Load screen complete.";
-        manager->openEntryPoint();
-        this->stopContext();
-      }
-
-    }
+//    if ( _isLoadScreen )
+//    {
+//      if ( manager->getContextManager().isLoaded() )
+//      {
+//        DEBUG_STREAM <<  "TestContext::updateContext " << _name << " : Load screen complete.";
+//        manager->openEntryPoint();
+//        this->stopContext();
+//      }
+//
+//    }
 
     if ( _deathTimer.trigger( timestep ) )
     {

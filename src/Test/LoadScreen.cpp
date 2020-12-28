@@ -21,9 +21,7 @@ namespace Regolith
 
   void LoadScreen::onStart()
   {
-    Manager::getInstance()->getContextManager().loadNextContextGroup();
-
-    this->setClosed( true );
+    this->setClosed( false );
   }
 
 
@@ -31,12 +29,12 @@ namespace Regolith
   {
     static Manager* manager = Manager::getInstance();
 
-    if ( manager->getContextManager().isLoaded() )
-    {
-      DEBUG_LOG( "LoadScreen::updateContext : Load screen complete." );
-      manager->openEntryPoint();
-      this->stopContext();
-    }
+//    if ( manager->getContextManager().isLoaded() )
+//    {
+//      DEBUG_LOG( "LoadScreen::updateContext : Load screen complete." );
+//      manager->openEntryPoint();
+//      this->stopContext();
+//    }
   }
 
 }

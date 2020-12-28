@@ -12,6 +12,9 @@ namespace Regolith
   void deathSignals( int );
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Con/Destruction
+
   Manager::Manager() :
     _theThreads(),
     _theWindow(),
@@ -72,11 +75,11 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Stack manipulation
 
-  void Manager::openEntryPoint()
-  {
-    DEBUG_LOG( "Manager::openEntryPoint : Opening Entry Point" );
-    _theEngine.openContext( _theContexts.getCurrentContextGroup()->getEntryPoint() );
-  }
+//  void Manager::openEntryPoint()
+//  {
+//    DEBUG_LOG( "Manager::openEntryPoint : Opening Entry Point" );
+//    _theEngine.openContext( _theContexts.getCurrentContextGroup()->getEntryPoint() );
+//  }
 
 
   void Manager::openContext( Context* c )
@@ -91,11 +94,8 @@ namespace Regolith
     DEBUG_LOG( "Manager::openContextGroup : Opening Context Group" );
     DEBUG_STREAM << "Manager::openContextGroup : Context Load Screen @ " << *cg->getLoadScreen();
 
-    // Prepare the context manager
-    _theContexts.setNextContextGroup( cg );
-
     // Tell the engine to queue the load screen for the context group
-    _theEngine.openContextGroup( *cg->getLoadScreen() );
+    _theEngine.openContextGroup( cg );
   }
 
 
@@ -115,11 +115,12 @@ namespace Regolith
       {
         // Load the first context group blocking this thread until completion
         INFO_LOG( "Manager::run : Loading entry point" );
-        _theContexts.loadEntryPoint();
+        ContextGroup* entryPoint = _theContexts.loadEntryPoint();
 
         // Reset the stack to the first context
         INFO_LOG( "Manager::run : Loading the first context" );
-        this->openEntryPoint();
+//        this->openEntryPoint();
+        _theEngine.openContextStack( entryPoint->getEntryPoint() );
 
         // Start the engine!
         INFO_LOG( "Manager::run : Starting the engine." );

@@ -12,7 +12,7 @@ namespace Regolith
 {
 
   ContextGroup::ContextGroup() :
-    _renderRate( 10 ),
+    _renderRate( 100 ),
     _isGlobalGroup( false ),
     _theAudio( Manager::getInstance()->getAudioManager() ),
     _theData(),
@@ -27,6 +27,7 @@ namespace Regolith
     _loadingState( false ),
     _loadProgress( 0 ),
     _loadTotal( 0 ),
+    _loadStatus( "" ),
     _renderPosition( _gameObjects.begin() ),
     _isRendered( false )
   {
@@ -56,6 +57,13 @@ namespace Regolith
   }
 
 
+  void ContextGroup::setStatus( std::string status )
+  {
+    GuardLock lg( _mutexProgress );
+    _loadStatus = status;
+  }
+
+
   bool ContextGroup::isLoaded() const
   {
     GuardLock lg( _mutexProgress );
@@ -67,6 +75,27 @@ namespace Regolith
   {
     GuardLock lg( _mutexProgress );
     return (float) _loadProgress / _loadTotal;
+  }
+
+
+  std::string ContextGroup::getLoadStatus() const
+  {
+    GuardLock lg( _mutexProgress );
+    return _loadStatus;
+  }
+
+
+  void ContextGroup::open()
+  {
+    // Audio handler shit
+
+  }
+
+
+  void ContextGroup::close()
+  {
+    // Audio handler shit
+
   }
 
 
@@ -201,11 +230,13 @@ namespace Regolith
 
 
     DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
+    setStatus( "Configuring Audio" );
     _theAudio.configure( json_data["music"], _theData );
     loadElement();
 
 
     DEBUG_LOG( "ContextGroup::load : Loading the objects" );
+    setStatus( "Building Game Objects" );
     // Load objects
     ObjectFactory& obj_factory = Manager::getInstance()->getObjectFactory();
 
@@ -256,6 +287,7 @@ namespace Regolith
 
 
     DEBUG_LOG( "ContextGroup::load : Filling the spawn buffers" );
+    setStatus( "Filling Spawn Buffers" );
     // Fill spawn buffers
     Json::Value& spawn_buffers = json_data["spawn_buffers"];
     for( Json::Value::iterator b_it = spawn_buffers.begin(); b_it != spawn_buffers.end(); ++b_it )
@@ -270,6 +302,7 @@ namespace Regolith
 
 
     DEBUG_LOG( "ContextGroup::load : Loading the contexts" );
+    setStatus( "Loading Levels" );
     // Load contexts
     ContextFactory& cont_factory = Manager::getInstance()->getContextFactory();
 
@@ -321,9 +354,11 @@ namespace Regolith
 
 
     // Wait for engine rendering process
+    setStatus( "Rendering Textures" );
     Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
 
 
+    setStatus( "Complete" );
     DEBUG_LOG( "ContextGroup::load : Complete" );
     {
       GuardLock lg( _mutexProgress );
@@ -347,12 +382,11 @@ namespace Regolith
       _loadingState = false;
     }
 
+    setStatus( "" );
     resetProgress();
-
 
     _renderPosition = _gameObjects.begin();
     _isRendered = false;
-
 
     // Wait for the engine to clear all the textures
     Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
