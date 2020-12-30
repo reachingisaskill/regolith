@@ -306,11 +306,13 @@ namespace Regolith
         if ( ! contextUpdate.data )
         {
           contextUpdate.variable.wait( contextLock, [&]()->bool{ return (! threadHandler.isGood() ) || contextUpdate.data; } );
-          contextUpdate.data = false;
         }
-        contextLock.unlock();
 
-        if ( ! threadHandler.isGood() ) break;
+        if ( ! threadHandler.isGood() )
+        {
+          contextLock.unlock();
+          break;
+        }
 
         DEBUG_STREAM << "ContextManagerLoadingThread : WORKING";
 
@@ -320,7 +322,11 @@ namespace Regolith
         manager._loadContextGroup = nullptr;
         ContextGroup* unloadGroup = manager._unloadContextGroup;
         manager._unloadContextGroup = nullptr;
+
+        contextUpdate.data = false;
+
         loadPointerLock.unlock();
+        contextLock.unlock();
 
         // Update the current group pointer
         currentPointerLock.lock();
