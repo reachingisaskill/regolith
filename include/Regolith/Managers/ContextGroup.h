@@ -163,8 +163,8 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
       // Accessors
 
-      // Return a pointer to a requested context.
-      Context* getContext( std::string );
+//      // Return a pointer to a requested context.
+//      Context* getContext( std::string );
 
       // Return a pointer to a pointer to a requested context.
       Context** getContextPointer( std::string );

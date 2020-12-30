@@ -199,6 +199,9 @@ namespace Regolith
       // Open a new context on top of the stack
       void openContext( Context* );
 
+      // Open a new context on an empty stack
+      void openContextStack( Context* );
+
       // Open a new context in place of the current one
       void openContextGroup( ContextGroup* );
 

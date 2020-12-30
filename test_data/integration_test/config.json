@@ -26,12 +26,7 @@
 
   "collision_teams" :
   {
-  },
-
-
-  "font_data" :
-  {
-    "fonts" : []
+    "null" : 1
   },
 
 

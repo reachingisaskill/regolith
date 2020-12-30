@@ -272,6 +272,8 @@ namespace Regolith
     INFO_LOG( "Context::configure : Configuring Context" );
     _owner = &handler;
 
+    DEBUG_STREAM << "Context::configure : Owner @ " << _owner;
+
     validateJson( json_data, "layers", JsonType::OBJECT );
     validateJson( json_data, "collision_handling", JsonType::OBJECT );
 

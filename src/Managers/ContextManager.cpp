@@ -87,6 +87,7 @@ namespace Regolith
     std::string global_file = json_data["global"].asString();
     _globalContextGroup.configure( global_file, true );
     INFO_LOG( "ContextManager::configure : Global Context Group Configured" );
+    DEBUG_STREAM << "ContextManager::configure : Global Context Group @ " << &_globalContextGroup;
 
     // Create all the context groups but don't load any information
     INFO_LOG( "ContextManager::configure : Configuring Context Groups" );
@@ -99,8 +100,10 @@ namespace Regolith
       std::string file = it->asString();
 
       ContextGroup* cg = new ContextGroup();
+      DEBUG_STREAM << "ContextManager::configure : Created Context Group @ " << cg;
       cg->configure( file, false );
       _contextGroups[ name ] = cg;
+      DEBUG_STREAM << "ContextManager::configure : Created Context Group @ " << _contextGroups[ name ];
     }
     INFO_LOG( "ContextManager::configure : Context Groups Configured" );
 
@@ -207,7 +210,7 @@ namespace Regolith
     // Lock the pointers for the next action
     GuardLock lg( _loadGroupMutex );
 
-    DEBUG_LOG( "ContextManager::setNextContextGroup : Setting next context group." );
+    DEBUG_LOG( "ContextManager::loadContextGroup : Setting next context group." );
     _loadContextGroup = next;
 
     std::unique_lock<std::mutex> lock( _contextUpdate.mutex );
@@ -224,14 +227,14 @@ namespace Regolith
     // Lock the pointers for the next action
     GuardLock lg( _loadGroupMutex );
 
-    DEBUG_LOG( "ContextManager::setNextContextGroup : Setting next context group." );
+    DEBUG_LOG( "ContextManager::unloadContextGroup : Setting next context group." );
     _unloadContextGroup = previous;
 
     std::unique_lock<std::mutex> lock( _contextUpdate.mutex );
     _contextUpdate.data = true;
     lock.unlock();
 
-    DEBUG_LOG( "ContextManager::loadNextContextGroup : Triggering condition variable." );
+    DEBUG_LOG( "ContextManager::unloadNextContextGroup : Triggering condition variable." );
     _contextUpdate.variable.notify_all();
   }
 

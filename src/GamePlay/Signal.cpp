@@ -229,6 +229,31 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Context Stack Change Signal
+
+  OpenContextStackSignal::OpenContextStackSignal() :
+    _theContext()
+  {
+  }
+
+
+  void OpenContextStackSignal::trigger() const
+  {
+    DEBUG_LOG( "OpenContextStackSignal::trigger : Opening context" );
+    Manager::getInstance()->openContextStack( *_theContext );
+  }
+
+
+  void OpenContextStackSignal::configure( Json::Value& json_data, ContextGroup& cg )
+  {
+    validateJson( json_data, "context_name", JsonType::STRING );
+    _theContext = cg.getContextPointer( json_data["context_name"].asString() );
+
+    INFO_STREAM << "OpenContextStackSignal::configure : Registered context with name: " << json_data["context_name"].asString();
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Group Change Signal
 
   OpenContextGroupSignal::OpenContextGroupSignal() :
@@ -240,7 +265,7 @@ namespace Regolith
   void OpenContextGroupSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextGroupSignal::trigger : Opening context group" );
-    Manager::getInstance()->getContextManager().setNextContextGroup( _theContextGroup );
+    Manager::getInstance()->openContextGroup( _theContextGroup );
   }
 
 

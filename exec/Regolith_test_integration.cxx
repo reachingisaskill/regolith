@@ -2,6 +2,7 @@
 #include "Regolith.h"
 #include "Regolith/Test/TestContext.h"
 #include "Regolith/Test/TestObject.h"
+#include "Regolith/Test/StatusString.h"
 
 #include "testass.h"
 #include "logtastic.h"
@@ -31,6 +32,7 @@ int main( int, char** )
 
   INFO_LOG( "Main : Creating test builders" );
   man->getObjectFactory().addBuilder< TestObject >( "null" );
+  man->getObjectFactory().addBuilder< StatusString >( "status_string" );
   man->getContextFactory().addBuilder< TestContext >( "null" );
 
   try

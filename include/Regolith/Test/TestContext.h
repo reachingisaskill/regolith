@@ -17,9 +17,10 @@ namespace Regolith
     private:
       std::string _name;
       ContextGroup* _cg_load;
+      Context** _child_load;
       CountdownTimer _timer;
+      CountdownTimer _childTimer;
       CountdownTimer _deathTimer;
-      bool _isLoadScreen;
 
     protected:
       virtual void onStart() override;
@@ -42,7 +43,7 @@ namespace Regolith
 
 
       // Title Scenes take ownership of the display.
-      virtual bool overridesPreviousContext() const override { return true; }
+      virtual bool overridesPreviousContext() const override { return false; }
 
       // Updates the camera position
       virtual Vector updateCamera( float ) const override { return Vector(); }

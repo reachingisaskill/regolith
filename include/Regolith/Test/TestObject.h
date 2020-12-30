@@ -14,7 +14,6 @@ namespace Regolith
   class TestObject : public PhysicalObject
   {
     private:
-      std::vector<int> _someData;
 
     protected:
 

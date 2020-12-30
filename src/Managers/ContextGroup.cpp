@@ -328,6 +328,7 @@ namespace Regolith
       {
         Context* cont = cont_factory.build( context_data, *this );
         _contexts[ cont_name ] = cont;
+        DEBUG_STREAM << "ContextGroup::load : Context : " << cont_name << " built @ " << cont;
       }
       catch ( Exception& ex )
       {
@@ -342,15 +343,6 @@ namespace Regolith
     DEBUG_LOG( "ContextGroup::load : Initialising audio handler" );
     _theAudio.initialise();
     loadElement();
-
-
-//    DEBUG_LOG( "ContextGroup::load : Performing on-load operations" );
-//    // Trigger all the signals cached before this context was loaded
-//    while ( ! _onLoadOperations.empty() )
-//    {
-//      _onLoadOperations.front().trigger( this );
-//      _onLoadOperations.pop();
-//    }
 
 
     // Wait for engine rendering process
@@ -488,19 +480,25 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Accessors
 
-  Context* ContextGroup::getContext( std::string name )
-  {
-    ContextMap::iterator found = _contexts.find( name );
-
-    if ( found == _contexts.end() )
-    {
-      Exception ex( "ContextGroup::getContext()", "Could not find requested context." );
-      ex.addDetail( "Context Name", name );
-      throw ex;
-    }
-
-    return found->second;
-  }
+//  Context* ContextGroup::getContext( std::string name )
+//  {
+//    ContextMap::iterator found = _contexts.find( name );
+//
+//    if ( found == _contexts.end() )
+//    {
+//      Exception ex( "ContextGroup::getContext()", "Could not find requested context." );
+//      ex.addDetail( "Context Name", name );
+//      throw ex;
+//    }
+//    else if ( found->second == nullptr )
+//    {
+//      Exception ex( "ContextGroup::getContext()", "Context is not constructed." );
+//      ex.addDetail( "Context Name", name );
+//      throw ex;
+//    }
+//
+//    return found->second;
+//  }
 
 
   Context** ContextGroup::getContextPointer( std::string name )

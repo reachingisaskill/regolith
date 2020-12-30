@@ -21,8 +21,8 @@
       "objects" :
       [
         {
-          "name" : "child_context_status",
-          "position" : [ 200, 150 ]
+          "name" : "context_2_status",
+          "position" : [ 100, 100 ]
         }
       ],
       "spawns" : []
@@ -38,12 +38,7 @@
 
   "tests" :
   {
-    "name" : "context_child",
-    "context_group_loading" :
-    {
-      "wait_for" : 2000,
-      "context_group" : "empty_context_group"
-    }
+    "name" : "context_2"
   }
 }
 

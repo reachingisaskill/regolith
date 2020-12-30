@@ -10,7 +10,24 @@
     "container_rules" : []
   },
 
-  "layers" : {},
+  "layers" :
+  {
+    "the_layer" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024.0,
+      "height" : 768.0,
+      "movement_scale" : [ 1.0, 1.0 ],
+      "objects" :
+      [
+        {
+          "name" : "context_1_status",
+          "position" : [ 100, 100 ]
+        }
+      ],
+      "spawns" : []
+    }
+  },
   
   "camera" :
   {
@@ -22,7 +39,11 @@
   "tests" :
   {
     "name" : "context_1",
-    "child" : "context_child"
+    "child_context_loading" : 
+    {
+      "context" : "context_child",
+      "wait_for" : 2000
+    }
   }
 }
 

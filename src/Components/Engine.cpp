@@ -21,7 +21,9 @@ namespace Regolith
     _inputManager( input ),
     _contextStack(),
     _openContext( nullptr ),
+    _openContextStack( nullptr ),
     _openContextGroup( nullptr ),
+    _currentContextGroup( nullptr ),
     _frameTimer(),
     _pause( false )
   {
@@ -157,8 +159,14 @@ namespace Regolith
     {
       if ( _openContextGroup->isLoaded() )
       {
+        DEBUG_LOG( "Engine::performStackOperations : New context group is loaded" );
         _openContextStack = _openContextGroup->getEntryPoint();
         _openContextGroup = nullptr;
+
+        for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
+        {
+          (*it)->stopContext();
+        }
       }
     }
 
@@ -167,9 +175,13 @@ namespace Regolith
     {
       if ( _contextStack.empty() )
       {
+        modified = true;
+
+        DEBUG_LOG( "Engine::performStackOperations : Opening new context stack." );
         // If the context groups change
         if ( _openContextStack->owner() != _currentContextGroup )
         {
+          DEBUG_LOG( "Engine::performStackOperations : Exchanging context group pointers" );
           if ( _currentContextGroup != nullptr )
           {
             _currentContextGroup->close();

@@ -89,6 +89,13 @@ namespace Regolith
   }
 
 
+  void Manager::openContextStack( Context* c )
+  {
+    DEBUG_LOG( "Manager::openContextStack : Opening Context" );
+    _theEngine.openContextStack( c );
+  }
+
+
   void Manager::openContextGroup( ContextGroup* cg )
   {
     DEBUG_LOG( "Manager::openContextGroup : Opening Context Group" );
