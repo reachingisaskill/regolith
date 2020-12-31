@@ -5,6 +5,7 @@
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
 #include "Regolith/Contexts/Context.h"
+#include "Regolith/Audio/Playlist.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -23,6 +24,7 @@ namespace Regolith
     _spawnBuffers(),
 //    _onLoadOperations(),
     _entryPoint( nullptr ),
+    _defaultPlaylist( nullptr ),
     _isLoaded( false ),
     _loadingState( false ),
     _loadProgress( 0 ),
@@ -87,15 +89,21 @@ namespace Regolith
 
   void ContextGroup::open()
   {
-    // Audio handler shit
-
+    // If a default playlist is mentioned, play it.
+    if ( _defaultPlaylist != nullptr )
+    {
+      _defaultPlaylist->play();
+    }
   }
 
 
   void ContextGroup::close()
   {
-    // Audio handler shit
+    // Stop all the music which may have originated from this CG
+    Manager::getInstance()->getAudioManager().clearQueue();
+    Manager::getInstance()->getAudioManager().stopTrack();
 
+    DEBUG_LOG( "ContextGroup::close : HERE" );
   }
 
 
@@ -122,6 +130,16 @@ namespace Regolith
     {
       validateJson( json_data, "load_screen", JsonType::STRING );
       _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContextPointer( json_data["load_screen"].asString() );
+    }
+
+
+    // Configure an entry for the playlists in the audio handler
+    DEBUG_LOG( "ContextGroup::configure : Configuring audio handler" );
+    _theAudio.configure( json_data["music"], _theData );
+    if ( validateJson( json_data["music"], "default_playlist", JsonType::STRING, false ) )
+    {
+      std::string pl_name = json_data["music"]["default_playlist"].asString();
+      _defaultPlaylist = _theAudio.getPlaylist( pl_name );
     }
 
 
@@ -204,7 +222,7 @@ namespace Regolith
     }
 
     // Set the total number of elements to load (used for progress bars)
-    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 2;
+    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 1;
   }
 
 
@@ -227,12 +245,6 @@ namespace Regolith
     // Load Json Data
     Json::Value json_data;
     loadJsonData( json_data, _fileName );
-
-
-    DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
-    setStatus( "Configuring Audio" );
-    _theAudio.configure( json_data["music"], _theData );
-    loadElement();
 
 
     DEBUG_LOG( "ContextGroup::load : Loading the objects" );
@@ -341,7 +353,7 @@ namespace Regolith
 
 
     DEBUG_LOG( "ContextGroup::load : Initialising audio handler" );
-    _theAudio.initialise();
+    _theAudio.initialise( json_data["music"], _theData );
     loadElement();
 
 
@@ -382,6 +394,9 @@ namespace Regolith
 
     // Wait for the engine to clear all the textures
     Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+
+    INFO_LOG( "ContextGroup::unload : Unloading Audio Configuration" );
+    _theAudio.clear();
 
     INFO_LOG( "ContextGroup::unload : Unloading Data" );
     _theData.clear();

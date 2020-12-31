@@ -1,20 +1,30 @@
 {
   "load_screen" : "load_screen",
 
-  "entry_point" : "context_2",
+  "entry_point" : "intro_context",
 
   "music" :
   {
+    "playlists" :
+    {
+      "default" :
+      {
+        "tracks" :
+        [
+          {
+            "music_track" : "intro_track",
+            "play_count" : 0
+          }
+        ]
+      }
+    },
+
+    "default_playlist" : "default"
   },
 
   "game_objects" :
   {
-    "fat_object" :
-    {
-      "type" : "null",
-      "load_time" : 2000
-    },
-    "context_2_status" :
+    "welcome_status" :
     {
       "type" : "status_string",
       "has_moveable" : false,
@@ -25,9 +35,9 @@
         "height" : 0.0,
         "collision_team" : "null"
       },
-      "text" : "Context 2",
+      "text" : "Welcome to the Complete Test",
       "font" : "the_font",
-      "size" : 18,
+      "size" : 28,
       "colour" : [ 255, 255, 255, 255 ]
     }
   },
@@ -40,7 +50,7 @@
 
   "contexts" :
   {
-    "context_2" : "test_data/integration_test/context_2.json"
+    "intro_context" : "test_data/complete_test/intro_context.json"
   }
 
 }

@@ -36,6 +36,12 @@ namespace Regolith
   }
 
 
+  void Playlist::clear()
+  {
+    _musics.clear();
+  }
+
+
   void Playlist::play()
   {
     AudioManager& manager = Manager::getInstance()->getAudioManager();

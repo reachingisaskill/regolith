@@ -1,10 +1,25 @@
 {
   "load_screen" : null,
 
-  "entry_point" : "context_0",
+  "entry_point" : null,
 
   "music" :
   {
+    "playlists" :
+    {
+      "default" :
+      {
+        "tracks" :
+        [
+          {
+            "music_track" : "a_beat",
+            "play_count" : 0
+          }
+        ]
+      }
+    },
+
+    "default_playlist" : "default"
   },
 
   "game_objects" : 
@@ -35,8 +50,7 @@
 
   "contexts" :
   {
-    "context_0" : "test_data/integration_test/context_0.json",
-    "load_screen" : "test_data/integration_test/load_screen.json"
+    "load_screen" : "test_data/complete_test/load_screen.json"
   }
 
 }

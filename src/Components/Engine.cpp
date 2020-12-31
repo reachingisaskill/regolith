@@ -245,6 +245,7 @@ namespace Regolith
     else // Stack is empty! Time to abandon ship
     {
       DEBUG_LOG( "Engine::perfornStackOperations : Context stack is empty. Closing engine." );
+      Manager::getInstance()->getContextManager().unloadContextGroup( _currentContextGroup );
       if ( _frameTimer.hasFPSMeasurement() )
       {
         INFO_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
@@ -256,93 +257,6 @@ namespace Regolith
       _visibleStackEnd = _contextStack.rend();
       return false;
     }
-
-
-
-
-
-
-    /*
-
-    // Pop the closed contexts first
-    while ( ( ! _contextStack.empty() ) && _contextStack.front()->closed() )
-    {
-      modified = true;
-
-      DEBUG_LOG( "Engine::performStackOperations : Popping closed context" );
-      // Pop the context
-      _contextStack.pop_front();
-    }
-
-
-    if ( _openContextGroup != nullptr ) // Changing context group
-    {
-      // If the stack is empty
-      if ( _contextStack.empty() )
-      {
-        if ( _loadScreen != nullptr ) // Load screen is waiting
-        {
-          modified = true;
-
-          DEBUG_LOG( "Engine::performStackOperations : Opening Load Screen" );
-          _contextStack.push_front( _loadScreen );
-          _contextStack.front()->startContext();
-          _loadScreen = nullptr;
-        }
-        else if ( _openContextGroup->isLoaded() ) // Context Group is loaded
-        {
-          modified = true;
-
-          // Loaded => just open the entry point
-          _contextStack.push_front( _openContextGroup->getEntryPoint() );
-          _contextStack.front()->startContext();
-          _openContextGroup = nullptr;
-        }
-        else // Open whatever is queued
-        {
-          while ( _openContext != nullptr )
-          {
-            modified = true;
-
-            DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
-            // Push onto stack
-            _contextStack.push_front( _openContext );
-            _openContext = nullptr;
-            // Trigger the start hooks
-            _contextStack.front()->startContext();
-          }
-        }
-      }
-      else // Context stack not empty
-      {
-        if ( _openContextGroup->isLoaded() ) // If the new context group has loaded
-        {
-          // Close everything so we can open it
-          for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
-          {
-            (*it)->stopContext();
-          }
-        }
-      }
-    }
-    else // Only permit new contexts to open when there isn't a context group queued for loading
-    {
-      // This is a loop because contexts can open children as soon as they are started.
-      while ( _openContext != nullptr )
-      {
-        modified = true;
-
-        DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
-        // Push onto stack
-        _contextStack.push_front( _openContext );
-        _openContext = nullptr;
-        // Trigger the start hooks
-        _contextStack.front()->startContext();
-      }
-    }
-
-  */
-
   }
 
 

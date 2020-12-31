@@ -56,7 +56,10 @@ namespace Regolith
       void configure( Json::Value&, DataHandler& );
 
       // Allocate audio channels for the objects
-      void initialise();
+      void initialise( Json::Value&, DataHandler& );
+
+      // Clears all the memory stored within this handler while the context group is unloaded.
+      void clear();
 
 
       // Allocates a channel for the provided sound
@@ -65,16 +68,6 @@ namespace Regolith
 
       // Returns a reference to a playlist
       Playlist* getPlaylist( std::string );
-
-
-      // Play a track immediately
-      void playSong( Music* );
-
-      // Queue a track to play next
-      void queueSong( Music* );
-
-      // Stop the music playing
-      void stopSong();
 
 
       // Play a sound effect in the local context

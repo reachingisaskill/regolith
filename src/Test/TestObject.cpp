@@ -20,7 +20,7 @@ namespace Regolith
   }
 
 
-  void TestObject::configure( Json::Value& json_data, ContextGroup& cg )
+  void TestObject::configure( Json::Value& json_data, ContextGroup& /*cg*/ )
   {
 //    PhysicalObject::configure( json_data, cg );
 

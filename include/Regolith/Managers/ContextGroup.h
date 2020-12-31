@@ -21,6 +21,7 @@ namespace Regolith
 
   class Context;
   class Camera;
+  class Playlist;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -69,6 +70,10 @@ namespace Regolith
 
       // Starting point when this context group is loaded
       Context** _entryPoint;
+
+      // Playlist to start when context group is loaded.
+      Playlist* _defaultPlaylist;
+
 
 ////////////////////////////////////////////////////////////////////////////////
       // Flags and variables to interface with loading functions
@@ -153,11 +158,19 @@ namespace Regolith
       // Return the load screen
       Context** getLoadScreen() const { return _loadScreen; }
 
+
       // Set the entry point when this context group loads
       void setEntryPoint( Context** c ) { _entryPoint = c; }
 
       // Return the entry point for this context group
       Context* getEntryPoint() { return *_entryPoint; }
+
+
+      // Get a pointer to a playlist
+      Playlist* getPlaylist( std::string name ) { return _theAudio.getPlaylist( name ); }
+
+      // Sets the default playlist when the context group opens
+      void setDefaultPlaylist( Playlist* p ) { _defaultPlaylist = p; }
 
 
 ////////////////////////////////////////////////////////////////////////////////

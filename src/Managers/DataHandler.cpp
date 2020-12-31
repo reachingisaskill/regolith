@@ -43,7 +43,7 @@ namespace Regolith
 
       if ( it->second.surface != nullptr )
       {
-        DEBUG_STREAM << "Unloaded texture: " << name << " @ " << it->second.sdl_texture;
+        DEBUG_STREAM << "Unloaded texture: " << name << " @ " << it->second.surface;
         SDL_FreeSurface( it->second.surface );
         it->second.surface = nullptr;
       }

@@ -51,8 +51,8 @@
 
   "contexts" :
   {
-    "context_child" : "test_data/integration_test/context_child.json",
-    "context_1" : "test_data/integration_test/context_1.json"
+    "context_child" : "test_data/context_group_test/context_child.json",
+    "context_1" : "test_data/context_group_test/context_1.json"
   }
 
 }

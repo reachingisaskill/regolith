@@ -1,14 +1,19 @@
 
 #include "Regolith.h"
 #include "Regolith/Test/TestContext.h"
+#include "Regolith/Test/EmptyContext.h"
 #include "Regolith/Test/TestObject.h"
 #include "Regolith/Test/StatusString.h"
+#include "Regolith/Test/SimpleObject.h"
+#include "Regolith/Test/ContainerObject.h"
+#include "Regolith/Test/BonkObject.h"
+#include "Regolith/Test/FPSString.h"
 
 #include "testass.h"
 #include "logtastic.h"
 
 
-const char* test_config = "test_data/integration_test/config.json";
+const char* test_config = "test_data/complete_test/config.json";
 
 
 using namespace Regolith;
@@ -17,10 +22,10 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_integration.log" );
+  logtastic::addLogFile( "tests_complete.log" );
   logtastic::setPrintToScreenLimit( logtastic::error );
 
-  testass::control::init( "Regolith", "Integration Test" );
+  testass::control::init( "Regolith", "Complete Integration Test" );
   testass::control::get()->setVerbosity( testass::control::verb_short );
 
   bool success = false;
@@ -28,12 +33,18 @@ int main( int, char** )
   // Create the manager first so that it can register signal handlers
   Manager* man = Manager::createInstance();
 
-  logtastic::start( "Regolith - Integration Test", REGOLITH_VERSION_NUMBER );
+  logtastic::start( "Regolith - Complete Integration Test", REGOLITH_VERSION_NUMBER );
 
   INFO_LOG( "Main : Creating test builders" );
-  man->getObjectFactory().addBuilder< TestObject >( "null" );
+  man->getObjectFactory().addBuilder< TestObject >( "test" );
+  man->getObjectFactory().addBuilder< SimpleObject >( "simple_object" );
+  man->getObjectFactory().addBuilder< ContainerObject >( "container_object" );
+  man->getObjectFactory().addBuilder< BonkObject >( "bonk_object" );
   man->getObjectFactory().addBuilder< StatusString >( "status_string" );
-  man->getContextFactory().addBuilder< TestContext >( "null" );
+  man->getObjectFactory().addBuilder< FPSString >( "fps_string" );
+
+  man->getContextFactory().addBuilder< TestContext >( "test" );
+  man->getContextFactory().addBuilder< EmptyContext >( "empty" );
 
   try
   {

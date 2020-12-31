@@ -227,7 +227,7 @@ namespace Regolith
     // Lock the pointers for the next action
     GuardLock lg( _loadGroupMutex );
 
-    DEBUG_LOG( "ContextManager::unloadContextGroup : Setting next context group." );
+    DEBUG_LOG( "ContextManager::unloadContextGroup : Setting unload context group." );
     _unloadContextGroup = previous;
 
     std::unique_lock<std::mutex> lock( _contextUpdate.mutex );
@@ -307,10 +307,11 @@ namespace Regolith
         {
           contextUpdate.variable.wait( contextLock, [&]()->bool{ return (! threadHandler.isGood() ) || contextUpdate.data; } );
         }
+        contextUpdate.data = false;
+        contextLock.unlock();
 
         if ( ! threadHandler.isGood() )
         {
-          contextLock.unlock();
           break;
         }
 
@@ -322,11 +323,7 @@ namespace Regolith
         manager._loadContextGroup = nullptr;
         ContextGroup* unloadGroup = manager._unloadContextGroup;
         manager._unloadContextGroup = nullptr;
-
-        contextUpdate.data = false;
-
         loadPointerLock.unlock();
-        contextLock.unlock();
 
         // Update the current group pointer
         currentPointerLock.lock();

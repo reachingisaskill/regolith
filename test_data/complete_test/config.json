@@ -1,0 +1,71 @@
+{
+  "window" :
+  {
+    "screen_width" : 1024,
+    "screen_height" : 768,
+    "default_colour" : [ 150, 150, 500, 255 ],
+    "title" : "Regolith Complete Test",
+    "v-sync" : true
+  },
+
+  "fonts" :
+  {
+    "default_font" : null,
+    "font_list" :
+    [
+    ]
+  },
+
+  "input_device" :
+  {
+    "require" : [ ],
+    "keymappings" : []
+  },
+
+  "audio_device" :
+  {
+    "sample_frequency" : 22050,
+    "audio_channels" : 2,
+    "chunk_size" : 1024,
+    "music_volume" : 0.1,
+    "effect_volume" : 0.8,
+    "fade_time" : 0
+  },
+
+
+  "collision_teams" :
+  {
+    "scene_boundary" : 0,
+    "environment" : 1,
+    "object" : 2,
+    "hud" : 3,
+    "null" : 4
+  },
+
+
+  "collision_types" :
+  {
+    "basic" : 0
+  },
+
+
+  "game_data" :
+  {
+    "resource_index_file" : "test_data/complete_test/index.json"
+  },
+
+  "contexts" :
+  {
+    "global" : "test_data/complete_test/global_context_group.json",
+
+    "context_groups" : 
+    {
+      "physics_context_group" : "test_data/complete_test/physics_context_group.json",
+      "intro_context_group" : "test_data/complete_test/intro_context_group.json"
+    },
+
+    "entry_point" : "intro_context_group"
+  }
+
+}
+

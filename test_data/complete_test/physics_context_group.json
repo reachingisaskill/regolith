@@ -1,0 +1,185 @@
+{
+  "load_screen" : "load_screen",
+
+  "entry_point" : "physics_context",
+
+  "music" :
+  {
+    "playlists" :
+    {
+      "default" :
+      {
+        "tracks" :
+        [
+          {
+            "music_track" : "physics_track",
+            "play_count" : 0
+          }
+        ]
+      }
+    },
+
+    "default_playlist" : "default"
+  },
+
+  "game_objects" : 
+  {
+    "fat_object" :
+    {
+      "type" : "test",
+      "load_time" : 2000
+    },
+    "fps_string" :
+    {
+      "type" : "fps_string",
+      "has_moveable" : false,
+      "has_physics" : false,
+      "bounding_box" :
+      {
+        "width" : 0.0,
+        "height" : 0.0,
+        "collision_team" : "hud"
+      },
+      "font" : "the_font",
+      "size" : 16,
+      "colour" : [ 255, 255, 255, 255],
+      "text_name" : "calculating"
+    },
+
+    "red_box" : 
+    {
+      "type" : "bonk_object",
+      "has_moveable" : true,
+      "has_physics" : true,
+      "mass" : 10.0,
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "velocity" : [ 0.0, 0.0 ],
+      "rotation" : 0.0,
+      "bounding_box" :
+      {
+        "width" : 20.0,
+        "height" : 20.0,
+        "collision_team" : "object"
+      },
+      "texture" :
+      {
+        "texture_name" : "coloured_boxes",
+        "start_number" : 0
+      },
+      "bonk" :
+      {
+        "sound_name" : "bonk"
+      },
+      "collision" :
+      {
+        "hit_boxes" :
+        [
+          [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
+        ]
+      },
+      "start_state" : "default"
+    },
+
+    "blue_box" :
+    {
+      "type" : "simple_object",
+      "has_moveable" : true,
+      "has_physics" : true,
+      "mass" : 100.0,
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "velocity" : [ 0.0, 0.0 ],
+      "rotation" : 0.0,
+      "bounding_box" :
+      {
+        "width" : 20.0,
+        "height" : 20.0,
+        "collision_team" : "object"
+      },
+      "texture" :
+      {
+        "texture_name" : "coloured_boxes",
+        "start_number" : 3
+      },
+      "collision" :
+      {
+        "hit_boxes" :
+        [
+          [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
+        ]
+      },
+      "start_state" : "default"
+    },
+
+    "green_box" :
+    {
+      "type" : "simple_object",
+      "has_moveable" : false,
+      "has_physics" : true,
+      "mass" : 0.0,
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "velocity" : [ 0.0, 0.0 ],
+      "rotation" : 0.0,
+      "bounding_box" :
+      {
+        "width" : 20.0,
+        "height" : 20.0,
+        "collision_team" : "object"
+      },
+      "texture" :
+      {
+        "texture_name" : "coloured_boxes",
+        "start_number" : 2
+      },
+      "collision" :
+      {
+        "hit_boxes" :
+        [
+          [ { "position" : [ 0, 0 ], "width" : 20, "height" : 20, "type" : "basic" } ]
+        ]
+      },
+      "start_state" : "default"
+    },
+
+    "environment_container" :
+    {
+      "type" : "container_object",
+      "has_moveable" : false,
+      "has_physics" : false,
+      "mass" : 0.0,
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "bounding_box" :
+      {
+        "width" : 1024.0,
+        "height" : 768.0,
+        "collision_team" : "scene_boundary"
+      },
+      "collision" :
+      {
+        "hit_boxes" :
+        [
+          [ { "position" : [ 0, 0 ], "width" : 1024, "height" : 768, "type" : "basic" } ]
+        ]
+      },
+      "start_state" : "default"
+    }
+  },
+
+
+  "spawn_buffers" :
+  {
+    "red_box" : 10,
+    "blue_box" : 10
+  },
+
+
+  "contexts" :
+  {
+    "physics_context" : "test_data/complete_test/physics_context.json"
+  }
+
+}
+
