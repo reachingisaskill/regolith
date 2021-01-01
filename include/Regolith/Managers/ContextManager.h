@@ -4,6 +4,7 @@
 
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Utilities/Condition.h"
+#include "Regolith/Utilities/MutexedBuffer.h"
 
 #include <thread>
 #include <atomic>
@@ -18,6 +19,8 @@ namespace Regolith
     friend void contextManagerLoadingThread();
 
     typedef std::map<std::string, ContextGroup*> ContextGroupMap;
+    typedef std::pair< ContextGroup*, bool > BufferElement;
+    typedef MutexedBuffer< BufferElement > ContextGroupBuffer;
 
     private:
       // The data that exists in the global scope
@@ -29,6 +32,7 @@ namespace Regolith
       // Entry point on load
       ContextGroup* _entryPoint;
 
+      /*
       // Pointer to the next context groups to load/unload
       ContextGroup* _loadContextGroup;
       ContextGroup* _unloadContextGroup;
@@ -37,6 +41,10 @@ namespace Regolith
       // Pointer to the current context group being loaded
       ContextGroup* _currentContextGroup;
       mutable std::mutex _currentGroupMutex;
+      */
+
+      // Maintains a queue of the jobs for the loading thread
+      ContextGroupBuffer _contextGroupBuffer;
 
       // Pointer to the context group to be rendered
       Condition< ContextGroup* > _renderContextGroup;
@@ -44,7 +52,10 @@ namespace Regolith
 
 
       // Signals a ContextGroup is ready to be loaded
-      Condition<bool> _contextUpdate;
+//      Condition<bool> _contextUpdate;
+      // Lock this to block the loading thread
+      std::condition_variable _loadingThreadCondition;
+      mutable std::mutex _loadingThreadActive;
 
 
     public:

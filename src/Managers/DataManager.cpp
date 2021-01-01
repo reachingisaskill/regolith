@@ -63,6 +63,7 @@ namespace Regolith
     switch ( asset_found->second.type )
     {
       case ASSET_IMAGE :
+        DEBUG_STREAM << "DataManager::buildRawTexture : Building " << name;
         return loadRawTexture( asset_found->second.imageDetail );
         break;
 

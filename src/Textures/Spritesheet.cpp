@@ -71,7 +71,7 @@ namespace Regolith
 
     std::string texture_name = json_data["texture_name"].asString();
     _rawTexture = handler.getRawTexture( texture_name );
-    DEBUG_STREAM << "Found texture: " << texture_name << " : " << _rawTexture;
+    DEBUG_STREAM << "Spritesheet::configure : Found texture: " << texture_name << " : " << _rawTexture;
 
     _clip.x = 0;
     _clip.y = 0;

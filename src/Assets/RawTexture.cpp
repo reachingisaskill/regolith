@@ -21,6 +21,7 @@ namespace Regolith
 
     // Load the image into a surface
     raw_texture.surface = IMG_Load( details.filename.c_str() );
+    DEBUG_STREAM << "loadRawTexture : Loaded @ " << raw_texture.surface;
     if ( raw_texture.surface == nullptr )
     {
       Exception ex( "loadRawTexture()", "Could not load image data", false );
