@@ -8,7 +8,7 @@
 #include "Regolith/Managers/AudioHandler.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/GamePlay/Spawner.h"
-#include "Regolith/Utilities/ProxyMap.h"
+#include "Regolith/Utilities/Condition.h"
 
 #include <list>
 #include <string>
@@ -21,6 +21,7 @@ namespace Regolith
 
   class Context;
   class Camera;
+  class Playlist;
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -39,7 +40,6 @@ namespace Regolith
     private:
       // Set the number of objects to render per frame when loading this group
       unsigned int _renderRate;
-
 
       // Flag to indicate that this is the global context group
       bool _isGlobalGroup;
@@ -71,6 +71,10 @@ namespace Regolith
       // Starting point when this context group is loaded
       Context** _entryPoint;
 
+      // Playlist to start when context group is loaded.
+      Playlist* _defaultPlaylist;
+
+
 ////////////////////////////////////////////////////////////////////////////////
       // Flags and variables to interface with loading functions
 
@@ -79,6 +83,7 @@ namespace Regolith
       bool _loadingState;
       unsigned int _loadProgress;
       unsigned int _loadTotal;
+      std::string _loadStatus;
       mutable std::mutex _mutexProgress;
 
       // Iterator to track the current rendering position
@@ -93,6 +98,7 @@ namespace Regolith
       // Lock the mutex before setting the load progress
       void resetProgress();
       void loadElement();
+      void setStatus( std::string );
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -120,10 +126,22 @@ namespace Regolith
       void unload();
 
 
+      // Hook for when this context group becomes the active one in memory
+      void open();
+
+      // Hook for when this context group is closed from the active context stack
+      void close();
+
+
+
       // Return a flag to indicate the group is loaded into memory
       bool isLoaded() const;
+      // Completion fraction
       float getLoadProgress() const;
+      // String of current status
+      std::string getLoadStatus() const;
 
+      // Have all the textures received a rendering pass
       bool isRendered() const { return _isRendered; }
 
       // Flag to indicate this is the global context group. Don't unload accidentally!
@@ -140,6 +158,7 @@ namespace Regolith
       // Return the load screen
       Context** getLoadScreen() const { return _loadScreen; }
 
+
       // Set the entry point when this context group loads
       void setEntryPoint( Context** c ) { _entryPoint = c; }
 
@@ -147,11 +166,18 @@ namespace Regolith
       Context* getEntryPoint() { return *_entryPoint; }
 
 
+      // Get a pointer to a playlist
+      Playlist* getPlaylist( std::string name ) { return _theAudio.getPlaylist( name ); }
+
+      // Sets the default playlist when the context group opens
+      void setDefaultPlaylist( Playlist* p ) { _defaultPlaylist = p; }
+
+
 ////////////////////////////////////////////////////////////////////////////////
       // Accessors
 
-      // Return a pointer to a requested context.
-      Context* getContext( std::string );
+//      // Return a pointer to a requested context.
+//      Context* getContext( std::string );
 
       // Return a pointer to a pointer to a requested context.
       Context** getContextPointer( std::string );

@@ -3,6 +3,8 @@
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/ThreadHandler.h"
+#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Contexts/Context.h"
 
 
 namespace Regolith
@@ -19,7 +21,9 @@ namespace Regolith
     _inputManager( input ),
     _contextStack(),
     _openContext( nullptr ),
+    _openContextStack( nullptr ),
     _openContextGroup( nullptr ),
+    _currentContextGroup( nullptr ),
     _frameTimer(),
     _pause( false )
   {
@@ -40,7 +44,7 @@ namespace Regolith
     _pause = false;
 
     // Synchronise access to the contexts
-    std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex );
+    std::unique_lock<std::mutex> renderLock( _renderMutex );
 
 
     DEBUG_LOG( "Engine::run : Engine now running" );
@@ -140,6 +144,7 @@ namespace Regolith
     bool modified = false;
 
 
+    // Pop the closed contexts first
     while ( ( ! _contextStack.empty() ) && _contextStack.front()->closed() )
     {
       modified = true;
@@ -150,36 +155,63 @@ namespace Regolith
     }
 
 
-    // If the stack is empty and a new group is queued, we load that.
-    if ( _contextStack.empty() && _openContextGroup != nullptr )
+    if ( _openContextGroup != nullptr ) // New Context group is queued
     {
-      modified = true;
+      if ( _openContextGroup->isLoaded() )
+      {
+        DEBUG_LOG( "Engine::performStackOperations : New context group is loaded" );
+        _openContextStack = _openContextGroup->getEntryPoint();
+        _openContextGroup = nullptr;
 
-      DEBUG_LOG( "Engine::performStackOperations : Push context from new context group" );
-      // Push context pointer onto the empty stack
-      _contextStack.push_front( _openContextGroup );
-      _openContextGroup = nullptr;
-
-      // Trigger the on start hooks
-      _contextStack.front()->startContext();
+        for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
+        {
+          (*it)->stopContext();
+        }
+      }
     }
 
 
-    // Only permit new contexts to open when there isn't a context group queued for loading
-    if ( _openContextGroup == nullptr )
+    if ( _openContextStack != nullptr ) // New stack base is queued
     {
-      // This is a loop because contexts can open children as soon as they are started.
-      while ( _openContext != nullptr )
+      if ( _contextStack.empty() )
       {
         modified = true;
 
-        DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
-        // Push onto stack
-        _contextStack.push_front( _openContext );
-        _openContext = nullptr;
-        // Trigger the start hooks
+        DEBUG_LOG( "Engine::performStackOperations : Opening new context stack." );
+        // If the context groups change
+        if ( _openContextStack->owner() != _currentContextGroup )
+        {
+          DEBUG_LOG( "Engine::performStackOperations : Exchanging context group pointers" );
+          if ( _currentContextGroup != nullptr )
+          {
+            _currentContextGroup->close();
+            Manager::getInstance()->getContextManager().unloadContextGroup( _currentContextGroup );
+          }
+          _currentContextGroup = _openContextStack->owner();
+          _currentContextGroup->open();
+        }
+
+        // Push the new base context
+        _contextStack.push_front( _openContextStack );
+        _openContextStack = nullptr;
+
         _contextStack.front()->startContext();
       }
+    }
+
+
+    
+    // Open any queued contexts
+    while ( _openContext != nullptr )
+    {
+      modified = true;
+
+      DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
+      // Push onto stack
+      _contextStack.push_front( _openContext );
+      _openContext = nullptr;
+      // Trigger the start hooks
+      _contextStack.front()->startContext();
     }
 
 
@@ -213,6 +245,7 @@ namespace Regolith
     else // Stack is empty! Time to abandon ship
     {
       DEBUG_LOG( "Engine::perfornStackOperations : Context stack is empty. Closing engine." );
+      Manager::getInstance()->getContextManager().unloadContextGroup( _currentContextGroup );
       if ( _frameTimer.hasFPSMeasurement() )
       {
         INFO_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
@@ -224,7 +257,6 @@ namespace Regolith
       _visibleStackEnd = _contextStack.rend();
       return false;
     }
-
   }
 
 
@@ -234,15 +266,35 @@ namespace Regolith
   // Tells the engine to push the context pointer to the top of the stack
   void Engine::openContext( Context* c )
   {
-    _openContext = c;
+    if ( c->owner() != _currentContextGroup )
+    {
+      WARN_LOG( "Engine::openContext : Cannot stack contexts from different groups." );
+    }
+    else
+    {
+      _openContext = c;
+    }
+  }
+
+
+  // Tells the engine to push the context pointer to the bottom of the stack once its empty
+  void Engine::openContextStack( Context* c )
+  {
+    _openContextStack = c;
   }
 
 
   // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
-  void Engine::openContextGroup( Context* c )
+  void Engine::openContextGroup( ContextGroup* cg )
   {
+    if ( _openContextGroup != nullptr ) 
+    {
+      WARN_LOG( "Engine::openContextGroup : Attempting to load two context groups at once" );
+      return;
+    }
+
     // Set the pointer
-    _openContextGroup = c;
+    _openContextGroup = cg;
 
     // Tell everything that is running to stop
     for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
@@ -250,9 +302,11 @@ namespace Regolith
       (*it)->stopContext();
     }
 
-    // Opening a context group takes priority so clear up this
-    _openContext = nullptr;
+    // Queue the load screen
+    _openContextStack = *cg->getLoadScreen();
 
+    // Tell the context manager to load and unload the context groups
+    Manager::getInstance()->getContextManager().loadContextGroup( _openContextGroup );
   }
 
 
@@ -317,7 +371,7 @@ namespace Regolith
     ContextManager& contextManager = Manager::getInstance()->getContextManager();
 
     // Control access to the contexts
-    std::unique_lock<std::mutex> renderLock( Manager::getInstance()->getThreadManager().RenderMutex, std::defer_lock );
+    std::unique_lock<std::mutex> renderLock( engine._renderMutex, std::defer_lock );
 
 
     // Update the thread status

@@ -5,6 +5,7 @@
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
 #include "Regolith/Contexts/Context.h"
+#include "Regolith/Audio/Playlist.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -12,7 +13,7 @@ namespace Regolith
 {
 
   ContextGroup::ContextGroup() :
-    _renderRate( 10 ),
+    _renderRate( 100 ),
     _isGlobalGroup( false ),
     _theAudio( Manager::getInstance()->getAudioManager() ),
     _theData(),
@@ -23,10 +24,12 @@ namespace Regolith
     _spawnBuffers(),
 //    _onLoadOperations(),
     _entryPoint( nullptr ),
+    _defaultPlaylist( nullptr ),
     _isLoaded( false ),
     _loadingState( false ),
     _loadProgress( 0 ),
     _loadTotal( 0 ),
+    _loadStatus( "" ),
     _renderPosition( _gameObjects.begin() ),
     _isRendered( false )
   {
@@ -56,6 +59,13 @@ namespace Regolith
   }
 
 
+  void ContextGroup::setStatus( std::string status )
+  {
+    GuardLock lg( _mutexProgress );
+    _loadStatus = status;
+  }
+
+
   bool ContextGroup::isLoaded() const
   {
     GuardLock lg( _mutexProgress );
@@ -70,6 +80,33 @@ namespace Regolith
   }
 
 
+  std::string ContextGroup::getLoadStatus() const
+  {
+    GuardLock lg( _mutexProgress );
+    return _loadStatus;
+  }
+
+
+  void ContextGroup::open()
+  {
+    // If a default playlist is mentioned, play it.
+    if ( _defaultPlaylist != nullptr )
+    {
+      _defaultPlaylist->play();
+    }
+  }
+
+
+  void ContextGroup::close()
+  {
+    // Stop all the music which may have originated from this CG
+    Manager::getInstance()->getAudioManager().clearQueue();
+    Manager::getInstance()->getAudioManager().stopTrack();
+
+    DEBUG_LOG( "ContextGroup::close : HERE" );
+  }
+
+
   void ContextGroup::configure( std::string filename, bool isGlobal )
   {
     INFO_STREAM << "ContextGroup::configure : Configuring with filename: " << filename;
@@ -79,20 +116,30 @@ namespace Regolith
 
     // Load Json Data
     Json::Value json_data;
-    Utilities::loadJsonData( json_data, _fileName );
+    loadJsonData( json_data, _fileName );
 
     // Validate top-level objects
-    Utilities::validateJson( json_data, "game_objects", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "spawn_buffers", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "music", Utilities::JSON_TYPE_OBJECT );
+    validateJson( json_data, "game_objects", JsonType::OBJECT );
+    validateJson( json_data, "spawn_buffers", JsonType::OBJECT );
+    validateJson( json_data, "contexts", JsonType::OBJECT );
+    validateJson( json_data, "music", JsonType::OBJECT );
 
 
     // Global groups don't have a load-screen
     if ( ! _isGlobalGroup )
     {
-      Utilities::validateJson( json_data, "load_screen", Utilities::JSON_TYPE_STRING );
+      validateJson( json_data, "load_screen", JsonType::STRING );
       _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContextPointer( json_data["load_screen"].asString() );
+    }
+
+
+    // Configure an entry for the playlists in the audio handler
+    DEBUG_LOG( "ContextGroup::configure : Configuring audio handler" );
+    _theAudio.configure( json_data["music"], _theData );
+    if ( validateJson( json_data["music"], "default_playlist", JsonType::STRING, false ) )
+    {
+      std::string pl_name = json_data["music"]["default_playlist"].asString();
+      _defaultPlaylist = _theAudio.getPlaylist( pl_name );
     }
 
 
@@ -162,7 +209,7 @@ namespace Regolith
 
 
     // Set the default entry point. Optional if this is the global context group
-    if ( Utilities::validateJson( json_data, "entry_point", Utilities::JSON_TYPE_STRING, (!_isGlobalGroup) ) )
+    if ( validateJson( json_data, "entry_point", JsonType::STRING, (!_isGlobalGroup) ) )
     {
       ContextMap::iterator found = _contexts.find( json_data["entry_point"].asString() );
 
@@ -175,7 +222,7 @@ namespace Regolith
     }
 
     // Set the total number of elements to load (used for progress bars)
-    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 2;
+    _loadTotal = (2*_gameObjects.size()) + _spawnBuffers.size() + _contexts.size() + 1;
   }
 
 
@@ -197,15 +244,11 @@ namespace Regolith
     DEBUG_LOG( "ContextGroup::load : Loading" );
     // Load Json Data
     Json::Value json_data;
-    Utilities::loadJsonData( json_data, _fileName );
-
-
-    DEBUG_LOG( "ContextGroup::load : Configuring audio handler" );
-    _theAudio.configure( json_data["music"], _theData );
-    loadElement();
+    loadJsonData( json_data, _fileName );
 
 
     DEBUG_LOG( "ContextGroup::load : Loading the objects" );
+    setStatus( "Building Game Objects" );
     // Load objects
     ObjectFactory& obj_factory = Manager::getInstance()->getObjectFactory();
 
@@ -219,7 +262,7 @@ namespace Regolith
       // If object details are in a separate file, load them
       if ( o_it->isString() )
       {
-        Utilities::loadJsonData( object_data, o_it->asString() );
+        loadJsonData( object_data, o_it->asString() );
       }
       else
       {
@@ -256,6 +299,7 @@ namespace Regolith
 
 
     DEBUG_LOG( "ContextGroup::load : Filling the spawn buffers" );
+    setStatus( "Filling Spawn Buffers" );
     // Fill spawn buffers
     Json::Value& spawn_buffers = json_data["spawn_buffers"];
     for( Json::Value::iterator b_it = spawn_buffers.begin(); b_it != spawn_buffers.end(); ++b_it )
@@ -270,6 +314,7 @@ namespace Regolith
 
 
     DEBUG_LOG( "ContextGroup::load : Loading the contexts" );
+    setStatus( "Loading Levels" );
     // Load contexts
     ContextFactory& cont_factory = Manager::getInstance()->getContextFactory();
 
@@ -284,7 +329,7 @@ namespace Regolith
       // Load the context data from another file if a string is provided
       if ( c_it->isString() )
       {
-        Utilities::loadJsonData( context_data, c_it->asString() );
+        loadJsonData( context_data, c_it->asString() );
       }
       else
       {
@@ -295,6 +340,7 @@ namespace Regolith
       {
         Context* cont = cont_factory.build( context_data, *this );
         _contexts[ cont_name ] = cont;
+        DEBUG_STREAM << "ContextGroup::load : Context : " << cont_name << " built @ " << cont;
       }
       catch ( Exception& ex )
       {
@@ -307,23 +353,16 @@ namespace Regolith
 
 
     DEBUG_LOG( "ContextGroup::load : Initialising audio handler" );
-    _theAudio.initialise();
+    _theAudio.initialise( json_data["music"], _theData );
     loadElement();
 
 
-//    DEBUG_LOG( "ContextGroup::load : Performing on-load operations" );
-//    // Trigger all the signals cached before this context was loaded
-//    while ( ! _onLoadOperations.empty() )
-//    {
-//      _onLoadOperations.front().trigger( this );
-//      _onLoadOperations.pop();
-//    }
-
-
     // Wait for engine rendering process
+    setStatus( "Rendering Textures" );
     Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
 
 
+    setStatus( "Complete" );
     DEBUG_LOG( "ContextGroup::load : Complete" );
     {
       GuardLock lg( _mutexProgress );
@@ -347,15 +386,17 @@ namespace Regolith
       _loadingState = false;
     }
 
+    setStatus( "" );
     resetProgress();
-
 
     _renderPosition = _gameObjects.begin();
     _isRendered = false;
 
-
     // Wait for the engine to clear all the textures
     Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+
+    INFO_LOG( "ContextGroup::unload : Unloading Audio Configuration" );
+    _theAudio.clear();
 
     INFO_LOG( "ContextGroup::unload : Unloading Data" );
     _theData.clear();
@@ -454,19 +495,25 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Accessors
 
-  Context* ContextGroup::getContext( std::string name )
-  {
-    ContextMap::iterator found = _contexts.find( name );
-
-    if ( found == _contexts.end() )
-    {
-      Exception ex( "ContextGroup::getContext()", "Could not find requested context." );
-      ex.addDetail( "Context Name", name );
-      throw ex;
-    }
-
-    return found->second;
-  }
+//  Context* ContextGroup::getContext( std::string name )
+//  {
+//    ContextMap::iterator found = _contexts.find( name );
+//
+//    if ( found == _contexts.end() )
+//    {
+//      Exception ex( "ContextGroup::getContext()", "Could not find requested context." );
+//      ex.addDetail( "Context Name", name );
+//      throw ex;
+//    }
+//    else if ( found->second == nullptr )
+//    {
+//      Exception ex( "ContextGroup::getContext()", "Context is not constructed." );
+//      ex.addDetail( "Context Name", name );
+//      throw ex;
+//    }
+//
+//    return found->second;
+//  }
 
 
   Context** ContextGroup::getContextPointer( std::string name )

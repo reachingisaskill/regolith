@@ -19,11 +19,7 @@ namespace Regolith
   ThreadManager::ThreadManager() :
     _contextManagerThread(),
     _engineRenderingThread(),
-    _threadStatus(),
-    DataUpdate( false ),
-    ContextUpdate( false ),
-    MusicUpdate( nullptr ),
-    RenderMutex()
+    _threadStatus()
   {
     GuardLock lk( _threadStatus.mutex );
     for ( char n = 0; n < REGOLITH_THREAD_TOTAL; ++n )
@@ -99,11 +95,21 @@ namespace Regolith
     ErrorFlag = true;
     QuitFlag = true;
 
+    ERROR_LOG( "ThreadManager::error : Triggering all registered wait conditions." );
+    for ( ConditionList::iterator it = _conditionVariables.begin(); it != _conditionVariables.end(); ++it )
+    {
+      (*it)->notify_all();
+    }
+
     // Notify all the conditions so that the threads see the flags
     StartCondition.variable.notify_all();
-    DataUpdate.variable.notify_all();
-    ContextUpdate.variable.notify_all();
-    MusicUpdate.variable.notify_all();
+    StopCondition.variable.notify_all();
+  }
+
+
+  void ThreadManager::registerCondition( std::condition_variable* condition )
+  {
+    _conditionVariables.push_back( condition );
   }
 
 
@@ -154,9 +160,10 @@ namespace Regolith
     QuitFlag = true;
 
     // Notify all the conditions so that the threads see the quit flag
-    DataUpdate.variable.notify_all();
-    ContextUpdate.variable.notify_all();
-    MusicUpdate.variable.notify_all();
+    for ( ConditionList::iterator it = _conditionVariables.begin(); it != _conditionVariables.end(); ++it )
+    {
+      (*it)->notify_all();
+    }
 
     waitThreadStatus( THREAD_CLOSING );
   }

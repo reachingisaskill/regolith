@@ -63,8 +63,8 @@ namespace Regolith
 
   void PhysicalObject::configure( Json::Value& json_data, ContextGroup& /*cg*/ )
   {
-    Utilities::validateJson( json_data, "has_moveable", Utilities::JSON_TYPE_BOOLEAN );
-    Utilities::validateJson( json_data, "has_physics", Utilities::JSON_TYPE_BOOLEAN );
+    validateJson( json_data, "has_moveable", JsonType::BOOLEAN );
+    validateJson( json_data, "has_physics", JsonType::BOOLEAN );
 
     // Configure the flags of physical object
     _hasMoveable = json_data["has_moveable"].asBool();
@@ -72,21 +72,21 @@ namespace Regolith
 
 
     // Set the mass properties - Determine if an object can even be moved
-    if ( Utilities::validateJson( json_data, "mass", Utilities::JSON_TYPE_FLOAT, false ) )
+    if ( validateJson( json_data, "mass", JsonType::FLOAT, false ) )
     {
       setMass( json_data["mass"].asFloat() );
     }
 
     // Set the coefficient of elasticity of the object. 1 = perfectly elastic.
-    if ( Utilities::validateJson( json_data, "elasticity", Utilities::JSON_TYPE_FLOAT, false ) )
+    if ( validateJson( json_data, "elasticity", JsonType::FLOAT, false ) )
     {
       _elasticity = json_data["elasticity"].asFloat();
     }
 
     // Set the starting position (defaults to zero, zero)
-    if ( Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY, false ) )
+    if ( validateJson( json_data, "position", JsonType::ARRAY, false ) )
     {
-      Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+      validateJsonArray( json_data["position"], 2, JsonType::FLOAT );
 
       float x =  json_data["position"][0].asFloat();
       float y =  json_data["position"][1].asFloat();
@@ -94,41 +94,41 @@ namespace Regolith
     }
 
     // Set the starting rotation (defaults to zero)
-    if ( Utilities::validateJson( json_data, "rotation", Utilities::JSON_TYPE_FLOAT, false ) )
+    if ( validateJson( json_data, "rotation", JsonType::FLOAT, false ) )
     {
       _rotation =  json_data["rotation"].asFloat();
       WARN_LOG( "PhysicalObject::configure() : Rotations are not currently fully supported for collision detection." );
     }
 
     // Set the starting flip state
-    if ( Utilities::validateJson( json_data, "flip_horizontal", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    if ( validateJson( json_data, "flip_horizontal", JsonType::BOOLEAN, false ) )
     {
       if ( json_data["flip_horizontal"].asBool() )
         _flipFlag = (SDL_RendererFlip) (_flipFlag ^ SDL_FLIP_HORIZONTAL);
     }
-    if ( Utilities::validateJson( json_data, "flip_vertical", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    if ( validateJson( json_data, "flip_vertical", JsonType::BOOLEAN, false ) )
     {
       if ( json_data["flip_vertical"].asBool() )
         _flipFlag = (SDL_RendererFlip) (_flipFlag ^ SDL_FLIP_VERTICAL);
     }
 
     // Set the initial velocity
-    if ( Utilities::validateJson( json_data, "velocity", Utilities::JSON_TYPE_ARRAY, false ) )
+    if ( validateJson( json_data, "velocity", JsonType::ARRAY, false ) )
     {
-      Utilities::validateJsonArray( json_data["velocity"], 2, Utilities::JSON_TYPE_FLOAT );
+      validateJsonArray( json_data["velocity"], 2, JsonType::FLOAT );
       float vx = json_data["velocity"][0].asFloat();
       float vy = json_data["velocity"][1].asFloat();
       setVelocity( Vector( vx, vy ) );
     }
 
     // Set the collision properties
-    if ( Utilities::validateJson( json_data, "bounding_box", Utilities::JSON_TYPE_OBJECT, false ) )
+    if ( validateJson( json_data, "bounding_box", JsonType::OBJECT, false ) )
     {
       Json::Value& bounding_box_data = json_data["bounding_box"];
 
-      Utilities::validateJson( bounding_box_data, "width", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( bounding_box_data, "height", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( bounding_box_data, "collision_team", Utilities::JSON_TYPE_STRING );
+      validateJson( bounding_box_data, "width", JsonType::FLOAT );
+      validateJson( bounding_box_data, "height", JsonType::FLOAT );
+      validateJson( bounding_box_data, "collision_team", JsonType::STRING );
 
       _width = bounding_box_data["width"].asFloat();
       _height = bounding_box_data["height"].asFloat();

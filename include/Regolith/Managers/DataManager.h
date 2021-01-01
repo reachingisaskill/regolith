@@ -40,6 +40,7 @@ namespace Regolith
       // Map of all the assets that can be used
       AssetMap _assets;
 
+
     public:
       // Con/de-struction
       DataManager();

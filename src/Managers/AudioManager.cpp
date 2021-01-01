@@ -231,12 +231,12 @@ namespace Regolith
 
   void AudioManager::configure( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "sample_frequency", Utilities::JSON_TYPE_INTEGER );
-//    Utilities::validateJson( json_data, "format", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "audio_channels", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "chunk_size", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "music_volume", Utilities::JSON_TYPE_FLOAT );
-    Utilities::validateJson( json_data, "effect_volume", Utilities::JSON_TYPE_FLOAT );
+    validateJson( json_data, "sample_frequency", JsonType::INTEGER );
+//    validateJson( json_data, "format", JsonType::INTEGER );
+    validateJson( json_data, "audio_channels", JsonType::INTEGER );
+    validateJson( json_data, "chunk_size", JsonType::INTEGER );
+    validateJson( json_data, "music_volume", JsonType::FLOAT );
+    validateJson( json_data, "effect_volume", JsonType::FLOAT );
 
     _frequency = json_data["sample_frequency"].asInt();
 //    _format = json_data["format"].asInt();
@@ -244,7 +244,7 @@ namespace Regolith
     _channels = json_data["audio_channels"].asInt();
     _chunkSize = json_data["chunk_size"].asInt();
 
-    if ( Utilities::validateJson( json_data, "fade_time", Utilities::JSON_TYPE_INTEGER, false ) )
+    if ( validateJson( json_data, "fade_time", JsonType::INTEGER, false ) )
       _fadeTime = json_data["fade_time"].asInt();
 
     if ( Mix_OpenAudio( _frequency, _format, _channels, _chunkSize ) == -1 )
@@ -352,21 +352,7 @@ namespace Regolith
       }
     }
 
-
-//    Mix_HookMusicFinished( playNextTrack );
   }
-
-
-//    Condition<Mix_Music*>& musicUpdate = Manager::getInstance()->getThreadManager().MusicUpdate;
-//    GuardLock lk( musicUpdate.mutex );
-//
-//    DEBUG_LOG( "playNextTrack : Playing next track" );
-//    if ( musicUpdate.data != nullptr )
-//    {
-//      Mix_PlayMusic( musicUpdate.data, -1 );
-//      musicUpdate.data = nullptr;
-//    }
-//  }
 
 
 }

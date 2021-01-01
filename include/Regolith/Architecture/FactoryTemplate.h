@@ -51,7 +51,7 @@ namespace Regolith
   template< class TYPE, class ... ARGS >
   TYPE* FactoryTemplate<TYPE, ARGS...>::build( Json::Value& data, ARGS... args ) const
   {
-    Utilities::validateJson( data, "type", Utilities::JSON_TYPE_STRING, true );
+    validateJson( data, "type", JsonType::STRING, true );
 
     std::string name = data["type"].asString();
 

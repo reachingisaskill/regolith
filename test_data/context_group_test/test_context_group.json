@@ -1,0 +1,59 @@
+{
+  "load_screen" : "load_screen",
+
+  "entry_point" : "context_1",
+
+  "music" :
+  {
+  },
+
+  "game_objects" :
+  {
+    "context_1_status" :
+    {
+      "type" : "status_string",
+      "has_moveable" : false,
+      "has_physics" : false,
+      "bounding_box" :
+      {
+        "width" : 0.0,
+        "height" : 0.0,
+        "collision_team" : "null"
+      },
+      "text" : "Context 1",
+      "font" : "the_font",
+      "size" : 18,
+      "colour" : [ 255, 255, 255, 255 ]
+    },
+    "child_context_status" :
+    {
+      "type" : "status_string",
+      "has_moveable" : false,
+      "has_physics" : false,
+      "bounding_box" :
+      {
+        "width" : 0.0,
+        "height" : 0.0,
+        "collision_team" : "null"
+      },
+      "text" : "Child Context",
+      "font" : "the_font",
+      "size" : 18,
+      "colour" : [ 255, 255, 255, 255 ]
+    }
+  },
+
+
+  "spawn_buffers" :
+  {
+  },
+
+
+  "contexts" :
+  {
+    "context_child" : "test_data/context_group_test/context_child.json",
+    "context_1" : "test_data/context_group_test/context_1.json"
+  }
+
+}
+

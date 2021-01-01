@@ -16,6 +16,7 @@ namespace Regolith
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
     _title(),
+    _defaultColour( { 0, 0, 0, 255 } ),
     _width( 0 ),
     _height( 0 ),
     _resolutionWidth( 0 ),
@@ -51,10 +52,10 @@ namespace Regolith
 
   void Window::configure( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "screen_width", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "screen_height", Utilities::JSON_TYPE_INTEGER );
-    Utilities::validateJson( json_data, "title", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "v-sync", Utilities::JSON_TYPE_BOOLEAN );
+    validateJson( json_data, "screen_width", JsonType::INTEGER );
+    validateJson( json_data, "screen_height", JsonType::INTEGER );
+    validateJson( json_data, "title", JsonType::STRING );
+    validateJson( json_data, "v-sync", JsonType::BOOLEAN );
 
     // Load the window configuration
     _width = json_data["screen_width"].asInt();
@@ -63,6 +64,19 @@ namespace Regolith
     _resolutionHeight = _height;
     _title = json_data["title"].asString();
     _vsyncOn = json_data["v-sync"].asBool();
+
+
+    // Set the default colour
+    if( validateJson( json_data, "default_colour", JsonType::ARRAY, false ) )
+    {
+      validateJsonArray( json_data["default_colour"], 4, JsonType::INTEGER );
+
+      Json::Value color = json_data["default_color"];
+      _defaultColour.r = color[0].asInt();
+      _defaultColour.g = color[1].asInt();
+      _defaultColour.b = color[2].asInt();
+      _defaultColour.a = color[3].asInt();
+    }
   }
 
 

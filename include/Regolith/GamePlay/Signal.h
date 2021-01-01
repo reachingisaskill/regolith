@@ -211,6 +211,28 @@ namespace Regolith
   };
 
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Context Stack Change Signal
+
+  class OpenContextStackSignal : public Signal
+  {
+    private:
+      Context** _theContext;
+
+    public :
+      // Con/Destruction
+      OpenContextStackSignal();
+      virtual ~OpenContextStackSignal() {}
+
+      void trigger() const;
+
+      virtual void configure( Json::Value&, ContextGroup& ) override;
+
+      virtual Signal* clone() const override { return new OpenContextStackSignal( *this ); }
+  };
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Group Change Signal
 

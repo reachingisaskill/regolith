@@ -46,16 +46,16 @@ namespace Regolith
     {
       // Load and parse the json config
       Json::Value json_data;
-      Utilities::loadJsonData( json_data, json_file );
+      loadJsonData( json_data, json_file );
 
       // Validate the required keys
-      Utilities::validateJson( json_data, "window", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "input_device", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "audio_device", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "collision_teams", Utilities::JSON_TYPE_OBJECT );
-//      Utilities::validateJson( json_data, "font_data", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "game_data", Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJson( json_data, "contexts", Utilities::JSON_TYPE_OBJECT );
+      validateJson( json_data, "window", JsonType::OBJECT );
+      validateJson( json_data, "input_device", JsonType::OBJECT );
+      validateJson( json_data, "audio_device", JsonType::OBJECT );
+      validateJson( json_data, "collision_teams", JsonType::OBJECT );
+//      validateJson( json_data, "font_data", JsonType::OBJECT );
+      validateJson( json_data, "game_data", JsonType::OBJECT );
+      validateJson( json_data, "contexts", JsonType::OBJECT );
 
 
       // Load the input device configuration first so objects can register game-wide behaviours
@@ -150,16 +150,6 @@ namespace Regolith
 
     // Register the regolith events with the input manager
     _theWindow.registerEvents( _theInput );
-
-    // Set the default colour
-    Utilities::validateJson( json_data, "default_colour", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["default_colour"], 4, Utilities::JSON_TYPE_INTEGER );
-
-    Json::Value color = json_data["default_color"];
-    _defaultColor.r = color[0].asInt();
-    _defaultColor.g = color[1].asInt();
-    _defaultColor.b = color[2].asInt();
-    _defaultColor.a = color[3].asInt();
   }
 
 

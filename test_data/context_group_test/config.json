@@ -26,28 +26,23 @@
 
   "collision_teams" :
   {
-  },
-
-
-  "font_data" :
-  {
-    "fonts" : []
+    "null" : 1
   },
 
 
   "game_data" :
   {
-    "resource_index_file" : "test_data/integration_test/index.json"
+    "resource_index_file" : "test_data/context_group_test/index.json"
   },
 
   "contexts" :
   {
-    "global" : "test_data/integration_test/global_context_group.json",
+    "global" : "test_data/context_group_test/global_context_group.json",
 
     "context_groups" : 
     {
-      "test_context_group" : "test_data/integration_test/test_context_group.json",
-      "empty_context_group" : "test_data/integration_test/empty_context_group.json"
+      "test_context_group" : "test_data/context_group_test/test_context_group.json",
+      "empty_context_group" : "test_data/context_group_test/empty_context_group.json"
     },
 
     "entry_point" : "test_context_group"

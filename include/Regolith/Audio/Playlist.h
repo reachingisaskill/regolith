@@ -25,6 +25,9 @@ namespace Regolith
       // Configure the playlist
       void configure( Json::Value&, DataHandler& );
 
+      // Clear the contents
+      void clear();
+
 
       // Clears the current AudioManager music queue and pushes the play list
       void play();

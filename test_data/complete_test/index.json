@@ -1,0 +1,21 @@
+{
+  "fonts": 
+  {
+    "the_font": { "path": "test_data/complete_test/crap_font.ttf" }
+  },
+  "audio": 
+  {
+    "a_beat": { "path": "test_data/complete_test/a_beat.wav" },
+    "intro_track": { "path": "test_data/complete_test/intro_track.mp3" },
+    "physics_track": { "path": "test_data/complete_test/physics_track.mp3" },
+    "bonk": { "path": "test_data/complete_test/sound_bonk.wav" }
+  },
+  "text": 
+  {
+    "calculating": { "path": "test_data/complete_test/calculating.txt" }
+  },
+  "images": 
+  {
+    "coloured_boxes": { "path": "test_data/complete_test/coloured_boxes.bmp", "width": 40, "height": 40, "rows": 2, "columns": 2 }
+  }
+}

@@ -17,6 +17,7 @@ namespace Regolith
       Window& _theWindow;
       SDL_Renderer* _theRenderer;
 //      float _zoom;
+      SDL_Color _defaultColour;
 
       // References to the dimensions of the displayed area
       const int& _width;
@@ -40,6 +41,9 @@ namespace Regolith
 
       // Clears the SDL renderer. Makes the camera invalid
       void clear();
+
+      // Set the default colour used to clear the window
+      void setDefaultColour( SDL_Color c ) { _defaultColour = c; }
 
 
       // Sets the renderer pointer for the camera

@@ -41,8 +41,8 @@ namespace Regolith
 
   void FontManager::configure( Json::Value& json_data )
   {
-    Utilities::validateJson( json_data, "fonts", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data["fonts"], 0, Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "fonts", JsonType::ARRAY );
+    validateJsonArray( json_data["fonts"], 0, JsonType::STRING );
 
     Json::Value& fonts = json_data["fonts"];
     for ( Json::ArrayIndex i = 0; i < fonts.size(); ++i )

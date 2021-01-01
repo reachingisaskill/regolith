@@ -43,7 +43,7 @@ namespace Regolith
 
       if ( it->second.surface != nullptr )
       {
-        DEBUG_STREAM << "Unloaded texture: " << name << " @ " << it->second.sdl_texture;
+        DEBUG_STREAM << "DataHandler::clear : Unloaded texture: " << name << " @ " << it->second.surface;
         SDL_FreeSurface( it->second.surface );
         it->second.surface = nullptr;
       }
@@ -73,7 +73,7 @@ namespace Regolith
 
       if ( it->second.text != nullptr )
       {
-        DEBUG_STREAM << "Unloaded text: " << name;
+        DEBUG_STREAM << "DataHandler::clear : Unloaded text: " << name;
         delete it->second.text;
         it->second.text = nullptr;
       }
@@ -86,7 +86,7 @@ namespace Regolith
 
       if ( it->second.music != nullptr )
       {
-        DEBUG_STREAM << "Unloaded music: " << name << " @ " << it->second.music;
+        DEBUG_STREAM << "DataHandler::clear : Unloaded music: " << name << " @ " << it->second.music;
         Mix_FreeMusic( it->second.music );
         it->second.music = nullptr;
       }
@@ -99,7 +99,7 @@ namespace Regolith
 
       if ( it->second.sound != nullptr )
       {
-        DEBUG_STREAM << "Unloaded sound: " << name << " @ " << it->second.sound;
+        DEBUG_STREAM << "DataHandler::clear : Unloaded sound: " << name << " @ " << it->second.sound;
         Mix_FreeChunk( it->second.sound );
         it->second.sound = nullptr;
       }

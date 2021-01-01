@@ -6,7 +6,6 @@
 #include "Regolith/Architecture/Component.h"
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/GamePlay/Timers.h"
-#include "Regolith/Utilities/Condition.h"
 
 #include <mutex>
 
@@ -15,6 +14,7 @@ namespace Regolith
 {
 
   class Context;
+  class ContextGroup;
   class DataHandler;
 
   typedef std::deque< Context* > ContextStack;
@@ -38,18 +38,32 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
     // Class members
     private:
+      // This manager handles input events
       InputManager& _inputManager;
+
+      // Stack of all contexts that are curent rendereable
       ContextStack _contextStack;
 
+      // Queue up pointers to the next context or context group to load. Context groups take priority
       Context* _openContext;
-      Context* _openContextGroup;
+      Context* _openContextStack;
+      ContextGroup* _openContextGroup;
+      ContextGroup* _currentContextGroup;
 
+      // Only draw the context stack between these two iterators
       ContextStack::reverse_iterator _visibleStackStart;
       ContextStack::reverse_iterator _visibleStackEnd;
 
+      // Count the frame times. Provide update time for loops and estimate FPS.
       FrameTimer _frameTimer;
 
+      // Store the pause state
       bool _pause;
+
+
+      // Mutex to control access to contexts
+      mutable std::mutex _renderMutex;
+
 
     protected:
       // Function which checks the current context stack and performs the queued operations
@@ -69,11 +83,19 @@ namespace Regolith
       // Returns a pointer to the current context with focus
       Context* currentContext() { return _contextStack.front(); }
 
-      // Tells the engine to push the context pointer to the top of the stack
+      // Returns a pointer to the current context group that owns the contents of the stack
+      ContextGroup* currentContextGroup() { return _currentContextGroup; }
+
+
+      // Tells the engine to push the context pointer to the top of the stack. Must be a member of the current context group
       void openContext( Context* );
 
+      // Tells the engine to push the context pointer to the top of the stack, once it has cleared.
+      // This context must be a member of the current context group.
+      void openContextStack( Context* );
+
       // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
-      void openContextGroup( Context* );
+      void openContextGroup( ContextGroup* );
 
 
       // Return the current estimated FPS of the engine

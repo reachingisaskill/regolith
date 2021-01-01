@@ -33,7 +33,7 @@ namespace Regolith
     DEBUG_LOG( "ContainerObject::configure : Configuring ContainerObject" );
     
     // Hitbox details
-    if ( Utilities::validateJson( json_data, "collision", Utilities::JSON_TYPE_OBJECT ) )
+    if ( validateJson( json_data, "collision", JsonType::OBJECT ) )
     {
       _collision.configure( json_data["collision"] );
     }

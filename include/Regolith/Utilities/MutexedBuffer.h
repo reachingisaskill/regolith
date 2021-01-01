@@ -5,6 +5,7 @@
 #include "Regolith/Global/Definitions.h"
 
 #include <mutex>
+#include <condition_variable>
 
 
 namespace Regolith
@@ -40,6 +41,10 @@ namespace Regolith
       size_t _elementCount;
       std::mutex _mutexCounter;
 
+      // Condition variables to wait on
+      std::condition_variable _waitData;
+      std::condition_variable _waitEmpty;
+
     public:
       MutexedBuffer();
 
@@ -51,13 +56,21 @@ namespace Regolith
       // Pop from back of the buffer
       bool pop( TYPE& );
 
-//      bool next( TYPE& );
-
+      // Clears all the data from the buffer using the calling thread.
+      // Other threads may still push behind this operation
       void clear();
 
+      // Returns the size stored in the internal counter
       size_t size();
 
+      // Returns true if the size is zero
       bool empty();
+
+      // Blocks the calling thread until data is entered. Then a single waiting thread is notified
+      void waitForData();
+
+      // Blocks the calling thread until size is zero. Then all waiting threads are notified
+      void waitForEmpty();
 
   };
 
@@ -109,6 +122,9 @@ namespace Regolith
 
     // Release the counter
     counterLock.unlock();
+
+    // Notify anyone waiting that the queue is now empty
+    _waitEmpty.notify_all();
 
     // Release the end
     startLock.unlock();
@@ -195,6 +211,9 @@ namespace Regolith
         break;
 
     }
+
+    // Notify anyone waiting that an element was pushed.
+    _waitData.notify_one();
 
     startLock.unlock();
   }
@@ -284,7 +303,16 @@ namespace Regolith
 
           // Update and release the counter
           --_elementCount;
-          counterLock.unlock();
+
+          if ( _elementCount == 0 )
+          {
+            counterLock.unlock();
+            _waitEmpty.notify_all();
+          }
+          else
+          {
+            counterLock.unlock();
+          }
 
 
 //          // Check that we can own the last element
@@ -309,7 +337,29 @@ namespace Regolith
     }
     return true;
   }
-  
+
+
+  template < class TYPE >
+  void MutexedBuffer< TYPE >::waitForData()
+  {
+    UniqueLock counterLock( _mutexCounter );
+
+    _waitData.wait( counterLock, [&]()->bool{ return _elementCount > 0; } );
+
+    counterLock.unlock();
+  }
+
+
+  template < class TYPE >
+  void MutexedBuffer< TYPE >::waitForEmpty()
+  {
+    UniqueLock counterLock( _mutexCounter );
+
+    _waitEmpty.wait( counterLock, [&]()->bool{ return _elementCount == 0; } );
+
+    counterLock.unlock();
+  }
+
 }
 
 #endif // REGOLITH_THREAD_SAFE_BUFFER_H_

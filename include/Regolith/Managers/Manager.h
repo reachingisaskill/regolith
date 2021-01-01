@@ -65,20 +65,14 @@ namespace Regolith
 
       // Useful global constants
       std::string _title;
-      SDL_Color _defaultColor;
 
       // Info for SDL user events
       Uint32 _eventStartIndex;
       SDL_Event _gameEvents[REGOLITH_EVENT_TOTAL];
 
-      // Global Physics info
-      Vector _gravityConst;
-      float _dragConst;
-
 
     protected:
       Manager();
-
 
       // Load the input device configuration
       void _loadInput( Json::Value& );
@@ -159,15 +153,8 @@ namespace Regolith
       ////////////////////////////////////////////////////////////////////////////////
       // Contexts and Data
 
-      // Return a pointer to the current active context - may become invalid after rendering!
+      // Return a pointer to the current active context - this is only  valid for the frame on which it is called
       Context* getCurrentContext() { return _theEngine.currentContext(); }
-
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // Access default constants
-
-      // Return the default colour
-      SDL_Color& getDefaultColour() { return _defaultColor; }
 
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -206,24 +193,18 @@ namespace Regolith
       // Context stack Interface.
       // Pushed context stack operations to the engine
 
-      // Opens the entry point of the current context group
-      void openEntryPoint();
+//      // Opens the entry point of the current context group
+//      void openEntryPoint();
 
       // Open a new context on top of the stack
       void openContext( Context* );
 
+      // Open a new context on an empty stack
+      void openContextStack( Context* );
+
       // Open a new context in place of the current one
       void openContextGroup( ContextGroup* );
 
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // Global Physics functions
-
-      // Return the constant g
-      inline Vector getGravity() { return _gravityConst; }
-
-      // Return the drag
-      inline float getDrag() { return _dragConst; }
   };
 
 }

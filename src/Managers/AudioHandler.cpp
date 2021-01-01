@@ -24,7 +24,7 @@ namespace Regolith
   void AudioHandler::configure( Json::Value& json_data, DataHandler& handler )
   {
     // Configure any playlists
-    if ( Utilities::validateJson( json_data, "playlists", Utilities::JSON_TYPE_OBJECT, false ) )
+    if ( validateJson( json_data, "playlists", JsonType::OBJECT, false ) )
     {
       Json::Value& playlist_data = json_data["playlists"];
       for ( Json::Value::iterator it = playlist_data.begin(); it != playlist_data.end(); ++it )
@@ -45,8 +45,19 @@ namespace Regolith
   }
 
 
-  void AudioHandler::initialise()
+  void AudioHandler::initialise( Json::Value& json_data, DataHandler& handler )
   {
+    // Build the playlists
+    if ( validateJson( json_data, "playlists", JsonType::OBJECT, false ) )
+    {
+      Json::Value& playlist_data = json_data["playlists"];
+      for ( Json::Value::iterator it = playlist_data.begin(); it != playlist_data.end(); ++it )
+      {
+        std::string name = it.key().asString();
+        _playlists[ name ].configure( (*it), handler );
+      }
+    }
+
     // Allocate audio channels for objects
     int size = _channelPauses.size();
     int result = Mix_AllocateChannels( size );
@@ -61,6 +72,15 @@ namespace Regolith
       ex.addDetail( "Received", result );
       ex.addDetail( "Mix Error", error );
       throw ex;
+    }
+  }
+
+
+  void AudioHandler::clear()
+  {
+    for ( PlaylistMap::iterator it = _playlists.begin(); it != _playlists.end(); ++it )
+    {
+      it->second.clear();
     }
   }
 
@@ -185,24 +205,6 @@ namespace Regolith
     }
 
     _state = MUSIC_STATE_STOPPED;
-  }
-
-
-  void AudioHandler::playSong( Music* music )
-  {
-    _manager.playTrack( music );
-  }
-
-
-  void AudioHandler::queueSong( Music* music )
-  {
-    _manager.queueTrack( music );
-  }
-
-
-  void AudioHandler::stopSong()
-  {
-    _manager.stopTrack();
   }
 
 

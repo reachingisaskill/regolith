@@ -272,21 +272,23 @@ namespace Regolith
     INFO_LOG( "Context::configure : Configuring Context" );
     _owner = &handler;
 
-    Utilities::validateJson( json_data, "layers", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "collision_handling", Utilities::JSON_TYPE_OBJECT );
+    DEBUG_STREAM << "Context::configure : Owner @ " << _owner;
+
+    validateJson( json_data, "layers", JsonType::OBJECT );
+    validateJson( json_data, "collision_handling", JsonType::OBJECT );
 
     // Configure the collision rules
     _theCollision.configure( json_data["collision_handling"] );
 
     // Configure the input mapping if one is required
-    if ( Utilities::validateJson( json_data, "input_mapping", Utilities::JSON_TYPE_STRING, false ) )
+    if ( validateJson( json_data, "input_mapping", JsonType::STRING, false ) )
     {
       _theInput.configure( json_data["input_mapping"].asString() );
     }
 
 
     // Pause behaviour
-    if ( Utilities::validateJson( json_data, "pauseable", Utilities::JSON_TYPE_BOOLEAN, false ) )
+    if ( validateJson( json_data, "pauseable", JsonType::BOOLEAN, false ) )
     {
       _pauseable = json_data["pauseable"].asBool();
       DEBUG_STREAM << "Context::configure : Context " << ( _pauseable ? "is" : "is not" ) << " pauseable";
@@ -300,18 +302,18 @@ namespace Regolith
       Json::Value& layer_data = *layer_it;
 
       // Validate required keys
-      Utilities::validateJson( layer_data, "position", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( layer_data, "width", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( layer_data, "height", Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJson( layer_data, "objects", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( layer_data, "spawns", Utilities::JSON_TYPE_ARRAY );
-      Utilities::validateJson( layer_data, "movement_scale", Utilities::JSON_TYPE_ARRAY );
+      validateJson( layer_data, "position", JsonType::ARRAY );
+      validateJson( layer_data, "width", JsonType::FLOAT );
+      validateJson( layer_data, "height", JsonType::FLOAT );
+      validateJson( layer_data, "objects", JsonType::ARRAY );
+      validateJson( layer_data, "spawns", JsonType::ARRAY );
+      validateJson( layer_data, "movement_scale", JsonType::ARRAY );
 
       // Validate array types
-      Utilities::validateJsonArray( layer_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
-      Utilities::validateJsonArray( layer_data["objects"], 0, Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJsonArray( layer_data["spawns"], 0, Utilities::JSON_TYPE_OBJECT );
-      Utilities::validateJsonArray( layer_data["movement_scale"], 2, Utilities::JSON_TYPE_FLOAT );
+      validateJsonArray( layer_data["position"], 2, JsonType::FLOAT );
+      validateJsonArray( layer_data["objects"], 0, JsonType::OBJECT );
+      validateJsonArray( layer_data["spawns"], 0, JsonType::OBJECT );
+      validateJsonArray( layer_data["movement_scale"], 2, JsonType::FLOAT );
 
       std::string layer_name = layer_it.key().asString();
       INFO_STREAM << "Building context layer: " << layer_name;
@@ -338,7 +340,7 @@ namespace Regolith
       Json::Value& object_data = layer_data["objects"];
       for  ( Json::ArrayIndex i = 0; i < object_data.size(); ++i )
       {
-        Utilities::validateJson( object_data[i], "name", Utilities::JSON_TYPE_STRING );
+        validateJson( object_data[i], "name", JsonType::STRING );
 
         std::string object_name = object_data[i]["name"].asString();
         INFO_STREAM << "Adding game object into context layer: " << object_name;
@@ -346,7 +348,7 @@ namespace Regolith
         PhysicalObject* object;
 
         // If a global object is requested
-        if ( Utilities::validateJson( object_data[i], "global", Utilities::JSON_TYPE_BOOLEAN, false ) && object_data[i]["global"].asBool() )
+        if ( validateJson( object_data[i], "global", JsonType::BOOLEAN, false ) && object_data[i]["global"].asBool() )
         {
           object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getPhysicalObject( object_name );
         }
@@ -387,7 +389,7 @@ namespace Regolith
       Json::Value& spawn_data = layer_data["spawns"];
       for ( Json::ArrayIndex j = 0; j < spawn_data.size(); ++j )
       {
-        Utilities::validateJson( spawn_data[j], "name", Utilities::JSON_TYPE_STRING );
+        validateJson( spawn_data[j], "name", JsonType::STRING );
 
         std::string spawn_name = spawn_data[j]["name"].asString();
         INFO_STREAM << "Context::configure : Spawning game object into context layer: " << spawn_name;
@@ -395,7 +397,7 @@ namespace Regolith
         PhysicalObject* object;
 
         // If a global object is requested
-        if ( Utilities::validateJson( spawn_data[j], "global", Utilities::JSON_TYPE_BOOLEAN, false ) && spawn_data[j]["global"].asBool() )
+        if ( validateJson( spawn_data[j], "global", JsonType::BOOLEAN, false ) && spawn_data[j]["global"].asBool() )
         {
 
           object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->spawnPhysicalObject( spawn_name );
@@ -449,9 +451,9 @@ namespace Regolith
     DEBUG_LOG( "Context::configureObject : Placing in Layer" );
 
     // Load the absolute position
-    if ( Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY, false ) )
+    if ( validateJson( json_data, "position", JsonType::ARRAY, false ) )
     {
-      Utilities::validateJsonArray( json_data["position"], 2, Utilities::JSON_TYPE_FLOAT );
+      validateJsonArray( json_data["position"], 2, JsonType::FLOAT );
       Vector pos( 0.0 );
 
       float x = json_data["position"][0].asFloat();
@@ -462,9 +464,9 @@ namespace Regolith
     }
 
     // Load the alignment info
-    if ( Utilities::validateJson( json_data, "alignment", Utilities::JSON_TYPE_ARRAY, false ) )
+    if ( validateJson( json_data, "alignment", JsonType::ARRAY, false ) )
     {
-      Utilities::validateJsonArray( json_data["alignment"], 2, Utilities::JSON_TYPE_STRING );
+      validateJsonArray( json_data["alignment"], 2, JsonType::STRING );
       Vector offset( 0.0 );
 
       if ( json_data["alignment"][0].asString() == "center" )
@@ -489,9 +491,9 @@ namespace Regolith
     }
 
     // Load the velocity
-    if ( Utilities::validateJson( json_data, "velocity", Utilities::JSON_TYPE_ARRAY, false ) )
+    if ( validateJson( json_data, "velocity", JsonType::ARRAY, false ) )
     {
-      Utilities::validateJsonArray( json_data["velocity"], 2, Utilities::JSON_TYPE_FLOAT );
+      validateJsonArray( json_data["velocity"], 2, JsonType::FLOAT );
       Vector vel( 0.0 );
 
       vel.x() = json_data["velocity"][0].asFloat();

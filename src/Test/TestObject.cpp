@@ -1,21 +1,16 @@
 
 #include "Regolith/Test/TestObject.h"
 #include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Utilities/JsonValidation.h"
 
 
 namespace Regolith
 {
 
   TestObject::TestObject() :
-    PhysicalObject(),
-    _someData(1000)
+    PhysicalObject()
   {
-    INFO_LOG( "TestObject::TestObject : Creating null object" );
-
-    for ( unsigned int i = 0; i < 1000; ++i )
-    {
-      _someData[i] = i;
-    }
+    INFO_LOG( "TestObject::TestObject : Creating test object" );
   }
 
 
@@ -25,8 +20,17 @@ namespace Regolith
   }
 
 
-  void TestObject::configure( Json::Value&, ContextGroup& )
+  void TestObject::configure( Json::Value& json_data, ContextGroup& /*cg*/ )
   {
+//    PhysicalObject::configure( json_data, cg );
+
+    if ( validateJson( json_data, "load_time", JsonType::INTEGER, false ) )
+    {
+      unsigned int sleep = json_data["load_time"].asInt();
+      DEBUG_STREAM << "TestObject::configure : Configuring for " << sleep << " milliseconds.";
+
+      std::this_thread::sleep_for( std::chrono::milliseconds( sleep ) );
+    }
   }
 }
 

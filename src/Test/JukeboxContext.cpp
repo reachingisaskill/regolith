@@ -32,11 +32,11 @@ namespace Regolith
     // Configure the base class
     Context::configure( json_data, cg );
 
-    Utilities::validateJson( json_data, "playlist", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "playlist", JsonType::STRING );
     _playlist = cg.getAudioHandler().getPlaylist( json_data["playlist"].asString() );
 
 
-    Utilities::validateJson( json_data, "status_string", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "status_string", JsonType::STRING );
     PhysicalObject* status_phys = cg.getPhysicalObject( json_data["status_string"].asString() );
     _status = dynamic_cast<StatusString*>( status_phys );
 

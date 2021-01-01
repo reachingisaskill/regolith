@@ -31,7 +31,7 @@ namespace Regolith
   void InputActionSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Action Signal" );
-    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "action", JsonType::STRING );
     _theAction = getActionID( json_data["action"].asString() );
   }
 
@@ -55,8 +55,8 @@ namespace Regolith
   void InputBooleanSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Boolean Signal" );
-    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "value", Utilities::JSON_TYPE_BOOLEAN );
+    validateJson( json_data, "action", JsonType::STRING );
+    validateJson( json_data, "value", JsonType::BOOLEAN );
 
     InputAction action = getActionID( json_data["action"].asString() );
     bool value = json_data["value"].asBool();
@@ -86,8 +86,8 @@ namespace Regolith
   void InputFloatSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Float Signal" );
-    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "value", Utilities::JSON_TYPE_FLOAT );
+    validateJson( json_data, "action", JsonType::STRING );
+    validateJson( json_data, "value", JsonType::FLOAT );
 
     InputAction action = getActionID( json_data["action"].asString() );
     bool value = json_data["value"].asFloat();
@@ -117,9 +117,9 @@ namespace Regolith
   void InputVectorSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Vector Signal" );
-    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "vector", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJsonArray( json_data, 2, Utilities::JSON_TYPE_FLOAT );
+    validateJson( json_data, "action", JsonType::STRING );
+    validateJson( json_data, "vector", JsonType::ARRAY );
+    validateJsonArray( json_data, 2, JsonType::FLOAT );
 
     InputAction action = getActionID( json_data["action"].asString() );
     Vector value( json_data["vector"][0].asFloat(), json_data["vector"][1].asFloat() );
@@ -150,10 +150,10 @@ namespace Regolith
   void InputMouseSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     INFO_LOG( " Input Mouse Signal" );
-    Utilities::validateJson( json_data, "action", Utilities::JSON_TYPE_STRING );
-    Utilities::validateJson( json_data, "position", Utilities::JSON_TYPE_ARRAY );
-    Utilities::validateJson( json_data, "click", Utilities::JSON_TYPE_BOOLEAN );
-    Utilities::validateJsonArray( json_data, 2, Utilities::JSON_TYPE_FLOAT );
+    validateJson( json_data, "action", JsonType::STRING );
+    validateJson( json_data, "position", JsonType::ARRAY );
+    validateJson( json_data, "click", JsonType::BOOLEAN );
+    validateJsonArray( json_data, 2, JsonType::FLOAT );
 
     InputAction action = getActionID( json_data["action"].asString() );
     Vector position( json_data["vector"][0].asFloat(), json_data["vector"][1].asFloat() );
@@ -182,7 +182,7 @@ namespace Regolith
 
   void GameEventSignal::configure( Json::Value& json_data, ContextGroup& )
   {
-    Utilities::validateJson( json_data, "event", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "event", JsonType::STRING );
 
     _theEvent = getRegolithEventID( json_data["event"].asString() );
   }
@@ -221,10 +221,35 @@ namespace Regolith
 
   void OpenContextSignal::configure( Json::Value& json_data, ContextGroup& cg )
   {
-    Utilities::validateJson( json_data, "context_name", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "context_name", JsonType::STRING );
     _theContext = cg.getContextPointer( json_data["context_name"].asString() );
 
     INFO_STREAM << "OpenContextSignal::configure : Registered context with name: " << json_data["context_name"].asString();
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Context Stack Change Signal
+
+  OpenContextStackSignal::OpenContextStackSignal() :
+    _theContext()
+  {
+  }
+
+
+  void OpenContextStackSignal::trigger() const
+  {
+    DEBUG_LOG( "OpenContextStackSignal::trigger : Opening context" );
+    Manager::getInstance()->openContextStack( *_theContext );
+  }
+
+
+  void OpenContextStackSignal::configure( Json::Value& json_data, ContextGroup& cg )
+  {
+    validateJson( json_data, "context_name", JsonType::STRING );
+    _theContext = cg.getContextPointer( json_data["context_name"].asString() );
+
+    INFO_STREAM << "OpenContextStackSignal::configure : Registered context with name: " << json_data["context_name"].asString();
   }
 
 
@@ -240,13 +265,13 @@ namespace Regolith
   void OpenContextGroupSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextGroupSignal::trigger : Opening context group" );
-    Manager::getInstance()->getContextManager().setNextContextGroup( _theContextGroup );
+    Manager::getInstance()->openContextGroup( _theContextGroup );
   }
 
 
   void OpenContextGroupSignal::configure( Json::Value& json_data, ContextGroup& )
   {
-    Utilities::validateJson( json_data, "context_group", Utilities::JSON_TYPE_STRING );
+    validateJson( json_data, "context_group", JsonType::STRING );
     _theContextGroup = Manager::getInstance()->getContextManager().getContextGroup( json_data["context_group"].asString() );
 
     INFO_STREAM << "OpenContextGroupSignal::configure : Registered context group with name : " << json_data["context_group"].asString();

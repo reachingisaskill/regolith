@@ -10,9 +10,10 @@ namespace Regolith
   TestContext::TestContext() :
     Context(),
     _cg_load( nullptr ),
+    _child_load( nullptr ),
     _timer(),
-    _deathTimer(),
-    _isLoadScreen( false )
+    _childTimer(),
+    _deathTimer()
   {
     INFO_LOG( "TestContext::TestContext : Null Context Created" );
   }
@@ -30,30 +31,37 @@ namespace Regolith
     Context::configure( json_data, group );
 
     // Perform some tests specfied in the "tests" sectino
-    Utilities::validateJson( json_data, "tests", Utilities::JSON_TYPE_OBJECT );
+    validateJson( json_data, "tests", JsonType::OBJECT );
     Json::Value& tests = json_data["tests"];
 
     // Load the name of this context
-    Utilities::validateJson( tests, "name", Utilities::JSON_TYPE_STRING );
+    validateJson( tests, "name", JsonType::STRING );
     _name = tests["name"].asString();
 
+    // Load a child context
+    if ( validateJson( tests, "child_context_loading", JsonType::OBJECT, false ) )
+    {
+      Json::Value& cg_loading_data = tests["child_context_loading"];
+      validateJson( cg_loading_data, "wait_for", JsonType::INTEGER );
+      validateJson( cg_loading_data, "context", JsonType::STRING );
+
+      INFO_STREAM << "TestContext::configure : Testing the child context loading functionality, Context Group : " << cg_loading_data["context"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " milliseconds.";
+
+      _childTimer.configure( cg_loading_data["wait_for"].asFloat(), 1 );
+      _child_load = group.getContextPointer( cg_loading_data["context"].asString() );
+    }
+
     // Test loading another context group
-    if ( Utilities::validateJson( tests, "context_group_loading", Utilities::JSON_TYPE_OBJECT, false ) )
+    if ( validateJson( tests, "context_group_loading", JsonType::OBJECT, false ) )
     {
       Json::Value& cg_loading_data = tests["context_group_loading"];
-      Utilities::validateJson( cg_loading_data, "wait_for", Utilities::JSON_TYPE_INTEGER );
-      Utilities::validateJson( cg_loading_data, "context_group", Utilities::JSON_TYPE_STRING );
+      validateJson( cg_loading_data, "wait_for", JsonType::INTEGER );
+      validateJson( cg_loading_data, "context_group", JsonType::STRING );
 
-      INFO_STREAM << "TestContext::configure : Testing the context group loading functionality, Context Group : " << cg_loading_data["context_group"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " seconds.";
+      INFO_STREAM << "TestContext::configure : Testing the context group loading functionality, Context Group : " << cg_loading_data["context_group"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " milliseconds.";
 
       _timer.configure( cg_loading_data["wait_for"].asFloat(), 1 );
       _cg_load = Manager::getInstance()->getContextManager().getContextGroup( cg_loading_data["context_group"].asString() );
-    }
-
-    // If this iteration is acting as a load_screen
-    if ( Utilities::validateJson( tests, "load_screen", Utilities::JSON_TYPE_BOOLEAN, false ) )
-    {
-      _isLoadScreen = tests["load_screen"].asBool();
     }
 
     _deathTimer.configure( 5000.0, 1 ); // Kill self after 5 seconds
@@ -69,12 +77,9 @@ namespace Regolith
 
     _timer.reset();
 
-    _deathTimer.reset();
+    _childTimer.reset();
 
-    if ( _isLoadScreen )
-    {
-      Manager::getInstance()->getContextManager().loadNextContextGroup();
-    }
+    _deathTimer.reset();
   }
 
 
@@ -93,22 +98,18 @@ namespace Regolith
     if ( _timer.trigger( timestep ) )
     {
       DEBUG_STREAM << "TestContext::updateContext " << _name << " : Opening new context group";
-      Manager::getInstance()->openContextGroup( _cg_load );
+      manager->openContextGroup( _cg_load );
     }
 
-    if ( _isLoadScreen )
+    if ( _childTimer.trigger( timestep ) )
     {
-      if ( manager->getContextManager().isLoaded() )
-      {
-        DEBUG_STREAM <<  "TestContext::updateContext " << _name << " : Load screen complete.";
-        manager->openEntryPoint();
-        this->stopContext();
-      }
-
+      DEBUG_STREAM << "TestContext::updateContext " << _name << " : Opening child context @ " << *_child_load;
+      manager->openContext( *_child_load );
     }
 
     if ( _deathTimer.trigger( timestep ) )
     {
+      DEBUG_STREAM << "TestContext::updateContext " << _name << " : Suicide";
       this->stopContext();
     }
   }

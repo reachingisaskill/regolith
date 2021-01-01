@@ -33,9 +33,9 @@ namespace Regolith
 
   void BonkObject::configure( Json::Value& json_data, ContextGroup& cg )
   {
-    Utilities::validateJson( json_data, "collision", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "texture", Utilities::JSON_TYPE_OBJECT );
-    Utilities::validateJson( json_data, "bonk", Utilities::JSON_TYPE_OBJECT );
+    validateJson( json_data, "collision", JsonType::OBJECT );
+    validateJson( json_data, "texture", JsonType::OBJECT );
+    validateJson( json_data, "bonk", JsonType::OBJECT );
 
     // Configure the parent class first
     PhysicalObject::configure( json_data, cg);
