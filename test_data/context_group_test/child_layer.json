@@ -1,0 +1,15 @@
+{
+  "position" : [ 0.0, 0.0 ],
+  "width" : 1024.0,
+  "height" : 768.0,
+  "movement_scale" : [ 1.0, 1.0 ],
+  "objects" :
+  [
+    {
+      "name" : "child_context_status",
+      "position" : [ 200, 150 ]
+    }
+  ],
+  "spawns" : []
+}
+

@@ -3,24 +3,25 @@
 
   "entry_point" : null,
 
-  "music" :
-  {
-    "playlists" :
-    {
-      "default" :
-      {
-        "tracks" :
-        [
-          {
-            "music_track" : "a_beat",
-            "play_count" : 0
-          }
-        ]
-      }
-    },
+  "default_playlist" : "default",
 
-    "default_playlist" : "default"
+  "include_files" : [],
+
+
+  "playlists" :
+  {
+    "default" :
+    {
+      "tracks" :
+      [
+        {
+          "music_track" : "a_beat",
+          "play_count" : 0
+        }
+      ]
+    }
   },
+
 
   "game_objects" : 
   {

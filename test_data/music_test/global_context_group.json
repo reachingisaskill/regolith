@@ -3,7 +3,9 @@
 
   "entry_point" : null,
 
-  "music" :
+  "include_files" : [],
+
+  "playlists" :
   {
   },
 

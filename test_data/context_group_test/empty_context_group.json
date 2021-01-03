@@ -3,7 +3,12 @@
 
   "entry_point" : "context_2",
 
-  "music" :
+  "include_files" : 
+  [
+    "test_data/context_group_test/include_child.json"
+  ],
+
+  "playlists" :
   {
   },
 

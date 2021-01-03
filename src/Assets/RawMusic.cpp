@@ -10,6 +10,7 @@ namespace Regolith
     RawMusic raw_music;
 
     raw_music.music = Mix_LoadMUS( details.filename.c_str() );
+    DEBUG_STREAM << "loadRawMusic : Loaded music data : " << details.filename << " @ " << raw_music.music;
 
     if ( raw_music.music == nullptr )
     {

@@ -12,21 +12,7 @@
 
   "layers" :
   {
-    "the_layer" :
-    {
-      "position" : [ 0.0, 0.0 ],
-      "width" : 1024.0,
-      "height" : 768.0,
-      "movement_scale" : [ 1.0, 1.0 ],
-      "objects" :
-      [
-        {
-          "name" : "child_context_status",
-          "position" : [ 200, 150 ]
-        }
-      ],
-      "spawns" : []
-    }
+    "the_layer" : "test_data/context_group_test/child_layer.json"
   },
   
   "camera" :
@@ -38,12 +24,7 @@
 
   "tests" :
   {
-    "name" : "context_child",
-    "context_group_loading" :
-    {
-      "wait_for" : 2000,
-      "context_group" : "empty_context_group"
-    }
+    "name" : "context_child"
   }
 }
 
