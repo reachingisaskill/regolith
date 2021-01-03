@@ -299,7 +299,16 @@ namespace Regolith
     Json::Value& layers = json_data["layers"];
     for ( Json::Value::iterator layer_it = layers.begin(); layer_it != layers.end(); ++layer_it )
     {
-      Json::Value& layer_data = *layer_it;
+      Json::Value layer_data;
+      // If the layer is a file name, open it
+      if ( layer_it->isString() )
+      {
+        loadJsonData( layer_data, layer_it->asString() );
+      }
+      else
+      {
+        layer_data = *layer_it;
+      }
 
       // Validate required keys
       validateJson( layer_data, "position", JsonType::ARRAY );
