@@ -27,10 +27,6 @@ namespace Regolith
 
   class ContextGroup
   {
-    public:
-//      class Operation;
-
-////////////////////////////////////////////////////////////////////////////////
     private:
       typedef std::map<std::string, SpawnBuffer> SpawnBufferMap;
 //      typedef std::queue<Operation> OperationQueue;
@@ -38,6 +34,18 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////
     private:
+
+      // Configures null pointers for all the game objects, spawn buffers, contexts and playlists
+      void _configureData( Json::Value& );
+
+      // Loads the data for all the game objects, spawn buffers, contexts and playlists
+      void _loadPlaylists( Json::Value& );
+      void _loadObjects( Json::Value& );
+      void _loadSpawnBuffers( Json::Value& );
+      void _loadContexts( Json::Value& );
+
+
+////////////////////////////////////////////////////////////////////////////////
       // Set the number of objects to render per frame when loading this group
       unsigned int _renderRate;
 
@@ -64,9 +72,6 @@ namespace Regolith
 
       // List of all the spawned physical objects used by the contexts
       SpawnBufferMap _spawnBuffers;
-
-//      // Operations to trigger on load - Messaging the contexts before they have loaded.
-//      OperationQueue _onLoadOperations;
 
       // Starting point when this context group is loaded
       Context** _entryPoint;
@@ -195,43 +200,6 @@ namespace Regolith
       Spawner getSpawner( std::string, ContextLayer* );
 
   };
-
-
-
-
-
-
-
-
-
-
-
-
-  /*
-    // Context Group Operations
-
-    class Operation
-    {
-      public:
-        enum OperationType
-        {
-          ACTION_NULL,
-          ACTION_SET_ENTRY_POINT
-        };
-
-      private:
-        OperationType _operation;
-        std::string _key;
-        std::string _value;
-
-      public:
-        Operation( OperationType, std::string, std::string = std::string("") );
-
-        void trigger( ContextGroup* );
-
-    };
-  */
-
 
 }
 

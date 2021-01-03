@@ -39,6 +39,11 @@
   "tests" :
   {
     "name" : "context_1",
+    "context_group_loading" :
+    {
+      "wait_for" : 3000,
+      "context_group" : "empty_context_group"
+    },
     "child_context_loading" : 
     {
       "context" : "context_child",

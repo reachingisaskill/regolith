@@ -21,43 +21,39 @@ namespace Regolith
   }
 
 
-  void AudioHandler::configure( Json::Value& json_data, DataHandler& handler )
+  void AudioHandler::configure( Json::Value& json_data, DataHandler& /*handler*/ )
   {
     // Configure any playlists
-    if ( validateJson( json_data, "playlists", JsonType::OBJECT, false ) )
+    for ( Json::Value::iterator it = json_data.begin(); it != json_data.end(); ++it )
     {
-      Json::Value& playlist_data = json_data["playlists"];
-      for ( Json::Value::iterator it = playlist_data.begin(); it != playlist_data.end(); ++it )
+      std::string name = it.key().asString();
+      DEBUG_STREAM << "AudioHandler::configure : Configured empty playlist : " << name;
+
+      if ( _playlists.find( name ) != _playlists.end() )
       {
-        std::string name = it.key().asString();
-
-        if ( _playlists.find( name ) != _playlists.end() )
-        {
-          WARN_STREAM << "AudioHandler::configure : Cannot add playlist found with existing name : " << name;
-          continue;
-        }
-
-        _playlists[ name ] = Playlist();
-        _playlists[ name ].configure( (*it), handler );
+        WARN_STREAM << "AudioHandler::configure : Cannot add playlist found with existing name : " << name;
+        continue;
       }
-    }
 
+      _playlists[ name ] = Playlist();
+    }
   }
 
 
-  void AudioHandler::initialise( Json::Value& json_data, DataHandler& handler )
+  void AudioHandler::load( Json::Value& json_data, DataHandler& handler )
   {
     // Build the playlists
-    if ( validateJson( json_data, "playlists", JsonType::OBJECT, false ) )
+    for ( Json::Value::iterator it = json_data.begin(); it != json_data.end(); ++it )
     {
-      Json::Value& playlist_data = json_data["playlists"];
-      for ( Json::Value::iterator it = playlist_data.begin(); it != playlist_data.end(); ++it )
-      {
-        std::string name = it.key().asString();
-        _playlists[ name ].configure( (*it), handler );
-      }
+      std::string name = it.key().asString();
+      DEBUG_STREAM << "AudioHandler::configure : Loaded playlist : " << name;
+      _playlists[ name ].configure( (*it), handler );
     }
+  }
 
+
+  void AudioHandler::initialise()
+  {
     // Allocate audio channels for objects
     int size = _channelPauses.size();
     int result = Mix_AllocateChannels( size );

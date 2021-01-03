@@ -3,7 +3,10 @@
 
   "entry_point" : "the_context",
 
-  "music" :
+  "include_files" : [],
+
+
+  "playlists" :
   {
   },
 

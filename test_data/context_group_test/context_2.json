@@ -38,7 +38,12 @@
 
   "tests" :
   {
-    "name" : "context_2"
+    "name" : "context_2",
+    "child_context_loading" : 
+    {
+      "context" : "context_child",
+      "wait_for" : 2000
+    }
   }
 }
 

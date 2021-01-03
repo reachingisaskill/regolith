@@ -52,11 +52,14 @@ namespace Regolith
       ~AudioHandler();
 
 
-      // Load all playlists, etc
+      // Configure all playlists
       void configure( Json::Value&, DataHandler& );
 
+      // Load the music files
+      void load( Json::Value&, DataHandler& );
+
       // Allocate audio channels for the objects
-      void initialise( Json::Value&, DataHandler& );
+      void initialise();
 
       // Clears all the memory stored within this handler while the context group is unloaded.
       void clear();
