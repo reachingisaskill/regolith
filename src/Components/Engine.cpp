@@ -176,6 +176,7 @@ namespace Regolith
       if ( _contextStack.empty() )
       {
         modified = true;
+        _openContext = nullptr; // Stop us from accidentally using a context from the old context group
 
         DEBUG_LOG( "Engine::performStackOperations : Opening new context stack." );
         // If the context groups change

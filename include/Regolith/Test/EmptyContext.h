@@ -21,6 +21,18 @@ namespace Regolith
       // Configure the death timer.
       virtual void onStart() override;
 
+      // Updates the camera position
+      virtual Vector updateCamera( float ) const override { return Vector(); }
+
+      // Called for each object that is flagged to have global physics
+      virtual void updatePhysics( PhysicalObject*, float ) const {}
+
+      // Updates the internal state of the context. Nothing to do here.
+      virtual void updateContext( float ) override;
+
+      // Called at the end of the render loop to do any context-specific rendering (e.g. transitions)
+      virtual void renderContext( Camera& ) {}
+
     public:
       // Trivial Constructor
       EmptyContext();
@@ -32,17 +44,6 @@ namespace Regolith
       // Title Scenes take ownership of the display.
       virtual bool overridesPreviousContext() const override { return true; }
 
-
-      // Updates the camera position
-      virtual Vector updateCamera( float ) const override { return Vector(); }
-
-
-      // Called for each object that is flagged to have global physics
-      virtual void updatePhysics( PhysicalObject*, float ) const {}
-
-
-      // Updates the internal state of the context. Nothing to do here.
-      virtual void updateContext( float ) override;
   };
 
 }

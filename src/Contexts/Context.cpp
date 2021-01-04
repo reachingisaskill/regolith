@@ -262,6 +262,9 @@ namespace Regolith
         }
       }
     }
+
+    // Call inherited function to do any context-specific rendering. (e.g. transition effects)
+    renderContext( camera );
   }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////// 

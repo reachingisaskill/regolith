@@ -7,5 +7,22 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 
+
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+#define REGOLITH_R_MASK 0xff000000
+#define REGOLITH_G_MASK 0x00ff0000
+#define REGOLITH_B_MASK 0x0000ff00
+#define REGOLITH_A_MASK 0x000000ff
+#else
+#define REGOLITH_R_MASK 0x000000ff
+#define REGOLITH_G_MASK 0x0000ff00
+#define REGOLITH_B_MASK 0x00ff0000
+#define REGOLITH_A_MASK 0xff000000
+#endif
+
+#define REGOLITH_PIXEL_DEPTH 32
+
+
+
 #endif // REGOLITH_GLOBAL_SDL_H_
 

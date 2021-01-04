@@ -16,8 +16,8 @@ namespace Regolith
   {
     private:
       std::string _name;
-      ContextGroup* _cg_load;
-      Context** _child_load;
+      ContextGroup* _cgLoad;
+      Context** _childLoad;
       CountdownTimer _timer;
       CountdownTimer _childTimer;
       CountdownTimer _deathTimer;
@@ -28,7 +28,17 @@ namespace Regolith
       virtual void onPause() override {}
       virtual void onResume() override {}
 
+      // Updates the camera position
+      virtual Vector updateCamera( float ) const override { return Vector(); }
+
+      // Called for each object that is flagged to have global physics
+      virtual void updatePhysics( PhysicalObject*, float ) const {}
+
+      // Update the state of the context
       virtual void updateContext( float ) override;
+
+      // Called at the end of the render loop to do any context-specific rendering (e.g. transitions)
+      virtual void renderContext( Camera& ) override {}
 
     public:
       // Trivial Constructor
@@ -44,13 +54,6 @@ namespace Regolith
 
       // Title Scenes take ownership of the display.
       virtual bool overridesPreviousContext() const override { return false; }
-
-      // Updates the camera position
-      virtual Vector updateCamera( float ) const override { return Vector(); }
-
-      // Called for each object that is flagged to have global physics
-      virtual void updatePhysics( PhysicalObject*, float ) const {}
-
 
 //////////////////////////////////////////////////
       // Requirements for the ControllableInterface - input action handling

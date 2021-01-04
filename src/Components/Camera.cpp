@@ -56,10 +56,6 @@ namespace Regolith
       ex.addDetail( "SDL error", SDL_GetError() );
       throw ex;
     }
-
-//      SDL_SetTextureColorMod( _rawTexture->sdl_texture, raw_texture->colourMod.r, raw_texture->colourMod.g, raw_texture->colourMod.b );
-//      SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, raw_texture->alpha );
-//      SDL_SetTextureBlendMode( _rawTexture->sdl_texture, raw_texture->blendmode );
   }
 
 
@@ -81,10 +77,6 @@ namespace Regolith
         throw ex;
       }
 
-//      SDL_SetTextureColorMod( _rawTexture->sdl_texture, red, green, blue );
-//      SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, alpha );
-//      SDL_SetTextureBlendMode( _rawTexture->sdl_texture, blendmode );
-
       // Update the texture with the new SDL_Texture
       texture.setRenderedTexture( temp_texture );
     }
@@ -105,6 +97,8 @@ namespace Regolith
     {
       renderTexture( texture );
     }
+
+    DEBUG_STREAM << "Camera::renderDrawableObject : " << _targetRect.x << ", " << _targetRect.y << ", " << _targetRect.w << ", " << _targetRect.h << " @ " << texture.getSDLTexture();
 
     // Render to the back bufer
     SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), texture.getTextureCenter(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
