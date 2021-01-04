@@ -14,6 +14,7 @@ namespace Regolith
     _theWindow( window ),
     _theRenderer( renderer ),
     _defaultColour( { 0, 0, 0, 255 } ),
+    _windowRect( { 0, 0, 0, 0 } ),
     _width( width ),
     _height( height ),
     _scaleX( scalex ),
@@ -25,6 +26,7 @@ namespace Regolith
 
   void Camera::resetRender() const
   {
+    SDL_SetRenderDrawBlendMode( _theRenderer, SDL_BLENDMODE_NONE );
     SDL_SetRenderDrawColor( _theRenderer, _defaultColour.r, _defaultColour.g, _defaultColour.b, _defaultColour.a );
     SDL_RenderClear( _theRenderer );
   }
@@ -108,6 +110,17 @@ namespace Regolith
   void Camera::clearTexture( Texture& texture )
   {
     texture.clearSDLTexture();
+  }
+
+
+  void Camera::fillWindow( SDL_Color& colour )
+  {
+    _windowRect.w = _width;
+    _windowRect.h = _height;
+    DEBUG_STREAM << "Camera::fillWindow : Filling window : " << _windowRect.x << ", " << _windowRect.y << ", " << _windowRect.w << ", " << _windowRect.h;
+    SDL_SetRenderDrawBlendMode( _theRenderer, SDL_BLENDMODE_BLEND );
+    SDL_SetRenderDrawColor( _theRenderer, colour.r, colour.g, colour.b, colour.a );
+    SDL_RenderFillRect( _theRenderer, &_windowRect );
   }
 
 }

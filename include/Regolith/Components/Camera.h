@@ -19,6 +19,8 @@ namespace Regolith
 //      float _zoom;
       SDL_Color _defaultColour;
 
+      SDL_Rect _windowRect;
+
       // References to the dimensions of the displayed area
       const int& _width;
       const int& _height;
@@ -72,6 +74,10 @@ namespace Regolith
 
       // Destroys the sdl texture object
       void clearTexture( Texture& );
+
+
+      // Fills the displayable area with the colour provided
+      void fillWindow( SDL_Color& );
   };
 
 }

@@ -16,6 +16,10 @@ namespace Regolith
   {
     private:
       CountdownTimer _death;
+      bool _fading;
+      float _time;
+      float _fadeTime;
+      SDL_Color _fadeColour;
 
     protected:
       // Configure the death timer.
@@ -31,7 +35,7 @@ namespace Regolith
       virtual void updateContext( float ) override;
 
       // Called at the end of the render loop to do any context-specific rendering (e.g. transitions)
-      virtual void renderContext( Camera& ) {}
+      virtual void renderContext( Camera& );
 
     public:
       // Trivial Constructor
