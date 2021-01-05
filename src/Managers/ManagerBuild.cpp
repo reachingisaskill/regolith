@@ -107,7 +107,7 @@ namespace Regolith
       throw ex;
     }
 
-    this->configureEvents();
+    this->_configureEvents();
   }
 
 
@@ -160,7 +160,7 @@ namespace Regolith
     {
       std::string team_name = it.key().asString();
       CollisionTeam id = (CollisionTeam) it->asInt();
-      addCollisionTeam( team_name, id );
+      _teamNames[ team_name ] = id;
     }
   }
 
@@ -170,9 +170,9 @@ namespace Regolith
     INFO_LOG( "Manager::_loadTeams : Loading collision type map" );
     for ( Json::Value::const_iterator it = json_data.begin(); it != json_data.end(); ++it )
     {
-      std::string team_name = it.key().asString();
+      std::string type_name = it.key().asString();
       CollisionType id = (CollisionType) it->asInt();
-      addCollisionType( team_name, id );
+      _typeNames[ type_name ] = id;
     }
   }
 
@@ -198,6 +198,32 @@ namespace Regolith
     INFO_LOG( "Manager::_loadContexts : Loading contexts" );
 
     _theContexts.configure( context_data );
+  }
+
+
+  void Manager::_configureEvents()
+  {
+    // Load user events, etc
+    Uint32 start_num = SDL_RegisterEvents( REGOLITH_EVENT_TOTAL );
+    INFO_STREAM << "Manager::configureEvents : Registering " << REGOLITH_EVENT_TOTAL << " user events";
+
+    if ( start_num == (unsigned int)-1 )
+    {
+      std::string error = SDL_GetError();
+      FAILURE_STREAM << "Manager::configureEvents : Could not create required user events : " << error;
+      Exception ex( "Manager::configureEvents()", "Could not create user events", true );
+      ex.addDetail( "SDL Error", error );
+      throw ex;
+    }
+
+    for ( unsigned int i = 0; i < (unsigned int)REGOLITH_EVENT_TOTAL; ++i )
+    {
+      SDL_memset( &_gameEvents[ i ], 0, sizeof(_gameEvents[ i ]) );
+      _gameEvents[ i ].type = start_num; // This should be the same number as SDL_USEREVENT
+      _gameEvents[ i ].user.code = i;
+      _gameEvents[ i ].user.data1 = nullptr;
+      _gameEvents[ i ].user.data2 = nullptr;
+    }
   }
 
 }

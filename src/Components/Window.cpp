@@ -145,10 +145,14 @@ namespace Regolith
   }
 
 
+  void Window::setTitle( std::string title )
+  {
+    _title = title;
+    SDL_SetWindowTitle( _theWindow, _title.c_str() );
+  }
+
   void Window::eventAction( const RegolithEvent&, const SDL_Event& e  )
   {
-    bool updateCaption = false;
-
     switch ( e.window.event )
     {
       case SDL_WINDOWEVENT_SIZE_CHANGED :
@@ -156,7 +160,6 @@ namespace Regolith
         _height = e.window.data2;
         _scaleX = (float)_width / (float)_resolutionWidth;
         _scaleY = (float)_height / (float)_resolutionHeight;
-        updateCaption = true;
 //        SDL_RenderPresent( _theRenderer );
         break;
 
@@ -166,55 +169,40 @@ namespace Regolith
 
       case SDL_WINDOWEVENT_ENTER :
         _mouseFocus = true;
-        updateCaption = true;
         break;
 
       case SDL_WINDOWEVENT_LEAVE :
         _mouseFocus = false;
-        updateCaption = true;
         break;
 
       case SDL_WINDOWEVENT_FOCUS_GAINED :
         _keyboardFocus = true;
-        updateCaption = true;
-        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CONTEXT_RESUME );
         break;
 
       case SDL_WINDOWEVENT_FOCUS_LOST :
         _keyboardFocus = false;
-        updateCaption = true;
-        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CONTEXT_PAUSE );
         break;
 
       case SDL_WINDOWEVENT_MINIMIZED :
         _minimized = true;
-        updateCaption = true;
-        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CONTEXT_PAUSE );
         Manager::getInstance()->raiseEvent( REGOLITH_EVENT_ENGINE_PAUSE );
         break;
 
       case SDL_WINDOWEVENT_MAXIMIZED :
         _minimized = false;
-        updateCaption = true;
         break;
 
       case SDL_WINDOWEVENT_RESTORED :
         _minimized = false;
-        updateCaption = true;
         Manager::getInstance()->raiseEvent( REGOLITH_EVENT_ENGINE_RESUME );
-        Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CONTEXT_RESUME );
         break;
     }
 
-    if ( updateCaption )
-    {
-      std::stringstream text;
-      text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" ) << " : " << _width << "x" << _height << " SCALE: " << _scaleX << ", " << _scaleY;
-
-      SDL_SetWindowTitle( _theWindow, text.str().c_str() );
-
-      Manager::getInstance()->raiseEvent( REGOLITH_EVENT_CAMERA_RESIZE );
-    }
+#ifdef REGOLITH_VERSION_DEBUG
+    std::stringstream text;
+    text << "SDL Testing | Keyboard Focus: " << ( _keyboardFocus ? "On" : "Off" ) << ". Mouse Focus " << ( _mouseFocus ? "On" : "Off" ) << " : " << _width << "x" << _height << " SCALE: " << _scaleX << ", " << _scaleY;
+    SDL_SetWindowTitle( _theWindow, text.str().c_str() );
+#endif
   }
 
 }

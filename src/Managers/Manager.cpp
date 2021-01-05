@@ -107,7 +107,7 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Utility functions
+  // Run!
 
   void Manager::run()
   {
@@ -199,35 +199,6 @@ namespace Regolith
       throw ex;
     }
     return found->second;
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Configure user events
-
-  void Manager::configureEvents()
-  {
-    // Load user events, etc
-    Uint32 start_num = SDL_RegisterEvents( REGOLITH_EVENT_TOTAL );
-    INFO_STREAM << "Manager::configureEvents : Registering " << REGOLITH_EVENT_TOTAL << " user events";
-
-    if ( start_num == (unsigned int)-1 )
-    {
-      std::string error = SDL_GetError();
-      FAILURE_STREAM << "Manager::configureEvents : Could not create required user events : " << error;
-      Exception ex( "Manager::configureEvents()", "Could not create user events", true );
-      ex.addDetail( "SDL Error", error );
-      throw ex;
-    }
-
-    for ( unsigned int i = 0; i < (unsigned int)REGOLITH_EVENT_TOTAL; ++i )
-    {
-      SDL_memset( &_gameEvents[ i ], 0, sizeof(_gameEvents[ i ]) );
-      _gameEvents[ i ].type = start_num; // This should be the same number as SDL_USEREVENT
-      _gameEvents[ i ].user.code = i;
-      _gameEvents[ i ].user.data1 = nullptr;
-      _gameEvents[ i ].user.data2 = nullptr;
-    }
   }
 
 

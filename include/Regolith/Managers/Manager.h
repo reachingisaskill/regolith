@@ -3,6 +3,7 @@
 #define REGOLITH_MANAGER_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Links/Link.h"
 #include "Regolith/Architecture/GameObject.h"
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/FactoryTemplate.h"
@@ -40,6 +41,8 @@ namespace Regolith
   class Manager : public Singleton< Manager >
   {
     friend class Singleton< Manager >; // Required to enable the singleton pattern
+
+    template < class T, class R > friend class Link;
 
     private:
       // Crucial objects for Regolith
@@ -93,6 +96,15 @@ namespace Regolith
       // Load all the contexts
       void _loadContexts( Json::Value& );
 
+      // Configure the list of user events for game events
+      void _configureEvents();
+
+
+      // Add a team name to the team list
+      void addCollisionTeam( std::string name, CollisionTeam id ) { _teamNames[ name ] = id; }
+      void addCollisionType( std::string name, CollisionType id ) { _typeNames[ name ] = id; }
+
+
     public:
       virtual ~Manager();
 
@@ -101,7 +113,7 @@ namespace Regolith
       void init( std::string );
 
 
-      // Load the first scene into the engine and give it control
+      // Load the first context group into the engine and give it control
       void run();
 
 
@@ -125,11 +137,13 @@ namespace Regolith
       // Return a reference to the Scene builder
       SignalFactory& getSignalFactory() { return _signalFactory; }
 
+
       // Get the pointer to the window
       Window& getWindow() { return _theWindow; }
 
       // Get the reference to the engine
       Engine& getEngine() { return _theEngine; }
+
 
       // Return a reference to the thread manager
       ThreadManager& getThreadManager() { return _theThreads; }
@@ -143,7 +157,7 @@ namespace Regolith
       // Return a reference to the data manager
       DataManager& getDataManager() { return _theData; }
 
-      // Return a reference to the data manager
+      // Return a reference to the font manager
       FontManager& getFontManager() { return _theFonts; }
 
       // Return a reference to the data manager
@@ -160,9 +174,6 @@ namespace Regolith
       ////////////////////////////////////////////////////////////////////////////////
       // User Event functions
 
-      // Configure the list of user events for game events
-      void configureEvents();
-
       // Push a user event into the SDL event queue
       void raiseEvent( RegolithEvent );
 
@@ -176,17 +187,11 @@ namespace Regolith
       // Return the team ID for a given name
       CollisionTeam getCollisionTeam( std::string name );
 
-      // Add a team to the map
-      void addCollisionTeam( std::string name, CollisionTeam id ) { _teamNames[name] = id; }
-
       // Return the number of teams
       size_t getNumberTypes() const { return _typeNames.size(); }
 
       // Return the type ID for a given name
       CollisionType getCollisionType( std::string name );
-
-      // Add a type to the map
-      void addCollisionType( std::string name, CollisionType id ) { _typeNames[name] = id; }
 
 
       ////////////////////////////////////////////////////////////////////////////////

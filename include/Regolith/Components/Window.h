@@ -94,6 +94,8 @@ namespace Regolith
       float getScaleX() { return _scaleX; }
       float getScaleY() { return _scaleY; }
 
+      // Update the title
+      void setTitle( std::string );
 
 //////////////////////////////////////////////////////////////////////////////// 
       // Window state accessors

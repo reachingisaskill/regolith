@@ -174,23 +174,6 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Context Event Signal
-
-//  class ContextEventSignal : public Signal
-//  {
-//    private:
-//      ContextEvent _theEvent;
-//
-//    public :
-//      // Con/Destruction
-//      ContextEventSignal( ContextEvent );
-//      virtual ~ContextEventSignal() {}
-//
-//      void trigger() const;
-//  };
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Change Signal
 
   class OpenContextSignal : public Signal

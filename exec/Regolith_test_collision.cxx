@@ -1,6 +1,7 @@
 #define TESTASS_APPROX_LIMIT 1.0E-6
 
 #include "Regolith.h"
+#include "Regolith/Links/LinkManager.h"
 #include "Regolith/Collisions/Collision.h"
 
 #include "testass.h"
@@ -34,6 +35,7 @@ int main( int, char** )
 
   // Create the manager
   Regolith::Manager* manager = Manager::createInstance();
+  Regolith::Link<Regolith::Manager, Regolith::TestType> link_manager( manager );
 
   // Tell logging to start
   logtastic::start( "Regolith - Collision Tests", REGOLITH_VERSION_NUMBER );
@@ -44,10 +46,10 @@ int main( int, char** )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Configure some name lookups in the manager first
-  manager->addCollisionType( "test0", 0 );
-  manager->addCollisionType( "test1", 1 );
-  manager->addCollisionType( "test2", 2 );
-  manager->addCollisionType( "test3", 3 );
+  link_manager.addCollisionType( "test0", 0 );
+  link_manager.addCollisionType( "test1", 1 );
+  link_manager.addCollisionType( "test2", 2 );
+  link_manager.addCollisionType( "test3", 3 );
 
   Json::CharReaderBuilder json_reader_builder;
   Json::CharReader* json_reader = json_reader_builder.newCharReader();

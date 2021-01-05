@@ -328,11 +328,13 @@ namespace Regolith
     {
       case REGOLITH_EVENT_QUIT :
         _pause = false;
-//        Manager::getInstance()->quit();
         for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
         {
           (*it)->stopContext();
         }
+        _openContext = nullptr;
+        _openContextStack = nullptr;
+        _openContextGroup = nullptr;
         break;
 
       case REGOLITH_EVENT_ENGINE_PAUSE :
