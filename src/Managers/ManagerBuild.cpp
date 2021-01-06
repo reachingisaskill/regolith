@@ -52,7 +52,7 @@ namespace Regolith
       validateJson( json_data, "window", JsonType::OBJECT );
       validateJson( json_data, "input_device", JsonType::OBJECT );
       validateJson( json_data, "audio_device", JsonType::OBJECT );
-      validateJson( json_data, "collision_teams", JsonType::OBJECT );
+      validateJson( json_data, "collision", JsonType::OBJECT );
 //      validateJson( json_data, "font_data", JsonType::OBJECT );
       validateJson( json_data, "game_data", JsonType::OBJECT );
       validateJson( json_data, "contexts", JsonType::OBJECT );
@@ -73,12 +73,8 @@ namespace Regolith
       this->_loadWindow( json_data["window"] );
 
 
-      //Load all the collision teams
-      this->_loadTeams( json_data["collision_teams"] );
-
-
-      //Load all the collision types
-      this->_loadTypes( json_data["collision_types"] );
+      //Load all the collision data
+      this->_loadCollision( json_data["collision"] );
 
 
       // Load all the game objects files
@@ -86,7 +82,7 @@ namespace Regolith
 
 
       // Currently Font Manager requires no global configuration
-//      // Load all the game objects files
+//      // Load all the font data
 //      this->_loadFonts( json_data["font_data"] );
 
 
@@ -145,6 +141,8 @@ namespace Regolith
 
   void Manager::_loadWindow( Json::Value& json_data )
   {
+    INFO_LOG( "Manager::_loadWindow : Loading window data" );
+
     // Let the window configure itself from the json data
     _theWindow.configure( json_data );
 
@@ -153,27 +151,11 @@ namespace Regolith
   }
 
 
-  void Manager::_loadTeams( Json::Value& json_data )
+  void Manager::_loadCollision( Json::Value& json_data )
   {
-    INFO_LOG( "Manager::_loadTeams : Loading collision team map" );
-    for ( Json::Value::const_iterator it = json_data.begin(); it != json_data.end(); ++it )
-    {
-      std::string team_name = it.key().asString();
-      CollisionTeam id = (CollisionTeam) it->asInt();
-      _teamNames[ team_name ] = id;
-    }
-  }
+    INFO_LOG( "Manager::_loadCollision : Loading collision data" );
 
-
-  void Manager::_loadTypes( Json::Value& json_data )
-  {
-    INFO_LOG( "Manager::_loadTeams : Loading collision type map" );
-    for ( Json::Value::const_iterator it = json_data.begin(); it != json_data.end(); ++it )
-    {
-      std::string type_name = it.key().asString();
-      CollisionType id = (CollisionType) it->asInt();
-      _typeNames[ type_name ] = id;
-    }
+    _theCollision.configure( json_data );
   }
 
 

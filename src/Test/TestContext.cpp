@@ -10,8 +10,8 @@ namespace Regolith
   TestContext::TestContext() :
     Context(),
     _name(),
-    _cgLoad( nullptr ),
-    _childLoad( nullptr ),
+    _cgSignal(),
+    _childSignal(),
     _timer(),
     _childTimer(),
     _deathTimer()
@@ -44,12 +44,12 @@ namespace Regolith
     {
       Json::Value& cg_loading_data = tests["child_context_loading"];
       validateJson( cg_loading_data, "wait_for", JsonType::INTEGER );
-      validateJson( cg_loading_data, "context", JsonType::STRING );
 
       INFO_STREAM << "TestContext::configure : Testing the child context loading functionality, Context Group : " << cg_loading_data["context"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " milliseconds.";
 
       _childTimer.configure( cg_loading_data["wait_for"].asFloat(), 1 );
-      _childLoad = group.getContextPointer( cg_loading_data["context"].asString() );
+//      _childLoad = group.getContextPointer( cg_loading_data["context"].asString() );
+      _childSignal.configure( cg_loading_data, group );
     }
 
     // Test loading another context group
@@ -57,12 +57,12 @@ namespace Regolith
     {
       Json::Value& cg_loading_data = tests["context_group_loading"];
       validateJson( cg_loading_data, "wait_for", JsonType::INTEGER );
-      validateJson( cg_loading_data, "context_group", JsonType::STRING );
 
       INFO_STREAM << "TestContext::configure : Testing the context group loading functionality, Context Group : " << cg_loading_data["context_group"].asString() << " after " << cg_loading_data["wait_for"].asFloat() << " milliseconds.";
 
       _timer.configure( cg_loading_data["wait_for"].asFloat(), 1 );
-      _cgLoad = Manager::getInstance()->getContextManager().getContextGroup( cg_loading_data["context_group"].asString() );
+//      _cgLoad = Manager::getInstance()->getContextManager<Context>().getContextGroup( cg_loading_data["context_group"].asString() );
+      _cgSignal.configure( cg_loading_data, group );
     }
 
     // Set the lifetime of the context
@@ -103,18 +103,16 @@ namespace Regolith
 
   void TestContext::updateContext( float timestep )
   {
-    static Manager* manager = Manager::getInstance();
-
     if ( _timer.trigger( timestep ) )
     {
       DEBUG_STREAM << "TestContext::updateContext " << _name << " : Opening new context group";
-      manager->openContextGroup( _cgLoad );
+      _cgSignal.trigger();
     }
 
     if ( _childTimer.trigger( timestep ) )
     {
-      DEBUG_STREAM << "TestContext::updateContext " << _name << " : Opening child context @ " << *_childLoad;
-      manager->openContext( *_childLoad );
+      DEBUG_STREAM << "TestContext::updateContext : Opening child context";
+      _childSignal.trigger();
     }
 
     if ( _deathTimer.trigger( timestep ) )

@@ -62,6 +62,9 @@ namespace Regolith
       // Cache the SDL event
       SDL_Event _theEvent;
 
+      // Cache the pointer to the last used input handler. Used to simulate input actions
+      InputHandler* _lastHandler;
+
 
     public:
       InputManager();
@@ -100,11 +103,11 @@ namespace Regolith
 
 
       // Functions to manually push events to objects without the SDL event queue
-      void simulateInputAction( InputHandler*, InputAction );
-      void simulateBooleanAction( InputHandler*, InputAction, bool );
-      void simulateFloatAction( InputHandler*, InputAction, float );
-      void simulateVectorAction( InputHandler*, InputAction, const Vector& );
-      void simulateMouseAction( InputHandler*, InputAction, bool, const Vector& );
+      void simulateInputAction( InputAction );
+      void simulateBooleanAction( InputAction, bool );
+      void simulateFloatAction( InputAction, float );
+      void simulateVectorAction( InputAction, const Vector& );
+      void simulateMouseAction( InputAction, bool, const Vector& );
   };
 
 

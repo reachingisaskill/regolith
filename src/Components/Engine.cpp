@@ -1,5 +1,7 @@
 
 #include "Regolith/Components/Engine.h"
+#include "Regolith/Links/LinkEngine.h"
+#include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
 #include "Regolith/Managers/ThreadHandler.h"
@@ -186,7 +188,7 @@ namespace Regolith
           if ( _currentContextGroup != nullptr )
           {
             _currentContextGroup->close();
-            Manager::getInstance()->getContextManager().unloadContextGroup( _currentContextGroup );
+            Manager::getInstance()->getContextManager<Engine>().unloadContextGroup( _currentContextGroup );
           }
           _currentContextGroup = _openContextStack->owner();
           _currentContextGroup->open();
@@ -246,7 +248,7 @@ namespace Regolith
     else // Stack is empty! Time to abandon ship
     {
       DEBUG_LOG( "Engine::perfornStackOperations : Context stack is empty. Closing engine." );
-      Manager::getInstance()->getContextManager().unloadContextGroup( _currentContextGroup );
+      Manager::getInstance()->getContextManager<Engine>().unloadContextGroup( _currentContextGroup );
       if ( _frameTimer.hasFPSMeasurement() )
       {
         INFO_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
@@ -307,7 +309,7 @@ namespace Regolith
     _openContextStack = *cg->getLoadScreen();
 
     // Tell the context manager to load and unload the context groups
-    Manager::getInstance()->getContextManager().loadContextGroup( _openContextGroup );
+    Manager::getInstance()->getContextManager<Engine>().loadContextGroup( _openContextGroup );
   }
 
 
@@ -364,17 +366,18 @@ namespace Regolith
     threadHandler.start();
 
 
-    // Get a reference to the engine
-    Engine& engine = Manager::getInstance()->getEngine();
-
     // Get references to the required components
+//    Link<Engine, EngineRenderingThreadType> engine = Manager::getInstance()->getEngine<EngineRenderingThreadType>();
+    auto engine = Manager::getInstance()->getEngine<EngineRenderingThreadType>();
+//    ContextManager& contextManager = Manager::getInstance()->getContextManager();
+    auto contextManager = Manager::getInstance()->getContextManager<EngineRenderingThreadType>();
+
     Camera& camera = Manager::getInstance()->requestCamera();
-    ContextStack::reverse_iterator& visibleStackStart = engine._visibleStackStart;
-    ContextStack::reverse_iterator& visibleStackEnd = engine._visibleStackEnd;
-    ContextManager& contextManager = Manager::getInstance()->getContextManager();
+    ContextStack::reverse_iterator& visibleStackStart = engine.visibleStackStart();
+    ContextStack::reverse_iterator& visibleStackEnd = engine.visibleStackEnd();
 
     // Control access to the contexts
-    std::unique_lock<std::mutex> renderLock( engine._renderMutex, std::defer_lock );
+    std::unique_lock<std::mutex> renderLock( engine.renderMutex(), std::defer_lock );
 
 
     // Update the thread status

@@ -16,11 +16,11 @@ namespace Regolith
     struct FalseType : public std::false_type {};
 
     // This assert throws a compile time error, whenever the template parameters are expanded within this class.
-    // Template specialisations are allowed.
+    // Only template specialisations are allowed.
     static_assert( FalseType::value, "A link is not permitted between the requested classes" );
 
     public :
-      Link( TARGET* ) {}
+      Link( TARGET& ) {}
   };
 
 }

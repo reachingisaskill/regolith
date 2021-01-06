@@ -2,6 +2,7 @@
 #include "Regolith/Contexts/Context.h"
 
 #include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
 #include "Regolith/ObjectInterfaces/CollidableObject.h"
@@ -362,7 +363,7 @@ namespace Regolith
         // If a global object is requested
         if ( validateJson( object_data[i], "global", JsonType::BOOLEAN, false ) && object_data[i]["global"].asBool() )
         {
-          object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getPhysicalObject( object_name );
+          object = Manager::getInstance()->getContextManager<Context>().getGlobalContextGroup()->getPhysicalObject( object_name );
         }
         else
         {
@@ -412,7 +413,7 @@ namespace Regolith
         if ( validateJson( spawn_data[j], "global", JsonType::BOOLEAN, false ) && spawn_data[j]["global"].asBool() )
         {
 
-          object = Manager::getInstance()->getContextManager().getGlobalContextGroup()->spawnPhysicalObject( spawn_name );
+          object = Manager::getInstance()->getContextManager<Context>().getGlobalContextGroup()->spawnPhysicalObject( spawn_name );
         }
         else
         {

@@ -1,6 +1,8 @@
 
+#ifndef REGOLITH_LINKS_LINK_MANAGER_H_
+#define REGOLITH_LINKS_LINK_MANAGER_H_
+
 #include "Regolith/Links/Link.h"
-#include "Regolith/Managers/Manager.h"
 
 
 namespace Regolith
@@ -11,25 +13,28 @@ namespace Regolith
   class Link< Manager, REQUESTER >
   {
     struct FalseType : public std::false_type {};
-    static_assert( FalseType::value, "A link is not permitted between the requested classes" );
+    static_assert( FalseType::value, "A link is not permitted between the requested class and the manager" );
   };
 
 
   
+  // Test access
   template <>
   class Link< Manager, TestType >
   {
     private:
 
-      Manager* _manager;
+      Manager& _manager;
 
     public:
 
-      Link( Manager* m ) : _manager( m ) {}
+      Link( Manager& m ) : _manager( m ) {}
 
-      void addCollisionTeam( std::string name, CollisionTeam id ) { _manager->addCollisionTeam( name, id ); }
-      void addCollisionType( std::string name, CollisionType id ) { _manager->addCollisionType( name, id ); }
+      void addCollisionTeam( std::string name, CollisionTeam id ) { _manager.addCollisionTeam( name, id ); }
+      void addCollisionType( std::string name, CollisionType id ) { _manager.addCollisionType( name, id ); }
 
   };
 }
+
+#endif // REGOLITH_LINKS_LINK_MANAGER_H_
 

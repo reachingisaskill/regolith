@@ -4,6 +4,7 @@
 
 #include "Regolith/Contexts/Context.h"
 #include "Regolith/GamePlay/Timers.h"
+#include "Regolith/GamePlay/Signal.h"
 
 
 namespace Regolith
@@ -16,8 +17,10 @@ namespace Regolith
   {
     private:
       std::string _name;
-      ContextGroup* _cgLoad;
-      Context** _childLoad;
+      OpenContextGroupSignal _cgSignal;
+//      ContextGroup* _cgLoad;
+      OpenContextSignal _childSignal;
+//      Context** _childLoad;
       CountdownTimer _timer;
       CountdownTimer _childTimer;
       CountdownTimer _deathTimer;

@@ -24,7 +24,7 @@ namespace Regolith
   {
 ////////////////////////////////////////////////////////////////////////////////
     // Friend declarations
-    friend void engineRenderingThread();
+    template < class T, class R > friend class Link;
 
 ////////////////////////////////////////////////////////////////////////////////
     // Sub classes and types
@@ -69,6 +69,7 @@ namespace Regolith
       // Function which checks the current context stack and performs the queued operations
       bool performStackOperations();
 
+
     public:
       // Create the engine with the required references in place
       Engine( InputManager& );
@@ -80,12 +81,8 @@ namespace Regolith
       void run();
 
 
-      // Returns a pointer to the current context with focus
-      Context* currentContext() { return _contextStack.front(); }
-
-      // Returns a pointer to the current context group that owns the contents of the stack
-      ContextGroup* currentContextGroup() { return _currentContextGroup; }
-
+////////////////////////////////////////////////////////////////////////////////
+      // Context stack manipulation
 
       // Tells the engine to push the context pointer to the top of the stack. Must be a member of the current context group
       void openContext( Context* );
@@ -96,6 +93,14 @@ namespace Regolith
 
       // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
       void openContextGroup( ContextGroup* );
+
+
+      // Returns a pointer to the current context with focus
+      Context* currentContext() { return _contextStack.front(); }
+
+      // Returns a pointer to the current context group that owns the contents of the stack
+      ContextGroup* currentContextGroup() { return _currentContextGroup; }
+
 
 
       // Return the current estimated FPS of the engine

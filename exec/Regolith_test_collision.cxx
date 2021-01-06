@@ -33,9 +33,9 @@ int main( int, char** )
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_collision.log" );
 
-  // Create the manager
-  Regolith::Manager* manager = Manager::createInstance();
-  Regolith::Link<Regolith::Manager, Regolith::TestType> link_manager( manager );
+  // Get link to the manager
+  Manager::createInstance();
+  Regolith::Link<Regolith::CollisionManager, Regolith::TestType> link_manager = Manager::getInstance()->getCollisionManager< Regolith::TestType >();
 
   // Tell logging to start
   logtastic::start( "Regolith - Collision Tests", REGOLITH_VERSION_NUMBER );

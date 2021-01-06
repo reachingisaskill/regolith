@@ -10,6 +10,7 @@
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Managers/AudioManager.h"
 #include "Regolith/Managers/HardwareManager.h"
+#include "Regolith/Managers/CollisionManager.h"
 #include "Regolith/Managers/DataManager.h"
 #include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/ContextManager.h"
@@ -31,7 +32,6 @@ namespace Regolith
 {
 
   // Factory typedefs
-  typedef FactoryTemplate< Signal, ContextGroup& > SignalFactory;
   typedef FactoryTemplate< GameObject, ContextGroup& > ObjectFactory;
   typedef FactoryTemplate< Context, ContextGroup& > ContextFactory;
 
@@ -52,6 +52,7 @@ namespace Regolith
       InputManager _theInput;
       AudioManager _theAudio;
       HardwareManager _theHardware;
+      CollisionManager _theCollision;
       DataManager _theData;
       ContextManager _theContexts;
       FontManager _theFonts;
@@ -60,7 +61,6 @@ namespace Regolith
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
       ContextFactory _contextFactory;
-      SignalFactory _signalFactory;
 
       // Maps of the collision team and type names
       TeamNameMap _teamNames;
@@ -84,9 +84,7 @@ namespace Regolith
       // Configure the window
       void _loadWindow( Json::Value& );
       // Load map of collision teams
-      void _loadTeams( Json::Value& );
-      // Load map of collision types
-      void _loadTypes( Json::Value& );
+      void _loadCollision( Json::Value& );
       // Load all the data manager
       void _loadData( Json::Value& );
       // Load all the requested fonts
@@ -100,11 +98,6 @@ namespace Regolith
       void _configureEvents();
 
 
-      // Add a team name to the team list
-      void addCollisionTeam( std::string name, CollisionTeam id ) { _teamNames[ name ] = id; }
-      void addCollisionType( std::string name, CollisionType id ) { _typeNames[ name ] = id; }
-
-
     public:
       virtual ~Manager();
 
@@ -114,7 +107,7 @@ namespace Regolith
 
 
       // Load the first context group into the engine and give it control
-      void run();
+      bool run();
 
 
       // Sends quit an error flags to all threads and rejoins them if possible
@@ -134,15 +127,6 @@ namespace Regolith
       // Return a reference to the Scene builder
       ContextFactory& getContextFactory() { return _contextFactory; }
 
-      // Return a reference to the Scene builder
-      SignalFactory& getSignalFactory() { return _signalFactory; }
-
-
-      // Get the pointer to the window
-      Window& getWindow() { return _theWindow; }
-
-      // Get the reference to the engine
-      Engine& getEngine() { return _theEngine; }
 
 
       // Return a reference to the thread manager
@@ -160,16 +144,6 @@ namespace Regolith
       // Return a reference to the font manager
       FontManager& getFontManager() { return _theFonts; }
 
-      // Return a reference to the data manager
-      ContextManager& getContextManager() { return _theContexts; }
-
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // Contexts and Data
-
-      // Return a pointer to the current active context - this is only  valid for the frame on which it is called
-      Context* getCurrentContext() { return _theEngine.currentContext(); }
-
 
       ////////////////////////////////////////////////////////////////////////////////
       // User Event functions
@@ -179,36 +153,26 @@ namespace Regolith
 
 
       ////////////////////////////////////////////////////////////////////////////////
-      // Team Configuration
+      // Link access functions
+      // If the requested link is not allowed a compile time error will be shown.
 
-      // Return the number of teams
-      size_t getNumberTeams() const { return _teamNames.size(); }
+      template < class REQUESTER >
+      Link< Manager, REQUESTER > getManager() { return Link< Manager, REQUESTER >( *this ); }
 
-      // Return the team ID for a given name
-      CollisionTeam getCollisionTeam( std::string name );
+      template < class REQUESTER >
+      Link< Engine, REQUESTER > getEngine() { return Link< Engine, REQUESTER >( _theEngine ); }
 
-      // Return the number of teams
-      size_t getNumberTypes() const { return _typeNames.size(); }
+      template < class REQUESTER >
+      Link< Engine, REQUESTER > getWindow() { return Link< Engine, REQUESTER >( _theWindow ); }
 
-      // Return the type ID for a given name
-      CollisionType getCollisionType( std::string name );
+      template < class REQUESTER >
+      Link< Window, REQUESTER > getWindow() { return Link< Window, REQUESTER >( _theWindow ); }
 
+      template < class REQUESTER >
+      Link< CollisionManager, REQUESTER > getCollisionManager() { return Link< CollisionManager, REQUESTER >( _theCollision ); }
 
-      ////////////////////////////////////////////////////////////////////////////////
-      // Context stack Interface.
-      // Pushed context stack operations to the engine
-
-//      // Opens the entry point of the current context group
-//      void openEntryPoint();
-
-      // Open a new context on top of the stack
-      void openContext( Context* );
-
-      // Open a new context on an empty stack
-      void openContextStack( Context* );
-
-      // Open a new context in place of the current one
-      void openContextGroup( ContextGroup* );
+      template < class REQUESTER >
+      Link< ContextManager, REQUESTER > getContextManager() { return Link< ContextManager, REQUESTER >( _theContexts ); }
 
   };
 

@@ -43,9 +43,7 @@ int main( int, char** )
     man->init( test_config );
 
     INFO_LOG( "Main : Starting Regolith" );
-    man->run();
-
-    success = true;
+    success = man->run();
   }
   catch ( Exception& ex )
   {

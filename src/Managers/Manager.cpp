@@ -22,12 +22,12 @@ namespace Regolith
     _theInput(),
     _theAudio(),
     _theHardware(),
+    _theCollision(),
     _theData(),
     _theContexts(),
     _theEngine( _theInput ),
     _objectFactory(),
     _contextFactory(),
-    _signalFactory(),
     _teamNames(),
     _typeNames(),
     _title(),
@@ -48,6 +48,9 @@ namespace Regolith
   Manager::~Manager()
   {
     DEBUG_LOG( "Manager::~Manager : Destruction" );
+
+    INFO_LOG( "Manager::~Manager : Clearing collision data" );
+    _theCollision.clear();
 
     INFO_LOG( "Manager::~Manager : Clearing font data" );
     _theFonts.clear();
@@ -73,44 +76,11 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Context Stack manipulation
-
-//  void Manager::openEntryPoint()
-//  {
-//    DEBUG_LOG( "Manager::openEntryPoint : Opening Entry Point" );
-//    _theEngine.openContext( _theContexts.getCurrentContextGroup()->getEntryPoint() );
-//  }
-
-
-  void Manager::openContext( Context* c )
-  {
-    DEBUG_LOG( "Manager::openContext : Opening Context" );
-    _theEngine.openContext( c );
-  }
-
-
-  void Manager::openContextStack( Context* c )
-  {
-    DEBUG_LOG( "Manager::openContextStack : Opening Context" );
-    _theEngine.openContextStack( c );
-  }
-
-
-  void Manager::openContextGroup( ContextGroup* cg )
-  {
-    DEBUG_LOG( "Manager::openContextGroup : Opening Context Group" );
-    DEBUG_STREAM << "Manager::openContextGroup : Context Load Screen @ " << *cg->getLoadScreen();
-
-    // Tell the engine to queue the load screen for the context group
-    _theEngine.openContextGroup( cg );
-  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
   // Run!
 
-  void Manager::run()
+  bool Manager::run()
   {
+    bool success = true;
     try
     {
       // Start all the waiting threads
@@ -135,6 +105,7 @@ namespace Regolith
       }
       catch ( Exception& ex )
       {
+        success = false;
         ERROR_LOG( "Manager::run : A Regolith error occured during runtime" );
         ERROR_STREAM << ex.elucidate();
         std::cerr << ex.elucidate();
@@ -149,10 +120,9 @@ namespace Regolith
       }
       catch ( Exception& ex )
       {
+        success = false;
         ERROR_LOG( "Manager::run : A Regolith exception occured unloading data" );
-        ERROR_STREAM << ex.elucidate();
-        std::cerr << ex.elucidate();
-        return;
+        throw ex;
       }
 
         // Stop all the threads
@@ -162,6 +132,7 @@ namespace Regolith
     }
     catch ( std::exception& ex )
     {
+      success = false;
       ERROR_LOG( "Manager::run : A unexpected exception occured." );
       ERROR_STREAM << ex.what();
       _theThreads.error();
@@ -170,37 +141,13 @@ namespace Regolith
     // Join all the threads
     INFO_LOG( "Manager::run : Joining all worker threads" );
     _theThreads.join();
+
+    return success;
   }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Accessors for global data
-
-  CollisionTeam Manager::getCollisionTeam( std::string name )
-  {
-    TeamNameMap::iterator found = _teamNames.find( name );
-    if ( found == _teamNames.end() )
-    {
-      Exception ex( "Manager::getCollisionTeam()", "Could not find requested team name." );
-      ex.addDetail( "Team Name", name );
-      throw ex;
-    }
-    return found->second;
-  }
-
-
-  CollisionType Manager::getCollisionType( std::string name )
-  {
-    TypeNameMap::iterator found = _typeNames.find( name );
-    if ( found == _typeNames.end() )
-    {
-      Exception ex( "Manager::getCollisionType()", "Could not find requested type name." );
-      ex.addDetail( "Type Name", name );
-      throw ex;
-    }
-    return found->second;
-  }
-
+  // Event functions
 
   void Manager::raiseEvent( RegolithEvent eventNum )
   {

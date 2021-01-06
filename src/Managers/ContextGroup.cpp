@@ -1,6 +1,7 @@
 
 #include "Regolith/Managers/ContextGroup.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
@@ -156,7 +157,7 @@ namespace Regolith
     if ( ! _isGlobalGroup )
     {
       validateJson( json_data, "load_screen", JsonType::STRING );
-      _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContextPointer( json_data["load_screen"].asString() );
+      _loadScreen = Manager::getInstance()->getContextManager<ContextGroup>().getGlobalContextGroup()->getContextPointer( json_data["load_screen"].asString() );
       INFO_STREAM << "ContextGroup::configure : Load Screen found : " << json_data["load_screen"].asString();
     }
 
@@ -273,7 +274,7 @@ namespace Regolith
     // Wait for engine rendering process
     DEBUG_LOG( "ContextGroup::load : Waiting for engine rendering" );
     setStatus( "Pre-Rendering" );
-    Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+    Manager::getInstance()->getContextManager<ContextGroup>().requestRenderContextGroup( this );
 
 
     setStatus( "Complete" );
@@ -307,7 +308,7 @@ namespace Regolith
     _isRendered = false;
 
     // Wait for the engine to clear all the textures
-    Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+    Manager::getInstance()->getContextManager<ContextGroup>().requestRenderContextGroup( this );
 
     INFO_LOG( "ContextGroup::unload : Unloading Audio Configuration" );
     _theAudio.clear();

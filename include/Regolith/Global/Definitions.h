@@ -59,8 +59,18 @@ namespace Regolith
   typedef std::lock_guard< std::mutex > GuardLock;
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Types to control link access
+
   // Struct used to signal a test
   struct TestType {};
+
+  // Struct used to signal the rendering thread
+  struct EngineRenderingThreadType {};
+
+  // Struct used to signal the context manager thread
+  struct ContextManagerThreadType {};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Status enum for thread behvaiour
