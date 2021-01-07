@@ -4,6 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
+#include "Regolith/Links/Link.h"
 #include "Regolith/Components/Camera.h"
 
 #include <string>
@@ -17,6 +18,9 @@ namespace Regolith
    */
   class Window : public Component
   {
+    // Allow links to access the private members
+    template < class T, class R > friend class Link;
+
     // Camera is a friend of the window
     friend class Camera;
 
@@ -58,6 +62,10 @@ namespace Regolith
       // Destroys the window and renderer objects
       void destroy();
 
+      // Create the window and return the camera
+      Camera& create();
+
+
     public:
 //////////////////////////////////////////////////////////////////////////////// 
       // Con/Destruction
@@ -74,9 +82,6 @@ namespace Regolith
 
       // Configure the window
       void configure( Json::Value& );
-
-      // Create the window and return the camera
-      Camera& create();
 
 
 //////////////////////////////////////////////////////////////////////////////// 

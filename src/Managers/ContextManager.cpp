@@ -1,8 +1,8 @@
 
 #include "Regolith/Managers/ContextManager.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/ThreadHandler.h"
+#include "Regolith/Links/LinkThreadManager.h"
 #include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -84,8 +84,8 @@ namespace Regolith
 
     // Register condition variables that can block thread execution
 //    Manager::getInstance()->getThreadManager().registerCondition( &_contextUpdate.variable );
-    Manager::getInstance()->getThreadManager().registerCondition( &_loadingThreadCondition );
-    Manager::getInstance()->getThreadManager().registerCondition( &_renderContextGroup.variable );
+    Manager::getInstance()->getThreadManager<ContextManager>().registerCondition( &_loadingThreadCondition );
+    Manager::getInstance()->getThreadManager<ContextManager>().registerCondition( &_renderContextGroup.variable );
 
     // Validate expected json values
     validateJson( json_data, "global", JsonType::STRING );

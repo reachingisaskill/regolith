@@ -11,7 +11,7 @@ namespace Regolith
   ThreadHandler::ThreadHandler( std::string name, ThreadName id ) :
     _threadName( name ),
     _identifier( id ),
-    _owner( Manager::getInstance()->getThreadManager() ),
+    _owner( Manager::getInstance()->getThreadManager<ThreadHandler>() ),
     _quitFlag( ThreadManager::QuitFlag ),
     _errorFlag( ThreadManager::ErrorFlag ),
     _startCondition( ThreadManager::StartCondition ),
@@ -78,7 +78,7 @@ namespace Regolith
 
   void ThreadHandler::throwError( Exception& ex )
   {
-    Manager::getInstance()->getThreadManager().error();
+    Manager::getInstance()->error();
 
     FAILURE_STREAM << "ThreadHandler< " << _threadName << " > : Regolith Exception thrown.";
     FAILURE_STREAM << "ThreadHandler< " << _threadName << " > : " << ex.elucidate();
@@ -88,7 +88,7 @@ namespace Regolith
 
   void ThreadHandler::throwError( std::exception& ex )
   {
-    Manager::getInstance()->getThreadManager().error();
+    Manager::getInstance()->error();
 
     FAILURE_STREAM << "ThreadHandler< " << _threadName << " > : Standard Exception thrown.";
     FAILURE_STREAM << "ThreadHandler< " << _threadName << " > : " << ex.what();

@@ -32,7 +32,8 @@ namespace Regolith
   // Manager Class
   class ThreadManager
   {
-    friend class ThreadHandler;
+    // Allow links to access the private members
+    template < class T, class R > friend class Link;
 
     private:
       typedef std::map< ThreadName, ThreadStatus > StatusMap;
@@ -60,6 +61,13 @@ namespace Regolith
       // Used by the thread handlers to update their respective status' status
       void setThreadStatus( ThreadName, ThreadStatus );
 
+      // Wait on the status of one or all the the threads
+      void waitThreadStatus( ThreadStatus );
+      void waitThreadStatus( ThreadName, ThreadStatus );
+
+      // Register a condition variable so that it can be triggered in the event of an error
+      void registerCondition( std::condition_variable* );
+
 
     public:
       // Con/Destructors
@@ -80,15 +88,6 @@ namespace Regolith
 
       // Closes the thread handlers
       void join();
-
-
-      // Wait on the status of one or all the the threads
-      void waitThreadStatus( ThreadStatus );
-      void waitThreadStatus( ThreadName, ThreadStatus );
-
-
-      // Register a condition variable so that it can be triggered in the event of an error
-      void registerCondition( std::condition_variable* );
 
 
 ////////////////////////////////////////////////////////////////////////////////

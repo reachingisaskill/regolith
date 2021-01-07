@@ -18,14 +18,13 @@ namespace Regolith
   Manager::Manager() :
     _theThreads(),
     _theWindow(),
-    _rendererExists( false ),
     _theInput(),
     _theAudio(),
     _theHardware(),
     _theCollision(),
     _theData(),
     _theContexts(),
-    _theEngine( _theInput ),
+    _theEngine(),
     _objectFactory(),
     _contextFactory(),
     _teamNames(),
@@ -66,12 +65,6 @@ namespace Regolith
     Mix_Quit();
     IMG_Quit();
     SDL_Quit();
-  }
-
-
-  Camera& Manager::requestCamera()
-  {
-    return _theWindow.create();
   }
 
 
@@ -147,11 +140,89 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Event functions
+  // Functions accessible during game play
+
+  // Events
+
+  void Manager::error()
+  {
+    _theThreads.error();
+  }
+
 
   void Manager::raiseEvent( RegolithEvent eventNum )
   {
     SDL_PushEvent( &_gameEvents[ eventNum ] );
+  }
+
+
+  // Collision Interface
+
+  CollisionTeam Manager::getCollisionTeam( std::string name )
+  {
+    return _theCollision.getCollisionTeam( name );
+  }
+
+
+  CollisionType Manager::getCollisionType( std::string name )
+  {
+    return _theCollision.getCollisionType( name );
+  }
+
+
+  // Music Interface
+
+  void Manager::queueTrack( Music* m )
+  {
+    _theAudio.queueTrack( m );
+  }
+
+
+  void Manager::playTrack( Music* m )
+  {
+    _theAudio.playTrack( m );
+  }
+
+
+  void Manager::clearQueue()
+  {
+    _theAudio.clearQueue();
+  }
+
+
+  void Manager::stopTrack()
+  {
+    _theAudio.stopTrack();
+  }
+
+
+  void Manager::pauseTrack()
+  {
+    _theAudio.pauseTrack();
+  }
+
+
+  void Manager::resumeTrack()
+  {
+    _theAudio.resumeTrack();
+  }
+
+
+  void Manager::stopRepeatTrack()
+  {
+    _theAudio.stopRepeatTrack();
+  }
+
+
+  void Manager::nextTrack()
+  {
+    _theAudio.nextTrack();
+  }
+
+
+  void Manager::nextRepeatTrack()
+  {
+    _theAudio.nextRepeatTrack();
   }
 
 

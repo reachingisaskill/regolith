@@ -71,48 +71,46 @@ namespace Regolith
 
   void JukeboxContext::updateContext( float time )
   {
-    static AudioManager& manager = Manager::getInstance()->getAudioManager();
-
     if ( _skipTimer1.trigger( time ) )
     {
       _status->setStatus( "Skip" );
-      manager.nextTrack();
+      Manager::getInstance()->nextTrack();
     }
 
     if ( _skipTimer2.trigger( time ) )
     {
       _status->setStatus( "Skip Repeat" );
-      manager.nextRepeatTrack();
+      Manager::getInstance()->nextRepeatTrack();
     }
 
     if ( _pauseTimer.trigger( time ) )
     {
       _status->setStatus( "Paused" );
-      manager.pauseTrack();
+      Manager::getInstance()->pauseTrack();
     }
 
     if ( _resumeTimer.trigger( time ) )
     {
       _status->setStatus( "Resumed" );
-      manager.resumeTrack();
+      Manager::getInstance()->resumeTrack();
     }
 
     if ( _stopTimer.trigger( time ) )
     {
       _status->setStatus( "Stopped" );
-      manager.stopTrack();
+      Manager::getInstance()->stopTrack();
     }
 
     if ( _startTimer.trigger( time ) )
     {
       _status->setStatus( "Started" );
-      manager.resumeTrack();
+      Manager::getInstance()->resumeTrack();
     }
 
     if ( _stopRepeatTimer.trigger( time ) )
     {
       _status->setStatus( "Stopping Repeat" );
-      manager.stopRepeatTrack();
+      Manager::getInstance()->stopRepeatTrack();
     }
 
     if ( _closeTimer.trigger( time ) )

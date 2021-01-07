@@ -27,9 +27,6 @@ namespace Regolith
     typedef std::map<std::string, Playlist> PlaylistMap;
 
     private:
-      // Reference to the manager
-      AudioManager& _manager;
-
       // Rememeber the current handler state
       MusicState _state;
 
@@ -46,7 +43,7 @@ namespace Regolith
 
     public:
       // Constructor
-      AudioHandler( AudioManager& );
+      AudioHandler();
 
       // Destructor
       ~AudioHandler();

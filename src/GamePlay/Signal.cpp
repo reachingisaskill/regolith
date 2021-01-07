@@ -7,6 +7,7 @@
 #include "Regolith/Managers/InputManager.h"
 #include "Regolith/Links/LinkEngine.h"
 #include "Regolith/Links/LinkContextManager.h"
+#include "Regolith/Links/LinkInputManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -24,8 +25,7 @@ namespace Regolith
 
   void InputActionSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateInputAction( _theAction );
+    Manager::getInstance()->getInputManager<Signal>().simulateInputAction( _theAction );
   }
 
 
@@ -49,8 +49,7 @@ namespace Regolith
 
   void InputBooleanSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateBooleanAction( _theAction, _theValue );
+    Manager::getInstance()->getInputManager<Signal>().simulateBooleanAction( _theAction, _theValue );
   }
 
   void InputBooleanSignal::configure( Json::Value& json_data, ContextGroup& )
@@ -79,8 +78,7 @@ namespace Regolith
 
   void InputFloatSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateFloatAction( _theAction, _theValue );
+    Manager::getInstance()->getInputManager<Signal>().simulateFloatAction( _theAction, _theValue );
   }
 
 
@@ -110,8 +108,7 @@ namespace Regolith
 
   void InputVectorSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateVectorAction( _theAction, _theValue );
+    Manager::getInstance()->getInputManager<Signal>().simulateVectorAction( _theAction, _theValue );
   }
 
 
@@ -143,8 +140,7 @@ namespace Regolith
 
   void InputMouseSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateMouseAction( _theAction, _click, _position );
+    Manager::getInstance()->getInputManager<Signal>().simulateMouseAction( _theAction, _click, _position );
   }
 
 

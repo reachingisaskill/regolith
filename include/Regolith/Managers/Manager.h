@@ -48,7 +48,6 @@ namespace Regolith
       // Crucial objects for Regolith
       ThreadManager _theThreads;
       Window _theWindow;
-      bool _rendererExists;
       InputManager _theInput;
       AudioManager _theAudio;
       HardwareManager _theHardware;
@@ -99,7 +98,7 @@ namespace Regolith
 
 
     public:
-      virtual ~Manager();
+      ~Manager();
 
 
       // Initialise the manager class from the configuration file
@@ -110,12 +109,86 @@ namespace Regolith
       bool run();
 
 
-      // Sends quit an error flags to all threads and rejoins them if possible
-      void error() { _theThreads.error(); }
+      ////////////////////////////////////////////////////////////////////////////////
+      // Functions accessible to contexts and objects during run time
+
+      // Events during game play
+
+      // Sends an error flag to all threads and triggers all registered condition variables
+      void error();
+
+      // Push a game/regolith event into the SDL event queue
+      void raiseEvent( RegolithEvent );
 
 
-      // Create and return the pointer to the Renderer - can only be called once!
-      Camera& requestCamera();
+      // Collision Interface
+
+      // Return a collision team id
+      CollisionTeam getCollisionTeam( std::string );
+
+      // Return a collision type id
+      CollisionType getCollisionType( std::string );
+
+
+      // Music Interface
+
+      // Add a track to the back of the queue
+      void queueTrack( Music* );
+
+      // Clear the current queue and play this track instead
+      void playTrack( Music* );
+
+      // Clear the queue
+      void clearQueue();
+
+      // Stop the the audio if its playing
+      void stopTrack();
+
+      // Pause the the audio if its playing
+      void pauseTrack();
+
+      // Resume the paused audio
+      void resumeTrack();
+
+      // Stop the infinitely repeating track
+      void stopRepeatTrack();
+
+      // Stop the current track and move on to the next one in the queue
+      void nextTrack();
+
+      // Skip to the next track at the end of the current repeat
+      void nextRepeatTrack();
+
+
+      ////////////////////////////////////////////////////////////////////////////////
+      // Link access functions
+      // If the requested link is not allowed a compile time error will be shown.
+
+//      template < class REQUESTER >
+//      Link< Manager, REQUESTER > getManager() { return Link< Manager, REQUESTER >( *this ); }
+
+      template < class REQUESTER >
+      Link< ThreadManager, REQUESTER > getThreadManager() { return Link< ThreadManager, REQUESTER >( _theThreads ); }
+
+      template < class REQUESTER >
+      Link< Window, REQUESTER > getWindow() { return Link< Window, REQUESTER >( _theWindow ); }
+
+      template < class REQUESTER >
+      Link< InputManager, REQUESTER > getInputManager() { return Link< InputManager, REQUESTER >( _theInput ); }
+
+
+      template < class REQUESTER >
+      Link< HardwareManager, REQUESTER > getHardwareManager() { return Link< HardwareManager, REQUESTER >( _theHardware ); }
+
+      template < class REQUESTER >
+      Link< CollisionManager, REQUESTER > getCollisionManager() { return Link< CollisionManager, REQUESTER >( _theCollision ); }
+
+
+      template < class REQUESTER >
+      Link< ContextManager, REQUESTER > getContextManager() { return Link< ContextManager, REQUESTER >( _theContexts ); }
+
+      template < class REQUESTER >
+      Link< Engine, REQUESTER > getEngine() { return Link< Engine, REQUESTER >( _theEngine ); }
 
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -128,51 +201,14 @@ namespace Regolith
       ContextFactory& getContextFactory() { return _contextFactory; }
 
 
-
-      // Return a reference to the thread manager
-      ThreadManager& getThreadManager() { return _theThreads; }
-
       // Return a reference to the input manager
-      InputManager& getInputManager() { return _theInput; }
-
-      // Return a reference to the input manager
-      AudioManager& getAudioManager() { return _theAudio; }
+//      AudioManager& getAudioManager() { return _theAudio; }
 
       // Return a reference to the data manager
       DataManager& getDataManager() { return _theData; }
 
       // Return a reference to the font manager
       FontManager& getFontManager() { return _theFonts; }
-
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // User Event functions
-
-      // Push a user event into the SDL event queue
-      void raiseEvent( RegolithEvent );
-
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // Link access functions
-      // If the requested link is not allowed a compile time error will be shown.
-
-      template < class REQUESTER >
-      Link< Manager, REQUESTER > getManager() { return Link< Manager, REQUESTER >( *this ); }
-
-      template < class REQUESTER >
-      Link< Engine, REQUESTER > getEngine() { return Link< Engine, REQUESTER >( _theEngine ); }
-
-      template < class REQUESTER >
-      Link< Engine, REQUESTER > getWindow() { return Link< Engine, REQUESTER >( _theWindow ); }
-
-      template < class REQUESTER >
-      Link< Window, REQUESTER > getWindow() { return Link< Window, REQUESTER >( _theWindow ); }
-
-      template < class REQUESTER >
-      Link< CollisionManager, REQUESTER > getCollisionManager() { return Link< CollisionManager, REQUESTER >( _theCollision ); }
-
-      template < class REQUESTER >
-      Link< ContextManager, REQUESTER > getContextManager() { return Link< ContextManager, REQUESTER >( _theContexts ); }
 
   };
 

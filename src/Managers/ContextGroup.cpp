@@ -16,7 +16,7 @@ namespace Regolith
   ContextGroup::ContextGroup() :
     _renderRate( 100 ),
     _isGlobalGroup( false ),
-    _theAudio( Manager::getInstance()->getAudioManager() ),
+    _theAudio(),
     _theData(),
     _fileName(),
     _loadScreen( nullptr ),
@@ -101,8 +101,8 @@ namespace Regolith
   void ContextGroup::close()
   {
     // Stop all the music which may have originated from this CG
-    Manager::getInstance()->getAudioManager().clearQueue();
-    Manager::getInstance()->getAudioManager().stopTrack();
+    Manager::getInstance()->clearQueue();
+    Manager::getInstance()->stopTrack();
 
     DEBUG_LOG( "ContextGroup::close : HERE" );
   }

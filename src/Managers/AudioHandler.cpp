@@ -8,8 +8,7 @@
 namespace Regolith
 {
 
-  AudioHandler::AudioHandler( AudioManager& manager ) :
-    _manager( manager ),
+  AudioHandler::AudioHandler() :
     _state( MUSIC_STATE_STOPPED ),
     _channelPauses()
   {

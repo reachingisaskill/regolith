@@ -44,20 +44,18 @@ namespace Regolith
 
   void Playlist::play()
   {
-    AudioManager& manager = Manager::getInstance()->getAudioManager();
-
     // Clear the queue
-    manager.clearQueue();
+    Manager::getInstance()->clearQueue();
 
     // Refill it from the playlist
     for ( MusicList::iterator it = _musics.begin(); it != _musics.end(); ++it )
     {
       DEBUG_LOG( "Playlist::play : Queueing track" );
-      manager.queueTrack( &(*it) );
+      Manager::getInstance()->queueTrack( &(*it) );
     }
 
     // Start playing it
-    manager.nextTrack();
+    Manager::getInstance()->nextTrack();
   }
 
 

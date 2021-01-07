@@ -1,6 +1,8 @@
 
 #include "Regolith/Components/Engine.h"
 #include "Regolith/Links/LinkEngine.h"
+#include "Regolith/Links/LinkWindow.h"
+#include "Regolith/Links/LinkInputManager.h"
 #include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/DataHandler.h"
@@ -19,8 +21,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Engine member function definitions
 
-  Engine::Engine( InputManager& input ) :
-    _inputManager( input ),
+  Engine::Engine() :
     _contextStack(),
     _openContext( nullptr ),
     _openContextStack( nullptr ),
@@ -42,12 +43,12 @@ namespace Regolith
   void Engine::run()
   {
     // Reset the flags
-    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
     _pause = false;
 
     // Synchronise access to the contexts
     std::unique_lock<std::mutex> renderLock( _renderMutex );
 
+    auto inputManager = Manager::getInstance()->getInputManager<Engine>();
 
     DEBUG_LOG( "Engine::run : Engine now running" );
 
@@ -55,7 +56,7 @@ namespace Regolith
     {
 
       // Handler global events without a context.
-      _inputManager.handleEvents( nullptr );
+      inputManager.handleEvents( nullptr );
 
       // Reset the frame timer before the loop starts
       _frameTimer.lap();
@@ -64,7 +65,7 @@ namespace Regolith
       while ( performStackOperations() )
       {
         // If there's an error in another thread, we abandon ship
-        if ( quitFlag ) break;
+        if ( ThreadManager::QuitFlag ) break;
 
         // Release the context stack
         renderLock.unlock();
@@ -72,7 +73,7 @@ namespace Regolith
 
         DEBUG_LOG( "Engine::run : ------ EVENTS   ------" );
         // Handle events globally and context-specific actions using the contexts input handler
-        _inputManager.handleEvents( _contextStack.front()->inputHandler() );
+        inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
 
         // Stop updating things while we're paused
@@ -83,7 +84,7 @@ namespace Regolith
           std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
 
           // Handler global events without a context. Required to be able to leave the pause state.
-          _inputManager.handleEvents( nullptr );
+          inputManager.handleEvents( nullptr );
 
           // Reset the timer while paused
           _frameTimer.lap();
@@ -119,7 +120,7 @@ namespace Regolith
     }
     catch ( Exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
+      Manager::getInstance()->error();
       if ( renderLock.owns_lock() )
       {
         renderLock.unlock();
@@ -129,7 +130,7 @@ namespace Regolith
     }
     catch ( std::exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
+      Manager::getInstance()->error();
       if ( renderLock.owns_lock() )
       {
         renderLock.unlock();
@@ -372,7 +373,7 @@ namespace Regolith
 //    ContextManager& contextManager = Manager::getInstance()->getContextManager();
     auto contextManager = Manager::getInstance()->getContextManager<EngineRenderingThreadType>();
 
-    Camera& camera = Manager::getInstance()->requestCamera();
+    Camera& camera = Manager::getInstance()->getWindow<EngineRenderingThreadType>().create();
     ContextStack::reverse_iterator& visibleStackStart = engine.visibleStackStart();
     ContextStack::reverse_iterator& visibleStackEnd = engine.visibleStackEnd();
 

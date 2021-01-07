@@ -1,7 +1,7 @@
-#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Managers/InputHandler.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Links/LinkInputManager.h"
 
 
 namespace Regolith
@@ -21,7 +21,7 @@ namespace Regolith
 
   void InputHandler::configure( std::string mappingName )
   {
-    _inputMaps = Manager::getInstance()->getInputManager().requestMapping( mappingName );
+    _inputMaps = Manager::getInstance()->getInputManager<InputHandler>().requestMapping( mappingName );
     DEBUG_STREAM << "InputHandler::configure : Requested Input Map Pointer: " << _inputMaps;
   }
 

@@ -48,6 +48,9 @@ namespace Regolith
    */
   class InputManager
   {
+    // Friend declarations
+    template < class T, class R > friend class Link;
+
     // Make this class non-copyable
     InputManager( const InputManager& ) = delete;
     InputManager& operator=( const InputManager& ) = delete;
@@ -66,6 +69,32 @@ namespace Regolith
       InputHandler* _lastHandler;
 
 
+    protected:
+
+////////////////////////////////////////////////////////////////////////////////
+      // Input Handler Access
+      // Requests an input handler. If it exists, return the pointer, otherwise create it.
+      InputMappingSet* requestMapping( std::string );
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Engine access
+
+      // Iterate through all the SDL events and use the provided input handler to distribute user events
+      void handleEvents( InputHandler* );
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Signal access
+
+      // Functions to manually push events to objects without the SDL event queue
+      void simulateInputAction( InputAction );
+      void simulateBooleanAction( InputAction, bool );
+      void simulateFloatAction( InputAction, float );
+      void simulateVectorAction( InputAction, const Vector& );
+      void simulateMouseAction( InputAction, bool, const Vector& );
+
+
     public:
       InputManager();
 
@@ -75,10 +104,6 @@ namespace Regolith
       // Initialise the Input mappings and handling configuration
       void configure( Json::Value& );
 
-
-
-      // Iterate through all the SDL events and use the provided input handler to distribute user events
-      void handleEvents( InputHandler* );
 
 
 
@@ -96,18 +121,6 @@ namespace Regolith
       // Get the registered input action from the request mapper, for a specific event type and event code
       InputAction getRegisteredInputAction( std::string, InputEventType event_type, unsigned int code );
 
-
-
-      // Requests an input handler. If it exists, return the pointer, otherwise create it.
-      InputMappingSet* requestMapping( std::string );
-
-
-      // Functions to manually push events to objects without the SDL event queue
-      void simulateInputAction( InputAction );
-      void simulateBooleanAction( InputAction, bool );
-      void simulateFloatAction( InputAction, float );
-      void simulateVectorAction( InputAction, const Vector& );
-      void simulateMouseAction( InputAction, bool, const Vector& );
   };
 
 

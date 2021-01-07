@@ -3,6 +3,7 @@
 #define REGOLITH_LINKS_LINK_CONTEXT_MANAGER_H_
 
 #include "Regolith/Links/Link.h"
+#include "Regolith/Global/Global.h"
 #include "Regolith/Managers/ContextManager.h"
 
 

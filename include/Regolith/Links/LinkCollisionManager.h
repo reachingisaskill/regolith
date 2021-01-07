@@ -29,7 +29,7 @@ namespace Regolith
 
     public:
 
-      Link( ContextManager& m ) : _manager( m ) {}
+      Link( CollisionManager& m ) : _manager( m ) {}
 
       void addCollisionTeam( std::string name, CollisionTeam id ) { _manager.addCollisionTeam( name, id ); }
       void addCollisionType( std::string name, CollisionType id ) { _manager.addCollisionType( name, id ); }

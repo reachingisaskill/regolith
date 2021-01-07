@@ -35,12 +35,7 @@ namespace Regolith
       typedef std::queue< StackOperation > StackOperationQueue;
 
 
-////////////////////////////////////////////////////////////////////////////////
-    // Class members
     private:
-      // This manager handles input events
-      InputManager& _inputManager;
-
       // Stack of all contexts that are curent rendereable
       ContextStack _contextStack;
 
@@ -72,7 +67,7 @@ namespace Regolith
 
     public:
       // Create the engine with the required references in place
-      Engine( InputManager& );
+      Engine();
 
       // Just in case I decided to inherit from here in the future...
       virtual ~Engine();

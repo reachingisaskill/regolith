@@ -14,6 +14,7 @@ namespace Regolith
   class InputHandler
   {
     friend class InputManager;
+
     private:
       // Map the array of mapping object - one for each input event type
       InputMappingSet* _inputMaps;

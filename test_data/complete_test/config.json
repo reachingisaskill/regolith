@@ -33,19 +33,20 @@
   },
 
 
-  "collision_teams" :
+  "collision" :
   {
-    "scene_boundary" : 0,
-    "environment" : 1,
-    "object" : 2,
-    "hud" : 3,
-    "null" : 4
-  },
-
-
-  "collision_types" :
-  {
-    "basic" : 0
+    "collision_teams" :
+    {
+      "scene_boundary" : 0,
+      "environment" : 1,
+      "object" : 2,
+      "hud" : 3,
+      "null" : 4
+    },
+    "collision_types" :
+    {
+      "basic" : 0
+    }
   },
 
 
