@@ -1,7 +1,7 @@
 
 #include "Regolith/Textures/ShortText.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Handlers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -74,7 +74,7 @@ namespace Regolith
     font_colour.b = json_data["colour"][2].asInt();
     font_colour.a = json_data["colour"][3].asInt();
 
-    _pen = Manager::getInstance()->getFontManager().requestPen( font_name, font_size, font_colour );
+    _pen = Manager::getInstance()->requestPen( font_name, font_size, font_colour );
 
 
     // If a Text asset is requested

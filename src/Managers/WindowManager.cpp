@@ -1,5 +1,5 @@
 
-#include "Regolith/Components/Window.h"
+#include "Regolith/Managers/WindowManager.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/InputManager.h"
 
@@ -11,7 +11,7 @@
 namespace Regolith
 {
 
-  Window::Window() :
+  WindowManager::WindowManager() :
     _exists( false ),
     _theWindow( nullptr ),
     _theRenderer( nullptr ),
@@ -33,12 +33,12 @@ namespace Regolith
   }
 
 
-  Window::~Window()
+  WindowManager::~WindowManager()
   {
   }
 
 
-  void Window::destroy()
+  void WindowManager::destroy()
   {
     SDL_DestroyRenderer( _theRenderer );
     SDL_DestroyWindow( _theWindow );
@@ -50,7 +50,7 @@ namespace Regolith
   }
 
 
-  void Window::configure( Json::Value& json_data )
+  void WindowManager::configure( Json::Value& json_data )
   {
     validateJson( json_data, "screen_width", JsonType::INTEGER );
     validateJson( json_data, "screen_height", JsonType::INTEGER );
@@ -80,11 +80,11 @@ namespace Regolith
   }
 
 
-  Camera& Window::create()
+  Camera& WindowManager::create()
   {
     if ( _exists )
     {
-      Exception ex( "Window::create()", "Window already exists - only one thread may have access to the renderer." );
+      Exception ex( "WindowManager::create()", "WindowManager already exists - only one thread may have access to the renderer." );
       throw ex;
     }
     _exists = true;
@@ -92,10 +92,10 @@ namespace Regolith
     _theWindow = SDL_CreateWindow( _title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, _width, _height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE );
     if ( _theWindow == nullptr )
     {
-      Exception ex( "Window::create()", "Could not create window" );
-      ex.addDetail( "Window title", _title );
-      ex.addDetail( "Window width", _width );
-      ex.addDetail( "Window height", _height );
+      Exception ex( "WindowManager::create()", "Could not create window" );
+      ex.addDetail( "WindowManager title", _title );
+      ex.addDetail( "WindowManager width", _width );
+      ex.addDetail( "WindowManager height", _height );
       throw ex;
     }
 
@@ -110,7 +110,7 @@ namespace Regolith
 
     if ( _theRenderer == nullptr )
     {
-      Exception ex( "Window::create()", "Could not create SDL Renderer" );
+      Exception ex( "WindowManager::create()", "Could not create SDL Renderer" );
       throw ex;
     }
 
@@ -120,7 +120,7 @@ namespace Regolith
   }
 
 
-  void Window::toggleFullScreen()
+  void WindowManager::toggleFullScreen()
   {
     if ( _fullscreen )
     {
@@ -139,19 +139,19 @@ namespace Regolith
   }
 
 
-  void Window::registerEvents( InputManager& manager )
+  void WindowManager::registerEvents( InputManager& manager )
   {
     manager.registerEventRequest( this, REGOLITH_EVENT_WINDOW );
   }
 
 
-  void Window::setTitle( std::string title )
+  void WindowManager::setTitle( std::string title )
   {
     _title = title;
     SDL_SetWindowTitle( _theWindow, _title.c_str() );
   }
 
-  void Window::eventAction( const RegolithEvent&, const SDL_Event& e  )
+  void WindowManager::eventAction( const RegolithEvent&, const SDL_Event& e  )
   {
     switch ( e.window.event )
     {
@@ -160,11 +160,9 @@ namespace Regolith
         _height = e.window.data2;
         _scaleX = (float)_width / (float)_resolutionWidth;
         _scaleY = (float)_height / (float)_resolutionHeight;
-//        SDL_RenderPresent( _theRenderer );
         break;
 
       case SDL_WINDOWEVENT_EXPOSED :
-//        SDL_RenderPresent( _theRenderer );
         break;
 
       case SDL_WINDOWEVENT_ENTER :

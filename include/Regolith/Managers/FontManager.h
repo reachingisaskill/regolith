@@ -3,6 +3,7 @@
 #define REGOLITH_MANAGERS_FONT_MANAGER_H_
 
 #include "Regolith/Assets/RawFont.h"
+#include "Regolith/Architecture/Component.h"
 #include "Regolith/GamePlay/Pen.h"
 
 #include <map>
@@ -19,8 +20,12 @@ namespace Regolith
    * TTF font data stored within the handler.
    * 
    */
-  class FontManager
+  class FontManager : public Component
   {
+    // Allow links to access the private members
+    template < class T, class R > friend class Link;
+
+    // Useful typedefs
     typedef std::pair< TTF_Font*, SDL_Color > FontPair;
     typedef std::map< unsigned int, FontPair > FontSizeMap;
     typedef std::map< std::string, FontSizeMap > FontMap;
@@ -46,6 +51,15 @@ namespace Regolith
 
       // Return an Pen to write text
       Pen requestPen( std::string, unsigned int, SDL_Color );
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Component Interface
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager& ) override {}
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
 
   };
 

@@ -1,8 +1,7 @@
-//#define LOGTASTIC_DEBUG_OFF
 
-#include "Regolith/Managers/DataHandler.h"
-#include "Regolith/Managers/DataManager.h"
+#include "Regolith/Handlers/DataHandler.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Links/LinkDataManager.h"
 
 #include <thread>
 #include <chrono>
@@ -55,10 +54,8 @@ namespace Regolith
     for ( RawFontMap::iterator it = _rawFonts.begin(); it != font_end; ++it )
     {
       std::string name = it->first;
-
       if ( it->second.ttf_font != nullptr )
       {
-
         DEBUG_STREAM << "Unloaded font: " << name << " @ " << it->second.ttf_font;
         TTF_CloseFont( it->second.ttf_font );
         it->second.ttf_font = nullptr;
@@ -112,7 +109,7 @@ namespace Regolith
     RawTextureMap::iterator found = _rawTextures.find( name );
     if ( found == _rawTextures.end() )
     {
-      RawTexture new_texture = Manager::getInstance()->getDataManager().buildRawTexture( name );
+      RawTexture new_texture = Manager::getInstance()->getDataManager<DataHandler>().buildRawTexture( name );
       found = _rawTextures.insert( std::make_pair( name, new_texture ) ).first;
     }
 
@@ -125,7 +122,7 @@ namespace Regolith
     RawSoundMap::iterator found = _rawSounds.find( name );
     if ( found == _rawSounds.end() )
     {
-      RawSound new_sound = Manager::getInstance()->getDataManager().buildRawSound( name );
+      RawSound new_sound = Manager::getInstance()->getDataManager<DataHandler>().buildRawSound( name );
       found = _rawSounds.insert( std::make_pair( name, new_sound ) ).first;
     }
 
@@ -138,7 +135,7 @@ namespace Regolith
     RawMusicMap::iterator found = _rawMusic.find( name );
     if ( found == _rawMusic.end() )
     {
-      RawMusic new_music = Manager::getInstance()->getDataManager().buildRawMusic( name );
+      RawMusic new_music = Manager::getInstance()->getDataManager<DataHandler>().buildRawMusic( name );
       found = _rawMusic.insert( std::make_pair( name, new_music ) ).first;
     }
 
@@ -151,7 +148,7 @@ namespace Regolith
     RawFontMap::iterator found = _rawFonts.find( name );
     if ( found == _rawFonts.end() )
     {
-      RawFont new_font = Manager::getInstance()->getDataManager().buildRawFont( name );
+      RawFont new_font = Manager::getInstance()->getDataManager<DataHandler>().buildRawFont( name );
       found = _rawFonts.insert( std::make_pair( name, new_font ) ).first;
     }
 
@@ -164,7 +161,7 @@ namespace Regolith
     RawTextMap::iterator found = _rawTexts.find( name );
     if ( found == _rawTexts.end() )
     {
-      RawText new_text = Manager::getInstance()->getDataManager().buildRawText( name );
+      RawText new_text = Manager::getInstance()->getDataManager<DataHandler>().buildRawText( name );
       found = _rawTexts.insert( std::make_pair( name, new_text ) ).first;
     }
 

@@ -3,7 +3,7 @@
 #define REGOLITH_MANAGERS_THREAD_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
-
+#include "Regolith/Architecture/Component.h"
 #include "Regolith/Utilities/Condition.h"
 
 #include <thread>
@@ -30,7 +30,7 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Manager Class
-  class ThreadManager
+  class ThreadManager : public Component
   {
     // Allow links to access the private members
     template < class T, class R > friend class Link;
@@ -104,6 +104,15 @@ namespace Regolith
 
       // Every thread that sees this flag MUST end
       static std::atomic<bool> ErrorFlag;
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Component Interface
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager& ) override {}
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
 
   };
 

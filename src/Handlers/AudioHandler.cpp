@@ -1,6 +1,6 @@
 
-#include "Regolith/Managers/AudioHandler.h"
-#include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Handlers/AudioHandler.h"
+#include "Regolith/Handlers/DataHandler.h"
 #include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 

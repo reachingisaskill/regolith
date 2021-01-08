@@ -3,7 +3,7 @@
 #define REGOLITH_LINKS_LINK_WINDOW_H_
 
 #include "Regolith/Links/Link.h"
-#include "Regolith/Components/Window.h"
+#include "Regolith/Managers/WindowManager.h"
 
 
 namespace Regolith
@@ -11,7 +11,7 @@ namespace Regolith
 
   // Prevent partial specialisations from passing
   template < class REQUESTER >
-  class Link< Window, REQUESTER >
+  class Link< WindowManager, REQUESTER >
   {
     struct FalseType : public std::false_type {};
     static_assert( FalseType::value, "A link is not permitted between the requested class and the engine" );
@@ -23,15 +23,15 @@ namespace Regolith
   struct EngineRenderingThreadType;
 
   template <>
-  class Link< Window, EngineRenderingThreadType >
+  class Link< WindowManager, EngineRenderingThreadType >
   {
     private:
 
-      Window& _window;
+      WindowManager& _window;
 
     public:
 
-      Link( Window& m ) : _window( m ) {}
+      Link( WindowManager& m ) : _window( m ) {}
 
       Camera& create() { return _window.create(); }
   };

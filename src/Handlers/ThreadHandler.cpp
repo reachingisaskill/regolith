@@ -1,5 +1,5 @@
 
-#include "Regolith/Managers/ThreadHandler.h"
+#include "Regolith/Handlers/ThreadHandler.h"
 
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Managers/ThreadManager.h"

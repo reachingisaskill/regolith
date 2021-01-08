@@ -1,6 +1,7 @@
 
 #include "Regolith/Managers/FontManager.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Links/LinkDataManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -55,7 +56,7 @@ namespace Regolith
       }
 
       // Get the raw font object
-      RawFont raw_font = Manager::getInstance()->getDataManager().buildRawFont( font_name );
+      RawFont raw_font = Manager::getInstance()->getDataManager<FontManager>().buildRawFont( font_name );
 
       // Test that we can load it
       TTF_Font* ttf_font = TTF_OpenFont( raw_font.filename.c_str(), 10 );
@@ -80,7 +81,7 @@ namespace Regolith
     FontFileMap::iterator file_found = _fontFiles.find( font_name );
     if ( file_found == _fontFiles.end() )
     {
-      RawFont raw_font = Manager::getInstance()->getDataManager().buildRawFont( font_name );
+      RawFont raw_font = Manager::getInstance()->getDataManager<FontManager>().buildRawFont( font_name );
       file_found = _fontFiles.insert( std::make_pair( font_name, raw_font ) ).first;
     }
 

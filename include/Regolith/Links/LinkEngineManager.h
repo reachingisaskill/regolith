@@ -3,7 +3,7 @@
 #define REGOLITH_LINKS_LINK_ENGINE_H_
 
 #include "Regolith/Links/Link.h"
-#include "Regolith/Components/Engine.h"
+#include "Regolith/Managers/EngineManager.h"
 
 
 namespace Regolith
@@ -11,7 +11,7 @@ namespace Regolith
 
   // Prevent partial specialisations from passing
   template < class REQUESTER >
-  class Link< Engine, REQUESTER >
+  class Link< EngineManager, REQUESTER >
   {
     struct FalseType : public std::false_type {};
     static_assert( FalseType::value, "A link is not permitted between the requested class and the engine" );
@@ -23,15 +23,15 @@ namespace Regolith
   struct EngineRenderingThreadType;
 
   template <>
-  class Link< Engine, EngineRenderingThreadType >
+  class Link< EngineManager, EngineRenderingThreadType >
   {
     private:
 
-      Engine& _engine;
+      EngineManager& _engine;
 
     public:
 
-      Link( Engine& m ) : _engine( m ) {}
+      Link( EngineManager& m ) : _engine( m ) {}
 
       ContextStack::reverse_iterator& visibleStackStart() { return _engine._visibleStackStart; }
       ContextStack::reverse_iterator& visibleStackEnd() { return _engine._visibleStackEnd; }
@@ -45,15 +45,15 @@ namespace Regolith
   class Signal;
 
   template <>
-  class Link< Engine, Signal >
+  class Link< EngineManager, Signal >
   {
     private:
 
-      Engine& _engine;
+      EngineManager& _engine;
 
     public:
 
-      Link( Engine& m ) : _engine( m ) {}
+      Link( EngineManager& m ) : _engine( m ) {}
 
       void openContext( Context* c ) { _engine.openContext( c ); }
       void openContextStack( Context* c ) { _engine.openContextStack( c ); }

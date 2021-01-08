@@ -1,5 +1,5 @@
 
-#include "Regolith/Managers/CollisionHandler.h"
+#include "Regolith/Handlers/CollisionHandler.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/ObjectInterfaces/CollidableObject.h"
 #include "Regolith/Contexts/ContextLayer.h"

@@ -1,7 +1,8 @@
 
-#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Handlers/ContextGroup.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Links/LinkContextManager.h"
+#include "Regolith/Links/LinkAudioManager.h"
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
@@ -93,7 +94,10 @@ namespace Regolith
     // If a default playlist is mentioned, play it.
     if ( _defaultPlaylist != nullptr )
     {
-      _defaultPlaylist->play();
+      // Load the playlist into the queue
+      Manager::getInstance()->getAudioManager<ContextGroup>().load( _defaultPlaylist );
+      // Start playing it
+      Manager::getInstance()->getAudioManager<ContextGroup>().nextTrack();
     }
   }
 
@@ -101,10 +105,12 @@ namespace Regolith
   void ContextGroup::close()
   {
     // Stop all the music which may have originated from this CG
-    Manager::getInstance()->clearQueue();
-    Manager::getInstance()->stopTrack();
+    // Clear the current queue
+    Manager::getInstance()->getAudioManager<ContextGroup>().clearQueue();
+    // Stop the current track
+    Manager::getInstance()->getAudioManager<ContextGroup>().stopTrack();
 
-    DEBUG_LOG( "ContextGroup::close : HERE" );
+    DEBUG_LOG( "ContextGroup::close : Here" );
   }
 
 

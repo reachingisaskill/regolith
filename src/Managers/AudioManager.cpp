@@ -1,6 +1,7 @@
 
 #include "Regolith/Managers/AudioManager.h"
 #include "Regolith/Audio/Music.h"
+#include "Regolith/Audio/Playlist.h"
 #include "Regolith/Utilities/Exception.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -98,7 +99,7 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Music interface
+  // Hidden music interface
 
   void AudioManager::queueTrack( Music* music )
   {
@@ -154,6 +155,28 @@ namespace Regolith
     if ( Mix_PlayingMusic() == 1 )
     {
       Mix_HaltMusic();
+    }
+  }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Public music interface
+
+  void AudioManager::load( Playlist* pl )
+  {
+    DEBUG_LOG( "AudioManager::play : Playing playlist" );
+
+    // Empty existing queue
+    _musicQueue.clear();
+
+    // If there wasn't a playlist, nothing to push.
+    // This is kind of a backdoor to clearing the music queue
+    if ( pl == nullptr ) return;
+
+    // Refill it from the playlist
+    for ( Playlist::MusicList::iterator it = pl->_musics.begin(); it != pl->_musics.end(); ++it )
+    {
+      _musicQueue.push( std::make_pair( &(*it), it->getPlayCount() ) );
     }
   }
 

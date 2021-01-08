@@ -5,7 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
 #include "Regolith/Links/Link.h"
-#include "Regolith/Components/Camera.h"
+#include "Regolith/Handlers/Camera.h"
 
 #include <string>
 
@@ -14,9 +14,9 @@ namespace Regolith
 {
 
   /*
-   * Window wrapper class.
+   * WindowManager wrapper class.
    */
-  class Window : public Component
+  class WindowManager : public Component
   {
     // Allow links to access the private members
     template < class T, class R > friend class Link;
@@ -30,7 +30,7 @@ namespace Regolith
       // Keep track of whether a renderer already exists
       bool _exists;
 
-      // SDL Window pointer
+      // SDL WindowManager pointer
       SDL_Window* _theWindow;
       SDL_Renderer* _theRenderer;
 
@@ -71,10 +71,10 @@ namespace Regolith
       // Con/Destruction
 
       // Empty private initialisation
-      Window();
+      WindowManager();
 
       // On destruction delete the window pointer
-      virtual ~Window();
+      virtual ~WindowManager();
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -103,7 +103,7 @@ namespace Regolith
       void setTitle( std::string );
 
 //////////////////////////////////////////////////////////////////////////////// 
-      // Window state accessors
+      // WindowManager state accessors
 
       // Boolean functions to interrogate the current window state
       bool hasMouseFocus() const { return _mouseFocus; }

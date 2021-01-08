@@ -1,16 +1,15 @@
 
-#include "Regolith/Components/Camera.h"
-
+#include "Regolith/Handlers/Camera.h"
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
+#include "Regolith/Managers/WindowManager.h"
 #include "Regolith/Textures/Texture.h"
 #include "Regolith/Assets/RawTexture.h"
-#include "Regolith/Components/Window.h"
 
 
 namespace Regolith
 {
 
-  Camera::Camera( Window& window, SDL_Renderer* renderer, const int& width, const int& height, const float& scalex, const float& scaley ) :
+  Camera::Camera( WindowManager& window, SDL_Renderer* renderer, const int& width, const int& height, const float& scalex, const float& scaley ) :
     _theWindow( window ),
     _theRenderer( renderer ),
     _defaultColour( { 0, 0, 0, 255 } ),

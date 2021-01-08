@@ -4,7 +4,6 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/MassProduceable.h"
-#include "Regolith/Components/Engine.h"
 
 
 namespace Regolith

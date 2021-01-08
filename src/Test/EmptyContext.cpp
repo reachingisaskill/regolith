@@ -1,6 +1,6 @@
 
 #include "Regolith/Test/EmptyContext.h"
-#include "Regolith/Components/Camera.h"
+#include "Regolith/Handlers/Camera.h"
 
 #include <cmath>
 

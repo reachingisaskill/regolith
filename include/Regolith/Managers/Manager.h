@@ -15,9 +15,8 @@
 #include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Managers/ContextManager.h"
 #include "Regolith/Managers/FontManager.h"
-#include "Regolith/Managers/DataHandler.h"
-#include "Regolith/Components/Window.h"
-#include "Regolith/Components/Engine.h"
+#include "Regolith/Managers/WindowManager.h"
+#include "Regolith/Managers/EngineManager.h"
 #include "Regolith/GamePlay/Signal.h"
 #include "Regolith/Contexts/Context.h"
 #include "Regolith/Utilities/Singleton.h"
@@ -47,7 +46,7 @@ namespace Regolith
     private:
       // Crucial objects for Regolith
       ThreadManager _theThreads;
-      Window _theWindow;
+      WindowManager _theWindow;
       InputManager _theInput;
       AudioManager _theAudio;
       HardwareManager _theHardware;
@@ -55,18 +54,11 @@ namespace Regolith
       DataManager _theData;
       ContextManager _theContexts;
       FontManager _theFonts;
-      Engine _theEngine;
+      EngineManager _theEngine;
 
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
       ContextFactory _contextFactory;
-
-      // Maps of the collision team and type names
-      TeamNameMap _teamNames;
-      TypeNameMap _typeNames;
-
-      // Useful global constants
-      std::string _title;
 
       // Info for SDL user events
       Uint32 _eventStartIndex;
@@ -132,17 +124,8 @@ namespace Regolith
 
       // Music Interface
 
-      // Add a track to the back of the queue
-      void queueTrack( Music* );
-
-      // Clear the current queue and play this track instead
-      void playTrack( Music* );
-
-      // Clear the queue
-      void clearQueue();
-
-      // Stop the the audio if its playing
-      void stopTrack();
+      // Play the provided playlist
+      void loadPlaylist( Playlist* );
 
       // Pause the the audio if its playing
       void pauseTrack();
@@ -160,35 +143,16 @@ namespace Regolith
       void nextRepeatTrack();
 
 
-      ////////////////////////////////////////////////////////////////////////////////
-      // Link access functions
-      // If the requested link is not allowed a compile time error will be shown.
+      // Window interface
 
-//      template < class REQUESTER >
-//      Link< Manager, REQUESTER > getManager() { return Link< Manager, REQUESTER >( *this ); }
-
-      template < class REQUESTER >
-      Link< ThreadManager, REQUESTER > getThreadManager() { return Link< ThreadManager, REQUESTER >( _theThreads ); }
-
-      template < class REQUESTER >
-      Link< Window, REQUESTER > getWindow() { return Link< Window, REQUESTER >( _theWindow ); }
-
-      template < class REQUESTER >
-      Link< InputManager, REQUESTER > getInputManager() { return Link< InputManager, REQUESTER >( _theInput ); }
+      // Set the window title
+      void setWindowTitle( std::string );
 
 
-      template < class REQUESTER >
-      Link< HardwareManager, REQUESTER > getHardwareManager() { return Link< HardwareManager, REQUESTER >( _theHardware ); }
+      // Fonts interface
 
-      template < class REQUESTER >
-      Link< CollisionManager, REQUESTER > getCollisionManager() { return Link< CollisionManager, REQUESTER >( _theCollision ); }
-
-
-      template < class REQUESTER >
-      Link< ContextManager, REQUESTER > getContextManager() { return Link< ContextManager, REQUESTER >( _theContexts ); }
-
-      template < class REQUESTER >
-      Link< Engine, REQUESTER > getEngine() { return Link< Engine, REQUESTER >( _theEngine ); }
+      // Return an Pen to write text
+      Pen requestPen( std::string, unsigned int, SDL_Color );
 
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -201,14 +165,39 @@ namespace Regolith
       ContextFactory& getContextFactory() { return _contextFactory; }
 
 
-      // Return a reference to the input manager
-//      AudioManager& getAudioManager() { return _theAudio; }
+      ////////////////////////////////////////////////////////////////////////////////
+      // Link access functions
+      // If the requested link is not allowed a compile time error will be shown.
 
-      // Return a reference to the data manager
-      DataManager& getDataManager() { return _theData; }
+      template < class REQUESTER >
+      Link< ThreadManager, REQUESTER > getThreadManager() { return Link< ThreadManager, REQUESTER >( _theThreads ); }
 
-      // Return a reference to the font manager
-      FontManager& getFontManager() { return _theFonts; }
+      template < class REQUESTER >
+      Link< WindowManager, REQUESTER > getWindowManager() { return Link< WindowManager, REQUESTER >( _theWindow ); }
+
+      template < class REQUESTER >
+      Link< InputManager, REQUESTER > getInputManager() { return Link< InputManager, REQUESTER >( _theInput ); }
+
+      template < class REQUESTER >
+      Link< AudioManager, REQUESTER > getAudioManager() { return Link< AudioManager, REQUESTER >( _theAudio ); }
+
+      template < class REQUESTER >
+      Link< HardwareManager, REQUESTER > getHardwareManager() { return Link< HardwareManager, REQUESTER >( _theHardware ); }
+
+      template < class REQUESTER >
+      Link< CollisionManager, REQUESTER > getCollisionManager() { return Link< CollisionManager, REQUESTER >( _theCollision ); }
+
+      template < class REQUESTER >
+      Link< DataManager, REQUESTER > getDataManager() { return Link< DataManager, REQUESTER >( _theData ); }
+
+      template < class REQUESTER >
+      Link< ContextManager, REQUESTER > getContextManager() { return Link< ContextManager, REQUESTER >( _theContexts ); }
+
+      template < class REQUESTER >
+      Link< FontManager, REQUESTER > getFontManager() { return Link< FontManager, REQUESTER >( _theFonts ); }
+
+      template < class REQUESTER >
+      Link< EngineManager, REQUESTER > getEngineManager() { return Link< EngineManager, REQUESTER >( _theEngine ); }
 
   };
 

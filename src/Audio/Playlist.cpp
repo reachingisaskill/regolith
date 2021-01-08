@@ -42,23 +42,6 @@ namespace Regolith
   }
 
 
-  void Playlist::play()
-  {
-    // Clear the queue
-    Manager::getInstance()->clearQueue();
-
-    // Refill it from the playlist
-    for ( MusicList::iterator it = _musics.begin(); it != _musics.end(); ++it )
-    {
-      DEBUG_LOG( "Playlist::play : Queueing track" );
-      Manager::getInstance()->queueTrack( &(*it) );
-    }
-
-    // Start playing it
-    Manager::getInstance()->nextTrack();
-  }
-
-
   void Playlist::push( Music music )
   {
     _musics.push_back( music );

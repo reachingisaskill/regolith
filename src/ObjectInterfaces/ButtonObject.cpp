@@ -1,6 +1,6 @@
 
 #include "Regolith/ObjectInterfaces/ButtonObject.h"
-#include "Regolith/Managers/FocusHandler.h"
+#include "Regolith/Handlers/FocusHandler.h"
 
 
 namespace Regolith

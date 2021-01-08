@@ -1,6 +1,6 @@
 
 #include "Regolith/Managers/ThreadManager.h"
-#include "Regolith/Managers/ThreadHandler.h"
+#include "Regolith/Handlers/ThreadHandler.h"
 
 
 namespace Regolith

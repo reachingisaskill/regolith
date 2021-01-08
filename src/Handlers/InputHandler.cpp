@@ -1,5 +1,5 @@
 
-#include "Regolith/Managers/InputHandler.h"
+#include "Regolith/Handlers/InputHandler.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Links/LinkInputManager.h"
 

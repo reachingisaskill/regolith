@@ -5,7 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/Architecture/Component.h"
-#include "Regolith/Managers/InputMapping.h"
+#include "Regolith/Handlers/InputMapping.h"
 #include "Regolith/Utilities/NamedVector.h"
 
 #include <set>
@@ -46,7 +46,7 @@ namespace Regolith
    * Stores the global key mapping configuration and engine/game wide event call backs: INPUT_EVENTS
    * Additional callbacks are registered to the Scene's individual input handler
    */
-  class InputManager
+  class InputManager : public Component
   {
     // Friend declarations
     template < class T, class R > friend class Link;
@@ -105,8 +105,6 @@ namespace Regolith
       void configure( Json::Value& );
 
 
-
-
       // Register the request from a drawable object to be called when a given event is raised
       void registerEventRequest( Component*, RegolithEvent );
 
@@ -114,12 +112,20 @@ namespace Regolith
       ComponentSet& getRegisteredComponents( RegolithEvent );
 
 
-
-      // Register an input action to the mapper with the proveded name
+      // Register an input action to the mapper with the provided name
       void registerInputAction( std::string, InputEventType event_type, unsigned int code, InputAction event );
 
       // Get the registered input action from the request mapper, for a specific event type and event code
       InputAction getRegisteredInputAction( std::string, InputEventType event_type, unsigned int code );
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Component Interface
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager& ) override {}
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
 
   };
 

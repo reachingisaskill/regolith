@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_COMPONENTS_ENGINE_H_
-#define REGOLITH_COMPONENTS_ENGINE_H_
+#ifndef REGOLITH_MANAGERS_ENGINE_MANAGER_H_
+#define REGOLITH_MANAGERS_ENGINE_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
@@ -20,7 +20,7 @@ namespace Regolith
   typedef std::deque< Context* > ContextStack;
 
 
-  class Engine : public Component
+  class EngineManager : public Component
   {
 ////////////////////////////////////////////////////////////////////////////////
     // Friend declarations
@@ -67,10 +67,10 @@ namespace Regolith
 
     public:
       // Create the engine with the required references in place
-      Engine();
+      EngineManager();
 
       // Just in case I decided to inherit from here in the future...
-      virtual ~Engine();
+      virtual ~EngineManager();
 
       // Start the engine running. In order to stop it the quit() function must be used.
       void run();
@@ -138,5 +138,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_COMPONENTS_ENGINE_H_
+#endif // REGOLITH_MANAGERS_ENGINE_MANAGER_H_
 

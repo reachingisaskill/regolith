@@ -1,6 +1,7 @@
 
 #include "Regolith/Test/JukeboxContext.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Links/LinkAudioManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -63,54 +64,54 @@ namespace Regolith
 
    void JukeboxContext::onStart()
    {
-     _playlist->play();
-
      this->setClosed( false );
    }
 
 
   void JukeboxContext::updateContext( float time )
   {
+    static auto manager = Manager::getInstance()->getAudioManager<TestType>();
+
     if ( _skipTimer1.trigger( time ) )
     {
       _status->setStatus( "Skip" );
-      Manager::getInstance()->nextTrack();
+      manager.nextTrack();
     }
 
     if ( _skipTimer2.trigger( time ) )
     {
       _status->setStatus( "Skip Repeat" );
-      Manager::getInstance()->nextRepeatTrack();
+      manager.nextRepeatTrack();
     }
 
     if ( _pauseTimer.trigger( time ) )
     {
       _status->setStatus( "Paused" );
-      Manager::getInstance()->pauseTrack();
+      manager.pauseTrack();
     }
 
     if ( _resumeTimer.trigger( time ) )
     {
       _status->setStatus( "Resumed" );
-      Manager::getInstance()->resumeTrack();
+      manager.resumeTrack();
     }
 
     if ( _stopTimer.trigger( time ) )
     {
       _status->setStatus( "Stopped" );
-      Manager::getInstance()->stopTrack();
+      manager.stopTrack();
     }
 
     if ( _startTimer.trigger( time ) )
     {
       _status->setStatus( "Started" );
-      Manager::getInstance()->resumeTrack();
+      manager.resumeTrack();
     }
 
     if ( _stopRepeatTimer.trigger( time ) )
     {
       _status->setStatus( "Stopping Repeat" );
-      Manager::getInstance()->stopRepeatTrack();
+      manager.stopRepeatTrack();
     }
 
     if ( _closeTimer.trigger( time ) )

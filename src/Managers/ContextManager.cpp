@@ -1,7 +1,7 @@
 
 #include "Regolith/Managers/ContextManager.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/ThreadHandler.h"
+#include "Regolith/Handlers/ThreadHandler.h"
 #include "Regolith/Links/LinkThreadManager.h"
 #include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/Utilities/JsonValidation.h"

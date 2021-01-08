@@ -21,6 +21,7 @@ namespace Regolith
   
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Input Handler access
+  class InputHandler;
 
   template <>
   class Link< InputManager, InputHandler >
@@ -38,7 +39,8 @@ namespace Regolith
 
   
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Engine access
+  // Signal access
+  class Signal;
 
   template <>
   class Link< InputManager, Signal >
@@ -60,10 +62,11 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Engine access
+  // Engine Manager access
+  class EngineManager;
 
   template <>
-  class Link< InputManager, Engine >
+  class Link< InputManager, EngineManager >
   {
     private:
 

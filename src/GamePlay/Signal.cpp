@@ -2,10 +2,9 @@
 #include "Regolith/GamePlay/Signal.h"
 #include "Regolith/Contexts/Context.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/ContextGroup.h"
-#include "Regolith/Managers/DataHandler.h"
-#include "Regolith/Managers/InputManager.h"
-#include "Regolith/Links/LinkEngine.h"
+#include "Regolith/Handlers/ContextGroup.h"
+#include "Regolith/Handlers/DataHandler.h"
+#include "Regolith/Links/LinkEngineManager.h"
 #include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/Links/LinkInputManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
@@ -197,7 +196,7 @@ namespace Regolith
   void OpenContextSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextSignal::trigger : Opening context" );
-    Manager::getInstance()->getEngine<Signal>().openContext( *_theContext );
+    Manager::getInstance()->getEngineManager<Signal>().openContext( *_theContext );
   }
 
 
@@ -222,7 +221,7 @@ namespace Regolith
   void OpenContextStackSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextStackSignal::trigger : Opening context" );
-    Manager::getInstance()->getEngine<Signal>().openContextStack( *_theContext );
+    Manager::getInstance()->getEngineManager<Signal>().openContextStack( *_theContext );
   }
 
 
@@ -247,7 +246,7 @@ namespace Regolith
   void OpenContextGroupSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextGroupSignal::trigger : Opening context group" );
-    Manager::getInstance()->getEngine<Signal>().openContextGroup( _theContextGroup );
+    Manager::getInstance()->getEngineManager<Signal>().openContextGroup( _theContextGroup );
   }
 
 

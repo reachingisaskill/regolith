@@ -2,7 +2,9 @@
 #ifndef REGOLITH_MANAGERS_CONTEXT_MANAGER_H_
 #define REGOLITH_MANAGERS_CONTEXT_MANAGER_H_
 
-#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Global/Global.h"
+#include "Regolith/Architecture/Component.h"
+#include "Regolith/Handlers/ContextGroup.h"
 #include "Regolith/Utilities/Condition.h"
 #include "Regolith/Utilities/MutexedBuffer.h"
 
@@ -14,7 +16,7 @@
 namespace Regolith
 {
 
-  class ContextManager
+  class ContextManager : public Component
   {
     // Allow links to access the private members
     template < class T, class R > friend class Link;
@@ -102,6 +104,16 @@ namespace Regolith
 
       // Return true when the loading thread is active
       bool isLoading() const;
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Component Interface
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager& ) override {}
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
+
   };
 
 }

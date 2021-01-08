@@ -32,6 +32,10 @@ namespace Regolith
       // Remove all the owned hardware objects
       void clear();
 
+
+////////////////////////////////////////////////////////////////////////////////
+      // Component Interface
+
       // Register game-wide events with the manager
       virtual void registerEvents( InputManager& ) override;
 

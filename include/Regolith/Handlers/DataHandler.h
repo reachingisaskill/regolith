@@ -8,7 +8,6 @@
 #include "Regolith/Assets/RawMusic.h"
 #include "Regolith/Assets/RawFont.h"
 #include "Regolith/Assets/RawText.h"
-#include "Regolith/Components/Engine.h"
 #include "Regolith/Utilities/ProxyMap.h"
 
 #include <string>

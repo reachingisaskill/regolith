@@ -3,7 +3,7 @@
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
 #include "Regolith/Contexts/ContextLayer.h"
-#include "Regolith/Managers/AudioHandler.h"
+#include "Regolith/Handlers/AudioHandler.h"
 
 
 namespace Regolith

@@ -6,10 +6,10 @@
 #include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/Architecture/Component.h"
-#include "Regolith/Managers/InputHandler.h"
-#include "Regolith/Managers/FocusHandler.h"
-#include "Regolith/Managers/CollisionHandler.h"
-#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Handlers/InputHandler.h"
+#include "Regolith/Handlers/FocusHandler.h"
+#include "Regolith/Handlers/CollisionHandler.h"
+#include "Regolith/Handlers/ContextGroup.h"
 #include "Regolith/Contexts/ContextLayer.h"
 
 #include <map>
