@@ -53,7 +53,7 @@ namespace Regolith
       FrameTimer _frameTimer;
 
       // Store the pause state
-      bool _pause;
+      std::atomic<bool> _pause;
 
 
       // Mutex to control access to contexts

@@ -37,6 +37,7 @@ namespace Regolith
       ContextStack::reverse_iterator& visibleStackEnd() { return _engine._visibleStackEnd; }
 
       std::mutex& renderMutex() { return _engine._renderMutex; }
+      std::atomic<bool>& pause() { return _engine._pause; }
   };
 
 

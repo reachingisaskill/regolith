@@ -28,7 +28,7 @@ namespace Regolith
     _openContextGroup( nullptr ),
     _currentContextGroup( nullptr ),
     _frameTimer(),
-    _pause( false )
+    _pause( true )
   {
   }
 
@@ -374,16 +374,22 @@ namespace Regolith
     Camera& camera = Manager::getInstance()->getWindowManager<EngineRenderingThreadType>().create();
     ContextStack::reverse_iterator& visibleStackStart = engine.visibleStackStart();
     ContextStack::reverse_iterator& visibleStackEnd = engine.visibleStackEnd();
+    std::atomic<bool>& pause = engine.pause();
 
     // Control access to the contexts
     std::unique_lock<std::mutex> renderLock( engine.renderMutex(), std::defer_lock );
-
 
     // Update the thread status
     threadHandler.running();
 
     try
     {
+      // Before the run function has started, prioritise rendering to load first context group faster
+      while ( pause )
+      {
+        contextManager.renderContextGroup( camera );
+      }
+
 
       while ( threadHandler.isGood() )
       {
