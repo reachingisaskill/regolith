@@ -5,7 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
 #include "Regolith/Links/Link.h"
-#include "Regolith/Handlers/Camera.h"
+#include "Regolith/GamePlay/Camera.h"
 
 #include <string>
 

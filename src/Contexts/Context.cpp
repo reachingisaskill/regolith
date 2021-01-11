@@ -10,7 +10,7 @@
 #include "Regolith/ObjectInterfaces/AnimatedObject.h"
 #include "Regolith/ObjectInterfaces/ControllableObject.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Handlers/Camera.h"
+#include "Regolith/GamePlay/Camera.h"
 
 
 namespace Regolith

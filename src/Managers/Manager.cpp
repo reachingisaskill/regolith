@@ -1,6 +1,16 @@
 
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Managers/InputManager.h"
+#include "Regolith/Managers/AudioManager.h"
+#include "Regolith/Managers/HardwareManager.h"
+#include "Regolith/Managers/CollisionManager.h"
+#include "Regolith/Managers/DataManager.h"
+#include "Regolith/Managers/ThreadManager.h"
+#include "Regolith/Managers/ContextManager.h"
+#include "Regolith/Managers/FontManager.h"
+#include "Regolith/Managers/WindowManager.h"
+#include "Regolith/Managers/EngineManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -15,16 +25,16 @@ namespace Regolith
   // Con/Destruction
 
   Manager::Manager() :
-    _theThreads(),
-    _theWindow(),
-    _theInput(),
-    _theAudio(),
-    _theHardware(),
-    _theCollision(),
-    _theData(),
-    _theContexts(),
-    _theFonts(),
-    _theEngine(),
+    _theThreads( nullptr ),
+    _theWindow( nullptr ),
+    _theInput( nullptr ),
+    _theAudio( nullptr ),
+    _theHardware( nullptr ),
+    _theCollision( nullptr ),
+    _theData( nullptr ),
+    _theContexts( nullptr ),
+    _theFonts( nullptr ),
+    _theEngine( nullptr ),
     _objectFactory(),
     _contextFactory(),
     _eventStartIndex(0),
@@ -38,6 +48,10 @@ namespace Regolith
     logtastic::registerSignalHandler( SIGINT, deathSignals );
     logtastic::registerSignalHandler( SIGSEGV, deathSignals );
     logtastic::registerSignalHandler( SIGTERM, deathSignals );
+
+
+    INFO_LOG( "Manager::Manager : Allocating memory for the managers." );
+    this->_allocateManagers();
   }
 
 
@@ -46,16 +60,21 @@ namespace Regolith
     DEBUG_LOG( "Manager::~Manager : Destruction" );
 
     INFO_LOG( "Manager::~Manager : Clearing collision data" );
-    _theCollision.clear();
+    _theCollision->clear();
 
     INFO_LOG( "Manager::~Manager : Clearing font data" );
-    _theFonts.clear();
+    _theFonts->clear();
 
     INFO_LOG( "Manager::~Manager : Clearing audio manager" );
-    _theAudio.clear();
+    _theAudio->clear();
 
     INFO_LOG( "Manager::~Manager : Clearing hardware manager" );
-    _theHardware.clear();
+    _theHardware->clear();
+
+
+    INFO_LOG( "Manager::~Manager : Deallocating managers" );
+    this->_deallocateManagers();
+
 
     INFO_LOG( "Manager::~Manager : Closing the SDL subsystems" );
     TTF_Quit();
@@ -75,23 +94,23 @@ namespace Regolith
     {
       // Start all the waiting threads
       INFO_LOG( "Manager::run : Starting worker threads" );
-      _theThreads.startAll();
+      _theThreads->startAll();
 
 
       try
       {
         // Load the first context group blocking this thread until completion
         INFO_LOG( "Manager::run : Loading entry point" );
-        ContextGroup* entryPoint = _theContexts.loadEntryPoint();
+        ContextGroup* entryPoint = _theContexts->loadEntryPoint();
 
         // Reset the stack to the first context
         INFO_LOG( "Manager::run : Loading the first context" );
 //        this->openEntryPoint();
-        _theEngine.openContextStack( entryPoint->getEntryPoint() );
+        _theEngine->openContextStack( entryPoint->getEntryPoint() );
 
         // Start the engine!
         INFO_LOG( "Manager::run : Starting the engine." );
-        _theEngine.run();
+        _theEngine->run();
       }
       catch ( Exception& ex )
       {
@@ -106,7 +125,7 @@ namespace Regolith
       {
         // Unload everything
         INFO_LOG( "Manager::run : Unloading data" );
-        _theContexts.clear();
+        _theContexts->clear();
       }
       catch ( Exception& ex )
       {
@@ -117,7 +136,7 @@ namespace Regolith
 
         // Stop all the threads
       INFO_LOG( "Manager::run : Stopping all worker threads" );
-      _theThreads.stopAll();
+      _theThreads->stopAll();
 
     }
     catch ( std::exception& ex )
@@ -125,12 +144,12 @@ namespace Regolith
       success = false;
       ERROR_LOG( "Manager::run : A unexpected exception occured." );
       ERROR_STREAM << ex.what();
-      _theThreads.error();
+      _theThreads->error();
     }
 
     // Join all the threads
     INFO_LOG( "Manager::run : Joining all worker threads" );
-    _theThreads.join();
+    _theThreads->join();
 
     return success;
   }
@@ -143,7 +162,7 @@ namespace Regolith
 
   void Manager::error()
   {
-    _theThreads.error();
+    _theThreads->error();
   }
 
 
@@ -157,13 +176,13 @@ namespace Regolith
 
   CollisionTeam Manager::getCollisionTeam( std::string name )
   {
-    return _theCollision.getCollisionTeam( name );
+    return _theCollision->getCollisionTeam( name );
   }
 
 
   CollisionType Manager::getCollisionType( std::string name )
   {
-    return _theCollision.getCollisionType( name );
+    return _theCollision->getCollisionType( name );
   }
 
 
@@ -171,37 +190,37 @@ namespace Regolith
 
   void Manager::loadPlaylist( Playlist* pl )
   {
-    _theAudio.load( pl );
+    _theAudio->load( pl );
   }
 
 
   void Manager::pauseTrack()
   {
-    _theAudio.pauseTrack();
+    _theAudio->pauseTrack();
   }
 
 
   void Manager::resumeTrack()
   {
-    _theAudio.resumeTrack();
+    _theAudio->resumeTrack();
   }
 
 
   void Manager::stopRepeatTrack()
   {
-    _theAudio.stopRepeatTrack();
+    _theAudio->stopRepeatTrack();
   }
 
 
   void Manager::nextTrack()
   {
-    _theAudio.nextTrack();
+    _theAudio->nextTrack();
   }
 
 
   void Manager::nextRepeatTrack()
   {
-    _theAudio.nextRepeatTrack();
+    _theAudio->nextRepeatTrack();
   }
 
 
@@ -209,7 +228,7 @@ namespace Regolith
 
   void Manager::setWindowTitle( std::string t )
   {
-    _theWindow.setTitle( t );
+    _theWindow->setTitle( t );
   }
 
 
@@ -217,7 +236,7 @@ namespace Regolith
 
   Pen Manager::requestPen( std::string n, unsigned int s, SDL_Color c )
   {
-    return _theFonts.requestPen( n, s, c );
+    return _theFonts->requestPen( n, s, c );
   }
 
 
@@ -278,8 +297,8 @@ namespace Regolith
       // Load the input device configuration first so objects can register game-wide behaviours
       this->_loadInput( json_data["input_device"] );
       // Engine gets to register its events first
-      _theEngine.registerEvents( _theInput );
-      _theHardware.registerEvents( _theInput );
+      _theEngine->registerEvents( *_theInput );
+      _theHardware->registerEvents( *_theInput );
 
 
       // Load the audio device configuration
@@ -324,15 +343,56 @@ namespace Regolith
   }
 
 
+  void Manager::_allocateManagers()
+  {
+    _theInput = new InputManager();
+    _theAudio = new AudioManager();
+    _theHardware = new HardwareManager();
+    _theCollision = new CollisionManager();
+    _theData = new DataManager();
+    _theThreads = new ThreadManager();
+    _theContexts = new ContextManager();
+    _theFonts = new FontManager();
+    _theWindow = new WindowManager();
+    _theEngine = new EngineManager();
+  }
+
+
+  void Manager::_deallocateManagers()
+  {
+    delete _theInput;
+    delete _theAudio;
+    delete _theHardware;
+    delete _theCollision;
+    delete _theData;
+    delete _theThreads;
+    delete _theContexts;
+    delete _theFonts;
+    delete _theWindow;
+    delete _theEngine;
+
+    _theInput = nullptr;
+    _theAudio = nullptr;
+    _theHardware = nullptr;
+    _theCollision = nullptr;
+    _theData = nullptr;
+    _theThreads = nullptr;
+    _theContexts = nullptr;
+    _theFonts = nullptr;
+    _theWindow = nullptr;
+    _theEngine = nullptr;
+  }
+
+
   void Manager::_loadInput( Json::Value& json_data )
   {
     try
     {
       INFO_LOG( "Manager::_loadInput : Configuring the input manager" );
-      _theInput.configure( json_data );
+      _theInput->configure( json_data );
 
       // Register the regolith events
-      _theInput.registerEvents( _theInput );
+      _theInput->registerEvents( *_theInput );
     }
     catch ( std::runtime_error& rt )
     {
@@ -348,10 +408,10 @@ namespace Regolith
     try
     {
       INFO_LOG( "Manager::_loadAudio : Configuring the audio manager" );
-      _theAudio.configure( json_data );
+      _theAudio->configure( json_data );
 
       // Register the regolith events
-      _theAudio.registerEvents( _theInput );
+      _theAudio->registerEvents( *_theInput );
     }
     catch ( std::runtime_error& rt )
     {
@@ -367,50 +427,50 @@ namespace Regolith
     INFO_LOG( "Manager::_loadWindow : Loading window data" );
 
     // Let the window configure itself from the json data
-    _theWindow.configure( json_data );
+    _theWindow->configure( json_data );
 
     // Register the regolith events with the input manager
-    _theWindow.registerEvents( _theInput );
+    _theWindow->registerEvents( *_theInput );
   }
 
 
   void Manager::_loadCollision( Json::Value& json_data )
   {
     INFO_LOG( "Manager::_loadCollision : Loading collision data" );
-    _theCollision.configure( json_data );
+    _theCollision->configure( json_data );
 
     // Register the regolith events
-    _theCollision.registerEvents( _theInput );
+    _theCollision->registerEvents( *_theInput );
   }
 
 
   void Manager::_loadData( Json::Value& game_data )
   {
     INFO_LOG( "Manager::_loadData : Loading game data" );
-    _theData.configure( game_data );
+    _theData->configure( game_data );
 
     // Register the regolith events
-    _theData.registerEvents( _theInput );
+    _theData->registerEvents( *_theInput );
   }
 
 
   void Manager::_loadFonts( Json::Value& font_data )
   {
     INFO_LOG( "Manager::_loadFonts : Loading font data" );
-    _theFonts.configure( font_data );
+    _theFonts->configure( font_data );
 
     // Register the regolith events
-    _theFonts.registerEvents( _theInput );
+    _theFonts->registerEvents( *_theInput );
   }
 
 
   void Manager::_loadContexts( Json::Value& context_data )
   {
     INFO_LOG( "Manager::_loadContexts : Loading contexts" );
-    _theContexts.configure( context_data );
+    _theContexts->configure( context_data );
 
     // Register the regolith events
-    _theContexts.registerEvents( _theInput );
+    _theContexts->registerEvents( *_theInput );
   }
 
 

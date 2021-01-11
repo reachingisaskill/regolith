@@ -8,6 +8,7 @@
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
 #include "Regolith/Contexts/Context.h"
 #include "Regolith/Audio/Playlist.h"
+#include "Regolith/GamePlay/Camera.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 

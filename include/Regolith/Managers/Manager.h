@@ -7,24 +7,10 @@
 #include "Regolith/Architecture/GameObject.h"
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/FactoryTemplate.h"
-#include "Regolith/Managers/InputManager.h"
-#include "Regolith/Managers/AudioManager.h"
-#include "Regolith/Managers/HardwareManager.h"
-#include "Regolith/Managers/CollisionManager.h"
-#include "Regolith/Managers/DataManager.h"
-#include "Regolith/Managers/ThreadManager.h"
-#include "Regolith/Managers/ContextManager.h"
-#include "Regolith/Managers/FontManager.h"
-#include "Regolith/Managers/WindowManager.h"
-#include "Regolith/Managers/EngineManager.h"
 #include "Regolith/GamePlay/Signal.h"
+#include "Regolith/GamePlay/Pen.h"
 #include "Regolith/Contexts/Context.h"
 #include "Regolith/Utilities/Singleton.h"
-
-#include <vector>
-#include <map>
-#include <string>
-#include <deque>
 
 
 namespace Regolith
@@ -33,6 +19,18 @@ namespace Regolith
   // Factory typedefs
   typedef FactoryTemplate< GameObject, ContextGroup& > ObjectFactory;
   typedef FactoryTemplate< Context, ContextGroup& > ContextFactory;
+
+  // Manager typedefs
+  class InputManager;
+  class AudioManager;
+  class HardwareManager;
+  class CollisionManager;
+  class DataManager;
+  class ThreadManager;
+  class ContextManager;
+  class FontManager;
+  class WindowManager;
+  class EngineManager;
 
   // Manager class
   // Global storage for all scenes, renderers and windows.
@@ -45,16 +43,16 @@ namespace Regolith
 
     private:
       // Crucial objects for Regolith
-      ThreadManager _theThreads;
-      WindowManager _theWindow;
-      InputManager _theInput;
-      AudioManager _theAudio;
-      HardwareManager _theHardware;
-      CollisionManager _theCollision;
-      DataManager _theData;
-      ContextManager _theContexts;
-      FontManager _theFonts;
-      EngineManager _theEngine;
+      ThreadManager* _theThreads;
+      WindowManager* _theWindow;
+      InputManager* _theInput;
+      AudioManager* _theAudio;
+      HardwareManager* _theHardware;
+      CollisionManager* _theCollision;
+      DataManager* _theData;
+      ContextManager* _theContexts;
+      FontManager* _theFonts;
+      EngineManager* _theEngine;
 
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
@@ -67,6 +65,11 @@ namespace Regolith
 
     protected:
       Manager();
+
+      // Allocate memory for all the managers
+      void _allocateManagers();
+      // Deallocate memory for all the managers
+      void _deallocateManagers();
 
       // Load the input device configuration
       void _loadInput( Json::Value& );
@@ -170,34 +173,34 @@ namespace Regolith
       // If the requested link is not allowed a compile time error will be shown.
 
       template < class REQUESTER >
-      Link< ThreadManager, REQUESTER > getThreadManager() { return Link< ThreadManager, REQUESTER >( _theThreads ); }
+      Link< ThreadManager, REQUESTER > getThreadManager() { return Link< ThreadManager, REQUESTER >( *_theThreads ); }
 
       template < class REQUESTER >
-      Link< WindowManager, REQUESTER > getWindowManager() { return Link< WindowManager, REQUESTER >( _theWindow ); }
+      Link< WindowManager, REQUESTER > getWindowManager() { return Link< WindowManager, REQUESTER >( *_theWindow ); }
 
       template < class REQUESTER >
-      Link< InputManager, REQUESTER > getInputManager() { return Link< InputManager, REQUESTER >( _theInput ); }
+      Link< InputManager, REQUESTER > getInputManager() { return Link< InputManager, REQUESTER >( *_theInput ); }
 
       template < class REQUESTER >
-      Link< AudioManager, REQUESTER > getAudioManager() { return Link< AudioManager, REQUESTER >( _theAudio ); }
+      Link< AudioManager, REQUESTER > getAudioManager() { return Link< AudioManager, REQUESTER >( *_theAudio ); }
 
       template < class REQUESTER >
-      Link< HardwareManager, REQUESTER > getHardwareManager() { return Link< HardwareManager, REQUESTER >( _theHardware ); }
+      Link< HardwareManager, REQUESTER > getHardwareManager() { return Link< HardwareManager, REQUESTER >( *_theHardware ); }
 
       template < class REQUESTER >
-      Link< CollisionManager, REQUESTER > getCollisionManager() { return Link< CollisionManager, REQUESTER >( _theCollision ); }
+      Link< CollisionManager, REQUESTER > getCollisionManager() { return Link< CollisionManager, REQUESTER >( *_theCollision ); }
 
       template < class REQUESTER >
-      Link< DataManager, REQUESTER > getDataManager() { return Link< DataManager, REQUESTER >( _theData ); }
+      Link< DataManager, REQUESTER > getDataManager() { return Link< DataManager, REQUESTER >( *_theData ); }
 
       template < class REQUESTER >
-      Link< ContextManager, REQUESTER > getContextManager() { return Link< ContextManager, REQUESTER >( _theContexts ); }
+      Link< ContextManager, REQUESTER > getContextManager() { return Link< ContextManager, REQUESTER >( *_theContexts ); }
 
       template < class REQUESTER >
-      Link< FontManager, REQUESTER > getFontManager() { return Link< FontManager, REQUESTER >( _theFonts ); }
+      Link< FontManager, REQUESTER > getFontManager() { return Link< FontManager, REQUESTER >( *_theFonts ); }
 
       template < class REQUESTER >
-      Link< EngineManager, REQUESTER > getEngineManager() { return Link< EngineManager, REQUESTER >( _theEngine ); }
+      Link< EngineManager, REQUESTER > getEngineManager() { return Link< EngineManager, REQUESTER >( *_theEngine ); }
 
   };
 

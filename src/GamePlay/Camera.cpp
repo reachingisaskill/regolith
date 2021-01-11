@@ -1,5 +1,5 @@
 
-#include "Regolith/Handlers/Camera.h"
+#include "Regolith/GamePlay/Camera.h"
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/Managers/WindowManager.h"
 #include "Regolith/Textures/Texture.h"

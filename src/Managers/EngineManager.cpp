@@ -388,6 +388,9 @@ namespace Regolith
       while ( pause )
       {
         contextManager.renderContextGroup( camera );
+#ifdef REGOLITH_VALGRIND_BUILD
+        std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+#endif
       }
 
 
