@@ -44,18 +44,6 @@ namespace Regolith
   }
 
 
-  ContextEvent getContextEventID( std::string name )
-  {
-    for ( unsigned int i = 0; i < CONTEXT_EVENT_OPTIONS; ++i )
-    {
-      if ( name == ContextEventStrings[i] )
-        return (ContextEvent) i;
-    }
-
-    return CONTEXT_EVENT_OPTIONS;
-  }
-
-
   MouseButton getMouseButtonID( std::string name )
   {
     for ( unsigned int i = 0; i < MOUSE_BUTTON_TOTAL; ++i )

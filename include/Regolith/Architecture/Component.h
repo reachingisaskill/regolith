@@ -19,6 +19,8 @@ namespace Regolith
   {
     Component( const Component& ) = delete;
     Component& operator=( const Component& ) = delete;
+    Component( Component&& ) = delete;
+    Component& operator=( Component&& ) = delete;
 
     public :
       Component() = default;

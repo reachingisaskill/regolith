@@ -24,9 +24,15 @@
   },
 
 
-  "collision_teams" :
+  "collision" :
   {
-    "null" : 0
+    "collision_teams" :
+    {
+      "null" : 0
+    },
+    "collision_types" :
+    {
+    }
   },
 
 

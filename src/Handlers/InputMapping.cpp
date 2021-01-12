@@ -1,6 +1,6 @@
 
 #include "Regolith/Architecture/ControllableInterface.h"
-#include "Regolith/Managers/InputMapping.h"
+#include "Regolith/Handlers/InputMapping.h"
 
 
 namespace Regolith

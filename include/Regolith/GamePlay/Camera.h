@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_COMPONENTS_CAMERA_H_
-#define REGOLITH_COMPONENTS_CAMERA_H_
+#ifndef REGOLITH_MANAGERS_CAMERA_H_
+#define REGOLITH_MANAGERS_CAMERA_H_
 
 #include "Regolith/Global/Global.h"
 
@@ -8,16 +8,18 @@
 namespace Regolith
 {
   class DrawableObject;
-  class Window;
+  class WindowManager;
   class Texture;
 
   class Camera
   {
     private:
-      Window& _theWindow;
+      WindowManager& _theWindow;
       SDL_Renderer* _theRenderer;
 //      float _zoom;
       SDL_Color _defaultColour;
+
+      SDL_Rect _windowRect;
 
       // References to the dimensions of the displayed area
       const int& _width;
@@ -34,7 +36,7 @@ namespace Regolith
 
     public:
       // Constructor
-      Camera( Window&, SDL_Renderer*, const int&, const int &, const float&, const float& );
+      Camera( WindowManager&, SDL_Renderer*, const int&, const int &, const float&, const float& );
 
       // Destructor
       virtual ~Camera() {}
@@ -72,9 +74,13 @@ namespace Regolith
 
       // Destroys the sdl texture object
       void clearTexture( Texture& );
+
+
+      // Fills the displayable area with the colour provided
+      void fillWindow( SDL_Color& );
   };
 
 }
 
-#endif // REGOLITH_COMPONENTS_CAMERA_H_
+#endif // REGOLITH_MANAGERS_CAMERA_H_
 

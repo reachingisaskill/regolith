@@ -1,11 +1,14 @@
 
-#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Handlers/ContextGroup.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Links/LinkContextManager.h"
+#include "Regolith/Links/LinkAudioManager.h"
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
 #include "Regolith/Contexts/Context.h"
 #include "Regolith/Audio/Playlist.h"
+#include "Regolith/GamePlay/Camera.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -15,7 +18,7 @@ namespace Regolith
   ContextGroup::ContextGroup() :
     _renderRate( 100 ),
     _isGlobalGroup( false ),
-    _theAudio( Manager::getInstance()->getAudioManager() ),
+    _theAudio(),
     _theData(),
     _fileName(),
     _loadScreen( nullptr ),
@@ -92,7 +95,10 @@ namespace Regolith
     // If a default playlist is mentioned, play it.
     if ( _defaultPlaylist != nullptr )
     {
-      _defaultPlaylist->play();
+      // Load the playlist into the queue
+      Manager::getInstance()->getAudioManager<ContextGroup>().load( _defaultPlaylist );
+      // Start playing it
+      Manager::getInstance()->getAudioManager<ContextGroup>().nextTrack();
     }
   }
 
@@ -100,10 +106,12 @@ namespace Regolith
   void ContextGroup::close()
   {
     // Stop all the music which may have originated from this CG
-    Manager::getInstance()->getAudioManager().clearQueue();
-    Manager::getInstance()->getAudioManager().stopTrack();
+    // Clear the current queue
+    Manager::getInstance()->getAudioManager<ContextGroup>().clearQueue();
+    // Stop the current track
+    Manager::getInstance()->getAudioManager<ContextGroup>().stopTrack();
 
-    DEBUG_LOG( "ContextGroup::close : HERE" );
+    DEBUG_LOG( "ContextGroup::close : Here" );
   }
 
 
@@ -156,7 +164,7 @@ namespace Regolith
     if ( ! _isGlobalGroup )
     {
       validateJson( json_data, "load_screen", JsonType::STRING );
-      _loadScreen = Manager::getInstance()->getContextManager().getGlobalContextGroup()->getContextPointer( json_data["load_screen"].asString() );
+      _loadScreen = Manager::getInstance()->getContextManager<ContextGroup>().getGlobalContextGroup()->getContextPointer( json_data["load_screen"].asString() );
       INFO_STREAM << "ContextGroup::configure : Load Screen found : " << json_data["load_screen"].asString();
     }
 
@@ -273,7 +281,7 @@ namespace Regolith
     // Wait for engine rendering process
     DEBUG_LOG( "ContextGroup::load : Waiting for engine rendering" );
     setStatus( "Pre-Rendering" );
-    Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+    Manager::getInstance()->getContextManager<ContextGroup>().requestRenderContextGroup( this );
 
 
     setStatus( "Complete" );
@@ -307,7 +315,7 @@ namespace Regolith
     _isRendered = false;
 
     // Wait for the engine to clear all the textures
-    Manager::getInstance()->getContextManager().requestRenderContextGroup( this );
+    Manager::getInstance()->getContextManager<ContextGroup>().requestRenderContextGroup( this );
 
     INFO_LOG( "ContextGroup::unload : Unloading Audio Configuration" );
     _theAudio.clear();

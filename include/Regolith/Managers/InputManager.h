@@ -5,7 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/Architecture/Component.h"
-#include "Regolith/Managers/InputMapping.h"
+#include "Regolith/Handlers/InputMapping.h"
 #include "Regolith/Utilities/NamedVector.h"
 
 #include <set>
@@ -46,8 +46,11 @@ namespace Regolith
    * Stores the global key mapping configuration and engine/game wide event call backs: INPUT_EVENTS
    * Additional callbacks are registered to the Scene's individual input handler
    */
-  class InputManager
+  class InputManager : public Component
   {
+    // Friend declarations
+    template < class T, class R > friend class Link;
+
     // Make this class non-copyable
     InputManager( const InputManager& ) = delete;
     InputManager& operator=( const InputManager& ) = delete;
@@ -62,6 +65,35 @@ namespace Regolith
       // Cache the SDL event
       SDL_Event _theEvent;
 
+      // Cache the pointer to the last used input handler. Used to simulate input actions
+      InputHandler* _lastHandler;
+
+
+    protected:
+
+////////////////////////////////////////////////////////////////////////////////
+      // Input Handler Access
+      // Requests an input handler. If it exists, return the pointer, otherwise create it.
+      InputMappingSet* requestMapping( std::string );
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Engine access
+
+      // Iterate through all the SDL events and use the provided input handler to distribute user events
+      void handleEvents( InputHandler* );
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Signal access
+
+      // Functions to manually push events to objects without the SDL event queue
+      void simulateInputAction( InputAction );
+      void simulateBooleanAction( InputAction, bool );
+      void simulateFloatAction( InputAction, float );
+      void simulateVectorAction( InputAction, const Vector& );
+      void simulateMouseAction( InputAction, bool, const Vector& );
+
 
     public:
       InputManager();
@@ -73,12 +105,6 @@ namespace Regolith
       void configure( Json::Value& );
 
 
-
-      // Iterate through all the SDL events and use the provided input handler to distribute user events
-      void handleEvents( InputHandler* );
-
-
-
       // Register the request from a drawable object to be called when a given event is raised
       void registerEventRequest( Component*, RegolithEvent );
 
@@ -86,25 +112,21 @@ namespace Regolith
       ComponentSet& getRegisteredComponents( RegolithEvent );
 
 
-
-      // Register an input action to the mapper with the proveded name
+      // Register an input action to the mapper with the provided name
       void registerInputAction( std::string, InputEventType event_type, unsigned int code, InputAction event );
 
       // Get the registered input action from the request mapper, for a specific event type and event code
       InputAction getRegisteredInputAction( std::string, InputEventType event_type, unsigned int code );
 
 
+////////////////////////////////////////////////////////////////////////////////
+      // Component Interface
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager& ) override {}
 
-      // Requests an input handler. If it exists, return the pointer, otherwise create it.
-      InputMappingSet* requestMapping( std::string );
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
 
-
-      // Functions to manually push events to objects without the SDL event queue
-      void simulateInputAction( InputHandler*, InputAction );
-      void simulateBooleanAction( InputHandler*, InputAction, bool );
-      void simulateFloatAction( InputHandler*, InputAction, float );
-      void simulateVectorAction( InputHandler*, InputAction, const Vector& );
-      void simulateMouseAction( InputHandler*, InputAction, bool, const Vector& );
   };
 
 

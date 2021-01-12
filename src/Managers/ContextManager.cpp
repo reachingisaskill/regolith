@@ -1,8 +1,9 @@
 
 #include "Regolith/Managers/ContextManager.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/ThreadManager.h"
-#include "Regolith/Managers/ThreadHandler.h"
+#include "Regolith/Handlers/ThreadHandler.h"
+#include "Regolith/Links/LinkThreadManager.h"
+#include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -83,8 +84,8 @@ namespace Regolith
 
     // Register condition variables that can block thread execution
 //    Manager::getInstance()->getThreadManager().registerCondition( &_contextUpdate.variable );
-    Manager::getInstance()->getThreadManager().registerCondition( &_loadingThreadCondition );
-    Manager::getInstance()->getThreadManager().registerCondition( &_renderContextGroup.variable );
+    Manager::getInstance()->getThreadManager<ContextManager>().registerCondition( &_loadingThreadCondition );
+    Manager::getInstance()->getThreadManager<ContextManager>().registerCondition( &_renderContextGroup.variable );
 
     // Validate expected json values
     validateJson( json_data, "global", JsonType::STRING );
@@ -325,17 +326,13 @@ namespace Regolith
 
 
     // Set up references
-    ContextManager& manager = Manager::getInstance()->getContextManager();
-    std::condition_variable& activeCondition = manager._loadingThreadCondition;
-    UniqueLock activeLock( manager._loadingThreadActive );
-    ContextManager::ContextGroupBuffer& buffer = manager._contextGroupBuffer;
+    auto manager = Manager::getInstance()->getContextManager<ContextManagerThreadType>();
+
+    std::condition_variable& activeCondition = manager.loadingThreadCondition();
+    ContextManager::ContextGroupBuffer& buffer = manager.contextGroupBuffer();
+    UniqueLock activeLock( manager.loadingThreadActive() );
+
     ContextManager::BufferElement element;
-
-//    Condition<bool>& contextUpdate = manager._contextUpdate;
-//    UniqueLock contextLock( contextUpdate.mutex, std::defer_lock );
-//    UniqueLock loadPointerLock( manager._loadGroupMutex, std::defer_lock );
-//    UniqueLock currentPointerLock( manager._currentGroupMutex, std::defer_lock );
-
 
     // Update the thread status
     threadHandler.running();
@@ -344,16 +341,10 @@ namespace Regolith
     {
       while( threadHandler.isGood() )
       {
-        // Signal that the context group has been loaded
-//        contextLock.lock();
-//        if ( ! contextUpdate.data )
         if ( buffer.empty() )
         {
-//          contextUpdate.variable.wait( contextLock, [&]()->bool{ return (! threadHandler.isGood() ) || ( !_contextGroupBuffer.empty() ) } );
           activeCondition.wait( activeLock, [&]()->bool{ return (! threadHandler.isGood() ) || ( !buffer.empty() ); } );
         }
-//        contextUpdate.data = false;
-//        contextLock.unlock();
 
         if ( ! threadHandler.isGood() )
         {
@@ -377,52 +368,13 @@ namespace Regolith
           {
             element.first->unload();
           }
-
         }
-
-        /*
-        // Copy the request into the thread and clear them
-        loadPointerLock.lock();
-        ContextGroup* loadGroup = manager._loadContextGroup;
-        manager._loadContextGroup = nullptr;
-        ContextGroup* unloadGroup = manager._unloadContextGroup;
-        manager._unloadContextGroup = nullptr;
-        loadPointerLock.unlock();
-
-        // Update the current group pointer
-        currentPointerLock.lock();
-        manager._currentContextGroup = unloadGroup;
-        currentPointerLock.unlock();
-
-        // Unload the unload group
-        if ( ( unloadGroup != nullptr ) && ( ! unloadGroup->isGlobal() ) )
-        {
-          unloadGroup->unload();
-        }
-
-        // Update the current group pointer
-        currentPointerLock.lock();
-        manager._currentContextGroup = unloadGroup;
-        currentPointerLock.unlock();
-
-        // Load the load group
-        if ( ( loadGroup != nullptr ) && ( ! loadGroup->isGlobal() ) )
-        {
-          loadGroup->load();
-        }
-      */
       }
 
       activeLock.unlock();
-//      contextLock.unlock();
     }
     catch( Exception& ex )
     {
-//      if ( contextLock.owns_lock() )
-//      {
-//        contextUpdate.variable.notify_all();
-//        contextLock.unlock();
-//      }
       if ( activeLock.owns_lock() )
       {
         activeLock.unlock();
@@ -432,11 +384,6 @@ namespace Regolith
     }
     catch( std::exception& ex )
     {
-//      if ( contextLock.owns_lock() )
-//      {
-//        contextUpdate.variable.notify_all();
-//        contextLock.unlock();
-//      }
       if ( activeLock.owns_lock() )
       {
         activeLock.unlock();

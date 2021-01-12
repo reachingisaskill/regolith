@@ -1,6 +1,6 @@
 
-#ifndef REGOLITH_COMPONENTS_ENGINE_H_
-#define REGOLITH_COMPONENTS_ENGINE_H_
+#ifndef REGOLITH_MANAGERS_ENGINE_MANAGER_H_
+#define REGOLITH_MANAGERS_ENGINE_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
@@ -20,11 +20,11 @@ namespace Regolith
   typedef std::deque< Context* > ContextStack;
 
 
-  class Engine : public Component
+  class EngineManager : public Component
   {
 ////////////////////////////////////////////////////////////////////////////////
     // Friend declarations
-    friend void engineRenderingThread();
+    template < class T, class R > friend class Link;
 
 ////////////////////////////////////////////////////////////////////////////////
     // Sub classes and types
@@ -35,12 +35,7 @@ namespace Regolith
       typedef std::queue< StackOperation > StackOperationQueue;
 
 
-////////////////////////////////////////////////////////////////////////////////
-    // Class members
     private:
-      // This manager handles input events
-      InputManager& _inputManager;
-
       // Stack of all contexts that are curent rendereable
       ContextStack _contextStack;
 
@@ -58,7 +53,7 @@ namespace Regolith
       FrameTimer _frameTimer;
 
       // Store the pause state
-      bool _pause;
+      std::atomic<bool> _pause;
 
 
       // Mutex to control access to contexts
@@ -69,23 +64,20 @@ namespace Regolith
       // Function which checks the current context stack and performs the queued operations
       bool performStackOperations();
 
+
     public:
       // Create the engine with the required references in place
-      Engine( InputManager& );
+      EngineManager();
 
       // Just in case I decided to inherit from here in the future...
-      virtual ~Engine();
+      virtual ~EngineManager();
 
       // Start the engine running. In order to stop it the quit() function must be used.
       void run();
 
 
-      // Returns a pointer to the current context with focus
-      Context* currentContext() { return _contextStack.front(); }
-
-      // Returns a pointer to the current context group that owns the contents of the stack
-      ContextGroup* currentContextGroup() { return _currentContextGroup; }
-
+////////////////////////////////////////////////////////////////////////////////
+      // Context stack manipulation
 
       // Tells the engine to push the context pointer to the top of the stack. Must be a member of the current context group
       void openContext( Context* );
@@ -96,6 +88,14 @@ namespace Regolith
 
       // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
       void openContextGroup( ContextGroup* );
+
+
+      // Returns a pointer to the current context with focus
+      Context* currentContext() { return _contextStack.front(); }
+
+      // Returns a pointer to the current context group that owns the contents of the stack
+      ContextGroup* currentContextGroup() { return _currentContextGroup; }
+
 
 
       // Return the current estimated FPS of the engine
@@ -138,5 +138,5 @@ namespace Regolith
 
 }
 
-#endif // REGOLITH_COMPONENTS_ENGINE_H_
+#endif // REGOLITH_MANAGERS_ENGINE_MANAGER_H_
 

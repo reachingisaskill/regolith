@@ -1,6 +1,6 @@
 
-#include "Regolith/Managers/FocusHandler.h"
-#include "Regolith/Managers/InputHandler.h"
+#include "Regolith/Handlers/FocusHandler.h"
+#include "Regolith/Handlers/InputHandler.h"
 
 
 namespace Regolith

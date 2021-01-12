@@ -6,10 +6,10 @@
 #include "Regolith/Architecture/MassProduceable.h"
 #include "Regolith/Architecture/ControllableInterface.h"
 #include "Regolith/Architecture/Component.h"
-#include "Regolith/Managers/InputHandler.h"
-#include "Regolith/Managers/FocusHandler.h"
-#include "Regolith/Managers/CollisionHandler.h"
-#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Handlers/InputHandler.h"
+#include "Regolith/Handlers/FocusHandler.h"
+#include "Regolith/Handlers/CollisionHandler.h"
+#include "Regolith/Handlers/ContextGroup.h"
 #include "Regolith/Contexts/ContextLayer.h"
 
 #include <map>
@@ -91,6 +91,9 @@ namespace Regolith
 
       // Called for each object that is flagged to have global physics
       virtual void updatePhysics( PhysicalObject*, float ) const = 0;
+
+      // Called at the end of the render loop to do any context-specific rendering (e.g. transitions)
+      virtual void renderContext( Camera& ) = 0;
 
 //////////////////////////////////////////////////////////////////////////////// 
     public:

@@ -1,11 +1,12 @@
 
 #include "Regolith/GamePlay/Signal.h"
-
 #include "Regolith/Contexts/Context.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/ContextGroup.h"
-#include "Regolith/Managers/DataHandler.h"
-#include "Regolith/Managers/InputManager.h"
+#include "Regolith/Handlers/ContextGroup.h"
+#include "Regolith/Handlers/DataHandler.h"
+#include "Regolith/Links/LinkEngineManager.h"
+#include "Regolith/Links/LinkContextManager.h"
+#include "Regolith/Links/LinkInputManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -23,8 +24,7 @@ namespace Regolith
 
   void InputActionSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateInputAction( man->getCurrentContext()->inputHandler(), _theAction );
+    Manager::getInstance()->getInputManager<Signal>().simulateInputAction( _theAction );
   }
 
 
@@ -48,8 +48,7 @@ namespace Regolith
 
   void InputBooleanSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateBooleanAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
+    Manager::getInstance()->getInputManager<Signal>().simulateBooleanAction( _theAction, _theValue );
   }
 
   void InputBooleanSignal::configure( Json::Value& json_data, ContextGroup& )
@@ -78,8 +77,7 @@ namespace Regolith
 
   void InputFloatSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateFloatAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
+    Manager::getInstance()->getInputManager<Signal>().simulateFloatAction( _theAction, _theValue );
   }
 
 
@@ -109,8 +107,7 @@ namespace Regolith
 
   void InputVectorSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateVectorAction( man->getCurrentContext()->inputHandler(), _theAction, _theValue );
+    Manager::getInstance()->getInputManager<Signal>().simulateVectorAction( _theAction, _theValue );
   }
 
 
@@ -142,8 +139,7 @@ namespace Regolith
 
   void InputMouseSignal::trigger() const
   {
-    Manager* man = Manager::getInstance();
-    man->getInputManager().simulateMouseAction( man->getCurrentContext()->inputHandler(), _theAction, _click, _position );
+    Manager::getInstance()->getInputManager<Signal>().simulateMouseAction( _theAction, _click, _position );
   }
 
 
@@ -189,21 +185,6 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-//  // Context Event Signal
-//
-//  ContextEventSignal::ContextEventSignal( ContextEvent event ) :
-//    _theEvent( event )
-//  {
-//  }
-//
-//
-//  void ContextEventSignal::trigger() const
-//  {
-//    Manager::getInstance()->getCurrentContext()->raiseContextEvent( _theEvent );
-//  }
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
   // Context Change Signal
 
   OpenContextSignal::OpenContextSignal() :
@@ -215,16 +196,16 @@ namespace Regolith
   void OpenContextSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextSignal::trigger : Opening context" );
-    Manager::getInstance()->openContext( *_theContext );
+    Manager::getInstance()->getEngineManager<Signal>().openContext( *_theContext );
   }
 
 
   void OpenContextSignal::configure( Json::Value& json_data, ContextGroup& cg )
   {
-    validateJson( json_data, "context_name", JsonType::STRING );
-    _theContext = cg.getContextPointer( json_data["context_name"].asString() );
+    validateJson( json_data, "context", JsonType::STRING );
+    _theContext = cg.getContextPointer( json_data["context"].asString() );
 
-    INFO_STREAM << "OpenContextSignal::configure : Registered context with name: " << json_data["context_name"].asString();
+    INFO_STREAM << "OpenContextSignal::configure : Registered context with name: " << json_data["context"].asString();
   }
 
 
@@ -240,16 +221,16 @@ namespace Regolith
   void OpenContextStackSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextStackSignal::trigger : Opening context" );
-    Manager::getInstance()->openContextStack( *_theContext );
+    Manager::getInstance()->getEngineManager<Signal>().openContextStack( *_theContext );
   }
 
 
   void OpenContextStackSignal::configure( Json::Value& json_data, ContextGroup& cg )
   {
-    validateJson( json_data, "context_name", JsonType::STRING );
-    _theContext = cg.getContextPointer( json_data["context_name"].asString() );
+    validateJson( json_data, "context", JsonType::STRING );
+    _theContext = cg.getContextPointer( json_data["context"].asString() );
 
-    INFO_STREAM << "OpenContextStackSignal::configure : Registered context with name: " << json_data["context_name"].asString();
+    INFO_STREAM << "OpenContextStackSignal::configure : Registered context with name: " << json_data["context"].asString();
   }
 
 
@@ -265,14 +246,14 @@ namespace Regolith
   void OpenContextGroupSignal::trigger() const
   {
     DEBUG_LOG( "OpenContextGroupSignal::trigger : Opening context group" );
-    Manager::getInstance()->openContextGroup( _theContextGroup );
+    Manager::getInstance()->getEngineManager<Signal>().openContextGroup( _theContextGroup );
   }
 
 
   void OpenContextGroupSignal::configure( Json::Value& json_data, ContextGroup& )
   {
     validateJson( json_data, "context_group", JsonType::STRING );
-    _theContextGroup = Manager::getInstance()->getContextManager().getContextGroup( json_data["context_group"].asString() );
+    _theContextGroup = Manager::getInstance()->getContextManager<Signal>().getContextGroup( json_data["context_group"].asString() );
 
     INFO_STREAM << "OpenContextGroupSignal::configure : Registered context group with name : " << json_data["context_group"].asString();
   }

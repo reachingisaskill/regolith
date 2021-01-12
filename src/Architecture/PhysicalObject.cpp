@@ -1,8 +1,8 @@
 
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/ContextGroup.h"
-#include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Handlers/ContextGroup.h"
+#include "Regolith/Handlers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 

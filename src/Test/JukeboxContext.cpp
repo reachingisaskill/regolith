@@ -1,6 +1,7 @@
 
 #include "Regolith/Test/JukeboxContext.h"
 #include "Regolith/Managers/Manager.h"
+#include "Regolith/Links/LinkAudioManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 
@@ -63,15 +64,13 @@ namespace Regolith
 
    void JukeboxContext::onStart()
    {
-     _playlist->play();
-
      this->setClosed( false );
    }
 
 
   void JukeboxContext::updateContext( float time )
   {
-    static AudioManager& manager = Manager::getInstance()->getAudioManager();
+    static auto manager = Manager::getInstance()->getAudioManager<TestType>();
 
     if ( _skipTimer1.trigger( time ) )
     {

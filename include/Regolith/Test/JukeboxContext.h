@@ -42,6 +42,9 @@ namespace Regolith
       // Called for each object that is flagged to have global physics
       virtual void updatePhysics( PhysicalObject*, float ) const override {}
 
+      // Called at the end of the render loop to do any context-specific rendering (e.g. transitions)
+      virtual void renderContext( Camera& ) override {}
+
 
     public:
       JukeboxContext();

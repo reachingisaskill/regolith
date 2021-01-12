@@ -4,7 +4,8 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/Component.h"
-#include "Regolith/Components/Camera.h"
+#include "Regolith/Links/Link.h"
+#include "Regolith/GamePlay/Camera.h"
 
 #include <string>
 
@@ -13,10 +14,13 @@ namespace Regolith
 {
 
   /*
-   * Window wrapper class.
+   * WindowManager wrapper class.
    */
-  class Window : public Component
+  class WindowManager : public Component
   {
+    // Allow links to access the private members
+    template < class T, class R > friend class Link;
+
     // Camera is a friend of the window
     friend class Camera;
 
@@ -26,7 +30,7 @@ namespace Regolith
       // Keep track of whether a renderer already exists
       bool _exists;
 
-      // SDL Window pointer
+      // SDL WindowManager pointer
       SDL_Window* _theWindow;
       SDL_Renderer* _theRenderer;
 
@@ -58,15 +62,19 @@ namespace Regolith
       // Destroys the window and renderer objects
       void destroy();
 
+      // Create the window and return the camera
+      Camera& create();
+
+
     public:
 //////////////////////////////////////////////////////////////////////////////// 
       // Con/Destruction
 
       // Empty private initialisation
-      Window();
+      WindowManager();
 
       // On destruction delete the window pointer
-      virtual ~Window();
+      virtual ~WindowManager();
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -74,9 +82,6 @@ namespace Regolith
 
       // Configure the window
       void configure( Json::Value& );
-
-      // Create the window and return the camera
-      Camera& create();
 
 
 //////////////////////////////////////////////////////////////////////////////// 
@@ -94,9 +99,11 @@ namespace Regolith
       float getScaleX() { return _scaleX; }
       float getScaleY() { return _scaleY; }
 
+      // Update the title
+      void setTitle( std::string );
 
 //////////////////////////////////////////////////////////////////////////////// 
-      // Window state accessors
+      // WindowManager state accessors
 
       // Boolean functions to interrogate the current window state
       bool hasMouseFocus() const { return _mouseFocus; }

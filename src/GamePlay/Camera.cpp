@@ -1,19 +1,19 @@
 
-#include "Regolith/Components/Camera.h"
-
+#include "Regolith/GamePlay/Camera.h"
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
+#include "Regolith/Managers/WindowManager.h"
 #include "Regolith/Textures/Texture.h"
 #include "Regolith/Assets/RawTexture.h"
-#include "Regolith/Components/Window.h"
 
 
 namespace Regolith
 {
 
-  Camera::Camera( Window& window, SDL_Renderer* renderer, const int& width, const int& height, const float& scalex, const float& scaley ) :
+  Camera::Camera( WindowManager& window, SDL_Renderer* renderer, const int& width, const int& height, const float& scalex, const float& scaley ) :
     _theWindow( window ),
     _theRenderer( renderer ),
     _defaultColour( { 0, 0, 0, 255 } ),
+    _windowRect( { 0, 0, 0, 0 } ),
     _width( width ),
     _height( height ),
     _scaleX( scalex ),
@@ -25,6 +25,7 @@ namespace Regolith
 
   void Camera::resetRender() const
   {
+    SDL_SetRenderDrawBlendMode( _theRenderer, SDL_BLENDMODE_NONE );
     SDL_SetRenderDrawColor( _theRenderer, _defaultColour.r, _defaultColour.g, _defaultColour.b, _defaultColour.a );
     SDL_RenderClear( _theRenderer );
   }
@@ -56,10 +57,6 @@ namespace Regolith
       ex.addDetail( "SDL error", SDL_GetError() );
       throw ex;
     }
-
-//      SDL_SetTextureColorMod( _rawTexture->sdl_texture, raw_texture->colourMod.r, raw_texture->colourMod.g, raw_texture->colourMod.b );
-//      SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, raw_texture->alpha );
-//      SDL_SetTextureBlendMode( _rawTexture->sdl_texture, raw_texture->blendmode );
   }
 
 
@@ -80,10 +77,6 @@ namespace Regolith
         ex.addDetail( "SDL error", SDL_GetError() );
         throw ex;
       }
-
-//      SDL_SetTextureColorMod( _rawTexture->sdl_texture, red, green, blue );
-//      SDL_SetTextureAlphaMod( _rawTexture->sdl_texture, alpha );
-//      SDL_SetTextureBlendMode( _rawTexture->sdl_texture, blendmode );
 
       // Update the texture with the new SDL_Texture
       texture.setRenderedTexture( temp_texture );
@@ -106,6 +99,8 @@ namespace Regolith
       renderTexture( texture );
     }
 
+    DEBUG_STREAM << "Camera::renderDrawableObject : " << _targetRect.x << ", " << _targetRect.y << ", " << _targetRect.w << ", " << _targetRect.h << " @ " << texture.getSDLTexture();
+
     // Render to the back bufer
     SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), texture.getTextureCenter(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
   }
@@ -114,6 +109,17 @@ namespace Regolith
   void Camera::clearTexture( Texture& texture )
   {
     texture.clearSDLTexture();
+  }
+
+
+  void Camera::fillWindow( SDL_Color& colour )
+  {
+    _windowRect.w = _width;
+    _windowRect.h = _height;
+    DEBUG_STREAM << "Camera::fillWindow : Filling window : " << _windowRect.x << ", " << _windowRect.y << ", " << _windowRect.w << ", " << _windowRect.h;
+    SDL_SetRenderDrawBlendMode( _theRenderer, SDL_BLENDMODE_BLEND );
+    SDL_SetRenderDrawColor( _theRenderer, colour.r, colour.g, colour.b, colour.a );
+    SDL_RenderFillRect( _theRenderer, &_windowRect );
   }
 
 }

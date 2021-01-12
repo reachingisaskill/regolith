@@ -4,7 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Audio/Music.h"
-#include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Handlers/DataHandler.h"
 
 
 namespace Regolith
@@ -12,13 +12,19 @@ namespace Regolith
 
   class Playlist
   {
+    // Audio manager must extract music list
+    friend class AudioManager;
+
+    // Useful typedef
     typedef std::list< Music > MusicList;
+
     private:
+      // Ordered list of tracks to play
       MusicList _musics;
 
     public:
+      // Con/De-structors
       Playlist();
-
       ~Playlist();
 
 
@@ -29,10 +35,7 @@ namespace Regolith
       void clear();
 
 
-      // Clears the current AudioManager music queue and pushes the play list
-      void play();
-
-      // Push an item to the back of the playlist
+      // Push an item to the back of the playlist. An alternative to the Json configuration - should rarely be used.
       void push( Music );
 
   };

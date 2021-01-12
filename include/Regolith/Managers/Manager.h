@@ -3,36 +3,34 @@
 #define REGOLITH_MANAGER_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Links/Link.h"
 #include "Regolith/Architecture/GameObject.h"
 #include "Regolith/Architecture/PhysicalObject.h"
 #include "Regolith/Architecture/FactoryTemplate.h"
-#include "Regolith/Managers/InputManager.h"
-#include "Regolith/Managers/AudioManager.h"
-#include "Regolith/Managers/HardwareManager.h"
-#include "Regolith/Managers/DataManager.h"
-#include "Regolith/Managers/ThreadManager.h"
-#include "Regolith/Managers/ContextManager.h"
-#include "Regolith/Managers/FontManager.h"
-#include "Regolith/Managers/DataHandler.h"
-#include "Regolith/Components/Window.h"
-#include "Regolith/Components/Engine.h"
 #include "Regolith/GamePlay/Signal.h"
+#include "Regolith/GamePlay/Pen.h"
 #include "Regolith/Contexts/Context.h"
 #include "Regolith/Utilities/Singleton.h"
-
-#include <vector>
-#include <map>
-#include <string>
-#include <deque>
 
 
 namespace Regolith
 {
 
   // Factory typedefs
-  typedef FactoryTemplate< Signal, ContextGroup& > SignalFactory;
   typedef FactoryTemplate< GameObject, ContextGroup& > ObjectFactory;
   typedef FactoryTemplate< Context, ContextGroup& > ContextFactory;
+
+  // Manager typedefs
+  class InputManager;
+  class AudioManager;
+  class HardwareManager;
+  class CollisionManager;
+  class DataManager;
+  class ThreadManager;
+  class ContextManager;
+  class FontManager;
+  class WindowManager;
+  class EngineManager;
 
   // Manager class
   // Global storage for all scenes, renderers and windows.
@@ -41,30 +39,24 @@ namespace Regolith
   {
     friend class Singleton< Manager >; // Required to enable the singleton pattern
 
+    template < class T, class R > friend class Link;
+
     private:
       // Crucial objects for Regolith
-      ThreadManager _theThreads;
-      Window _theWindow;
-      bool _rendererExists;
-      InputManager _theInput;
-      AudioManager _theAudio;
-      HardwareManager _theHardware;
-      DataManager _theData;
-      ContextManager _theContexts;
-      FontManager _theFonts;
-      Engine _theEngine;
+      ThreadManager* _theThreads;
+      WindowManager* _theWindow;
+      InputManager* _theInput;
+      AudioManager* _theAudio;
+      HardwareManager* _theHardware;
+      CollisionManager* _theCollision;
+      DataManager* _theData;
+      ContextManager* _theContexts;
+      FontManager* _theFonts;
+      EngineManager* _theEngine;
 
       // Factories to provide object/context creation
       ObjectFactory _objectFactory;
       ContextFactory _contextFactory;
-      SignalFactory _signalFactory;
-
-      // Maps of the collision team and type names
-      TeamNameMap _teamNames;
-      TypeNameMap _typeNames;
-
-      // Useful global constants
-      std::string _title;
 
       // Info for SDL user events
       Uint32 _eventStartIndex;
@@ -74,6 +66,11 @@ namespace Regolith
     protected:
       Manager();
 
+      // Allocate memory for all the managers
+      void _allocateManagers();
+      // Deallocate memory for all the managers
+      void _deallocateManagers();
+
       // Load the input device configuration
       void _loadInput( Json::Value& );
       // Load the input device configuration
@@ -81,9 +78,7 @@ namespace Regolith
       // Configure the window
       void _loadWindow( Json::Value& );
       // Load map of collision teams
-      void _loadTeams( Json::Value& );
-      // Load map of collision types
-      void _loadTypes( Json::Value& );
+      void _loadCollision( Json::Value& );
       // Load all the data manager
       void _loadData( Json::Value& );
       // Load all the requested fonts
@@ -93,24 +88,74 @@ namespace Regolith
       // Load all the contexts
       void _loadContexts( Json::Value& );
 
+      // Configure the list of user events for game events
+      void _configureEvents();
+
+
     public:
-      virtual ~Manager();
+      ~Manager();
 
 
       // Initialise the manager class from the configuration file
       void init( std::string );
 
 
-      // Load the first scene into the engine and give it control
-      void run();
+      // Load the first context group into the engine and give it control
+      bool run();
 
 
-      // Sends quit an error flags to all threads and rejoins them if possible
-      void error() { _theThreads.error(); }
+      ////////////////////////////////////////////////////////////////////////////////
+      // Functions accessible to contexts and objects during run time
+
+      // Events during game play
+
+      // Sends an error flag to all threads and triggers all registered condition variables
+      void error();
+
+      // Push a game/regolith event into the SDL event queue
+      void raiseEvent( RegolithEvent );
 
 
-      // Create and return the pointer to the Renderer - can only be called once!
-      Camera& requestCamera();
+      // Collision Interface
+
+      // Return a collision team id
+      CollisionTeam getCollisionTeam( std::string );
+
+      // Return a collision type id
+      CollisionType getCollisionType( std::string );
+
+
+      // Music Interface
+
+      // Play the provided playlist
+      void loadPlaylist( Playlist* );
+
+      // Pause the the audio if its playing
+      void pauseTrack();
+
+      // Resume the paused audio
+      void resumeTrack();
+
+      // Stop the infinitely repeating track
+      void stopRepeatTrack();
+
+      // Stop the current track and move on to the next one in the queue
+      void nextTrack();
+
+      // Skip to the next track at the end of the current repeat
+      void nextRepeatTrack();
+
+
+      // Window interface
+
+      // Set the window title
+      void setWindowTitle( std::string );
+
+
+      // Fonts interface
+
+      // Return an Pen to write text
+      Pen requestPen( std::string, unsigned int, SDL_Color );
 
 
       ////////////////////////////////////////////////////////////////////////////////
@@ -122,88 +167,40 @@ namespace Regolith
       // Return a reference to the Scene builder
       ContextFactory& getContextFactory() { return _contextFactory; }
 
-      // Return a reference to the Scene builder
-      SignalFactory& getSignalFactory() { return _signalFactory; }
-
-      // Get the pointer to the window
-      Window& getWindow() { return _theWindow; }
-
-      // Get the reference to the engine
-      Engine& getEngine() { return _theEngine; }
-
-      // Return a reference to the thread manager
-      ThreadManager& getThreadManager() { return _theThreads; }
-
-      // Return a reference to the input manager
-      InputManager& getInputManager() { return _theInput; }
-
-      // Return a reference to the input manager
-      AudioManager& getAudioManager() { return _theAudio; }
-
-      // Return a reference to the data manager
-      DataManager& getDataManager() { return _theData; }
-
-      // Return a reference to the data manager
-      FontManager& getFontManager() { return _theFonts; }
-
-      // Return a reference to the data manager
-      ContextManager& getContextManager() { return _theContexts; }
-
 
       ////////////////////////////////////////////////////////////////////////////////
-      // Contexts and Data
+      // Link access functions
+      // If the requested link is not allowed a compile time error will be shown.
 
-      // Return a pointer to the current active context - this is only  valid for the frame on which it is called
-      Context* getCurrentContext() { return _theEngine.currentContext(); }
+      template < class REQUESTER >
+      Link< ThreadManager, REQUESTER > getThreadManager() { return Link< ThreadManager, REQUESTER >( *_theThreads ); }
 
+      template < class REQUESTER >
+      Link< WindowManager, REQUESTER > getWindowManager() { return Link< WindowManager, REQUESTER >( *_theWindow ); }
 
-      ////////////////////////////////////////////////////////////////////////////////
-      // User Event functions
+      template < class REQUESTER >
+      Link< InputManager, REQUESTER > getInputManager() { return Link< InputManager, REQUESTER >( *_theInput ); }
 
-      // Configure the list of user events for game events
-      void configureEvents();
+      template < class REQUESTER >
+      Link< AudioManager, REQUESTER > getAudioManager() { return Link< AudioManager, REQUESTER >( *_theAudio ); }
 
-      // Push a user event into the SDL event queue
-      void raiseEvent( RegolithEvent );
+      template < class REQUESTER >
+      Link< HardwareManager, REQUESTER > getHardwareManager() { return Link< HardwareManager, REQUESTER >( *_theHardware ); }
 
+      template < class REQUESTER >
+      Link< CollisionManager, REQUESTER > getCollisionManager() { return Link< CollisionManager, REQUESTER >( *_theCollision ); }
 
-      ////////////////////////////////////////////////////////////////////////////////
-      // Team Configuration
+      template < class REQUESTER >
+      Link< DataManager, REQUESTER > getDataManager() { return Link< DataManager, REQUESTER >( *_theData ); }
 
-      // Return the number of teams
-      size_t getNumberTeams() const { return _teamNames.size(); }
+      template < class REQUESTER >
+      Link< ContextManager, REQUESTER > getContextManager() { return Link< ContextManager, REQUESTER >( *_theContexts ); }
 
-      // Return the team ID for a given name
-      CollisionTeam getCollisionTeam( std::string name );
+      template < class REQUESTER >
+      Link< FontManager, REQUESTER > getFontManager() { return Link< FontManager, REQUESTER >( *_theFonts ); }
 
-      // Add a team to the map
-      void addCollisionTeam( std::string name, CollisionTeam id ) { _teamNames[name] = id; }
-
-      // Return the number of teams
-      size_t getNumberTypes() const { return _typeNames.size(); }
-
-      // Return the type ID for a given name
-      CollisionType getCollisionType( std::string name );
-
-      // Add a type to the map
-      void addCollisionType( std::string name, CollisionType id ) { _typeNames[name] = id; }
-
-
-      ////////////////////////////////////////////////////////////////////////////////
-      // Context stack Interface.
-      // Pushed context stack operations to the engine
-
-//      // Opens the entry point of the current context group
-//      void openEntryPoint();
-
-      // Open a new context on top of the stack
-      void openContext( Context* );
-
-      // Open a new context on an empty stack
-      void openContextStack( Context* );
-
-      // Open a new context in place of the current one
-      void openContextGroup( ContextGroup* );
+      template < class REQUESTER >
+      Link< EngineManager, REQUESTER > getEngineManager() { return Link< EngineManager, REQUESTER >( *_theEngine ); }
 
   };
 

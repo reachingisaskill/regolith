@@ -3,7 +3,7 @@
 #define REGOLITH_MANAGERS_THREAD_MANAGER_H_
 
 #include "Regolith/Global/Global.h"
-
+#include "Regolith/Architecture/Component.h"
 #include "Regolith/Utilities/Condition.h"
 
 #include <thread>
@@ -30,9 +30,10 @@ namespace Regolith
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Manager Class
-  class ThreadManager
+  class ThreadManager : public Component
   {
-    friend class ThreadHandler;
+    // Allow links to access the private members
+    template < class T, class R > friend class Link;
 
     private:
       typedef std::map< ThreadName, ThreadStatus > StatusMap;
@@ -60,6 +61,13 @@ namespace Regolith
       // Used by the thread handlers to update their respective status' status
       void setThreadStatus( ThreadName, ThreadStatus );
 
+      // Wait on the status of one or all the the threads
+      void waitThreadStatus( ThreadStatus );
+      void waitThreadStatus( ThreadName, ThreadStatus );
+
+      // Register a condition variable so that it can be triggered in the event of an error
+      void registerCondition( std::condition_variable* );
+
 
     public:
       // Con/Destructors
@@ -82,15 +90,6 @@ namespace Regolith
       void join();
 
 
-      // Wait on the status of one or all the the threads
-      void waitThreadStatus( ThreadStatus );
-      void waitThreadStatus( ThreadName, ThreadStatus );
-
-
-      // Register a condition variable so that it can be triggered in the event of an error
-      void registerCondition( std::condition_variable* );
-
-
 ////////////////////////////////////////////////////////////////////////////////
       // Conditions for threads to interact with
 
@@ -105,6 +104,15 @@ namespace Regolith
 
       // Every thread that sees this flag MUST end
       static std::atomic<bool> ErrorFlag;
+
+
+////////////////////////////////////////////////////////////////////////////////
+      // Component Interface
+      // Register game-wide events with the manager
+      virtual void registerEvents( InputManager& ) override {}
+
+      // Regolith events
+      virtual void eventAction( const RegolithEvent&, const SDL_Event& ) override {}
 
   };
 

@@ -12,7 +12,22 @@
 
   "layers" :
   {
-    "the_layer" : "test_data/context_group_test/child_layer.json"
+    "0-the_layer" : "test_data/context_group_test/child_layer.json",
+    "1-fade_layer" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024.0,
+      "height" : 768.0,
+      "movement_scale" : [ 1.0, 1.0 ],
+      "objects" :
+      [
+        {
+          "name" : "fade_screen",
+          "position" : [ 0, 0 ]
+        }
+      ],
+      "spawns" : []
+    }
   },
   
   "camera" :
@@ -24,7 +39,8 @@
 
   "tests" :
   {
-    "name" : "context_child"
+    "name" : "context_child",
+    "death" : 5000
   }
 }
 

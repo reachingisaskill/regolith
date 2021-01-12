@@ -1,6 +1,6 @@
 
 #include "Regolith/Test/TestObject.h"
-#include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Handlers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 

@@ -1,6 +1,6 @@
 
-#include "Regolith/Managers/AudioHandler.h"
-#include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Handlers/AudioHandler.h"
+#include "Regolith/Handlers/DataHandler.h"
 #include "Regolith/Managers/ThreadManager.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
@@ -8,8 +8,7 @@
 namespace Regolith
 {
 
-  AudioHandler::AudioHandler( AudioManager& manager ) :
-    _manager( manager ),
+  AudioHandler::AudioHandler() :
     _state( MUSIC_STATE_STOPPED ),
     _channelPauses()
   {

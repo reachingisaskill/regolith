@@ -1,9 +1,13 @@
 
-#include "Regolith/Components/Engine.h"
+#include "Regolith/Managers/EngineManager.h"
+#include "Regolith/Links/LinkEngineManager.h"
+#include "Regolith/Links/LinkWindowManager.h"
+#include "Regolith/Links/LinkInputManager.h"
+#include "Regolith/Links/LinkContextManager.h"
 #include "Regolith/Managers/Manager.h"
-#include "Regolith/Managers/DataHandler.h"
-#include "Regolith/Managers/ThreadHandler.h"
-#include "Regolith/Managers/ContextGroup.h"
+#include "Regolith/Handlers/DataHandler.h"
+#include "Regolith/Handlers/ThreadHandler.h"
+#include "Regolith/Handlers/ContextGroup.h"
 #include "Regolith/Contexts/Context.h"
 
 
@@ -15,45 +19,44 @@ namespace Regolith
   void engineProcessingThread();
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Engine member function definitions
+  // EngineManager member function definitions
 
-  Engine::Engine( InputManager& input ) :
-    _inputManager( input ),
+  EngineManager::EngineManager() :
     _contextStack(),
     _openContext( nullptr ),
     _openContextStack( nullptr ),
     _openContextGroup( nullptr ),
     _currentContextGroup( nullptr ),
     _frameTimer(),
-    _pause( false )
+    _pause( true )
   {
   }
 
 
-  Engine::~Engine()
+  EngineManager::~EngineManager()
   {
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Running control functions
 
-  void Engine::run()
+  void EngineManager::run()
   {
     // Reset the flags
-    std::atomic<bool>& quitFlag = Manager::getInstance()->getThreadManager().QuitFlag;
     _pause = false;
 
     // Synchronise access to the contexts
     std::unique_lock<std::mutex> renderLock( _renderMutex );
 
+    auto inputManager = Manager::getInstance()->getInputManager<EngineManager>();
 
-    DEBUG_LOG( "Engine::run : Engine now running" );
+    DEBUG_LOG( "EngineManager::run : EngineManager now running" );
 
     try
     {
 
       // Handler global events without a context.
-      _inputManager.handleEvents( nullptr );
+      inputManager.handleEvents( nullptr );
 
       // Reset the frame timer before the loop starts
       _frameTimer.lap();
@@ -62,15 +65,15 @@ namespace Regolith
       while ( performStackOperations() )
       {
         // If there's an error in another thread, we abandon ship
-        if ( quitFlag ) break;
+        if ( ThreadManager::QuitFlag ) break;
 
         // Release the context stack
         renderLock.unlock();
 
 
-        DEBUG_LOG( "Engine::run : ------ EVENTS   ------" );
+        DEBUG_LOG( "EngineManager::run : ------ EVENTS   ------" );
         // Handle events globally and context-specific actions using the contexts input handler
-        _inputManager.handleEvents( _contextStack.front()->inputHandler() );
+        inputManager.handleEvents( _contextStack.front()->inputHandler() );
 
 
         // Stop updating things while we're paused
@@ -81,7 +84,7 @@ namespace Regolith
           std::this_thread::sleep_for( std::chrono::milliseconds( 100 ) );
 
           // Handler global events without a context. Required to be able to leave the pause state.
-          _inputManager.handleEvents( nullptr );
+          inputManager.handleEvents( nullptr );
 
           // Reset the timer while paused
           _frameTimer.lap();
@@ -96,7 +99,7 @@ namespace Regolith
         while( ! renderLock.try_lock() );
 #endif
 
-        DEBUG_LOG( "Engine::run : ------ CONTEXTS ------" );
+        DEBUG_LOG( "EngineManager::run : ------ CONTEXTS ------" );
         float time = _frameTimer.lap(); // Only conversion from int to float happens here.
 
         // Iterate through all the visible contexts and update as necessary
@@ -117,28 +120,28 @@ namespace Regolith
     }
     catch ( Exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
+      Manager::getInstance()->error();
       if ( renderLock.owns_lock() )
       {
         renderLock.unlock();
       }
-      FAILURE_LOG( "Engine::run : Regolith Exception thrown from Engine Rendering Thread." );
+      FAILURE_LOG( "EngineManager::run : Regolith Exception thrown from EngineManager Rendering Thread." );
       std::cerr << ex.elucidate();
     }
     catch ( std::exception& ex )
     {
-      Manager::getInstance()->getThreadManager().error();
+      Manager::getInstance()->error();
       if ( renderLock.owns_lock() )
       {
         renderLock.unlock();
       }
-      FAILURE_LOG( "Engine::run : Standard Exception thrown from Engine Processing Thread." );
+      FAILURE_LOG( "EngineManager::run : Standard Exception thrown from EngineManager Processing Thread." );
       std::cerr << ex.what();
     }
   }
 
 
-  bool Engine::performStackOperations()
+  bool EngineManager::performStackOperations()
   {
     // Flag that we need to update the visible stack pointers
     bool modified = false;
@@ -149,7 +152,7 @@ namespace Regolith
     {
       modified = true;
 
-      DEBUG_LOG( "Engine::performStackOperations : Popping closed context" );
+      DEBUG_LOG( "EngineManager::performStackOperations : Popping closed context" );
       // Pop the context
       _contextStack.pop_front();
     }
@@ -159,7 +162,7 @@ namespace Regolith
     {
       if ( _openContextGroup->isLoaded() )
       {
-        DEBUG_LOG( "Engine::performStackOperations : New context group is loaded" );
+        DEBUG_LOG( "EngineManager::performStackOperations : New context group is loaded" );
         _openContextStack = _openContextGroup->getEntryPoint();
         _openContextGroup = nullptr;
 
@@ -176,16 +179,17 @@ namespace Regolith
       if ( _contextStack.empty() )
       {
         modified = true;
+        _openContext = nullptr; // Stop us from accidentally using a context from the old context group
 
-        DEBUG_LOG( "Engine::performStackOperations : Opening new context stack." );
+        DEBUG_LOG( "EngineManager::performStackOperations : Opening new context stack." );
         // If the context groups change
         if ( _openContextStack->owner() != _currentContextGroup )
         {
-          DEBUG_LOG( "Engine::performStackOperations : Exchanging context group pointers" );
+          DEBUG_LOG( "EngineManager::performStackOperations : Exchanging context group pointers" );
           if ( _currentContextGroup != nullptr )
           {
             _currentContextGroup->close();
-            Manager::getInstance()->getContextManager().unloadContextGroup( _currentContextGroup );
+            Manager::getInstance()->getContextManager<EngineManager>().unloadContextGroup( _currentContextGroup );
           }
           _currentContextGroup = _openContextStack->owner();
           _currentContextGroup->open();
@@ -206,7 +210,7 @@ namespace Regolith
     {
       modified = true;
 
-      DEBUG_LOG( "Engine::performStackOperations : Pushing new context" );
+      DEBUG_LOG( "EngineManager::performStackOperations : Pushing new context" );
       // Push onto stack
       _contextStack.push_front( _openContext );
       _openContext = nullptr;
@@ -219,7 +223,7 @@ namespace Regolith
     {
       if ( modified ) // Reset the visible stack pointers
       {
-        DEBUG_LOG( "Engine::performStackOperations : Resetting visible stack iterators" );
+        DEBUG_LOG( "EngineManager::performStackOperations : Resetting visible stack iterators" );
         // Set the visiblility start pointer. 
         // Start at the end and work backwards until either:
         //  - We hit the beginning of the stack, OR
@@ -235,7 +239,7 @@ namespace Regolith
 
         if ( _frameTimer.hasFPSMeasurement() )
         {
-          INFO_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
+          INFO_STREAM << "EngineManager::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
           _frameTimer.resetFPSCount();
         }
       }
@@ -244,11 +248,11 @@ namespace Regolith
     }
     else // Stack is empty! Time to abandon ship
     {
-      DEBUG_LOG( "Engine::perfornStackOperations : Context stack is empty. Closing engine." );
-      Manager::getInstance()->getContextManager().unloadContextGroup( _currentContextGroup );
+      DEBUG_LOG( "EngineManager::perfornStackOperations : Context stack is empty. Closing engine." );
+      Manager::getInstance()->getContextManager<EngineManager>().unloadContextGroup( _currentContextGroup );
       if ( _frameTimer.hasFPSMeasurement() )
       {
-        INFO_STREAM << "Engine::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
+        INFO_STREAM << "EngineManager::performStackOperations : FPS for previous context stack: AVG = " << _frameTimer.getAvgFPS() << " MIN = " << _frameTimer.getMinFPS() << " MAX = " << _frameTimer.getMaxFPS();
         _frameTimer.resetFPSCount();
       }
 
@@ -264,11 +268,11 @@ namespace Regolith
   // Context and context group opreations
 
   // Tells the engine to push the context pointer to the top of the stack
-  void Engine::openContext( Context* c )
+  void EngineManager::openContext( Context* c )
   {
     if ( c->owner() != _currentContextGroup )
     {
-      WARN_LOG( "Engine::openContext : Cannot stack contexts from different groups." );
+      WARN_LOG( "EngineManager::openContext : Cannot stack contexts from different groups." );
     }
     else
     {
@@ -278,18 +282,18 @@ namespace Regolith
 
 
   // Tells the engine to push the context pointer to the bottom of the stack once its empty
-  void Engine::openContextStack( Context* c )
+  void EngineManager::openContextStack( Context* c )
   {
     _openContextStack = c;
   }
 
 
   // Tells the engine that this is the new context group entry point. Current stack MUST close itself!
-  void Engine::openContextGroup( ContextGroup* cg )
+  void EngineManager::openContextGroup( ContextGroup* cg )
   {
     if ( _openContextGroup != nullptr ) 
     {
-      WARN_LOG( "Engine::openContextGroup : Attempting to load two context groups at once" );
+      WARN_LOG( "EngineManager::openContextGroup : Attempting to load two context groups at once" );
       return;
     }
 
@@ -306,14 +310,14 @@ namespace Regolith
     _openContextStack = *cg->getLoadScreen();
 
     // Tell the context manager to load and unload the context groups
-    Manager::getInstance()->getContextManager().loadContextGroup( _openContextGroup );
+    Manager::getInstance()->getContextManager<EngineManager>().loadContextGroup( _openContextGroup );
   }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////V
   // Event registration and actions
 
-  void Engine::registerEvents( InputManager& manager )
+  void EngineManager::registerEvents( InputManager& manager )
   {
     manager.registerEventRequest( this, REGOLITH_EVENT_QUIT );
     manager.registerEventRequest( this, REGOLITH_EVENT_ENGINE_PAUSE );
@@ -321,26 +325,28 @@ namespace Regolith
   }
 
 
-  void Engine::eventAction( const RegolithEvent& event, const SDL_Event& )
+  void EngineManager::eventAction( const RegolithEvent& event, const SDL_Event& )
   {
     switch( event )
     {
       case REGOLITH_EVENT_QUIT :
         _pause = false;
-//        Manager::getInstance()->quit();
         for ( ContextStack::iterator it = _contextStack.begin(); it != _contextStack.end(); ++it )
         {
           (*it)->stopContext();
         }
+        _openContext = nullptr;
+        _openContextStack = nullptr;
+        _openContextGroup = nullptr;
         break;
 
       case REGOLITH_EVENT_ENGINE_PAUSE :
-        INFO_LOG( "Engine::eventAction : Pausing Engine" );
+        INFO_LOG( "EngineManager::eventAction : Pausing EngineManager" );
         _pause = true;
         break;
 
       case REGOLITH_EVENT_ENGINE_RESUME :
-        INFO_LOG( "Engine::eventAction : Resuming Engine" );
+        INFO_LOG( "EngineManager::eventAction : Resuming EngineManager" );
         _pause = false;
         break;
 
@@ -351,7 +357,7 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Engine processing thread definition
+  // EngineManager processing thread definition
 
   void engineRenderingThread()
   {
@@ -361,24 +367,32 @@ namespace Regolith
     threadHandler.start();
 
 
-    // Get a reference to the engine
-    Engine& engine = Manager::getInstance()->getEngine();
-
     // Get references to the required components
-    Camera& camera = Manager::getInstance()->requestCamera();
-    ContextStack::reverse_iterator& visibleStackStart = engine._visibleStackStart;
-    ContextStack::reverse_iterator& visibleStackEnd = engine._visibleStackEnd;
-    ContextManager& contextManager = Manager::getInstance()->getContextManager();
+    auto engine = Manager::getInstance()->getEngineManager<EngineRenderingThreadType>();
+    auto contextManager = Manager::getInstance()->getContextManager<EngineRenderingThreadType>();
+
+    Camera& camera = Manager::getInstance()->getWindowManager<EngineRenderingThreadType>().create();
+    ContextStack::reverse_iterator& visibleStackStart = engine.visibleStackStart();
+    ContextStack::reverse_iterator& visibleStackEnd = engine.visibleStackEnd();
+    std::atomic<bool>& pause = engine.pause();
 
     // Control access to the contexts
-    std::unique_lock<std::mutex> renderLock( engine._renderMutex, std::defer_lock );
-
+    std::unique_lock<std::mutex> renderLock( engine.renderMutex(), std::defer_lock );
 
     // Update the thread status
     threadHandler.running();
 
     try
     {
+      // Before the run function has started, prioritise rendering to load first context group faster
+      while ( pause )
+      {
+        contextManager.renderContextGroup( camera );
+#ifdef REGOLITH_VALGRIND_BUILD
+        std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
+#endif
+      }
+
 
       while ( threadHandler.isGood() )
       {

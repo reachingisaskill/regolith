@@ -20,6 +20,19 @@ namespace Regolith
       // Trigger the loading process
       virtual void onStart() override;
 
+
+      // Updates the camera position
+      virtual Vector updateCamera( float ) const override { return zeroVector; }
+
+      // Called for each object that is flagged to have global physics
+      virtual void updatePhysics( PhysicalObject*, float ) const {}
+
+      // Updates the internal state of the context. Nothing to do here.
+      virtual void updateContext( float ) override;
+
+      // Called at the end of the render loop to do any context-specific rendering (e.g. transitions)
+      virtual void renderContext( Camera& ) override {}
+
     public:
       // Trivial Constructor
       LoadScreen();
@@ -31,17 +44,6 @@ namespace Regolith
       // Title Scenes take ownership of the display.
       virtual bool overridesPreviousContext() const override { return true; }
 
-
-      // Updates the camera position
-      virtual Vector updateCamera( float ) const override { return zeroVector; }
-
-
-      // Called for each object that is flagged to have global physics
-      virtual void updatePhysics( PhysicalObject*, float ) const {}
-
-
-      // Updates the internal state of the context. Nothing to do here.
-      virtual void updateContext( float ) override;
   };
 
 }

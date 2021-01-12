@@ -3,6 +3,7 @@
 #define REGOLITH_MANAGERS_THREAD_HANDLER_H_
 
 #include "Regolith/Global/Global.h"
+#include "Regolith/Links/LinkThreadManager.h"
 #include "Regolith/Utilities/Condition.h"
 
 #include <string>
@@ -10,14 +11,13 @@
 
 namespace Regolith
 {
-  class ThreadManager;
 
   class ThreadHandler
   {
     private:
       std::string _threadName;
       ThreadName _identifier;
-      ThreadManager& _owner;
+      Link<ThreadManager, ThreadHandler> _owner;
 
       std::atomic<bool>& _quitFlag;
       std::atomic<bool>& _errorFlag;

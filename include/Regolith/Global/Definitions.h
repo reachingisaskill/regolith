@@ -60,6 +60,19 @@ namespace Regolith
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Types to control link access
+
+  // Struct used to signal a test
+  struct TestType {};
+
+  // Struct used to signal the rendering thread
+  struct EngineRenderingThreadType {};
+
+  // Struct used to signal the context manager thread
+  struct ContextManagerThreadType {};
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
   // Status enum for thread behvaiour
 
   enum ThreadStatus
@@ -80,17 +93,27 @@ namespace Regolith
   };
 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Useful Enumerations
+//////////////////////////////////////////////////
+  // Event enumerations
 
-  enum CameraMode
+  enum RegolithEvent
   {
-    CAMERA_FIXED,
-    CAMERA_FLYING,
-    CAMERA_FOLLOWING,
-    CAMERA_CONSTANT_VELOCITY
+    REGOLITH_EVENT_NULL,
+    REGOLITH_EVENT_QUIT,
+    REGOLITH_EVENT_ENGINE_PAUSE,
+    REGOLITH_EVENT_ENGINE_RESUME,
+    REGOLITH_EVENT_WINDOW,
+    REGOLITH_EVENT_DISPLAY,
+    REGOLITH_EVENT_JOYSTICK_HARDWARE,
+    REGOLITH_EVENT_CONTROLLER_HARDWARE,
+    REGOLITH_EVENT_AUDIO_HARDWARE,
+
+    REGOLITH_EVENT_TOTAL
   };
 
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Useful Enumerations
 
   enum AlignmentMode
   {
@@ -119,62 +142,6 @@ namespace Regolith
     MOUSE_BUTTON_Y1,
     MOUSE_BUTTON_Y2,
     MOUSE_BUTTON_TOTAL
-  };
-
-
-//////////////////////////////////////////////////
-  // Event enumerations
-
-  // In-scene triggers
-  // Don't forget to update the string names!
-  enum ContextEvent : int
-  {
-    CONTEXT_EVENT_NULL,
-
-    CONTEXT_EVENT_QUIT,
-
-    CONTEXT_EVENT_RESPAWN,
-    CONTEXT_EVENT_DEATH,
-
-    CONTEXT_EVENT_NEXT,
-    CONTEXT_EVENT_PREV,
-    CONTEXT_EVENT_SKIP,
-
-    CONTEXT_EVENT_SELECT,
-
-    CONTEXT_END, // Stops the current context
-    CONTEXT_FINISHED, // Tells a context that it's daughter has stopped
-
-    CONTEXT_EVENT_OPTIONS, // Eveything beyond this point can be considered a numerical value
-
-    CONTEXT_EVENT_TOTAL = std::numeric_limits<int>::max() // Set to the maximum unsinged int
-  };
-
-
-  enum RegolithEvent
-  {
-    REGOLITH_EVENT_NULL,
-    REGOLITH_EVENT_QUIT,
-    REGOLITH_EVENT_ENGINE_PAUSE,
-    REGOLITH_EVENT_ENGINE_RESUME,
-    REGOLITH_EVENT_CONTEXT_END,
-    REGOLITH_EVENT_CONTEXT_PAUSE,
-    REGOLITH_EVENT_CONTEXT_RESUME,
-    REGOLITH_EVENT_FULLSCREEN,
-    REGOLITH_EVENT_WIN_CONDITION,
-    REGOLITH_EVENT_LOSE_CONDITION,
-    REGOLITH_EVENT_GAMEOVER,
-
-    REGOLITH_EVENT_WINDOW,
-    REGOLITH_EVENT_DISPLAY,
-    REGOLITH_EVENT_JOYSTICK_HARDWARE,
-    REGOLITH_EVENT_CONTROLLER_HARDWARE,
-    REGOLITH_EVENT_AUDIO_HARDWARE,
-
-    REGOLITH_EVENT_CAMERA_RESIZE,
-    REGOLITH_EVENT_DATA_LOADED,
-
-    REGOLITH_EVENT_TOTAL
   };
 
 
@@ -622,35 +589,11 @@ namespace Regolith
     "quit",
     "engine_pause",
     "engine_resume",
-    "context_end",
-    "context_pause",
-    "context_resume",
-    "fullscreen",
-    "win_condition",
-    "lose_condition",
-    "gameover",
     "window",
     "display",
     "joystick_hardware",
     "controller_hardware",
     "audio_hardware",
-    "camera_resize"
-  };
-
-
-  // Context Event strings
-  const char* const ContextEventStrings[] = 
-  {
-    "null",
-    "quit",
-    "respawn",
-    "death",
-    "next",
-    "prev",
-    "skip",
-    "select",
-    "end",
-    "finished",
   };
 
 
@@ -727,8 +670,6 @@ namespace Regolith
   SDL_Scancode getScancodeID( std::string );
 
   RegolithEvent getRegolithEventID( std::string );
-
-  ContextEvent getContextEventID( std::string );
 
   MouseButton getMouseButtonID( std::string );
 

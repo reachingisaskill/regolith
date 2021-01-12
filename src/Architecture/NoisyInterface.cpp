@@ -1,7 +1,7 @@
 
 #include "Regolith/Architecture/NoisyInterface.h"
 
-#include "Regolith/Managers/AudioHandler.h"
+#include "Regolith/Handlers/AudioHandler.h"
 
 
 namespace Regolith

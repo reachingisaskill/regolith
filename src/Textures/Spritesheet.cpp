@@ -1,6 +1,6 @@
 
 #include "Regolith/Textures/Spritesheet.h"
-#include "Regolith/Managers/DataHandler.h"
+#include "Regolith/Handlers/DataHandler.h"
 #include "Regolith/Utilities/JsonValidation.h"
 
 #include <cmath>
