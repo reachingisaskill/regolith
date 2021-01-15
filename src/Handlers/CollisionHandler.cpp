@@ -179,6 +179,272 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Collision algorithm
 
+
+  void CollisionHandler::collides( CollidableObject* object1, CollidableObject* object2 )
+  {
+    _object_pos1 = object1->position();
+    _object_pos2 = object2->position();
+
+    // Step 1 : Do the bounding boxes overlap
+    if ( ( _object_pos1.x() < ( _object_pos2.x() + object2->getWidth() ) ) &&
+         ( ( _object_pos1.x() + object1->getWidth() ) > _object_pos2.x() ) &&
+         ( _object_pos1.y() < ( _object_pos2.y() + object2->getHeight() ) ) &&
+         ( ( _object_pos1.x() + object1->getHeight() ) > _object_pos2.x() ) )
+    {
+
+      const Collision& collision1 = object1->getCollision();
+      const Collision& collision2 = object2->getCollision();
+
+      for ( Collision::iterator col_it1 = collision1.begin(); col_it1 != collision1.end(); ++col_it1 )
+      {
+        const HitBox& box1 = (*col_it1);
+        for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
+        {
+          const HitBox& box2 = (*col_it2);
+          bool separated = false;
+
+          for ( unsigned int box1_i = 0; box1_i < box1.number; ++box_i )
+          {
+            // Absolute _positions of the hit boxes vertices
+            Vector point1 = _object_pos1 + box1.points[box1_i];
+            Vector normal1 = box1.normals[box1_i];
+
+            for ( unsigned int box2_i = 0; box2_i < box2.number; ++box_i )
+            {
+              Vector point2 = _object_pos2 + box2.points[box2_i];
+
+              float proj1 = point1 * normal1;
+              float proj2 = point2 * normal1;
+
+              if ( proj1 > proj2 )
+              {
+                // Separating axis found. we good!
+                goto CollidingSeparatingAxisFound;
+              }
+            }
+          }
+
+
+          for ( unsigned int box2_i = 0; box2_i < box2.number; ++box_i )
+          {
+            // Absolute _positions of the hit boxes vertices
+            Vector point2 = _object_pos2 + box2.points[box2_i];
+            Vector normal2 = box2.normals[box2_i];
+
+            for ( unsigned int box1_i = 0; box1_i < box1.number; ++box_i )
+            {
+              Vector point1 = _object_pos1 + box1.points[box1_i];
+
+              float proj2 = point2 * normal2;
+              float proj1 = point1 * normal2;
+
+              if ( proj2 > proj1 )
+              {
+                // Separating axis found. we good!
+                goto CollidingSeparatingAxisFound;
+              }
+            }
+
+          }
+
+
+          // Separating axis not found. Calculate collision parameters
+
+          _contact1.type = col_it1->type;
+          _contact2.type = col_it2->type;
+          _contact1.normal = _contact1.overlap.norm();
+          _contact2.normal = _contact2.overlap.norm();
+          DEBUG_STREAM << "CollisionHandler::collides : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+          DEBUG_STREAM << "CollisionHandler::collides : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
+          callback( object1, object2 );
+
+CollidingSeparatingAxisFound:
+        }
+      }
+
+
+    }
+  }
+
+
+  void CollisionHandler::contains( CollidableObject* object1, CollidableObject* object2 )
+  {
+//    DEBUG_LOG( "CollisionHandler::contains : Checking containment" );
+
+    _object_pos1 = object1->position();
+    _object_pos2 = object2->position();
+
+    const Collision& collision1 = object1->getCollision();
+    const Collision& collision2 = object2->getCollision();
+
+    for ( Collision::iterator col_it1 = collision1.begin(); col_it1 != collision1.end(); ++col_it1 )
+    {
+      // Position of a container hitbox
+      _pos1 = _object_pos1 + col_it1->position;
+
+      // Is the bounding box not contained within the hitbox
+      if (  _pos1.x() > _object_pos2.x() ||
+            _pos1.y() > _object_pos2.y() ||
+            ( _pos1.x() + col_it1->width ) < ( _object_pos2.x() + object2->getWidth() ) ||
+            ( _pos1.y() + col_it1->height ) < ( _object_pos2.y() + object2->getHeight() ) )
+      {
+
+        // See which hit box is outside the container
+        for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
+        {
+          // Position of a container hitbox
+          _pos2 = _object_pos2 + col_it2->position;
+//          DEBUG_STREAM << "CollisionHandler::contains : Pos 1 = " << _pos1 << " Pos = " << _pos2;
+    
+          _diff_x = _pos2.x() - _pos1.x();
+          _diff_y = _pos2.y() - _pos1.y();
+          _overlap_x = ( _pos2.x() + col_it2->width ) - ( _pos1.x() + col_it1->width );
+          _overlap_y = ( _pos2.y() + col_it2->height ) - ( _pos1.y() + col_it1->height );
+//          DEBUG_STREAM << "CollisionHandler::contains : Diff = " << _diff_x << ", " << _diff_y << "   Overlap = " << _overlap_x << ", " << _overlap_y;
+
+          if ( _diff_x < 0.0 ) // Behind container position
+          {
+            if ( _diff_y < 0.0 )
+            {
+              _contact1.overlap.set(  _diff_x,  _diff_y );
+              _contact2.overlap.set( -_diff_x, -_diff_y );
+            }
+            else if ( _overlap_y > 0.0 )
+            {
+              _contact1.overlap.set(  _diff_x,  _overlap_y );
+              _contact2.overlap.set( -_diff_x, -_overlap_y );
+            }
+            else
+            {
+              _contact1.overlap.set(  _diff_x, 0.0 );
+              _contact2.overlap.set( -_diff_x, 0.0 );
+            }
+            _contact1.type = col_it1->type;
+            _contact2.type = col_it2->type;
+            _contact1.normal = _contact1.overlap.norm();
+            _contact2.normal = _contact2.overlap.norm();
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
+            callback( object1, object2 );
+          }
+          else if ( _overlap_x > 0.0 )
+          {
+            if ( _diff_y < 0.0 )
+            {
+              _contact1.overlap.set(  _overlap_x,  _diff_y );
+              _contact2.overlap.set( -_overlap_x, -_diff_y );
+            }
+            else if ( _overlap_y > 0.0 )
+            {
+              _contact1.overlap.set(  _overlap_x,  _overlap_y );
+              _contact2.overlap.set( -_overlap_x, -_overlap_y );
+            }
+            else
+            {
+              _contact1.overlap.set(  _overlap_x, 0.0 );
+              _contact2.overlap.set( -_overlap_x, 0.0 );
+            }
+            _contact1.type = col_it1->type;
+            _contact2.type = col_it2->type;
+            _contact1.normal = _contact1.overlap.norm();
+            _contact2.normal = _contact2.overlap.norm();
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
+            callback( object1, object2 );
+          }
+          else
+          {
+            if ( _diff_y < 0.0 )
+            {
+              _contact1.overlap.set( 0.0,  _diff_y );
+              _contact2.overlap.set( 0.0, -_diff_y );
+            }
+            else if ( _overlap_y > 0.0 )
+            {
+              _contact1.overlap.set( 0.0,  _overlap_y );
+              _contact2.overlap.set( 0.0, -_overlap_y );
+            }
+            else
+            {
+              continue;
+            }
+            _contact1.type = col_it1->type;
+            _contact2.type = col_it2->type;
+            _contact1.normal = _contact1.overlap.norm();
+            _contact2.normal = _contact2.overlap.norm();
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
+            callback( object1, object2 );
+          }
+        }
+      }
+    }
+  }
+
+
+  void CollisionHandler::callback( CollidableObject* object1, CollidableObject* object2 )
+  {
+    _coef_restitution = 1.0 + 0.5 * ( object1->getElasticity() + object2->getElasticity() );
+
+    if ( object1->hasMovement() )
+    {
+      if ( object2->hasMovement() )
+      {
+        // If both objects can move we weight the contact vector by the inverse of their masses
+        _total_M = object1->getMass() + object2->getMass();
+
+        float temp = _coef_restitution * ( object2->getVelocity()*_contact1.normal - object1->getVelocity()*_contact1.normal );
+
+        _contact1.inertiaRatio = object2->getMass()/_total_M;
+        _contact2.inertiaRatio = object1->getMass()/_total_M;
+        _contact1.impulse =  _contact1.inertiaRatio * temp * _contact1.normal;
+        _contact2.impulse =  _contact2.inertiaRatio * temp * _contact2.normal;
+
+      }
+      else
+      {
+        _contact1.inertiaRatio = 1.0;
+        _contact2.inertiaRatio = 0.0;
+//        _contact1.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact1.normal;
+        _contact1.impulse = _coef_restitution * (object2->getVelocity()*_contact1.normal - object1->getVelocity()*_contact1.normal) * _contact1.normal;
+        _contact2.impulse.zero();
+      }
+    }
+    else
+    {
+      if ( object2->hasMovement() )
+      {
+        _contact1.inertiaRatio = 0.0;
+        _contact2.inertiaRatio = 1.0;
+        _contact1.impulse.zero();
+//        _contact2.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact2.normal;
+        _contact2.impulse = _coef_restitution * (object1->getVelocity()*_contact2.normal - object2->getVelocity()*_contact2.normal) * _contact2.normal;
+      }
+      else
+      {
+        _contact1.inertiaRatio = 0.0;
+        _contact2.inertiaRatio = 0.0;
+        _contact1.impulse.zero();
+        _contact2.impulse.zero();
+      }
+    }
+
+//    DEBUG_STREAM << "CollisionHandler::callback : Impulse 1 = " << _contact1.impulse <<  " -- Impulse 2 = " << _contact2.impulse;
+
+    object1->onCollision( _contact1, object2 );
+    object2->onCollision( _contact2, object1 );
+  }
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // DEPRECATED COLLISION ALGORITHMS.
+
+  /*
+
   void CollisionHandler::collides( CollidableObject* object1, CollidableObject* object2 )
   {
     _object_pos1 = object1->position();
@@ -468,59 +734,7 @@ namespace Regolith
     }
   }
 
-
-  void CollisionHandler::callback( CollidableObject* object1, CollidableObject* object2 )
-  {
-    _coef_restitution = 1.0 + 0.5 * ( object1->getElasticity() + object2->getElasticity() );
-
-    if ( object1->hasMovement() )
-    {
-      if ( object2->hasMovement() )
-      {
-        // If both objects can move we weight the contact vector by the inverse of their masses
-        _total_M = object1->getMass() + object2->getMass();
-
-        float temp = _coef_restitution * ( object2->getVelocity()*_contact1.normal - object1->getVelocity()*_contact1.normal );
-
-        _contact1.inertiaRatio = object2->getMass()/_total_M;
-        _contact2.inertiaRatio = object1->getMass()/_total_M;
-        _contact1.impulse =  _contact1.inertiaRatio * temp * _contact1.normal;
-        _contact2.impulse =  _contact2.inertiaRatio * temp * _contact2.normal;
-
-      }
-      else
-      {
-        _contact1.inertiaRatio = 1.0;
-        _contact2.inertiaRatio = 0.0;
-//        _contact1.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact1.normal;
-        _contact1.impulse = _coef_restitution * (object2->getVelocity()*_contact1.normal - object1->getVelocity()*_contact1.normal) * _contact1.normal;
-        _contact2.impulse.zero();
-      }
-    }
-    else
-    {
-      if ( object2->hasMovement() )
-      {
-        _contact1.inertiaRatio = 0.0;
-        _contact2.inertiaRatio = 1.0;
-        _contact1.impulse.zero();
-//        _contact2.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact2.normal;
-        _contact2.impulse = _coef_restitution * (object1->getVelocity()*_contact2.normal - object2->getVelocity()*_contact2.normal) * _contact2.normal;
-      }
-      else
-      {
-        _contact1.inertiaRatio = 0.0;
-        _contact2.inertiaRatio = 0.0;
-        _contact1.impulse.zero();
-        _contact2.impulse.zero();
-      }
-    }
-
-//    DEBUG_STREAM << "CollisionHandler::callback : Impulse 1 = " << _contact1.impulse <<  " -- Impulse 2 = " << _contact2.impulse;
-
-    object1->onCollision( _contact1, object2 );
-    object2->onCollision( _contact2, object1 );
-  }
+*/
 
 }
 
