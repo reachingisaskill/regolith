@@ -13,6 +13,7 @@ namespace Regolith
     _death(),
     _fading( false ),
     _time( 0.0 ),
+    _fadeTrigger( 10000 ),
     _fadeTime( 2000 ),
     _fadeColour( { 0, 0, 0, 0 } )
   {
@@ -28,7 +29,7 @@ namespace Regolith
 
   void EmptyContext::onStart()
   {
-    _death.configure( 10000, 1 );
+    _death.configure( _fadeTrigger+_fadeTime, 1 );
     _fading = false;
   }
 
@@ -42,11 +43,11 @@ namespace Regolith
       this->stopContext();
     }
 
-    if ( _time > 8000 )
+    if ( _time > _fadeTrigger )
     {
       _fading = true;
 
-      _fadeColour.a = std::min( 255*(_time-8000)/2000, 255.0f );
+      _fadeColour.a = std::min( 255*(_time-_fadeTrigger)/_fadeTime, 255.0f );
 
       DEBUG_STREAM << "EmptyContext::updateContext : Fade Alpha = " << (int)_fadeColour.a;
     }

@@ -161,7 +161,7 @@
 
   "contexts" :
   {
-    "the_context" : "test_data/physics_test/context_0.json"
+    "the_context" : "test_data/physics_test/context_simple.json"
   }
 
 }

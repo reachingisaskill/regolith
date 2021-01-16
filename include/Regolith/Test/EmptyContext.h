@@ -18,6 +18,7 @@ namespace Regolith
       CountdownTimer _death;
       bool _fading;
       float _time;
+      float _fadeTrigger;
       float _fadeTime;
       SDL_Color _fadeColour;
 

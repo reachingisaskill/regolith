@@ -50,6 +50,11 @@ namespace Regolith
       // Should (slightly!) speed up the collision detection process
       Vector _object_pos1;
       Vector _object_pos2;
+      float _minimal_overlap;
+      Vector _separation_vector;
+
+
+
       Vector _pos1;
       Vector _pos2;
       float _overlap_x;

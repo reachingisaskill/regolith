@@ -109,13 +109,6 @@
       ],
       "spawns" : []
     }
-  },
-  
-  "camera" :
-  {
-    "follow:" : null,
-    "lower_limit" : [ 0.0, 0.0 ],
-    "upper_limit" : [ 1024.0, 768.0 ]
   }
 
 }

@@ -47,9 +47,6 @@ namespace Regolith
   // Struct holding the info required to perform collision detection using the separating axis theorem
   struct HitBox
   {
-    // Center of mass
-    Vector center;
-
     // Vertices position
     std::vector< Vector > points;
 

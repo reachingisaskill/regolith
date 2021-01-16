@@ -4,6 +4,8 @@
 #include "Regolith/ObjectInterfaces/CollidableObject.h"
 #include "Regolith/Contexts/ContextLayer.h"
 
+#include <limits>
+
 
 namespace Regolith
 {
@@ -201,64 +203,112 @@ namespace Regolith
         for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
         {
           const HitBox& box2 = (*col_it2);
-          bool separated = false;
 
-          for ( unsigned int box1_i = 0; box1_i < box1.number; ++box_i )
+          _contact1.overlap = std::numeric_limits<float>::lowest();
+
+
+////////////////////////////////////////////////////////////////////////////////
+          // First objects edges.
+          for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
           {
             // Absolute _positions of the hit boxes vertices
             Vector point1 = _object_pos1 + box1.points[box1_i];
             Vector normal1 = box1.normals[box1_i];
 
-            for ( unsigned int box2_i = 0; box2_i < box2.number; ++box_i )
+            DEBUG_STREAM << "CollisionHandler::collides : Checking Object1, Side " << box1_i << " P = " << point1 << ", N = " << normal1;
+
+            float largest_overlap = std::numeric_limits<float>::max();
+
+            for ( unsigned int box2_i = 0; box2_i < box2.number; ++box2_i )
             {
               Vector point2 = _object_pos2 + box2.points[box2_i];
+              float diff = (point2*normal1) - (point1*normal1);
 
-              float proj1 = point1 * normal1;
-              float proj2 = point2 * normal1;
+              DEBUG_STREAM << "CollisionHandler::collides :   Object2, P = " << point2 << " - DIFF = " << diff;
 
-              if ( proj1 > proj2 )
+              if ( diff < largest_overlap ) // Find the max size of the overlap
               {
-                // Separating axis found. we good!
-                goto CollidingSeparatingAxisFound;
+                largest_overlap = diff;
               }
             }
+
+            DEBUG_STREAM << "CollisionHandler::collides : Checking Object1, Overlap = " << largest_overlap;
+            if ( largest_overlap > 0 )
+            {
+              // Separating axis found. We good!
+              goto CollidingSeparatingAxisFound;
+            }
+
+            if ( largest_overlap > _contact1.overlap ) // Smallest total overlap is the shortest collision resolution
+            {
+              _contact1.overlap = largest_overlap;
+              _contact1.normal = normal1;
+            }
           }
+          _contact2.overlap = _contact1.overlap;
+          _contact2.normal = -_contact1.normal;
+
+          DEBUG_STREAM << "CollisionHandler::collides : Object1, Overlap = " << _contact1.overlap;
 
 
-          for ( unsigned int box2_i = 0; box2_i < box2.number; ++box_i )
+////////////////////////////////////////////////////////////////////////////////
+          // Second objects edges.
+          for ( unsigned int box2_i = 0; box2_i < box2.number; ++box2_i )
           {
             // Absolute _positions of the hit boxes vertices
             Vector point2 = _object_pos2 + box2.points[box2_i];
             Vector normal2 = box2.normals[box2_i];
 
-            for ( unsigned int box1_i = 0; box1_i < box1.number; ++box_i )
+            DEBUG_STREAM << "CollisionHandler::collides : Checking Object2, Side " << box2_i << " P = " << point2 << ", N = " << normal2;
+
+            float largest_overlap = std::numeric_limits<float>::max();
+
+            for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
             {
               Vector point1 = _object_pos1 + box1.points[box1_i];
+              float diff = (point1*normal2) - (point2*normal2);
 
-              float proj2 = point2 * normal2;
-              float proj1 = point1 * normal2;
+              DEBUG_STREAM << "CollisionHandler::collides :   Object1, P = " << point1 << " - DIFF = " << diff;
 
-              if ( proj2 > proj1 )
+
+              if ( diff < largest_overlap ) // Find the max size of the overlap
               {
-                // Separating axis found. we good!
-                goto CollidingSeparatingAxisFound;
+                largest_overlap = diff;
               }
             }
 
+            DEBUG_STREAM << "CollisionHandler::collides : Checking Object2, Overlap = " << largest_overlap;
+            if ( largest_overlap > 0 )
+            {
+              // Separating axis found. We good!
+              goto CollidingSeparatingAxisFound;
+            }
+
+            if ( largest_overlap > _contact2.overlap ) // Smallest total overlap is the shortest collision resolution
+            {
+              _contact2.overlap = largest_overlap;
+              _contact2.normal = normal2;
+            }
           }
+          _contact1.overlap = _contact2.overlap;
+          _contact1.normal = -_contact2.normal;
+
+          DEBUG_STREAM << "CollisionHandler::collides : Object2, Overlap = " << _contact2.overlap;
 
 
-          // Separating axis not found. Calculate collision parameters
+////////////////////////////////////////////////////////////////////////////////
+          // Collision determined
+          // Got this far, therefore separating axis not found. Calculate collision parameters
 
-          _contact1.type = col_it1->type;
-          _contact2.type = col_it2->type;
-          _contact1.normal = _contact1.overlap.norm();
-          _contact2.normal = _contact2.overlap.norm();
+          _contact1.type = col_it1->collisionType;
+          _contact2.type = col_it2->collisionType;
           DEBUG_STREAM << "CollisionHandler::collides : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
           DEBUG_STREAM << "CollisionHandler::collides : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
           callback( object1, object2 );
 
 CollidingSeparatingAxisFound:
+          // Just loop to the next hit box in the collision. Note the labels refer to a statement, so we need a continue or something
+          continue;
         }
       }
 
@@ -269,8 +319,6 @@ CollidingSeparatingAxisFound:
 
   void CollisionHandler::contains( CollidableObject* object1, CollidableObject* object2 )
   {
-//    DEBUG_LOG( "CollisionHandler::contains : Checking containment" );
-
     _object_pos1 = object1->position();
     _object_pos2 = object2->position();
 
@@ -279,104 +327,98 @@ CollidingSeparatingAxisFound:
 
     for ( Collision::iterator col_it1 = collision1.begin(); col_it1 != collision1.end(); ++col_it1 )
     {
-      // Position of a container hitbox
-      _pos1 = _object_pos1 + col_it1->position;
+      const HitBox& box1 = (*col_it1);
 
-      // Is the bounding box not contained within the hitbox
-      if (  _pos1.x() > _object_pos2.x() ||
-            _pos1.y() > _object_pos2.y() ||
-            ( _pos1.x() + col_it1->width ) < ( _object_pos2.x() + object2->getWidth() ) ||
-            ( _pos1.y() + col_it1->height ) < ( _object_pos2.y() + object2->getHeight() ) )
+      // Is the bounding box contained within this hitbox
+      for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
       {
+        // Absolute _positions of the hit boxes vertices
+        Vector point1 = _object_pos1 + box1.points[box1_i];
+        Vector normal1 = box1.normals[box1_i];
+        float overlap_edge = point1 * normal1;
 
-        // See which hit box is outside the container
-        for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
+        Vector point2 = _object_pos2;
+
+        if ( (point2*normal1) > overlap_edge )
         {
-          // Position of a container hitbox
-          _pos2 = _object_pos2 + col_it2->position;
-//          DEBUG_STREAM << "CollisionHandler::contains : Pos 1 = " << _pos1 << " Pos = " << _pos2;
-    
-          _diff_x = _pos2.x() - _pos1.x();
-          _diff_y = _pos2.y() - _pos1.y();
-          _overlap_x = ( _pos2.x() + col_it2->width ) - ( _pos1.x() + col_it1->width );
-          _overlap_y = ( _pos2.y() + col_it2->height ) - ( _pos1.y() + col_it1->height );
-//          DEBUG_STREAM << "CollisionHandler::contains : Diff = " << _diff_x << ", " << _diff_y << "   Overlap = " << _overlap_x << ", " << _overlap_y;
+          goto ContainingHitBoxCollision;
+        }
 
-          if ( _diff_x < 0.0 ) // Behind container position
+        point2.x() = point2.x() + object2->getWidth();
+        if ( (point2*normal1) > overlap_edge )
+        {
+          goto ContainingHitBoxCollision;
+        }
+
+        point2.y() = point2.y() + object2->getHeight();
+        if ( (point2*normal1) > overlap_edge )
+        {
+          goto ContainingHitBoxCollision;
+        }
+
+        point2.x() = point2.x() - object2->getWidth();
+        if ( (point2*normal1) > overlap_edge )
+        {
+          goto ContainingHitBoxCollision;
+        }
+      }
+
+      // No overlaps found. Break this loop and go to the next parent hitbox
+      break;
+
+        // Skipped the continue. Therefore we must check for an overlap
+ContainingHitBoxCollision:
+      DEBUG_LOG( "CollisionHandler::contains : Collision determined" );
+
+      _contact1.overlap = std::numeric_limits<float>::lowest();
+
+        // Iterate through the hit boxes of the daughter objects
+      for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
+      {
+        const HitBox& box2 = (*col_it2);
+
+        // This happens in reverse.
+        float largest_overlap = std::numeric_limits<float>::lowest();
+
+        // Is the daughter hit box contained within the parent hitbox
+        for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
+        {
+          // Absolute _positions of the hit boxes vertices
+          Vector point1 = _object_pos1 + box1.points[box1_i];
+          Vector normal1 = box1.normals[box1_i];
+
+          DEBUG_STREAM << "CollisionHandler::contains : Checking parent, Side " << box1_i << " P = " << point1 << ", N = " << normal1;
+
+          for ( unsigned int box2_i = 0; box2_i < box2.number; ++box2_i )
           {
-            if ( _diff_y < 0.0 )
+            Vector point2 = _object_pos2 + box2.points[box2_i];
+            float diff = (point2*normal1) - (point1*normal1);
+
+            DEBUG_STREAM << "CollisionHandler::contains :   Daughter, P = " << point2 << " - DIFF = " << diff;
+
+            if ( diff > largest_overlap ) // Find the max size of the overlap
             {
-              _contact1.overlap.set(  _diff_x,  _diff_y );
-              _contact2.overlap.set( -_diff_x, -_diff_y );
+              largest_overlap = diff;
+              DEBUG_STREAM << "CollisionHandler::contains :   Daughter, new overlap = " << largest_overlap;
             }
-            else if ( _overlap_y > 0.0 )
-            {
-              _contact1.overlap.set(  _diff_x,  _overlap_y );
-              _contact2.overlap.set( -_diff_x, -_overlap_y );
-            }
-            else
-            {
-              _contact1.overlap.set(  _diff_x, 0.0 );
-              _contact2.overlap.set( -_diff_x, 0.0 );
-            }
-            _contact1.type = col_it1->type;
-            _contact2.type = col_it2->type;
-            _contact1.normal = _contact1.overlap.norm();
-            _contact2.normal = _contact2.overlap.norm();
-//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
-//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
-            callback( object1, object2 );
           }
-          else if ( _overlap_x > 0.0 )
+
+          if ( largest_overlap > _contact1.overlap ) // Smallest total overlap is the shortest collision resolution
           {
-            if ( _diff_y < 0.0 )
-            {
-              _contact1.overlap.set(  _overlap_x,  _diff_y );
-              _contact2.overlap.set( -_overlap_x, -_diff_y );
-            }
-            else if ( _overlap_y > 0.0 )
-            {
-              _contact1.overlap.set(  _overlap_x,  _overlap_y );
-              _contact2.overlap.set( -_overlap_x, -_overlap_y );
-            }
-            else
-            {
-              _contact1.overlap.set(  _overlap_x, 0.0 );
-              _contact2.overlap.set( -_overlap_x, 0.0 );
-            }
-            _contact1.type = col_it1->type;
-            _contact2.type = col_it2->type;
-            _contact1.normal = _contact1.overlap.norm();
-            _contact2.normal = _contact2.overlap.norm();
-//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
-//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
-            callback( object1, object2 );
-          }
-          else
-          {
-            if ( _diff_y < 0.0 )
-            {
-              _contact1.overlap.set( 0.0,  _diff_y );
-              _contact2.overlap.set( 0.0, -_diff_y );
-            }
-            else if ( _overlap_y > 0.0 )
-            {
-              _contact1.overlap.set( 0.0,  _overlap_y );
-              _contact2.overlap.set( 0.0, -_overlap_y );
-            }
-            else
-            {
-              continue;
-            }
-            _contact1.type = col_it1->type;
-            _contact2.type = col_it2->type;
-            _contact1.normal = _contact1.overlap.norm();
-            _contact2.normal = _contact2.overlap.norm();
-//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
-//            DEBUG_STREAM << "CollisionHandler::contains : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
-            callback( object1, object2 );
+            _contact1.overlap = largest_overlap;
+            _contact1.normal = normal1;
           }
         }
+
+        DEBUG_STREAM << "CollisionHandler::contains : Overlap = " << _contact1.overlap << " N = " << _contact1.normal;
+
+        if ( _contact1.overlap < 0.0 ) continue;
+
+        _contact2.overlap = _contact1.overlap;
+        _contact2.normal = -_contact1.normal;
+
+        callback( object1, object2 );
+
       }
     }
   }

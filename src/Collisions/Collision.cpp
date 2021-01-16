@@ -51,9 +51,9 @@ namespace Regolith
           HitBox hb;
 
           validateJson( hitbox_data, "type", JsonType::STRING );
-          hb.type = Manager::getInstance()->getCollisionType( hitbox_data["type"].asString() );
+          hb.collisionType = Manager::getInstance()->getCollisionType( hitbox_data["type"].asString() );
 
-          if ( validateJson( hitbox_data, "shape", JsonType::STRING ) )
+          if ( validateJson( hitbox_data, "shape", JsonType::STRING, false ) )
           {
             std::string shape = hitbox_data["shape"].asString();
 
@@ -67,7 +67,7 @@ namespace Regolith
               hb.points.reserve( 1 );
               hb.shape = HitBoxType::Circle;
 
-              hb.center = Vector( hitbox_data["center"][0].asFloat(), hitbox_data["center"][1].asFloat() );
+              hb.points.push_back( Vector( hitbox_data["center"][0].asFloat(), hitbox_data["center"][1].asFloat() ) );
               hb.points.push_back( Vector( hitbox_data["radius"].asFloat(), 0.0 ) );
 
               hb.normals.push_back( unitVector_x );
@@ -83,16 +83,11 @@ namespace Regolith
               hb.normals.reserve( hb.number );
               hb.shape = HitBoxType::Polygon;
 
-              Vector point_sum = zeroVector;
               for ( Json::ArrayIndex i = 0; i < hb.number; ++i )
               {
                 validateJsonArray( points[i], 2, JsonType::FLOAT );
-                Vector new_point( points[i][0].asFloat(), points[i][1].asFloat() )
-                hb.points.push_back( new_point );
-                point_sum += new_point;
+                hb.points.push_back( Vector( points[i][0].asFloat(), points[i][1].asFloat() ) );
               }
-
-              hb.center = (1.0/hb.number) * point_sum;
 
               Vector current_point;
               Vector last_point = hb.points[hb.number-1];
@@ -102,8 +97,8 @@ namespace Regolith
 
                 // Calculate the left-side normal (We go in a clockwise direction!)
                 Vector delta = current_point - last_point;
-                Vector normal( -delta.Y(), delta.X() );
-                hb.normals.push_back();
+                Vector normal( -delta.y(), delta.x() );
+                hb.normals.push_back( normal );
 
                 last_point = current_point;
               }
@@ -125,22 +120,24 @@ namespace Regolith
             // Its a box, reserve 4 points
             hb.number = 4;
             hb.points.reserve( 4 );
+            hb.normals.reserve( 4 );
             hb.shape = HitBoxType::Polygon;
 
-            float width = hitbox_data["width"].asFloat()
-            float height = hitbox_data["height"].asFloat()
+            float width = hitbox_data["width"].asFloat();
+            float height = hitbox_data["height"].asFloat();
 
-            hb.points[0] = Vector( hitbox_data["position"][0].asFloat(), hitbox_data["position"][1].asFloat() );
-            hb.points[1] = hb.points[0];
-            hb.points[1].setX( hb.points[1].X() + width );
-            hb.points[2] = hb.points[1];
-            hb.points[2].setX( hb.points[2].Y() + height );
-            hb.points[3] = hb.points[2];
-            hb.points[3].setX( hb.points[3].X() - width );
+            hb.points.push_back( Vector( hitbox_data["position"][0].asFloat(), hitbox_data["position"][1].asFloat() ) );
+            hb.points.push_back( hb.points[0] );
+            hb.points[1].x() = hb.points[1].x() + width;
+            hb.points.push_back( hb.points[1] );
+            hb.points[2].y() = hb.points[2].y() + height;
+            hb.points.push_back( hb.points[2] );
+            hb.points[3].x() = hb.points[3].x() - width;
 
-            hb.center = hb.points[0];
-            hb.center.setX( hb.center.X() + 0.5*width );
-            hb.center.setY( hb.center.Y() + 0.5*height );
+            hb.normals.push_back( -unitVector_y );
+            hb.normals.push_back(  unitVector_x );
+            hb.normals.push_back(  unitVector_y );
+            hb.normals.push_back( -unitVector_x );
           }
 
           _collisionFrames[frame_num].push_back( hb );
