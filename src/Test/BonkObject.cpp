@@ -76,10 +76,11 @@ namespace Regolith
 
   void BonkObject::onCollision( Contact& contact, CollidableObject* /*other_object*/)
   {
-    DEBUG_STREAM << "PhysicalObject::onCollision : " << contact.overlap << " | " << contact.impulse;
-    this->move( contact.inertiaRatio * contact.overlap * contact.normal );
+    DEBUG_STREAM << "BonkObject::onCollision : " << contact.overlap << " | " << contact.impulse << " | " << contact.angularImpulse;
+    this->move( contact.massRatio * contact.overlap * contact.normal );
     this->kick( contact.impulse );
-    DEBUG_STREAM << "PhysicalObject::onCollision : Position : " << this->getPosition() << ", Vel : " << this->getVelocity();
+    this->spin( contact.angularImpulse );
+    DEBUG_STREAM << "BonkObject::onCollision : Position : " << this->getPosition() << ", Vel : " << this->getVelocity() << ", AngV : " << this->getAngularVelocity();
 
     this->playSound( _bonk );
   }

@@ -16,8 +16,12 @@ namespace Regolith
     _position(),
     _rotation( 0.0 ),
     _flipFlag( SDL_FLIP_NONE ),
+    _center(),
+    _centerPoint( {0, 0} ),
     _mass( 0.0 ),
     _inverseMass( 0.0 ),
+    _inertiaDensity( 1.0 ),
+    _inverseInertiaDensity( 1.0 ),
     _elasticity( 0.0 ),
     _width( 0.0 ),
     _height( 0.0 ),
@@ -38,8 +42,12 @@ namespace Regolith
     _position( other._position ),
     _rotation( other._rotation ),
     _flipFlag( other._flipFlag ),
+    _center( other._center ),
+    _centerPoint( other._centerPoint ),
     _mass( other._mass ),
     _inverseMass( other._inverseMass ),
+    _inertiaDensity( other._inertiaDensity ),
+    _inverseInertiaDensity( other._inverseInertiaDensity ),
     _elasticity( other._elasticity ),
     _width( other._width ),
     _height( other._height ),
@@ -77,6 +85,12 @@ namespace Regolith
       setMass( json_data["mass"].asFloat() );
     }
 
+    // Set the angular inertia properties - Determine if an object can even be rotated. Actually an inertial density, weighted by the mass
+    if ( validateJson( json_data, "inertia", JsonType::FLOAT, false ) )
+    {
+      setInertiaDensity( json_data["inertia"].asFloat() );
+    }
+
     // Set the coefficient of elasticity of the object. 1 = perfectly elastic.
     if ( validateJson( json_data, "elasticity", JsonType::FLOAT, false ) )
     {
@@ -97,7 +111,14 @@ namespace Regolith
     if ( validateJson( json_data, "rotation", JsonType::FLOAT, false ) )
     {
       _rotation =  json_data["rotation"].asFloat();
-      WARN_LOG( "PhysicalObject::configure() : Rotations are not currently fully supported for collision detection." );
+    }
+
+    // Set the center point for the object, w.r.t the bounding box
+    if ( validateJson( json_data, "center", JsonType::ARRAY, false ) )
+    {
+      validateJsonArray( json_data["center"], 2, JsonType::FLOAT );
+
+      this->setCenter( Vector( json_data["center"][0].asFloat(), json_data["center"][1].asFloat() ) );
     }
 
     // Set the starting flip state
@@ -119,6 +140,12 @@ namespace Regolith
       float vx = json_data["velocity"][0].asFloat();
       float vy = json_data["velocity"][1].asFloat();
       setVelocity( Vector( vx, vy ) );
+    }
+
+    // Set the initial angular velocity
+    if ( validateJson( json_data, "angular_velocity", JsonType::FLOAT, false ) )
+    {
+      setAngularVelocity( json_data["angular_velocity"].asFloat() );
     }
 
     // Set the collision properties
@@ -147,6 +174,7 @@ namespace Regolith
   {
     _destroyMe = false;
     _velocity.zero();
+    _angularVel = 0.0;
     _forces.zero();
   }
 
@@ -164,6 +192,16 @@ namespace Regolith
   }
 
 
+  void PhysicalObject::setInertiaDensity( float i )
+  {
+    _inertiaDensity = i;
+    if ( _inertiaDensity < epsilon )
+      _inverseInertiaDensity = 0.0;
+    else
+      _inverseInertiaDensity = 1.0/_inertiaDensity;
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Functions that enable physics
 
@@ -173,12 +211,17 @@ namespace Regolith
     // Starting with Euler Step algorithm.
     // Might move to leap-frog/Runge-Kutta later
     Vector accel = _inverseMass * _forces;
+    float r_accel = _inverseInertiaDensity * _torques;
 
     _velocity += ( accel * time );
     _position += ( _velocity * time );
 
+    _angularVel += ( r_accel * time );
+    _rotation += ( _angularVel * time );
+
     // Update complete - reset forces
     _forces.zero();
+    _torques = 0.0;
 //    DEBUG_STREAM << "PhysicalObject::step : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
   }
 

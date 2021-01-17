@@ -38,13 +38,16 @@
       [
         {
           "name" : "red_box",
-          "position" : [ 99.99, 100.0 ],
-          "velocity" : [ 0.001, 0.05 ]
+          "position" : [ 100.0, 100.0 ],
+          "velocity" : [ 0.2, 0.0 ],
+          "rotation" : 0,
+          "angular_velocity" : 0.0
         },
         {
           "name" : "red_box",
-          "position" : [ 100.0, 200.0 ],
-          "velocity" : [ 0.0, 0.0 ]
+          "position" : [ 500.0, 100.0 ],
+          "velocity" : [ -0.2, 0.0 ],
+          "rotation" : 0
         }
       ]
     },

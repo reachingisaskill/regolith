@@ -16,7 +16,7 @@ namespace Regolith
     _theSurface( nullptr ),
     _clip( { 0, 0, 0, 0 } ),
     _flipFlag( SDL_FLIP_NONE ),
-    _center( { 0, 0 } ),
+//    _center( { 0, 0 } ),
     _rotation( 0.0 )
   {
   }
@@ -108,8 +108,8 @@ namespace Regolith
     _clip.w = _theSurface->w;
     _clip.h = _theSurface->h;
 
-    _center.x = 0.5*_clip.w;
-    _center.y = 0.5*_clip.h;
+//    _center.x = 0.5*_clip.w;
+//    _center.y = 0.5*_clip.h;
 
     _update = true;
   }

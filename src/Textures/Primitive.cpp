@@ -20,7 +20,7 @@ namespace Regolith
     _theSurface( nullptr ),
     _clip( { 0, 0, 0, 0 } ),
     _flipFlag( SDL_FLIP_NONE ),
-    _center( { 0, 0 } ),
+//    _center( { 0, 0 } ),
     _rotation( 0.0 ),
     _blendMod( SDL_BLENDMODE_NONE ),
     _alphaMod( 255 ),
@@ -107,8 +107,8 @@ namespace Regolith
       _clip.w = json_data["width"].asInt();
       _clip.h = json_data["height"].asInt();
 
-      _center.x = 0.5*_clip.w;
-      _center.y = 0.5*_clip.h;
+//      _center.x = 0.5*_clip.w;
+//      _center.y = 0.5*_clip.h;
 
       _theSurface = SDL_CreateRGBSurface( 0, _clip.w, _clip.h, REGOLITH_PIXEL_DEPTH, REGOLITH_R_MASK, REGOLITH_G_MASK, REGOLITH_B_MASK, REGOLITH_A_MASK );
 

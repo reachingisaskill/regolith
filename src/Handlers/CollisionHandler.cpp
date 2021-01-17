@@ -19,7 +19,9 @@ namespace Regolith
   CollisionHandler::CollisionHandler() :
     _teamCollision(),
     _pairings(),
-    _containers()
+    _containers(),
+    _contact1(),
+    _contact2()
   {
     _contact1.other = &_contact2;
     _contact2.other = &_contact1;
@@ -197,6 +199,8 @@ namespace Regolith
       const Collision& collision1 = object1->getCollision();
       const Collision& collision2 = object2->getCollision();
 
+      DEBUG_STREAM << "CollisionHandler::collides : Checkig hitboxed. Obj1 : " << _object_pos1 << ", Obj2 : " << _object_pos2;
+
       for ( Collision::iterator col_it1 = collision1.begin(); col_it1 != collision1.end(); ++col_it1 )
       {
         const HitBox& box1 = (*col_it1);
@@ -212,16 +216,17 @@ namespace Regolith
           for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
           {
             // Absolute _positions of the hit boxes vertices
-            Vector point1 = _object_pos1 + box1.points[box1_i];
-            Vector normal1 = box1.normals[box1_i];
+            Vector point1 = _object_pos1 + box1.points[box1_i].getRotated( object1->rotation() );
+            Vector normal1 = box1.normals[box1_i].getRotated( object1->rotation() );
 
             DEBUG_STREAM << "CollisionHandler::collides : Checking Object1, Side " << box1_i << " P = " << point1 << ", N = " << normal1;
 
             float largest_overlap = std::numeric_limits<float>::max();
+            Vector overlapping_point;
 
             for ( unsigned int box2_i = 0; box2_i < box2.number; ++box2_i )
             {
-              Vector point2 = _object_pos2 + box2.points[box2_i];
+              Vector point2 = _object_pos2 + box2.points[box2_i].getRotated( object2->rotation() );
               float diff = (point2*normal1) - (point1*normal1);
 
               DEBUG_STREAM << "CollisionHandler::collides :   Object2, P = " << point2 << " - DIFF = " << diff;
@@ -229,11 +234,12 @@ namespace Regolith
               if ( diff < largest_overlap ) // Find the max size of the overlap
               {
                 largest_overlap = diff;
+                overlapping_point = point2;
               }
             }
 
             DEBUG_STREAM << "CollisionHandler::collides : Checking Object1, Overlap = " << largest_overlap;
-            if ( largest_overlap > 0 )
+            if ( largest_overlap > 0.0 )
             {
               // Separating axis found. We good!
               goto CollidingSeparatingAxisFound;
@@ -243,10 +249,12 @@ namespace Regolith
             {
               _contact1.overlap = largest_overlap;
               _contact1.normal = normal1;
+              _contact1.point = overlapping_point;
             }
           }
           _contact2.overlap = _contact1.overlap;
           _contact2.normal = -_contact1.normal;
+          _contact2.point = _contact1.point;
 
           DEBUG_STREAM << "CollisionHandler::collides : Object1, Overlap = " << _contact1.overlap;
 
@@ -256,16 +264,17 @@ namespace Regolith
           for ( unsigned int box2_i = 0; box2_i < box2.number; ++box2_i )
           {
             // Absolute _positions of the hit boxes vertices
-            Vector point2 = _object_pos2 + box2.points[box2_i];
-            Vector normal2 = box2.normals[box2_i];
+            Vector point2 = _object_pos2 + box2.points[box2_i].getRotated( object2->rotation() );
+            Vector normal2 = box2.normals[box2_i].getRotated( object2->rotation() );
 
             DEBUG_STREAM << "CollisionHandler::collides : Checking Object2, Side " << box2_i << " P = " << point2 << ", N = " << normal2;
 
             float largest_overlap = std::numeric_limits<float>::max();
+            Vector overlapping_point;
 
             for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
             {
-              Vector point1 = _object_pos1 + box1.points[box1_i];
+              Vector point1 = _object_pos1 + box1.points[box1_i].getRotated( object1->rotation() );
               float diff = (point1*normal2) - (point2*normal2);
 
               DEBUG_STREAM << "CollisionHandler::collides :   Object1, P = " << point1 << " - DIFF = " << diff;
@@ -274,11 +283,12 @@ namespace Regolith
               if ( diff < largest_overlap ) // Find the max size of the overlap
               {
                 largest_overlap = diff;
+                overlapping_point = point1;
               }
             }
 
             DEBUG_STREAM << "CollisionHandler::collides : Checking Object2, Overlap = " << largest_overlap;
-            if ( largest_overlap > 0 )
+            if ( largest_overlap > 0.0 )
             {
               // Separating axis found. We good!
               goto CollidingSeparatingAxisFound;
@@ -288,10 +298,12 @@ namespace Regolith
             {
               _contact2.overlap = largest_overlap;
               _contact2.normal = normal2;
+              _contact2.point = overlapping_point;
             }
           }
           _contact1.overlap = _contact2.overlap;
           _contact1.normal = -_contact2.normal;
+          _contact1.point = _contact2.point;
 
           DEBUG_STREAM << "CollisionHandler::collides : Object2, Overlap = " << _contact2.overlap;
 
@@ -333,8 +345,8 @@ CollidingSeparatingAxisFound:
       for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
       {
         // Absolute _positions of the hit boxes vertices
-        Vector point1 = _object_pos1 + box1.points[box1_i];
-        Vector normal1 = box1.normals[box1_i];
+        Vector point1 = _object_pos1 + box1.points[box1_i].getRotated( object1->rotation() );
+        Vector normal1 = box1.normals[box1_i].getRotated( object1->rotation() );
         float overlap_edge = point1 * normal1;
 
         Vector point2 = _object_pos2;
@@ -379,19 +391,20 @@ ContainingHitBoxCollision:
 
         // This happens in reverse.
         float largest_overlap = std::numeric_limits<float>::lowest();
+        Vector overlapping_point;
 
         // Is the daughter hit box contained within the parent hitbox
         for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
         {
           // Absolute _positions of the hit boxes vertices
-          Vector point1 = _object_pos1 + box1.points[box1_i];
-          Vector normal1 = box1.normals[box1_i];
+          Vector point1 = _object_pos1 + box1.points[box1_i].getRotated( object1->rotation() );
+          Vector normal1 = box1.normals[box1_i].getRotated( object1->rotation() );
 
           DEBUG_STREAM << "CollisionHandler::contains : Checking parent, Side " << box1_i << " P = " << point1 << ", N = " << normal1;
 
           for ( unsigned int box2_i = 0; box2_i < box2.number; ++box2_i )
           {
-            Vector point2 = _object_pos2 + box2.points[box2_i];
+            Vector point2 = _object_pos2 + box2.points[box2_i].getRotated( object2->rotation() );
             float diff = (point2*normal1) - (point1*normal1);
 
             DEBUG_STREAM << "CollisionHandler::contains :   Daughter, P = " << point2 << " - DIFF = " << diff;
@@ -399,6 +412,7 @@ ContainingHitBoxCollision:
             if ( diff > largest_overlap ) // Find the max size of the overlap
             {
               largest_overlap = diff;
+              overlapping_point = point2;
               DEBUG_STREAM << "CollisionHandler::contains :   Daughter, new overlap = " << largest_overlap;
             }
           }
@@ -407,6 +421,7 @@ ContainingHitBoxCollision:
           {
             _contact1.overlap = largest_overlap;
             _contact1.normal = normal1;
+            _contact1.point = overlapping_point;
           }
         }
 
@@ -416,6 +431,7 @@ ContainingHitBoxCollision:
 
         _contact2.overlap = _contact1.overlap;
         _contact2.normal = -_contact1.normal;
+        _contact2.point = _contact1.point;
 
         callback( object1, object2 );
 
@@ -434,40 +450,71 @@ ContainingHitBoxCollision:
       {
         // If both objects can move we weight the contact vector by the inverse of their masses
         _total_M = object1->getMass() + object2->getMass();
+        _total_L = object1->getInertia() + object2->getInertia();
+
 
         float temp = _coef_restitution * ( object2->getVelocity()*_contact1.normal - object1->getVelocity()*_contact1.normal );
 
-        _contact1.inertiaRatio = object2->getMass()/_total_M;
-        _contact2.inertiaRatio = object1->getMass()/_total_M;
-        _contact1.impulse =  _contact1.inertiaRatio * temp * _contact1.normal;
-        _contact2.impulse =  _contact2.inertiaRatio * temp * _contact2.normal;
+        _contact1.massRatio = object2->getMass()/_total_M;
+        _contact2.massRatio = object1->getMass()/_total_M;
+        _contact1.impulse =  _contact1.massRatio * temp * _contact1.normal;
+        _contact2.impulse =  _contact2.massRatio * temp * _contact2.normal;
+
+        _contact1.inertiaRatio = object2->getInertia()/_total_L;
+        _contact2.inertiaRatio = object1->getInertia()/_total_L;
+
+        Vector lever_arm_1 = ( _contact1.point - object1->getPosition() ).norm();
+        Vector lever_arm_2 = ( _contact2.point - object2->getPosition() ).norm();
+
+        DEBUG_STREAM << "CollisionHandler::callback : Lever Arms : " << _contact1.point << " ^ " << object1->position() << " = " << lever_arm_1;
+        DEBUG_STREAM << "CollisionHandler::callback : Lever Arms : " << _contact2.point << " ^ " << object2->position() << " = " << lever_arm_2;
+
+        _contact1.angularImpulse = _contact1.inertiaRatio * temp * ( _contact1.normal ^ lever_arm_1 );
+        _contact2.angularImpulse = _contact2.inertiaRatio * temp * ( _contact2.normal ^ lever_arm_2 );
 
       }
       else
       {
-        _contact1.inertiaRatio = 1.0;
-        _contact2.inertiaRatio = 0.0;
-//        _contact1.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact1.normal;
+        _contact1.massRatio = 1.0;
+        _contact2.massRatio = 0.0;
         _contact1.impulse = _coef_restitution * (object2->getVelocity()*_contact1.normal - object1->getVelocity()*_contact1.normal) * _contact1.normal;
         _contact2.impulse.zero();
+
+        _contact1.inertiaRatio = 1.0;
+        _contact2.inertiaRatio = 0.0;
       }
     }
     else
     {
       if ( object2->hasMovement() )
       {
+        _contact1.massRatio = 0.0;
+        _contact2.massRatio = 1.0;
+        _contact1.impulse.zero();
+        _contact2.impulse = _coef_restitution * (object1->getVelocity()*_contact2.normal - object2->getVelocity()*_contact2.normal) * _contact2.normal;
+
+        Vector lever_arm_2 = ( _contact2.point - object2->center() ).norm();
+
         _contact1.inertiaRatio = 0.0;
         _contact2.inertiaRatio = 1.0;
-        _contact1.impulse.zero();
-//        _contact2.impulse = _coef_restitution * (object2->getVelocity() - object1->getVelocity()) % _contact2.normal;
-        _contact2.impulse = _coef_restitution * (object1->getVelocity()*_contact2.normal - object2->getVelocity()*_contact2.normal) * _contact2.normal;
+
+        _contact1.angularImpulse = 0.0;
+        _contact2.angularImpulse =  _contact2.impulse ^ lever_arm_2;
       }
       else
       {
-        _contact1.inertiaRatio = 0.0;
-        _contact2.inertiaRatio = 0.0;
+        _contact1.massRatio = 0.0;
+        _contact2.massRatio = 0.0;
         _contact1.impulse.zero();
         _contact2.impulse.zero();
+
+        Vector lever_arm_1 = ( _contact1.point - object1->center() ).norm();
+
+        _contact1.inertiaRatio = 0.0;
+        _contact2.inertiaRatio = 0.0;
+
+        _contact1.angularImpulse = _contact1.impulse ^ lever_arm_1;
+        _contact2.angularImpulse = 0.0;
       }
     }
 

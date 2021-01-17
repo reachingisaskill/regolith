@@ -12,12 +12,29 @@ namespace Regolith
   // Struct holding all the info required for resolving a collision.
   struct Contact
   {
+    // A pointer to the other contact, seen from the colliding object's perspective
     Contact* other;
 
-    float inertiaRatio;
+    // Ratio of the inverse masses.
+    float massRatio;
+    // Impulse resulting from the collision
     Vector impulse;
-    float overlap;
+    // Normal vector to the collision. Use to calculate impulse
     Vector normal;
+
+
+    // Ratio of the inverse inertias
+    float inertiaRatio;
+    // Angular impulse resulting from the collision
+    float angularImpulse;
+    // Interaction point. Used to calculate angular impulse
+    Vector point;
+
+
+    // Size of the overlap between the hitboxes
+    float overlap;
+
+    // Type of the object collided with
     CollisionType type;
   };
 
