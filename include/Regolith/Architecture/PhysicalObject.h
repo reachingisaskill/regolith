@@ -11,20 +11,35 @@ namespace Regolith
   // Forward declares
   struct Contact;
 
+  struct BoundingBox
+  {
+    // Basic dimensions
+    float width;
+    float height;
+
+    // Vertices position
+    Vector points[4];
+
+    // Edge normals
+    Vector normals[4];
+  };
+
+
+////////////////////////////////////////////////////////////////////////////////
   /*
    * Defines the interface for "physical objects" any object that can be cloned, moved, seen or collided with.
    * Must therefore have a position and an area.
    */
   class PhysicalObject : virtual public GameObject
   {
-
-////////////////////////////////////////////////////////////////////////////////
     private:
       // Flag that this object is to be removed from the scene
       bool _destroyMe;
 
-      // Flag to indicate this object can be moved by physics processes
-      bool _hasMoveable;
+      // Flag to indicate this object can be translated by physics and collision processes
+      bool _hasTranslatable;
+      // Flag to indicate this object can be rotated by physics and collision processes
+      bool _hasRotatable;
       // Flag to indicate this object responds to global physics
       bool _hasPhysics;
 
@@ -47,8 +62,7 @@ namespace Regolith
       float _elasticity;
 
       // Defines the size of the drawable area for the object. Should ALWAYS contain all the collision boxes.
-      float _width;
-      float _height;
+      BoundingBox _boundingBox;
 
       // Physics variables
       Vector _velocity;
@@ -72,13 +86,13 @@ namespace Regolith
       // Property modifiers
       
       // Set the width of the the object
-      void setWidth( float w ) { _width = w; }
+      void setWidth( float );
 
       // Set the height of the the object
-      void setHeight( float h ) { _height = h; }
+      void setHeight( float );
 
       // Set the rotation center for the object
-      void setCenter( Vector c ) { _center = c; _centerPoint.x = c.x(); _centerPoint.y = c.y(); }
+      void setCenter( Vector );
 
       // For derived classes to update the mass. Sets both mass and it's inverse
       void setMass( float );
@@ -87,7 +101,10 @@ namespace Regolith
       void setInertiaDensity( float );
 
       // For derived classes to set the moveable flag
-      void setMoveable( bool m ) { _hasMoveable = m; }
+      void setTranslatable( bool t ) { _hasTranslatable = t; }
+
+      // For derived classes to set the moveable flag
+      void setRotatable( bool r ) { _hasRotatable = r; }
 
       // For derived classes to set whether this object is affected by global physics effects
       void setPhysics( bool p ) { _hasPhysics = p; }
@@ -126,7 +143,13 @@ namespace Regolith
 
 
       // Tells the caller that the object is moveable. i.e. the velocity may be non-zero
-      virtual bool hasMovement() const { return _hasMoveable; }
+      virtual bool hasMovement() const { return _hasTranslatable || _hasRotatable; }
+
+      // Tells the caller that the object is moveable. i.e. the velocity may be non-zero
+      virtual bool hasTranslation() const { return _hasTranslatable; }
+
+      // Tells the caller that the object is moveable. i.e. the velocity may be non-zero
+      virtual bool hasRotation() const { return _hasRotatable; }
 
       // Tells the caller that the is animated for every frame
       virtual bool hasPhysics() const { return _hasPhysics; }
@@ -222,8 +245,11 @@ namespace Regolith
       void setFlipFlag( SDL_RendererFlip f ) { _flipFlag = f; }
 
       // Bounding box dimensions
-      const float& getWidth() const { return _width; }
-      const float& getHeight() const { return _height; }
+      const float& getWidth() const { return _boundingBox.width; }
+      const float& getHeight() const { return _boundingBox.height; }
+
+      // Reference to the bounding box points
+      const BoundingBox& boundingBox() const { return _boundingBox; }
   };
 
 }

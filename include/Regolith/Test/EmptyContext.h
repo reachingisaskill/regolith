@@ -22,6 +22,8 @@ namespace Regolith
       float _fadeTime;
       SDL_Color _fadeColour;
 
+      mutable float _kineticEnergy;
+
     protected:
       // Configure the death timer.
       virtual void onStart() override;
@@ -30,7 +32,7 @@ namespace Regolith
       virtual Vector updateCamera( float ) const override { return Vector(); }
 
       // Called for each object that is flagged to have global physics
-      virtual void updatePhysics( PhysicalObject*, float ) const {}
+      virtual void updatePhysics( PhysicalObject*, float ) const;
 
       // Updates the internal state of the context. Nothing to do here.
       virtual void updateContext( float ) override;

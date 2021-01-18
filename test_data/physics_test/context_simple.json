@@ -31,7 +31,7 @@
         },
         {
           "name" : "green_box",
-          "position" : [ 500, 380 ]
+          "position" : [ 500, 500 ]
         }
       ],
       "spawns" :
@@ -46,8 +46,9 @@
         {
           "name" : "red_box",
           "position" : [ 500.0, 100.0 ],
-          "velocity" : [ -0.2, 0.0 ],
-          "rotation" : 0
+          "velocity" : [ 0.0, 0.0 ],
+          "rotation" : 90,
+          "angular_velocity" : -0.1
         }
       ]
     },

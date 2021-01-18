@@ -15,7 +15,8 @@ namespace Regolith
     _time( 0.0 ),
     _fadeTrigger( 10000 ),
     _fadeTime( 2000 ),
-    _fadeColour( { 0, 0, 0, 0 } )
+    _fadeColour( { 0, 0, 0, 0 } ),
+    _kineticEnergy( 0.0 )
   {
     DEBUG_LOG( "EmptyContext::EmptyContext : Empty Context Created" );
   }
@@ -51,6 +52,9 @@ namespace Regolith
 
       DEBUG_STREAM << "EmptyContext::updateContext : Fade Alpha = " << (int)_fadeColour.a;
     }
+
+    INFO_STREAM << "EmptyContext::updateContext : Total Kinetic Energy = " << _kineticEnergy;
+    _kineticEnergy = 0.0;
   }
 
 
@@ -62,5 +66,10 @@ namespace Regolith
     }
   }
 
+  void EmptyContext::updatePhysics( PhysicalObject* object, float /*time*/ ) const
+  {
+    _kineticEnergy += 0.5 * object->getMass() * object->getVelocity().square();
+    _kineticEnergy += 0.5 * object->getInertia() * object->getAngularVelocity() * object->getAngularVelocity();
+  }
 }
 

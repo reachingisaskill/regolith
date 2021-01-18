@@ -11,7 +11,8 @@ namespace Regolith
 
   PhysicalObject::PhysicalObject() :
     _destroyMe( false ),
-    _hasMoveable( false ),
+    _hasTranslatable( false ),
+    _hasRotatable( false ),
     _hasPhysics( false ),
     _position(),
     _rotation( 0.0 ),
@@ -20,11 +21,10 @@ namespace Regolith
     _centerPoint( {0, 0} ),
     _mass( 0.0 ),
     _inverseMass( 0.0 ),
-    _inertiaDensity( 1.0 ),
-    _inverseInertiaDensity( 1.0 ),
+    _inertiaDensity( 100.0 ),
+    _inverseInertiaDensity( 0.01 ),
     _elasticity( 0.0 ),
-    _width( 0.0 ),
-    _height( 0.0 ),
+    _boundingBox(),
     _velocity(),
     _forces(),
     _angularVel( 0.0 ),
@@ -37,7 +37,8 @@ namespace Regolith
   // Manually copy the children
   PhysicalObject::PhysicalObject( const PhysicalObject& other ) :
     _destroyMe( other._destroyMe ),
-    _hasMoveable( other._hasMoveable ),
+    _hasTranslatable( other._hasTranslatable ),
+    _hasRotatable( other._hasRotatable ),
     _hasPhysics( other._hasPhysics ),
     _position( other._position ),
     _rotation( other._rotation ),
@@ -49,8 +50,7 @@ namespace Regolith
     _inertiaDensity( other._inertiaDensity ),
     _inverseInertiaDensity( other._inverseInertiaDensity ),
     _elasticity( other._elasticity ),
-    _width( other._width ),
-    _height( other._height ),
+    _boundingBox( other._boundingBox ),
     _velocity( other._velocity ),
     _forces(),
     _angularVel( other._angularVel ),
@@ -71,11 +71,13 @@ namespace Regolith
 
   void PhysicalObject::configure( Json::Value& json_data, ContextGroup& /*cg*/ )
   {
-    validateJson( json_data, "has_moveable", JsonType::BOOLEAN );
+    validateJson( json_data, "has_translatable", JsonType::BOOLEAN );
+    validateJson( json_data, "has_rotatable", JsonType::BOOLEAN );
     validateJson( json_data, "has_physics", JsonType::BOOLEAN );
 
     // Configure the flags of physical object
-    _hasMoveable = json_data["has_moveable"].asBool();
+    _hasTranslatable = json_data["has_translatable"].asBool();
+    _hasRotatable = json_data["has_rotatable"].asBool();
     _hasPhysics = json_data["has_physics"].asBool();
 
 
@@ -152,21 +154,56 @@ namespace Regolith
     if ( validateJson( json_data, "bounding_box", JsonType::OBJECT, false ) )
     {
       Json::Value& bounding_box_data = json_data["bounding_box"];
+      Vector position = zeroVector;
+
+      if ( validateJson( bounding_box_data, "position", JsonType::ARRAY, false ) )
+      {
+        validateJsonArray( json_data["position"], 2, JsonType::FLOAT );
+        position.set( json_data["position"][0].asFloat(), json_data["position"][1].asFloat() );
+      }
 
       validateJson( bounding_box_data, "width", JsonType::FLOAT );
       validateJson( bounding_box_data, "height", JsonType::FLOAT );
       validateJson( bounding_box_data, "collision_team", JsonType::STRING );
 
-      _width = bounding_box_data["width"].asFloat();
-      _height = bounding_box_data["height"].asFloat();
-
       std::string collision_team = bounding_box_data["collision_team"].asString();
       _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
 
+
+      _boundingBox.width = bounding_box_data["width"].asFloat();
+      _boundingBox.height = bounding_box_data["height"].asFloat();
+
+      _boundingBox.points[0] = position;
+      _boundingBox.points[1] = _boundingBox.points[0];
+      _boundingBox.points[1].x() = _boundingBox.points[1].x() + _boundingBox.width;
+      _boundingBox.points[2] = _boundingBox.points[1];
+      _boundingBox.points[2].y() = _boundingBox.points[2].y() + _boundingBox.height;
+      _boundingBox.points[3] = _boundingBox.points[2];
+      _boundingBox.points[3].x() = _boundingBox.points[3].x() - _boundingBox.width;
+
+      _boundingBox.normals[0] = -unitVector_y;
+      _boundingBox.normals[1] =  unitVector_x;
+      _boundingBox.normals[2] =  unitVector_y;
+      _boundingBox.normals[3] = -unitVector_x;
       INFO_STREAM << "PhysicalObject::configure : Configuring physical object with collision team: " << collision_team;
     }
+    else
+    {
+      _boundingBox.width = 0.0;
+      _boundingBox.height = 0.0;
 
-    DEBUG_STREAM << "PhysicalObject::configure : Configured physical object. Pos = " << _position << " Vel = " << _velocity << " M = " << _mass << " w/h = " << _width << ", " << _height;
+      _boundingBox.points[0] = zeroVector;
+      _boundingBox.points[1] = zeroVector;
+      _boundingBox.points[2] = zeroVector;
+      _boundingBox.points[3] = zeroVector;
+
+      _boundingBox.normals[0] = -unitVector_y;
+      _boundingBox.normals[1] =  unitVector_x;
+      _boundingBox.normals[2] =  unitVector_y;
+      _boundingBox.normals[3] = -unitVector_x;
+    }
+
+    DEBUG_STREAM << "PhysicalObject::configure : Configured physical object. Pos = " << _position << " Vel = " << _velocity << " M = " << _mass << " w/h = " << _boundingBox.width << ", " << _boundingBox.height;
   }
 
 
@@ -202,6 +239,33 @@ namespace Regolith
   }
 
 
+  void PhysicalObject::setWidth( float w )
+  {
+    _boundingBox.width = w;
+    // Have to update the points
+    _boundingBox.points[1].set( _boundingBox.points[0].x() + w, _boundingBox.points[0].y() );
+    _boundingBox.points[2].set( _boundingBox.points[3].x() + w, _boundingBox.points[3].y() );
+  }
+
+
+  void PhysicalObject::setHeight( float h )
+  {
+    _boundingBox.height = h;
+    // Have to update the points
+    _boundingBox.points[2].set( _boundingBox.points[1].x(), _boundingBox.points[1].y() + h );
+    _boundingBox.points[2].set( _boundingBox.points[0].x(), _boundingBox.points[0].y() + h );
+  }
+
+
+  void PhysicalObject::setCenter( Vector c )
+  {
+    _center = c;
+    // Rounding for the float -> int conversion
+    _centerPoint.x = c.x()+0.5;
+    _centerPoint.y = c.y()+0.5;
+  }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Functions that enable physics
 
@@ -210,20 +274,42 @@ namespace Regolith
   {
     // Starting with Euler Step algorithm.
     // Might move to leap-frog/Runge-Kutta later
-    Vector accel = _inverseMass * _forces;
-    float r_accel = _inverseInertiaDensity * _torques;
 
-    _velocity += ( accel * time );
-    _position += ( _velocity * time );
+    if ( _hasTranslatable )
+    {
+      Vector accel = _inverseMass * _forces;
 
-    _angularVel += ( r_accel * time );
-    _rotation += ( _angularVel * time );
+      // Euler Step Integration
+      _velocity += ( accel * time );
+      _position += ( _velocity * time );
 
-    // Update complete - reset forces
-    _forces.zero();
-    _torques = 0.0;
-//    DEBUG_STREAM << "PhysicalObject::step : Position : " << _position << ", Vel : " << _velocity << ", Accel : " << accel << ", InvM : " << _inverseMass << ", Delta T : " << time;
+      _forces.zero();
+    }
+
+    if ( _hasRotatable )
+    {
+      float r_accel = _inverseInertiaDensity * _torques;
+
+      // Euler Step Integration
+      _angularVel += ( r_accel * time );
+      _rotation += ( _angularVel * time );
+
+      _torques = 0.0;
+    }
   }
+
+  /*
+  // Copy of the Runge Kutta Order 4 integration algorith for a future me...
+
+  dy/dt = f( y, t )
+
+  k1 = f( y0, t0 )
+  k2 = f( y0+h*(k1/2), t0+h/2 )
+  k3 = f( y0+h*(k2/2), t0+h/2 )
+  k4 = f( y0+h*k3, t0+h )
+
+  y1 = y0 + 1/6 * h * ( k1 + 2*k2 + 2*k3 + k4 )
+  */
 
 }
 

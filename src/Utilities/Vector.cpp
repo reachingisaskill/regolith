@@ -7,6 +7,8 @@
 namespace Regolith
 {
 
+  const float degrees_to_radians = 3.14159265/180.0;
+
   Vector::Vector() :
     _x(),
     _y()
@@ -61,8 +63,8 @@ namespace Regolith
 
   Vector& Vector::rotate( float angle )
   {
-    float cos = std::cos( angle );
-    float sin = std::sin( angle );
+    float cos = std::cos( angle*degrees_to_radians );
+    float sin = std::sin( angle*degrees_to_radians );
 
     float new_x = _x*cos - _y*sin;
     this->_y = _x*sin + _y*cos;
@@ -74,8 +76,8 @@ namespace Regolith
 
   Vector Vector::getRotated( float angle ) const
   {
-    float cos = std::cos( angle );
-    float sin = std::sin( angle );
+    float cos = std::cos( angle*degrees_to_radians );
+    float sin = std::sin( angle*degrees_to_radians );
 
     float new_x = _x*cos - _y*sin;
     float new_y = _x*sin + _y*cos;
@@ -86,8 +88,8 @@ namespace Regolith
 
   Vector& Vector::rotateAbout( float angle, const Vector& vec )
   {
-    float cos = std::cos( angle );
-    float sin = std::sin( angle );
+    float cos = std::cos( angle*degrees_to_radians );
+    float sin = std::sin( angle*degrees_to_radians );
 
     float new_x = (_x-vec._x)*cos - (_y-vec._y)*sin;
     float new_y = (_x-vec._x)*sin + (_y-vec._y)*cos;
@@ -100,8 +102,8 @@ namespace Regolith
 
   Vector Vector::getRotatedAbout( float angle, const Vector& vec ) const
   {
-    float cos = std::cos( angle );
-    float sin = std::sin( angle );
+    float cos = std::cos( angle*degrees_to_radians );
+    float sin = std::sin( angle*degrees_to_radians );
 
     float new_x = (_x-vec._x)*cos - (_y-vec._y)*sin;
     float new_y = (_x-vec._x)*sin + (_y-vec._y)*cos;
