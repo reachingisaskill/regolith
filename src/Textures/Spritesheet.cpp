@@ -88,7 +88,7 @@ namespace Regolith
 
     if ( validateJson( json_data, "rotation", JsonType::FLOAT, false ) )
     {
-      _rotation = json_data["rotation"].asFloat();
+      _rotation = json_data["rotation"].asFloat() * degrees_to_radians;
     }
 
     if ( validateJson( json_data, "flip_horizontal", JsonType::BOOLEAN, false ) )

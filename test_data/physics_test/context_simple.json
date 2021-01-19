@@ -40,15 +40,15 @@
           "name" : "red_box",
           "position" : [ 100.0, 100.0 ],
           "velocity" : [ 0.2, 0.0 ],
-          "rotation" : 0,
+          "rotation" : 45,
           "angular_velocity" : 0.0
         },
         {
           "name" : "red_box",
           "position" : [ 500.0, 100.0 ],
           "velocity" : [ 0.0, 0.0 ],
-          "rotation" : 90,
-          "angular_velocity" : -0.1
+          "rotation" : 0,
+          "angular_velocity" : 0.0
         }
       ]
     },

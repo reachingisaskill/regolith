@@ -4,26 +4,14 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/GameObject.h"
+#include "Regolith/Utilities/BoundingBox.h"
+
 
 namespace Regolith
 {
 ////////////////////////////////////////////////////////////////////////////////
   // Forward declares
   struct Contact;
-
-  struct BoundingBox
-  {
-    // Basic dimensions
-    float width;
-    float height;
-
-    // Vertices position
-    Vector points[4];
-
-    // Edge normals
-    Vector normals[4];
-  };
-
 
 ////////////////////////////////////////////////////////////////////////////////
   /*

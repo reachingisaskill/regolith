@@ -13,8 +13,7 @@ namespace Regolith
     _name( "" ),
     _position( 0.0 ),
     _movementScale( 0.0 ),
-    _width( 0.0 ),
-    _height( 0.0 ),
+    _boundingBox(),
     layerGraph()
   {
   }
@@ -32,8 +31,8 @@ namespace Regolith
     _name = name;
     _position = pos;
     _movementScale = move_scale;
-    _width = width;
-    _height = height;
+    
+    _boundingBox.configure( _position, width, height );
   }
 
 }

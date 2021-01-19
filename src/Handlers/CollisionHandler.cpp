@@ -1,8 +1,10 @@
+#define LOGTASTIC_DEBUG_OFF
 
 #include "Regolith/Handlers/CollisionHandler.h"
 #include "Regolith/Managers/Manager.h"
 #include "Regolith/ObjectInterfaces/CollidableObject.h"
 #include "Regolith/Contexts/ContextLayer.h"
+#include "Regolith/Utilities/BoundingBox.h"
 
 #include <limits>
 
@@ -207,6 +209,8 @@ namespace Regolith
       {
         _point2 = _object_pos2 + boundingBox2.points[b2_i].getRotated( object2->rotation() );
         _diff = (_point2*_normal1) - _projection1;
+        DEBUG_STREAM << "CollisionHandler::collides : Checking BB1, Side  P1 = " << _point1 << ", N = " << _normal1 << " P2 = " << _point2;
+
         if ( _diff < _largest_overlap ) // Find the max size of the overlap
         {
           _largest_overlap = _diff;
@@ -233,6 +237,8 @@ namespace Regolith
       {
         _point1 = _object_pos1 + boundingBox1.points[b1_i].getRotated( object1->rotation() );
         _diff = (_point1*_normal2) - _projection2;
+        DEBUG_STREAM << "CollisionHandler::collides : Checking BB2, Side  P1 = " << _point1 << ", N = " << _normal1 << " P2 = " << _point2;
+
         if ( _diff < _largest_overlap ) // Find the max size of the overlap
         {
           _largest_overlap = _diff;
@@ -251,7 +257,7 @@ namespace Regolith
     const Collision& collision1 = object1->getCollision();
     const Collision& collision2 = object2->getCollision();
 
-    DEBUG_STREAM << "CollisionHandler::collides : Checkig hitboxed. Obj1 : " << _object_pos1 << ", Obj2 : " << _object_pos2;
+    DEBUG_STREAM << "CollisionHandler::collides : Checkig hitboxes. Obj1 : " << _object_pos1 << ", Obj2 : " << _object_pos2;
 
     for ( Collision::iterator col_it1 = collision1.begin(); col_it1 != collision1.end(); ++col_it1 )
     {
@@ -378,111 +384,94 @@ CollidingSeparatingAxisFound:
 
   void CollisionHandler::contains( CollidableObject* object1, CollidableObject* object2 )
   {
+    DEBUG_LOG( "CollisionHandler::contains : Starting containment" );
+
     _object_pos1 = object1->position();
     _object_pos2 = object2->position();
 
-    const Collision& collision1 = object1->getCollision();
+    const BoundingBox& boundingBox1 = object1->boundingBox();
+    const BoundingBox& boundingBox2 = object2->boundingBox();
+
+////////////////////////////////////////////////////////////////////////////////
+    // Bounding box test
+    for ( unsigned int b1_i = 0; b1_i < 4; ++b1_i )
+    {
+      // Absolute _positions of the hit boxes vertices
+      _point1 = _object_pos1 + boundingBox1.points[b1_i].getRotated( object1->rotation() );
+      _normal1 = boundingBox1.normals[b1_i].getRotated( object1->rotation() );
+      _projection1 = _point1 * _normal1;
+
+      DEBUG_STREAM << "CollisionHandler::contains : Checking Parent, Side " << b1_i << " P = " << _point1 << ", N = " << _normal1;
+
+      for ( unsigned int b2_i = 0; b2_i < 4; ++b2_i )
+      {
+        _point2 = _object_pos2 + boundingBox2.points[b2_i].getRotated( object2->rotation() );
+        _diff = (_point2*_normal1) - _projection1;
+        DEBUG_STREAM << "CollisionHandler::contains : Checking Child " << " P = " << _point2 << " DIFF = " << _diff;
+
+        if ( _diff > 0.0 ) // Find the max size of the overlap
+        {
+          goto ContainingHitBoxCollision;
+        }
+      }
+    }
+
+    // No overlaps found. Break this loop and go to the next parent hitbox
+    return;
+
+    // Skipped the continue. Therefore we must check for an overlap
+ContainingHitBoxCollision:
+    DEBUG_LOG( "CollisionHandler::contains : Collision determined" );
     const Collision& collision2 = object2->getCollision();
 
-    for ( Collision::iterator col_it1 = collision1.begin(); col_it1 != collision1.end(); ++col_it1 )
+      // Iterate through the hit boxes of the daughter objects
+    for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
     {
-      const HitBox& box1 = (*col_it1);
+      const HitBox& box2 = (*col_it2);
+      _contact1.overlap = std::numeric_limits<float>::max();
 
-      // Is the bounding box contained within this hitbox
-      for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
+      for ( unsigned int b1_i = 0; b1_i < 4; ++b1_i )
       {
-        // Absolute _positions of the hit boxes vertices
-        Vector point1 = _object_pos1 + box1.points[box1_i].getRotated( object1->rotation() );
-        Vector normal1 = box1.normals[box1_i].getRotated( object1->rotation() );
-        float overlap_edge = point1 * normal1;
+        // Absolute _positions of the hit box's vertices
+        _point1 = _object_pos1 + boundingBox1.points[b1_i].getRotated( object1->rotation() );
+        _normal1 = -boundingBox1.normals[b1_i].getRotated( object1->rotation() );
+        _projection1 = _point1 * _normal1;
+        _largest_overlap = std::numeric_limits<float>::max();
 
-        Vector point2 = _object_pos2;
+        DEBUG_STREAM << "CollisionHandler::contains : Checking parent, Side " << b1_i << " P = " << _point1 << ", N = " << _normal1;
 
-        if ( (point2*normal1) > overlap_edge )
+        for ( unsigned int box2_i = 0; box2_i < box2.number; ++box2_i )
         {
-          goto ContainingHitBoxCollision;
-        }
+          _point2 = _object_pos2 + box2.points[box2_i].getRotated( object2->rotation() );
+          _diff = (_point2*_normal1) - _projection1;
 
-        point2.x() = point2.x() + object2->getWidth();
-        if ( (point2*normal1) > overlap_edge )
-        {
-          goto ContainingHitBoxCollision;
-        }
+          DEBUG_STREAM << "CollisionHandler::contains :   Daughter, P = " << _point2 << " - DIFF = " << _diff;
 
-        point2.y() = point2.y() + object2->getHeight();
-        if ( (point2*normal1) > overlap_edge )
-        {
-          goto ContainingHitBoxCollision;
-        }
-
-        point2.x() = point2.x() - object2->getWidth();
-        if ( (point2*normal1) > overlap_edge )
-        {
-          goto ContainingHitBoxCollision;
-        }
-      }
-
-      // No overlaps found. Break this loop and go to the next parent hitbox
-      break;
-
-        // Skipped the continue. Therefore we must check for an overlap
-ContainingHitBoxCollision:
-      DEBUG_LOG( "CollisionHandler::contains : Collision determined" );
-
-      _contact1.overlap = std::numeric_limits<float>::lowest();
-
-        // Iterate through the hit boxes of the daughter objects
-      for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
-      {
-        const HitBox& box2 = (*col_it2);
-
-        // This happens in reverse.
-        float largest_overlap = std::numeric_limits<float>::lowest();
-        Vector overlapping_point;
-
-        // Is the daughter hit box contained within the parent hitbox
-        for ( unsigned int box1_i = 0; box1_i < box1.number; ++box1_i )
-        {
-          // Absolute _positions of the hit boxes vertices
-          Vector point1 = _object_pos1 + box1.points[box1_i].getRotated( object1->rotation() );
-          Vector normal1 = box1.normals[box1_i].getRotated( object1->rotation() );
-
-          DEBUG_STREAM << "CollisionHandler::contains : Checking parent, Side " << box1_i << " P = " << point1 << ", N = " << normal1;
-
-          for ( unsigned int box2_i = 0; box2_i < box2.number; ++box2_i )
+          if ( _diff < _largest_overlap ) // Find the max size of the overlap
           {
-            Vector point2 = _object_pos2 + box2.points[box2_i].getRotated( object2->rotation() );
-            float diff = (point2*normal1) - (point1*normal1);
-
-            DEBUG_STREAM << "CollisionHandler::contains :   Daughter, P = " << point2 << " - DIFF = " << diff;
-
-            if ( diff > largest_overlap ) // Find the max size of the overlap
-            {
-              largest_overlap = diff;
-              overlapping_point = point2;
-              DEBUG_STREAM << "CollisionHandler::contains :   Daughter, new overlap = " << largest_overlap;
-            }
-          }
-
-          if ( largest_overlap > _contact1.overlap ) // Smallest total overlap is the shortest collision resolution
-          {
-            _contact1.overlap = largest_overlap;
-            _contact1.normal = normal1;
-            _contact1.point = overlapping_point;
+            _largest_overlap = _diff;
+            _overlapping_point = _point2;
           }
         }
 
-        DEBUG_STREAM << "CollisionHandler::contains : Overlap = " << _contact1.overlap << " N = " << _contact1.normal;
-
-        if ( _contact1.overlap < 0.0 ) continue;
-
-        _contact2.overlap = _contact1.overlap;
-        _contact2.normal = -_contact1.normal;
-        _contact2.point = _contact1.point;
-
-        callback( object1, object2 );
-
+        DEBUG_STREAM << "CollisionHandler::contains : Daughter overlap = " << _largest_overlap;
+        if ( _largest_overlap < _contact1.overlap ) // Smallest total overlap is the shortest collision resolution
+        {
+          _contact1.overlap = _largest_overlap;
+          _contact1.normal = _normal1;
+          _contact1.point = _overlapping_point;
+        }
       }
+
+      DEBUG_STREAM << "CollisionHandler::contains : Overlap = " << _contact1.overlap << " N = " << _contact1.normal;
+
+      if ( _contact1.overlap >= 0.0 ) continue;
+
+      _contact2.overlap = _contact1.overlap;
+      _contact2.normal = -_contact1.normal;
+      _contact2.point = _contact1.point;
+
+      callback( object1, object2 );
     }
   }
 
@@ -494,64 +483,65 @@ ContainingHitBoxCollision:
     _total_M = object1->getInverseMass() + object2->getInverseMass();
     _total_L = object1->getInverseInertia() + object2->getInverseInertia();
 
-    Vector lever_arm_1 = _contact1.point - object1->getPosition();
-    Vector lever_arm_2 = _contact2.point - object2->getPosition();
+    _lever_len_1 = _contact1.normal ^ (_contact1.point - object1->getPosition());
+    _lever_len_2 = _contact2.normal ^ (_contact2.point - object2->getPosition());
 
-    float lever_len_1 = _contact1.normal ^ lever_arm_1;
-    float lever_len_2 = _contact2.normal ^ lever_arm_2;
+    DEBUG_STREAM << "CollisionHandler::callback : Lever Length 1 = " << _lever_len_1;
+    DEBUG_STREAM << "CollisionHandler::callback : Lever Length 2 = " << _lever_len_2;
 
-    float point1_speed = object1->getAngularVelocity() * lever_len_1 * 3.14159265/180.0;
-    float point2_speed = object2->getAngularVelocity() * lever_len_2 * 3.14159265/180.0;
+    // Total impulse based on the relative speed at the point of impact,
+    _total_impulse = _coef_restitution * ( object2->getVelocity()*_contact1.normal +
+                                           object1->getVelocity()*_contact2.normal +
+                                           object1->getAngularVelocity() * _lever_len_1 +
+                                           object2->getAngularVelocity() * _lever_len_2 );
 
-    DEBUG_STREAM << "CollisionHandler::callback : Lever Arm 1 = " << lever_arm_1 << " Point = " << _contact1.point;
-    DEBUG_STREAM << "CollisionHandler::callback : Lever Arm 2 = " << lever_arm_2 << " Point = " << _contact2.point;
-    DEBUG_STREAM << "CollisionHandler::callback : Lever Length 1 = " << lever_len_1;
-    DEBUG_STREAM << "CollisionHandler::callback : Lever Length 2 = " << lever_len_2;
-    DEBUG_STREAM << "CollisionHandler::callback : Point velocity object1 : f = " << object1->getAngularVelocity() << ", u = " << point1_speed;
-    DEBUG_STREAM << "CollisionHandler::callback : Point velocity object2 : f = " << object2->getAngularVelocity() << ", u = " << point2_speed;
-
-
-    float momentum_sink = 0.0;
-
-    if ( object1->hasMovement() )
+    // If the objects are moving away, don't provide an impulse
+    if ( _total_impulse < 0.0 )
     {
-      momentum_sink += object1->getInverseMass();
+      float momentum_sink = 0.0;
+
+      if ( object1->hasMovement() )
+      {
+        momentum_sink += object1->getInverseMass();
+      }
+      if ( object2->hasMovement() )
+      {
+        momentum_sink += object2->getInverseMass();
+      }
+      if ( object1->hasRotation() )
+      {
+        momentum_sink += _lever_len_1*_lever_len_1*object1->getInverseInertia();
+      }
+      if ( object2->hasRotation() )
+      {
+        momentum_sink += _lever_len_2*_lever_len_2*object2->getInverseInertia();
+      }
+
+      // - weighted by the amount of inertia that can receive the impulse
+      _total_impulse /= momentum_sink;
     }
-    if ( object2->hasMovement() )
+    else
     {
-      momentum_sink += object2->getInverseMass();
-    }
-    if ( object1->hasRotation() )
-    {
-      momentum_sink += lever_len_1*lever_len_1*object1->getInverseInertia();
-    }
-    if ( object2->hasRotation() )
-    {
-      momentum_sink += lever_len_2*lever_len_2*object2->getInverseInertia();
+      _total_impulse = 0.0;
     }
 
-    float total_impulse = _coef_restitution * ( object2->getVelocity()*_contact1.normal + object1->getVelocity()*_contact2.normal + point1_speed + point2_speed ) / momentum_sink;
-
-    DEBUG_STREAM << "CollisionHandler::callback : Total Impulse = " << total_impulse;
-
+    DEBUG_STREAM << "CollisionHandler::callback : Total Impulse = " << _total_impulse;
 
     _contact1.massRatio = object1->getInverseMass()/_total_M;
     _contact2.massRatio = object2->getInverseMass()/_total_M;
-    _contact1.impulse = object1->getInverseMass() * total_impulse * _contact1.normal;
-    _contact2.impulse = object2->getInverseMass() * total_impulse * _contact2.normal;
+    _contact1.impulse = object1->getInverseMass() * _total_impulse * _contact1.normal;
+    _contact2.impulse = object2->getInverseMass() * _total_impulse * _contact2.normal;
 
 
     _contact1.inertiaRatio = object1->getInverseInertia()/_total_L;
     _contact2.inertiaRatio = object2->getInverseInertia()/_total_L;
-    _contact1.angularImpulse = - object1->getInverseInertia() * total_impulse * lever_len_1;
-    _contact2.angularImpulse = - object2->getInverseInertia() * total_impulse * lever_len_2;
-
+    _contact1.angularImpulse = - object1->getInverseInertia() * _total_impulse * _lever_len_1;
+    _contact2.angularImpulse = - object2->getInverseInertia() * _total_impulse * _lever_len_2;
 
     DEBUG_STREAM << "CollisionHandler::callback : Impulse 1 = " << _contact1.impulse;
     DEBUG_STREAM << "CollisionHandler::callback : Impulse 2 = " << _contact2.impulse;
     DEBUG_STREAM << "CollisionHandler::callback : Angular Impulse 1 = " << _contact1.angularImpulse;
     DEBUG_STREAM << "CollisionHandler::callback : Angular Impulse 2 = " << _contact2.angularImpulse;
-
 
     object1->onCollision( _contact1, object2 );
     object2->onCollision( _contact2, object1 );

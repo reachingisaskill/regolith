@@ -112,7 +112,7 @@ namespace Regolith
     // Set the starting rotation (defaults to zero)
     if ( validateJson( json_data, "rotation", JsonType::FLOAT, false ) )
     {
-      _rotation =  json_data["rotation"].asFloat();
+      _rotation =  json_data["rotation"].asFloat() * degrees_to_radians;
     }
 
     // Set the center point for the object, w.r.t the bounding box
@@ -147,7 +147,7 @@ namespace Regolith
     // Set the initial angular velocity
     if ( validateJson( json_data, "angular_velocity", JsonType::FLOAT, false ) )
     {
-      setAngularVelocity( json_data["angular_velocity"].asFloat() );
+      setAngularVelocity( json_data["angular_velocity"].asFloat() * degrees_to_radians );
     }
 
     // Set the collision properties
@@ -159,7 +159,7 @@ namespace Regolith
       if ( validateJson( bounding_box_data, "position", JsonType::ARRAY, false ) )
       {
         validateJsonArray( json_data["position"], 2, JsonType::FLOAT );
-        position.set( json_data["position"][0].asFloat(), json_data["position"][1].asFloat() );
+        position.set( bounding_box_data["position"][0].asFloat(), bounding_box_data["position"][1].asFloat() );
       }
 
       validateJson( bounding_box_data, "width", JsonType::FLOAT );
@@ -169,38 +169,16 @@ namespace Regolith
       std::string collision_team = bounding_box_data["collision_team"].asString();
       _collisionTeam = Manager::getInstance()->getCollisionTeam( collision_team );
 
+      float width = bounding_box_data["width"].asFloat();
+      float height = bounding_box_data["height"].asFloat();
 
-      _boundingBox.width = bounding_box_data["width"].asFloat();
-      _boundingBox.height = bounding_box_data["height"].asFloat();
+      _boundingBox.configure( position, width, height );
 
-      _boundingBox.points[0] = position;
-      _boundingBox.points[1] = _boundingBox.points[0];
-      _boundingBox.points[1].x() = _boundingBox.points[1].x() + _boundingBox.width;
-      _boundingBox.points[2] = _boundingBox.points[1];
-      _boundingBox.points[2].y() = _boundingBox.points[2].y() + _boundingBox.height;
-      _boundingBox.points[3] = _boundingBox.points[2];
-      _boundingBox.points[3].x() = _boundingBox.points[3].x() - _boundingBox.width;
-
-      _boundingBox.normals[0] = -unitVector_y;
-      _boundingBox.normals[1] =  unitVector_x;
-      _boundingBox.normals[2] =  unitVector_y;
-      _boundingBox.normals[3] = -unitVector_x;
       INFO_STREAM << "PhysicalObject::configure : Configuring physical object with collision team: " << collision_team;
     }
     else
     {
-      _boundingBox.width = 0.0;
-      _boundingBox.height = 0.0;
-
-      _boundingBox.points[0] = zeroVector;
-      _boundingBox.points[1] = zeroVector;
-      _boundingBox.points[2] = zeroVector;
-      _boundingBox.points[3] = zeroVector;
-
-      _boundingBox.normals[0] = -unitVector_y;
-      _boundingBox.normals[1] =  unitVector_x;
-      _boundingBox.normals[2] =  unitVector_y;
-      _boundingBox.normals[3] = -unitVector_x;
+      _boundingBox.configure( zeroVector, 0.0, 0.0 );
     }
 
     DEBUG_STREAM << "PhysicalObject::configure : Configured physical object. Pos = " << _position << " Vel = " << _velocity << " M = " << _mass << " w/h = " << _boundingBox.width << ", " << _boundingBox.height;

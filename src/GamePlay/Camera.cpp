@@ -107,8 +107,8 @@ namespace Regolith
 
     DEBUG_STREAM << "Camera::renderDrawableObject : " << _targetRect.x << ", " << _targetRect.y << ", " << _targetRect.w << ", " << _targetRect.h << " ~ " << object->getRotation()+texture.getRotation() <<  " @ " << texture.getSDLTexture();
 
-    // Render to the back bufer
-    SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), &object->getCenterPoint(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
+    // Render to the back bufer (Note SDL uses degrees...)
+    SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, (object->getRotation()+texture.getRotation())*radians_to_degrees , &object->getCenterPoint(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
   }
 
 

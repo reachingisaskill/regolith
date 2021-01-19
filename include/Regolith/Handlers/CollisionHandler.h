@@ -65,9 +65,14 @@ namespace Regolith
       float _largest_overlap;
       float _diff;
 
+      float _lever_len_1;
+      float _lever_len_2;
+
       float _total_M;
       float _total_L;
       float _coef_restitution;
+
+      float _total_impulse;
 
       Contact _contact1;
       Contact _contact2;

@@ -25,7 +25,7 @@ namespace Regolith
     {
       DEBUG_LOG( "Collision::configure : Loading hitboxes from array of frames" );
 
-      validateJsonArray( json_data["hit_boxes"], 1, JsonType::ARRAY );
+      validateJsonArray( json_data["hit_boxes"], 0, JsonType::ARRAY );
 
       // Reserve space for the number of frames in the animation
       _collisionFrames.reserve( (size_t)json_data["hit_boxes"].size() );
@@ -127,10 +127,13 @@ namespace Regolith
             float height = hitbox_data["height"].asFloat();
 
             hb.points.push_back( Vector( hitbox_data["position"][0].asFloat(), hitbox_data["position"][1].asFloat() ) );
+
             hb.points.push_back( hb.points[0] );
             hb.points[1].x() = hb.points[1].x() + width;
+
             hb.points.push_back( hb.points[1] );
             hb.points[2].y() = hb.points[2].y() + height;
+
             hb.points.push_back( hb.points[2] );
             hb.points[3].x() = hb.points[3].x() - width;
 
