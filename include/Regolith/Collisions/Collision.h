@@ -23,6 +23,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Structure for holding the description of a single bouding box
 
+  /*
   struct HitBox
   {
     // Relative position
@@ -33,6 +34,33 @@ namespace Regolith
 
     // The type of the collision
     CollisionType type;
+  };
+  */
+
+  // Enumarate the types of hit box for optimizations
+  //  Circle - Store center point. Radius is the x-value of the second point
+  //  Polygon - Has a list of points and normals of the same number describing the number of vertices and edges in clockwise order
+  //  COMING SOON...SymmetricPolygon - Must have even number of points and half the number of normals as the set of normals is reflected
+  enum class HitBoxType { Circle, Polygon };
+
+
+  // Struct holding the info required to perform collision detection using the separating axis theorem
+  struct HitBox
+  {
+    // Vertices position
+    std::vector< Vector > points;
+
+    // Edge normals
+    std::vector< Vector > normals;
+
+    // Number of points/edges
+    unsigned int number;
+
+    // The type of the collision
+    CollisionType collisionType;
+
+    // Type of hitbox to allow calculation optimization
+    HitBoxType shape;
   };
 
 

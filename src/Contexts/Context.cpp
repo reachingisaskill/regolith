@@ -476,6 +476,12 @@ namespace Regolith
       object->setPosition( pos );
     }
 
+    // Load the rotation of the object
+    if ( validateJson( json_data, "rotation", JsonType::FLOAT, false ) )
+    {
+      object->setRotation( json_data["rotation"].asFloat()*degrees_to_radians );
+    }
+
     // Load the alignment info
     if ( validateJson( json_data, "alignment", JsonType::ARRAY, false ) )
     {
@@ -513,6 +519,13 @@ namespace Regolith
       vel.y() = json_data["velocity"][1].asFloat();
 
       object->setVelocity( vel );
+    }
+
+    // Load the angular velocity
+    if ( validateJson( json_data, "angular_velocity", JsonType::FLOAT, false ) )
+    {
+      float ang_vel = json_data["angular_velocity"].asFloat()*degrees_to_radians;
+      object->setAngularVelocity( ang_vel );
     }
   }
 }

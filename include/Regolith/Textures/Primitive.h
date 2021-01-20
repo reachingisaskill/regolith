@@ -22,7 +22,6 @@ namespace Regolith
       SDL_Surface* _theSurface;
       SDL_Rect _clip;
       SDL_RendererFlip _flipFlag;
-      SDL_Point _center;
       float _rotation;
 
       // Post-render options
@@ -43,9 +42,6 @@ namespace Regolith
 
       // Return the flip flag
       virtual SDL_RendererFlip getRendererFlip() { return _flipFlag; }
-
-      // Return a pointer to the center point (If one is defined)
-      virtual SDL_Point* getTextureCenter() { return &_center; }
 
       // Return the rotation value
       virtual double getRotation() { return _rotation; }

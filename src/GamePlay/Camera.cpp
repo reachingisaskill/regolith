@@ -57,6 +57,8 @@ namespace Regolith
       ex.addDetail( "SDL error", SDL_GetError() );
       throw ex;
     }
+
+    SDL_SetTextureBlendMode( raw_texture->sdl_texture, SDL_BLENDMODE_BLEND );
   }
 
 
@@ -78,6 +80,8 @@ namespace Regolith
         throw ex;
       }
 
+      SDL_SetTextureBlendMode( temp_texture, SDL_BLENDMODE_BLEND );
+
       // Update the texture with the new SDL_Texture
       texture.setRenderedTexture( temp_texture );
     }
@@ -86,11 +90,13 @@ namespace Regolith
 
   void Camera::renderDrawableObject( DrawableObject* object, Vector& camera_position )
   {
-    _targetRect.x = ( object->getPosition().x() - camera_position.x() ) * _scaleX;
-    _targetRect.y = ( object->getPosition().y() - camera_position.y() ) * _scaleY;
+    // Scale factors account for different window sizes
+    _targetRect.x = ( object->position().x() - object->center().x() - camera_position.x() ) * _scaleX;
+    _targetRect.y = ( object->position().y() - object->center().y() - camera_position.y() ) * _scaleY;
     _targetRect.w = object->getWidth() * _scaleX;
     _targetRect.h = object->getHeight() * _scaleY;
 
+    // Get a reference to the texture object
     Texture& texture = object->getTexture();
 
     // If a new surface has been provided, re-render the texture
@@ -99,10 +105,10 @@ namespace Regolith
       renderTexture( texture );
     }
 
-    DEBUG_STREAM << "Camera::renderDrawableObject : " << _targetRect.x << ", " << _targetRect.y << ", " << _targetRect.w << ", " << _targetRect.h << " @ " << texture.getSDLTexture();
+    DEBUG_STREAM << "Camera::renderDrawableObject : " << _targetRect.x << ", " << _targetRect.y << ", " << _targetRect.w << ", " << _targetRect.h << " ~ " << object->getRotation()+texture.getRotation() <<  " @ " << texture.getSDLTexture();
 
-    // Render to the back bufer
-    SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, object->getRotation()+texture.getRotation(), texture.getTextureCenter(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
+    // Render to the back bufer (Note SDL uses degrees...)
+    SDL_RenderCopyEx( _theRenderer, texture.getSDLTexture(), texture.getClip(), &_targetRect, (object->getRotation()+texture.getRotation())*radians_to_degrees , &object->getCenterPoint(), (SDL_RendererFlip) (object->getFlipFlag() ^ texture.getRendererFlip()) );
   }
 
 

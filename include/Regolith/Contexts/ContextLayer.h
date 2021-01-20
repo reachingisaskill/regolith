@@ -4,6 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/Architecture/PhysicalObject.h"
+#include "Regolith/Utilities/BoundingBox.h"
 
 #include <list>
 #include <set>
@@ -23,8 +24,7 @@ namespace Regolith
       std::string _name;
       Vector _position; // Can be considered as the offset wrt to the camera
       Vector _movementScale; // Movement wrt the camera position
-      float _width;
-      float _height;
+      BoundingBox _boundingBox;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -56,9 +56,10 @@ namespace Regolith
       constexpr const Vector& getMovementScale() const { return _movementScale; }
 
       // Return width & height
-      constexpr const float& getWidth() const { return _width; }
-      constexpr const float& getHeight() const { return _height; }
+      const float& getWidth() const { return _boundingBox.width; }
+      const float& getHeight() const { return _boundingBox.height; }
 
+      const BoundingBox& getBoundingBox() const { return _boundingBox; }
   };
 
 }

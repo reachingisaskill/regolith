@@ -385,7 +385,7 @@ namespace Regolith
     try
     {
       // Before the run function has started, prioritise rendering to load first context group faster
-      while ( pause )
+      while ( pause && threadHandler.isGood() )
       {
         contextManager.renderContextGroup( camera );
 #ifdef REGOLITH_VALGRIND_BUILD

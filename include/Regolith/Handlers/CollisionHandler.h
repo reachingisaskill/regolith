@@ -50,14 +50,29 @@ namespace Regolith
       // Should (slightly!) speed up the collision detection process
       Vector _object_pos1;
       Vector _object_pos2;
-      Vector _pos1;
-      Vector _pos2;
-      float _overlap_x;
-      float _overlap_y;
-      float _diff_x;
-      float _diff_y;
+
+      Vector _point1;
+      Vector _point2;
+
+      Vector _normal1;
+      Vector _normal2;
+
+      float _projection1;
+      float _projection2;
+
+      Vector _overlapping_point;
+
+      float _largest_overlap;
+      float _diff;
+
+      float _lever_len_1;
+      float _lever_len_2;
+
       float _total_M;
+      float _total_L;
       float _coef_restitution;
+
+      float _total_impulse;
 
       Contact _contact1;
       Contact _contact2;

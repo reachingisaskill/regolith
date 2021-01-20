@@ -90,6 +90,29 @@
           "name" : "red_box",
           "position" : [ 0.0, 700.0 ],
           "velocity" : [ 0.1, 0.1 ]
+        },
+        {
+          "name" : "green_triangle",
+          "position" : [ 105.0, 334.0 ],
+          "velocity" : [ 0.1, 0.1 ],
+          "angular_velocity" : 0.1
+        },
+        {
+          "name" : "green_triangle",
+          "position" : [ 735.0, 34.0 ],
+          "velocity" : [ -0.1, -0.1 ],
+          "angular_velocity" : 0.1
+        },
+        {
+          "name" : "green_triangle",
+          "position" : [ 889.0, 634.0 ],
+          "velocity" : [ -0.1, 0.1 ],
+          "angular_velocity" : -0.05
+        },
+        {
+          "name" : "green_triangle",
+          "position" : [ 575.0, 134.0 ],
+          "velocity" : [ 0, 0.1 ]
         }
       ]
     },
@@ -109,13 +132,6 @@
       ],
       "spawns" : []
     }
-  },
-  
-  "camera" :
-  {
-    "follow:" : null,
-    "lower_limit" : [ 0.0, 0.0 ],
-    "upper_limit" : [ 1024.0, 768.0 ]
   }
 
 }

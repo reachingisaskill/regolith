@@ -17,12 +17,12 @@ using namespace Regolith;
 ////////////////////////////////////////////////////////////////////////////////
   // Json Data for test 1
 const std::string json_test_1 = "{ \"hit_boxes\" : [ [ { \"position\" : [ 10, 20 ], \"width\" : 100, \"height\": 200, \"type\" : \"test0\" } ], \
-                                                     [ { \"position\" : [ 30, 40 ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test1\" } ], \
-                                                     [ { \"position\" : [ 50, 60 ], \"width\" : 20,  \"height\": 10,  \"type\" : \"test1\" } ], \
                                                      [ { \"position\" : [ 10, 20 ], \"width\" : 1,   \"height\": 2,   \"type\" : \"test1\" }, \
                                                        { \"position\" : [ 20, 30 ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test2\" }, \
                                                        { \"position\" : [ 30, 40 ], \"width\" : 100, \"height\": 200, \"type\" : \"test3\" } ], \
-                                                     [ { \"position\" : [ 3 , 4  ], \"width\" : 10,  \"height\": 20,  \"type\" : \"test1\" } ] ] }";
+                                                     [ { \"shape\" : \"polygon\", \"points\" : [[3 , 4], [10, 7], [9, 15], [3, 12], [1, 7]],  \"type\" : \"test1\" } ] ] }";
+
+const std::string json_test_2 = "{ \"hit_boxes\" : [ [ { \"shape\" : \"polygon\", \"points\" : [[0, 0], [10, 0], [8, 10], [7, 3]], \"type\" : \"test0\" } ] ] }";
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -32,6 +32,7 @@ int main( int, char** )
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
   logtastic::addLogFile( "tests_collision.log" );
+  logtastic::setPrintToScreenLimit( logtastic::off );
 
   // Get link to the manager
   Manager::createInstance();
@@ -67,7 +68,7 @@ int main( int, char** )
 
     if ( ! json_reader->parse( json_test_1.c_str(), json_test_1.c_str() + json_test_1.size(), &json_data, &error_string ) )
     {
-      ERROR_LOG( "Error occured parsins Json String" );
+      ERROR_LOG( "Error occured parsing Json String" );
       ERROR_STREAM << error_string;
       error_string.clear();
     }
@@ -75,19 +76,13 @@ int main( int, char** )
 
     collision.configure( json_data );
 
-    ASSERT_EQUAL( collision.getNumberFrames(), (unsigned int) 5 );
+    ASSERT_EQUAL( collision.getNumberFrames(), (unsigned int) 3 );
     ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
 
     collision.setFrameNumber( 1 );
-    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
-
-    collision.setFrameNumber( 2 );
-    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
-
-    collision.setFrameNumber( 3 );
     ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 3 );
 
-    collision.setFrameNumber( 4 );
+    collision.setFrameNumber( 2 );
     ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
   }
 
@@ -100,11 +95,16 @@ int main( int, char** )
     Collision::iterator it = collision.begin();
     Collision::iterator end = collision.end();
 
-    ASSERT_APPROX_EQUAL( it->position.x(), 10 );
-    ASSERT_APPROX_EQUAL( it->position.y(), 20 );
-    ASSERT_APPROX_EQUAL( it->width, 100 );
-    ASSERT_APPROX_EQUAL( it->height, 200 );
-    ASSERT_EQUAL( it->type, (unsigned int) 0 );
+    ASSERT_EQUAL( it->number, (unsigned int)4 );
+    ASSERT_APPROX_EQUAL( it->points[0].x(), 10 );
+    ASSERT_APPROX_EQUAL( it->points[0].y(), 20 );
+    ASSERT_APPROX_EQUAL( it->points[1].x(), 110 );
+    ASSERT_APPROX_EQUAL( it->points[1].y(), 20 );
+    ASSERT_APPROX_EQUAL( it->points[2].x(), 110 );
+    ASSERT_APPROX_EQUAL( it->points[2].y(), 220 );
+    ASSERT_APPROX_EQUAL( it->points[3].x(), 10 );
+    ASSERT_APPROX_EQUAL( it->points[3].y(), 220 );
+    ASSERT_EQUAL( it->collisionType, (unsigned int) 0 );
 
     ASSERT_FALSE( it == end );
     ++it;
@@ -114,90 +114,100 @@ int main( int, char** )
 
   SECTION( "Hit Box Configuration - Frame 1" );
   {
-
     collision.setFrameNumber( 1 );
     Collision::iterator it = collision.begin();
     Collision::iterator end = collision.end();
-
-    ASSERT_APPROX_EQUAL( it->position.x(), 30 );
-    ASSERT_APPROX_EQUAL( it->position.y(), 40 );
-    ASSERT_APPROX_EQUAL( it->width, 10 );
-    ASSERT_APPROX_EQUAL( it->height, 20 );
-    ASSERT_EQUAL( it->type, (unsigned int) 1 );
-
     ASSERT_FALSE( it == end );
+
+    ASSERT_EQUAL( it->number, (unsigned int)4 );
+    ASSERT_APPROX_EQUAL( it->points[0].x(), 10 );
+    ASSERT_APPROX_EQUAL( it->points[0].y(), 20 );
+    ASSERT_APPROX_EQUAL( it->points[1].x(), 11 );
+    ASSERT_APPROX_EQUAL( it->points[1].y(), 20 );
+    ASSERT_APPROX_EQUAL( it->points[2].x(), 11 );
+    ASSERT_APPROX_EQUAL( it->points[2].y(), 22 );
+    ASSERT_APPROX_EQUAL( it->points[3].x(), 10 );
+    ASSERT_APPROX_EQUAL( it->points[3].y(), 22 );
+    ASSERT_EQUAL( it->collisionType, (unsigned int) 1 );
+
+    ++it;
+    ASSERT_FALSE( it == end );
+
+    ASSERT_EQUAL( it->number, (unsigned int)4 );
+    ASSERT_APPROX_EQUAL( it->points[0].x(), 20 );
+    ASSERT_APPROX_EQUAL( it->points[0].y(), 30 );
+    ASSERT_APPROX_EQUAL( it->points[1].x(), 30 );
+    ASSERT_APPROX_EQUAL( it->points[1].y(), 30 );
+    ASSERT_APPROX_EQUAL( it->points[2].x(), 30 );
+    ASSERT_APPROX_EQUAL( it->points[2].y(), 50 );
+    ASSERT_APPROX_EQUAL( it->points[3].x(), 20 );
+    ASSERT_APPROX_EQUAL( it->points[3].y(), 50 );
+    ASSERT_EQUAL( it->collisionType, (unsigned int) 2 );
+
+    ++it;
+    ASSERT_FALSE( it == end );
+
+    ASSERT_EQUAL( it->number, (unsigned int)4 );
+    ASSERT_APPROX_EQUAL( it->points[0].x(), 30 );
+    ASSERT_APPROX_EQUAL( it->points[0].y(), 40 );
+    ASSERT_APPROX_EQUAL( it->points[1].x(), 130 );
+    ASSERT_APPROX_EQUAL( it->points[1].y(), 40 );
+    ASSERT_APPROX_EQUAL( it->points[2].x(), 130 );
+    ASSERT_APPROX_EQUAL( it->points[2].y(), 240 );
+    ASSERT_APPROX_EQUAL( it->points[3].x(), 30 );
+    ASSERT_APPROX_EQUAL( it->points[3].y(), 240 );
+    ASSERT_EQUAL( it->collisionType, (unsigned int) 3 );
+
     ++it;
     ASSERT_TRUE( it == end );
   }
 
   SECTION( "Hit Box Configuration - Frame 2" );
   {
-
     collision.setFrameNumber( 2 );
     Collision::iterator it = collision.begin();
     Collision::iterator end = collision.end();
-
-    ASSERT_APPROX_EQUAL( it->position.x(), 50 );
-    ASSERT_APPROX_EQUAL( it->position.y(), 60 );
-    ASSERT_APPROX_EQUAL( it->width, 20 );
-    ASSERT_APPROX_EQUAL( it->height, 10 );
-    ASSERT_EQUAL( it->type, (unsigned int) 1 );
-
-    ASSERT_FALSE( it == end );
-    ++it;
-    ASSERT_TRUE( it == end );
-  }
-
-  SECTION( "Hit Box Configuration - Frame 3" );
-  {
-    collision.setFrameNumber( 3 );
-    Collision::iterator it = collision.begin();
-    Collision::iterator end = collision.end();
     ASSERT_FALSE( it == end );
 
-    ASSERT_APPROX_EQUAL( it->position.x(), 10 );
-    ASSERT_APPROX_EQUAL( it->position.y(), 20 );
-    ASSERT_APPROX_EQUAL( it->width, 1 );
-    ASSERT_APPROX_EQUAL( it->height, 2 );
-    ASSERT_EQUAL( it->type, (unsigned int) 1 );
-
-    ++it;
-    ASSERT_FALSE( it == end );
-
-    ASSERT_APPROX_EQUAL( it->position.x(), 20 );
-    ASSERT_APPROX_EQUAL( it->position.y(), 30 );
-    ASSERT_APPROX_EQUAL( it->width, 10 );
-    ASSERT_APPROX_EQUAL( it->height, 20 );
-    ASSERT_EQUAL( it->type, (unsigned int) 2 );
-
-    ++it;
-    ASSERT_FALSE( it == end );
-
-    ASSERT_APPROX_EQUAL( it->position.x(), 30 );
-    ASSERT_APPROX_EQUAL( it->position.y(), 40 );
-    ASSERT_APPROX_EQUAL( it->width, 100 );
-    ASSERT_APPROX_EQUAL( it->height, 200 );
-    ASSERT_EQUAL( it->type, (unsigned int) 3 );
+    ASSERT_APPROX_EQUAL( it->points[0].x(), 3 );
+    ASSERT_APPROX_EQUAL( it->points[0].y(), 4 );
+    ASSERT_APPROX_EQUAL( it->points[1].x(), 10 );
+    ASSERT_APPROX_EQUAL( it->points[1].y(), 7 );
+    ASSERT_APPROX_EQUAL( it->points[2].x(), 9 );
+    ASSERT_APPROX_EQUAL( it->points[2].y(), 15 );
+    ASSERT_APPROX_EQUAL( it->points[3].x(), 3 );
+    ASSERT_APPROX_EQUAL( it->points[3].y(), 12 );
+    ASSERT_APPROX_EQUAL( it->points[4].x(), 1 );
+    ASSERT_APPROX_EQUAL( it->points[4].y(), 7 );
+    ASSERT_EQUAL( it->collisionType, (unsigned int) 1 );
 
     ++it;
     ASSERT_TRUE( it == end );
   }
 
-  SECTION( "Hit Box Configuration - Frame 4" );
+////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Concave shape should fail
+  SECTION( "Hit Box Concave Test" );
   {
-    collision.setFrameNumber( 4 );
-    Collision::iterator it = collision.begin();
-    Collision::iterator end = collision.end();
-    ASSERT_FALSE( it == end );
 
-    ASSERT_APPROX_EQUAL( it->position.x(), 3 );
-    ASSERT_APPROX_EQUAL( it->position.y(), 4 );
-    ASSERT_APPROX_EQUAL( it->width, 10 );
-    ASSERT_APPROX_EQUAL( it->height, 20 );
-    ASSERT_EQUAL( it->type, (unsigned int) 1 );
+    if ( ! json_reader->parse( json_test_2.c_str(), json_test_2.c_str() + json_test_2.size(), &json_data, &error_string ) )
+    {
+      ERROR_LOG( "Error occured parsing Json String" );
+      ERROR_STREAM << error_string;
+      error_string.clear();
+    }
 
-    ++it;
-    ASSERT_TRUE( it == end );
+    std::string error_string( "" );
+    try
+    {
+      collision.configure( json_data );
+    }
+    catch ( Exception& ex )
+    {
+      error_string = ex.what();
+    }
+    ASSERT( error_string == std::string("Polygon is not convex. Vertecies must be provided in a clockwise order for a convex shape only. in Collision::configure()") );
+    
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

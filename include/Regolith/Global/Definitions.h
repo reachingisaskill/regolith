@@ -24,6 +24,10 @@ namespace Regolith
 
   const unsigned NUMBER_MOUSE_BUTTONS = 7;
 
+  const float degrees_to_radians = pi / 180.0;
+
+  const float radians_to_degrees = 180.0 / pi;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Useful Typedefs

@@ -18,7 +18,6 @@ namespace Regolith
     _rawTexture( nullptr ),
     _flipFlag( SDL_FLIP_NONE ),
     _clip( { 0, 0, 0, 0 } ),
-    _center( { 0, 0 } ),
     _rotation( 0.0 ),
     _currentSprite( 0 )
   {
@@ -58,9 +57,6 @@ namespace Regolith
     _clip.x = (_currentSprite % _rawTexture->columns) * _clip.w;
     _clip.y = (_currentSprite / _rawTexture->columns) * _clip.h;
 
-    _center.x = _clip.x + _centerOffset.x;
-    _center.y = _clip.y + _centerOffset.y;
-
     DEBUG_STREAM << "Spritesheet::setFrameNumber : " << _currentSprite << " : " << _clip.x << ", " << _clip.y << ", " << _clip.w << ", " << _clip.h;
   }
 
@@ -78,17 +74,9 @@ namespace Regolith
     _clip.w = _rawTexture->width / _rawTexture->columns;
     _clip.h = _rawTexture->height / _rawTexture->rows;
 
-    if ( validateJson( json_data, "center", JsonType::ARRAY, false ) )
-    {
-      validateJsonArray( json_data["center"], 2, JsonType::INTEGER );
-
-      _centerOffset.x = json_data["center"].asInt();
-      _centerOffset.y = json_data["center"].asInt();
-    }
-
     if ( validateJson( json_data, "rotation", JsonType::FLOAT, false ) )
     {
-      _rotation = json_data["rotation"].asFloat();
+      _rotation = json_data["rotation"].asFloat() * degrees_to_radians;
     }
 
     if ( validateJson( json_data, "flip_horizontal", JsonType::BOOLEAN, false ) )

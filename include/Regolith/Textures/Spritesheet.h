@@ -20,8 +20,6 @@ namespace Regolith
       mutable RawTexture* _rawTexture;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
-      SDL_Point _centerOffset;
-      SDL_Point _center;
       double _rotation;
 
       // If its a spritesheet
@@ -39,9 +37,6 @@ namespace Regolith
 
       // Return the flip flag
       virtual SDL_RendererFlip getRendererFlip() { return _flipFlag; }
-
-      // Return a pointer to the center point (If one is defined)
-      virtual SDL_Point* getTextureCenter() { return &_center; }
 
       // Return the rotation value
       virtual double getRotation() { return _rotation; }
