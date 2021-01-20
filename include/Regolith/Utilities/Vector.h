@@ -40,6 +40,7 @@ namespace Regolith
 
       double square() const;
       double mod() const;
+      double angle() const;
       Vector norm() const;
       Vector fabs() const;
 

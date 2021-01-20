@@ -83,12 +83,15 @@ namespace Regolith
               hb.normals.reserve( hb.number );
               hb.shape = HitBoxType::Polygon;
 
+              // Push the polygon vertecies
               for ( Json::ArrayIndex i = 0; i < hb.number; ++i )
               {
                 validateJsonArray( points[i], 2, JsonType::FLOAT );
                 hb.points.push_back( Vector( points[i][0].asFloat(), points[i][1].asFloat() ) );
               }
 
+              // Calculate the normals for each side of the polygon
+              std::vector< Vector > deltas;
               for ( Json::ArrayIndex i = 0; i < hb.number; ++i )
               {
                 Vector& current_point = hb.points[i];
@@ -97,8 +100,23 @@ namespace Regolith
                 // Calculate the left-side normal (We go in a clockwise direction)
                 Vector delta = next_point - current_point;
                 Vector normal( delta.y(), -delta.x() );
+
                 hb.normals.push_back( normal.norm() );
+                deltas.push_back( delta );
               }
+
+              // Check the final shape for convexity
+              for ( size_t i = 0; i < hb.number; ++i )
+              {
+                Vector current_delta = deltas[i];
+                Vector next_delta =  ( i+1 == hb.number ) ? deltas[0] : deltas[i+1];
+                if ( ( current_delta ^ next_delta ) < 0.0 )
+                {
+                  Exception ex( "Collision::configure()", "Polygon is not convex. Vertecies must be provided in a clockwise order for a convex shape only." );
+                  throw ex;
+                }
+              }
+
             }
             else
             {

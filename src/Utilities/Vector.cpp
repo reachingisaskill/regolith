@@ -43,6 +43,12 @@ namespace Regolith
   }
 
 
+  double Vector::angle() const
+  {
+    return std::atan2( _y, _x );
+  }
+
+
   Vector Vector::norm() const
   {
     float mod = this->mod();
