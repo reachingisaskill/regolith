@@ -9,7 +9,8 @@
     "child_context_status" :
     {
       "type" : "status_string",
-      "has_moveable" : false,
+      "has_translatable" : false,
+      "has_rotatable" : false,
       "has_physics" : false,
       "bounding_box" :
       {
@@ -25,7 +26,8 @@
     "fade_screen" :
     {
       "type" : "fade",
-      "has_moveable" : false,
+      "has_translatable" : false,
+      "has_rotatable" : false,
       "has_physics" : false,
       "bounding_box" :
       {

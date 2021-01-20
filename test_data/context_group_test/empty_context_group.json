@@ -22,7 +22,8 @@
     "context_2_status" :
     {
       "type" : "status_string",
-      "has_moveable" : false,
+      "has_translatable" : false,
+      "has_rotatable" : false,
       "has_physics" : false,
       "bounding_box" :
       {

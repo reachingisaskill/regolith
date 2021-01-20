@@ -9,7 +9,9 @@ I chose this to represent a layer of abstraction and memory management architect
 
 It provides an API to support the development of 2D sprite-based games. The initial developement was focussed with goal of supporting a side-scrolling Sci-Fi RPG (in development), but with facilities to make it easily extensible.
 
-It defines a multithreaded engine, handles asset and memory management and provides handlers for easy sound and input event functionality. Hopefully taking the most complicated stuff away from the actual game design.
+It defines a multithreaded engine, handling rendering and update steps in separate threads, it also handles asset and memory management and provides handlers for easy sound and input event functionality.
+Collision detection is implmented based in the separating axis theorem and is compatible is convex polygon hitboxes. Full impulse-based physics responses are provided for each pair of colliding hitboxes.
+Regolith is designed to take the most complicated stuff and heavy lifting away from the actual game design.
 
 There are two core class families for users to inherit from: Physical Objects and Contexts. See below for more details.
 
