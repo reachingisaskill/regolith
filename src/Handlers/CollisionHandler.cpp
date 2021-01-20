@@ -209,7 +209,7 @@ namespace Regolith
       {
         _point2 = _object_pos2 + boundingBox2.points[b2_i].getRotated( object2->rotation() );
         _diff = (_point2*_normal1) - _projection1;
-        DEBUG_STREAM << "CollisionHandler::collides : Checking BB1, Side  P1 = " << _point1 << ", N = " << _normal1 << " P2 = " << _point2;
+//        DEBUG_STREAM << "CollisionHandler::collides : Checking BB1, Side  P1 = " << _point1 << ", N = " << _normal1 << " P2 = " << _point2;
 
         if ( _diff < _largest_overlap ) // Find the max size of the overlap
         {
@@ -237,7 +237,7 @@ namespace Regolith
       {
         _point1 = _object_pos1 + boundingBox1.points[b1_i].getRotated( object1->rotation() );
         _diff = (_point1*_normal2) - _projection2;
-        DEBUG_STREAM << "CollisionHandler::collides : Checking BB2, Side  P1 = " << _point1 << ", N = " << _normal1 << " P2 = " << _point2;
+//        DEBUG_STREAM << "CollisionHandler::collides : Checking BB2, Side  P2 = " << _point2 << ", N = " << _normal2 << " P1 = " << _point1;
 
         if ( _diff < _largest_overlap ) // Find the max size of the overlap
         {
@@ -265,9 +265,7 @@ namespace Regolith
       for ( Collision::iterator col_it2 = collision2.begin(); col_it2 != collision2.end(); ++col_it2 )
       {
         const HitBox& box2 = (*col_it2);
-
         _contact1.overlap = std::numeric_limits<float>::lowest();
-
 
 ////////////////////////////////////////////////////////////////////////////////
         // First objects edges.
@@ -370,8 +368,8 @@ namespace Regolith
 
         _contact1.type = col_it1->collisionType;
         _contact2.type = col_it2->collisionType;
-        DEBUG_STREAM << "CollisionHandler::collides : Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
-        DEBUG_STREAM << "CollisionHandler::collides : Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
+        DEBUG_STREAM << "CollisionHandler::collides : Collides-Callback Overlap 1 = " << _contact1.overlap <<  " -- Normal 1 = " << _contact1.normal;
+        DEBUG_STREAM << "CollisionHandler::collides : Collides-Callback Overlap 2 = " << _contact2.overlap <<  " -- Normal 2 = " << _contact2.normal;
         callback( object1, object2 );
 
 CollidingSeparatingAxisFound:
@@ -546,9 +544,6 @@ ContainingHitBoxCollision:
     object1->onCollision( _contact1, object2 );
     object2->onCollision( _contact2, object1 );
   }
-
-
-
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

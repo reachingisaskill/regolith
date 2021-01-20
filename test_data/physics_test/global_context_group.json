@@ -30,6 +30,44 @@
       "text_name" : "calculating"
     },
 
+    "green_triangle" : 
+    {
+      "type" : "bonk_object",
+      "has_translatable" : true,
+      "has_rotatable" : true,
+      "has_physics" : true,
+      "mass" : 20.0,
+      "intertia" : 500.0,
+      "center" : [ 10.0, 7.0],
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "velocity" : [ 0.0, 0.0 ],
+      "rotation" : 0.0,
+      "bounding_box" :
+      {
+        "position" : [ -10, -10 ],
+        "width" : 20.0,
+        "height" : 20.0,
+        "collision_team" : "object"
+      },
+      "texture" :
+      {
+        "texture_name" : "boxes",
+        "start_number" : 4
+      },
+      "bonk" :
+      {
+        "sound_name" : "bonk"
+      },
+      "collision" :
+      {
+        "hit_boxes" :
+        [
+          [ { "shape" : "polygon", "points" : [[-10, -7], [10, -7], [0, 5]], "type" : "basic" } ]
+        ]
+      }
+    },
+
     "red_box" : 
     {
       "type" : "bonk_object",
@@ -168,7 +206,8 @@
   "spawn_buffers" :
   {
     "red_box" : 10,
-    "blue_box" : 10
+    "blue_box" : 10,
+    "green_triangle" : 10
   },
 
 

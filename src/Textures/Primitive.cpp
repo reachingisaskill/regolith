@@ -20,7 +20,6 @@ namespace Regolith
     _theSurface( nullptr ),
     _clip( { 0, 0, 0, 0 } ),
     _flipFlag( SDL_FLIP_NONE ),
-//    _center( { 0, 0 } ),
     _rotation( 0.0 ),
     _blendMod( SDL_BLENDMODE_NONE ),
     _alphaMod( 255 ),

@@ -89,18 +89,15 @@ namespace Regolith
                 hb.points.push_back( Vector( points[i][0].asFloat(), points[i][1].asFloat() ) );
               }
 
-              Vector current_point;
-              Vector last_point = hb.points[hb.number-1];
               for ( Json::ArrayIndex i = 0; i < hb.number; ++i )
               {
-                current_point = hb.points[i];
+                Vector& current_point = hb.points[i];
+                Vector& next_point = ( i+1 == hb.number ) ? hb.points[0] : hb.points[i+1];
 
-                // Calculate the left-side normal (We go in a clockwise direction!)
-                Vector delta = current_point - last_point;
-                Vector normal( -delta.y(), delta.x() );
-                hb.normals.push_back( normal );
-
-                last_point = current_point;
+                // Calculate the left-side normal (We go in a clockwise direction)
+                Vector delta = next_point - current_point;
+                Vector normal( delta.y(), -delta.x() );
+                hb.normals.push_back( normal.norm() );
               }
             }
             else

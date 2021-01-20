@@ -40,11 +40,11 @@
           "name" : "red_box",
           "position" : [ 100.0, 100.0 ],
           "velocity" : [ 0.2, 0.0 ],
-          "rotation" : 45,
+          "rotation" : 25,
           "angular_velocity" : 0.0
         },
         {
-          "name" : "red_box",
+          "name" : "green_triangle",
           "position" : [ 500.0, 100.0 ],
           "velocity" : [ 0.0, 0.0 ],
           "rotation" : 0,

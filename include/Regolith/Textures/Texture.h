@@ -45,9 +45,6 @@ namespace Regolith
 
       // Return the flip flag
       virtual SDL_RendererFlip getRendererFlip() = 0;
-//
-//      // Return a pointer to the center point (If one is defined)
-//      virtual SDL_Point* getTextureCenter() = 0;
 
       // Return the rotation value
       virtual double getRotation() = 0;
