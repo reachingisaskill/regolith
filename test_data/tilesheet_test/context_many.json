@@ -1,0 +1,138 @@
+{
+  "type" : "empty_context",
+
+  "input_mapping" : "empty",
+
+  "music" :
+  {
+    "music_track" : "music"
+  },
+
+  "collision_handling" :
+  {
+    "team_collision" : [ "object" ],
+    "collision_rules" : [ ],
+    "container_rules" : [ ["scene_boundary", "object"] ]
+  },
+
+  "layers" :
+  {
+    "the_layer" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024.0,
+      "height" : 768.0,
+      "movement_scale" : [ 1.0, 1.0 ],
+      "objects" :
+      [
+        {
+          "name" : "environment_container",
+          "position" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "green_box",
+          "position" : [ 500, 380 ]
+        }
+      ],
+      "spawns" :
+      [
+        {
+          "name" : "red_box",
+          "position" : [ 100.0, 100.0 ],
+          "velocity" : [ 0.50, 0.0 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 500.0, 115.0 ],
+          "velocity" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 200.0, 200.0 ],
+          "velocity" : [ 0.50, 0.0 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 500.0, 200.0 ],
+          "velocity" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 500.0, 605.0 ],
+          "velocity" : [ 0.2, 0.1 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 250.0, 700.0 ],
+          "velocity" : [ 0.30, 0.1 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 0.0, 0.0 ],
+          "velocity" : [ 0.1, 0.1 ]
+        },
+        {
+          "name" : "blue_box",
+          "position" : [ 700.0, 200.0 ],
+          "velocity" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "blue_box",
+          "position" : [ 550.0, 605.0 ],
+          "velocity" : [ 0.2, 0.1 ]
+        },
+        {
+          "name" : "blue_box",
+          "position" : [ 350.0, 700.0 ],
+          "velocity" : [ 0.30, 0.1 ]
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 0.0, 700.0 ],
+          "velocity" : [ 0.1, 0.1 ]
+        },
+        {
+          "name" : "green_triangle",
+          "position" : [ 105.0, 334.0 ],
+          "velocity" : [ 0.1, 0.1 ],
+          "angular_velocity" : 0.1
+        },
+        {
+          "name" : "green_triangle",
+          "position" : [ 735.0, 34.0 ],
+          "velocity" : [ -0.1, -0.1 ],
+          "angular_velocity" : 0.1
+        },
+        {
+          "name" : "green_triangle",
+          "position" : [ 889.0, 634.0 ],
+          "velocity" : [ -0.1, 0.1 ],
+          "angular_velocity" : -0.05
+        },
+        {
+          "name" : "green_triangle",
+          "position" : [ 575.0, 134.0 ],
+          "velocity" : [ 0, 0.1 ]
+        }
+      ]
+    },
+
+    "the_hud" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024.0,
+      "height" : 768.0,
+      "movement_scale" : [ 1.0, 1.0 ],
+      "objects" :
+      [
+        {
+          "name" : "fps_string",
+          "position" : [ 10.0, 10.0 ]
+        }
+      ],
+      "spawns" : []
+    }
+  }
+
+}
+
