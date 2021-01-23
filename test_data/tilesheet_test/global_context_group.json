@@ -197,8 +197,24 @@
       "collision" :
       {
         "hit_boxes" : []
-      },
-      "start_state" : "default"
+      }
+    },
+
+    "tiled_object" :
+    {
+      "type" : "tiled_object",
+      "has_translatable" : false,
+      "has_rotatable" : false,
+      "has_physics" : false,
+      "mass" : 0.0,
+      "elasticity" : 1.0,
+      "position" : [ 0.0, 0.0 ],
+      "bounding_box" :
+      {
+        "width" : 1024.0,
+        "height" : 768.0,
+        "collision_team" : "object"
+      }
     }
   },
 
