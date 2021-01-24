@@ -12,7 +12,6 @@ namespace Regolith
   Camera::Camera( WindowManager& window, SDL_Renderer* renderer, const int& width, const int& height, const float& scalex, const float& scaley ) :
     _theWindow( window ),
     _theRenderer( renderer ),
-    _defaultColour( { 0, 0, 0, 255 } ),
     _windowRect( { 0, 0, 0, 0 } ),
     _width( width ),
     _height( height ),
@@ -26,7 +25,7 @@ namespace Regolith
   void Camera::resetRender() const
   {
     SDL_SetRenderDrawBlendMode( _theRenderer, SDL_BLENDMODE_NONE );
-    SDL_SetRenderDrawColor( _theRenderer, _defaultColour.r, _defaultColour.g, _defaultColour.b, _defaultColour.a );
+    SDL_SetRenderDrawColor( _theRenderer, _theWindow._defaultColour.r, _theWindow._defaultColour.g, _theWindow._defaultColour.b, _theWindow._defaultColour.a );
     SDL_RenderClear( _theRenderer );
   }
 

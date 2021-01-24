@@ -5,7 +5,7 @@
 #include "Regolith/Global/Global.h"
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/ObjectInterfaces/CollidableObject.h"
-#include "Regolith/Collisions/Collision.h"
+#include "Regolith/Collisions/TilesheetCollision.h"
 #include "Regolith/Textures/Tilesheet.h"
 
 
@@ -21,7 +21,7 @@ namespace Regolith
       Tilesheet _texture;
 
       // Collision for the object
-      Collision _collision;
+      TilesheetCollision _collision;
 
     protected :
       // Copy constructor - protected so only way to duplicate objects is through the "clone" function

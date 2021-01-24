@@ -2,7 +2,7 @@
 
 #include "Regolith.h"
 #include "Regolith/Links/LinkCollisionManager.h"
-#include "Regolith/Collisions/Collision.h"
+#include "Regolith/Collisions/SpriteCollision.h"
 
 #include "testass.h"
 #include "logtastic.h"
@@ -57,7 +57,7 @@ int main( int, char** )
   Json::Value json_data;
   std::string error_string;
 
-  Collision collision;
+  SpriteCollision collision;
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -77,13 +77,13 @@ int main( int, char** )
     collision.configure( json_data );
 
     ASSERT_EQUAL( collision.getNumberFrames(), (unsigned int) 3 );
-    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
+    ASSERT_EQUAL( collision.size(), (unsigned int) 1 );
 
     collision.setFrameNumber( 1 );
-    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 3 );
+    ASSERT_EQUAL( collision.size(), (unsigned int) 3 );
 
     collision.setFrameNumber( 2 );
-    ASSERT_EQUAL( collision.getNumberHitBoxes(), (unsigned int) 1 );
+    ASSERT_EQUAL( collision.size(), (unsigned int) 1 );
   }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ int main( int, char** )
     {
       error_string = ex.what();
     }
-    ASSERT( error_string == std::string("Polygon is not convex. Vertecies must be provided in a clockwise order for a convex shape only. in Collision::configure()") );
+    ASSERT( error_string == std::string("Polygon is not convex. Vertecies must be provided in a clockwise order for a convex shape only. in SpriteCollision::configure()") );
     
   }
 

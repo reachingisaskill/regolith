@@ -3,8 +3,8 @@
   {
     "screen_width" : 1024,
     "screen_height" : 768,
-    "default_colour" : [ 150, 150, 500, 255 ],
-    "title" : "Regolith Physics Test",
+    "default_colour" : [ 150, 150, 150, 255 ],
+    "title" : "Regolith Tilesheet Test",
     "v-sync" : true
   },
 
@@ -51,12 +51,12 @@
 
   "game_data" :
   {
-    "resource_index_file" : "test_data/physics_test/index.json"
+    "resource_index_file" : "test_data/tilesheet_test/index.json"
   },
 
   "contexts" :
   {
-    "global" : "test_data/physics_test/global_context_group.json",
+    "global" : "test_data/tilesheet_test/global_context_group.json",
 
     "context_groups" : 
     {

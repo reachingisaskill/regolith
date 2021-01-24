@@ -71,7 +71,7 @@ namespace Regolith
     {
       validateJsonArray( json_data["default_colour"], 4, JsonType::INTEGER );
 
-      Json::Value color = json_data["default_color"];
+      Json::Value color = json_data["default_colour"];
       _defaultColour.r = color[0].asInt();
       _defaultColour.g = color[1].asInt();
       _defaultColour.b = color[2].asInt();

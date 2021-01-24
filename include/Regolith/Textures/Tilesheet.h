@@ -19,6 +19,7 @@ namespace Regolith
       // Pointer to the raw sdl texture
       mutable RawTexture* _rawTexture;
       SDL_Surface* _tiledSurface;
+      SDL_Texture* _tiledTexture;
       SDL_RendererFlip _flipFlag;
       SDL_Rect _clip;
       double _rotation;
@@ -31,7 +32,7 @@ namespace Regolith
       // Functions required to make this object render-able
 
       // Return a pointer the raw, SDL texture
-      virtual SDL_Texture* getSDLTexture() { return _rawTexture->sdl_texture; }
+      virtual SDL_Texture* getSDLTexture() { return _tiledTexture; }
 
       // Return a pointer to the clip rect for the rendering process
       virtual SDL_Rect* getClip() { return &_clip; }
@@ -60,7 +61,7 @@ namespace Regolith
       virtual ~Tilesheet();
 
       // Return true if a surface needs to be rendered
-      virtual bool update() const { return ( _rawTexture != nullptr ) && ( _rawTexture->sdl_texture == nullptr ); }
+      virtual bool update() const { return ( _tiledSurface != nullptr ) && ( _tiledTexture == nullptr ); }
 
 
       // Configures as a sprite sheet with optional animation. No. rows, No. Columns, and No. of used cells and update period

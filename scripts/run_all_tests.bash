@@ -10,4 +10,5 @@
 ./bin/Regolith_test_context_groups
 ./bin/Regolith_test_music
 ./bin/Regolith_test_physics_simulation
+./bin/Regolith_test_tilesheet
 

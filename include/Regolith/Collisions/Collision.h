@@ -23,31 +23,16 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////////////////////////
   // Structure for holding the description of a single bouding box
 
-  /*
-  struct HitBox
-  {
-    // Relative position
-    Vector position;
-    // Dimensions
-    float width;
-    float height;
-
-    // The type of the collision
-    CollisionType type;
-  };
-  */
-
-  // Enumarate the types of hit box for optimizations
-  //  Circle - Store center point. Radius is the x-value of the second point
-  //  Polygon - Has a list of points and normals of the same number describing the number of vertices and edges in clockwise order
-  //  COMING SOON...SymmetricPolygon - Must have even number of points and half the number of normals as the set of normals is reflected
-  enum class HitBoxType { Circle, Polygon };
+//  // Enumarate the types of hit box for optimizations
+//  //  Polygon - Has a list of points and normals of the same number describing the number of vertices and edges in clockwise order
+//  //  Coming soon: Circle - Store center point. Radius is the x-value of the second point
+//  enum class HitBoxType { Circle, Polygon };
 
 
   // Struct holding the info required to perform collision detection using the separating axis theorem
   struct HitBox
   {
-    // Vertices position
+    // Vertex positions
     std::vector< Vector > points;
 
     // Edge normals
@@ -59,8 +44,8 @@ namespace Regolith
     // The type of the collision
     CollisionType collisionType;
 
-    // Type of hitbox to allow calculation optimization
-    HitBoxType shape;
+//    // Type of hitbox to allow calculation optimization - NOT USED CURRENTLY. EVERYTHING IS A POLYGON!
+//    HitBoxType shape;
   };
 
 
@@ -73,39 +58,30 @@ namespace Regolith
       typedef std::vector< HitBox > HitBoxVector;
       typedef HitBoxVector::const_iterator iterator;
 
-    private:
-      typedef std::vector< HitBoxVector > CollisionFrames;
+    protected:
+      typedef std::vector< HitBoxVector > Frames;
 
     private:
-      // Store a vector of vector of hit boxes. Only one set is active at time.
-      CollisionFrames _collisionFrames;
-
-      // Current active hitboxes
-      size_t _currentCollision;
 
     public:
-      Collision();
-//      ~Collision();
-
-      // Configure the hitboxes for each frame
-      void configure( Json::Value& );
+      // Con/Destruction
+      Collision() {}
+      virtual ~Collision() {}
 
 
-      // Return the total number of frames loaded
-      unsigned int getNumberFrames() const { return _collisionFrames.size(); }
+      // Configure the hitboxes
+      virtual void configure( Json::Value& ) = 0;
+
 
       // Return the number of hitboxes in the current frame
-      unsigned int getNumberHitBoxes() const { return _collisionFrames[_currentCollision].size(); }
+      virtual size_t size() const = 0;
 
 
-      // If this is an animated collision, update accordingly
-      void setFrameNumber( unsigned int frame ) { _currentCollision = frame; }
+      // Return the start of the collision vector
+      virtual iterator begin() const = 0;
 
-      // Return the start of the active collision vector
-      iterator begin() const { return _collisionFrames[_currentCollision].begin(); }
-
-      // Return the end of the active collision vector
-      iterator end() const { return _collisionFrames[_currentCollision].end(); }
+      // Return the end of the collision vector
+      virtual iterator end() const = 0;
 
   };
 

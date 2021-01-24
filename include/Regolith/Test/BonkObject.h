@@ -6,7 +6,7 @@
 #include "Regolith/ObjectInterfaces/DrawableObject.h"
 #include "Regolith/ObjectInterfaces/CollidableObject.h"
 #include "Regolith/ObjectInterfaces/NoisyObject.h"
-#include "Regolith/Collisions/Collision.h"
+#include "Regolith/Collisions/SpriteCollision.h"
 #include "Regolith/Audio/Sound.h"
 #include "Regolith/Textures/Spritesheet.h"
 
@@ -23,7 +23,7 @@ namespace Regolith
       Spritesheet _texture;
 
       // Collision for the object
-      Collision _collision;
+      SpriteCollision _collision;
 
       // Noise to make in collision
       Sound _bonk;

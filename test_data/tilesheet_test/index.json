@@ -1,20 +1,20 @@
 {
   "fonts": 
   {
-    "the_font" : { "path" : "test_data/physics_test/crap_font.ttf" }
+    "the_font" : { "path" : "test_data/tilesheet_test/crap_font.ttf" }
   },
   "audio": 
   {
-    "bonk" : { "path" : "test_data/physics_test/sound_bonk.wav" },
-    "music" : { "path" : "test_data/physics_test/a_beat.wav" }
+    "bonk" : { "path" : "test_data/tilesheet_test/sound_bonk.wav" },
+    "music" : { "path" : "test_data/tilesheet_test/a_beat.wav" }
   },
   "text": 
   {
-    "calculating" : { "path" : "test_data/physics_test/calculating.txt" }
+    "calculating" : { "path" : "test_data/tilesheet_test/calculating.txt" }
   },
   "images": 
   {
-    "boxes": { "path": "test_data/physics_test/boxes.xcf", "width": 40, "height": 60, "rows": 3, "columns": 2, "colour_key" : [255, 255, 255, 255]  },
-    "coloured_boxes": { "path": "test_data/physics_test/coloured_boxes.bmp", "rows": 2, "columns": 2, "width": 40, "height": 40 }
+    "boxes": { "path": "test_data/tilesheet_test/boxes.xcf", "width": 40, "height": 60, "rows": 3, "columns": 2, "colour_key" : [255, 255, 255, 255]  },
+    "tilesheet": { "path": "test_data/tilesheet_test/tilesheet.xcf", "width": 150, "height": 250, "rows": 5, "columns": 3 }
   }
 }

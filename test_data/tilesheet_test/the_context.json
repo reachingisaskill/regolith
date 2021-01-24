@@ -1,0 +1,90 @@
+{
+  "type" : "empty_context",
+
+  "input_mapping" : "empty",
+
+  "music" :
+  {
+    "music_track" : "music"
+  },
+
+  "collision_handling" :
+  {
+    "team_collision" : [ "object" ],
+    "collision_rules" : [ ],
+    "container_rules" : [ ["scene_boundary", "object"] ]
+  },
+
+  "layers" :
+  {
+    "the_layer" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024.0,
+      "height" : 768.0,
+      "movement_scale" : [ 1.0, 1.0 ],
+      "objects" :
+      [
+        {
+          "name" : "environment_container",
+          "position" : [ 0.0, 0.0 ]
+        },
+        {
+          "name" : "tiled_object", 
+          "position" : [100, 100]
+        }
+      ],
+      "spawns" :
+      [
+        {
+          "name" : "red_box",
+          "position" : [ 150.0, 25.0 ],
+          "velocity" : [ 0.10, 0.3 ],
+          "rotation" : 45
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 50.0, 635.0 ],
+          "velocity" : [ 0.20, -0.2 ],
+          "rotation" : 0
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 850.0, 75.0 ],
+          "velocity" : [ -0.10, -0.3 ],
+          "rotation" : 15
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 500.0, 305.0 ],
+          "velocity" : [ -0.10, 0.1 ],
+          "rotation" : 985
+        },
+        {
+          "name" : "red_box",
+          "position" : [ 450.0, 105.0 ],
+          "velocity" : [ -0.10, 0.3 ],
+          "rotation" : 5
+        }
+      ]
+    },
+
+    "the_hud" :
+    {
+      "position" : [ 0.0, 0.0 ],
+      "width" : 1024.0,
+      "height" : 768.0,
+      "movement_scale" : [ 1.0, 1.0 ],
+      "objects" :
+      [
+        {
+          "name" : "fps_string",
+          "position" : [ 10.0, 10.0 ]
+        }
+      ],
+      "spawns" : []
+    }
+  }
+
+}
+

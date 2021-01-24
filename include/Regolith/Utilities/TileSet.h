@@ -26,12 +26,17 @@ namespace Regolith
       bool _optimize;
 
       // Tile dimensions
-      float _tileWidth;
-      float _tileHeight;
+      int _tileWidth;
+      int _tileHeight;
 
       // Whole tileset dimensions
-      float _width;
-      float _height;
+      int _width;
+      int _height;
+
+      // Dimensions of the internal arrays
+      size_t _numRows;
+      size_t _numCols;
+
 
       // The number of cells that the texture is required to have.
       unsigned int _numCells;
@@ -46,13 +51,34 @@ namespace Regolith
 
 
     public:
-      TileSet( std::string, RawTexture* );
+      TileSet( std::string );
 
       ~TileSet();
 
-      SDL_Surface* buildSurface( RawTexture* );
 
-      // void buildHitBoxes( HitBoxVector& );
+      // Return the width of a tile
+      float getTileWidth() const { return _tileWidth; }
+
+      // Return the height of a tile
+      float getTileHeight() const { return _tileHeight; }
+
+      // Return the dimensions of the whole tiled structure.
+      float getWidth() const { return _width; }
+      float getHeight() const { return _height; }
+
+
+
+      // Return the number of rows
+      size_t getNumberRows() const { return _numRows; }
+
+      // Return the number of columns
+      size_t getNumberColumns() const { return _numCols; }
+
+
+      // Return the value at the requested tile
+      unsigned int operator()( size_t r, size_t c ) const { return _matrix[r][c]; }
+      unsigned int get( size_t r, size_t c ) const { return _matrix[r][c]; }
+
   };
 
 }

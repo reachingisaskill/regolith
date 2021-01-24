@@ -9,10 +9,12 @@ namespace Regolith
   TileSet::TileSet( std::string file ) :
     _filename( file ),
     _optimize( false ),
-    _tileWidth( 0.0 ),
-    _tileHight( 0.0 ),
-    _width( 0.0 ),
-    _height( 0.0 ),
+    _tileWidth( 0 ),
+    _tileHeight( 0 ),
+    _width( 0 ),
+    _height( 0 ),
+    _numRows( 0 ),
+    _numCols( 0 ),
     _numCells( 0 ),
     _matrix()
   {
@@ -32,19 +34,22 @@ namespace Regolith
     loadJsonData( json_data, _filename );
 
     // Validate the data
-    validateJson( json_data, "tile_width", JsonType::FLOAT );
-    validateJson( json_data, "tile_height", JsonType::FLOAT );
+    validateJson( json_data, "tile_width", JsonType::INTEGER );
+    validateJson( json_data, "tile_height", JsonType::INTEGER );
     validateJson( json_data, "tile_matrix", JsonType::ARRAY );
     validateJsonArray( json_data["tile_matrix"], 0, JsonType::ARRAY );
 
-    _tileWidth = json_data["tile_width"].asFloat();
-    _tileHeight = json_data["tile_height"].asFloat();
+    _tileWidth = json_data["tile_width"].asInt();
+    _tileHeight = json_data["tile_height"].asInt();
 
     Json::Value& matrix_data = json_data["tile_matrix"];
-    unsigned int num_rows = matrix_data.size();
-    unsigned int num_cols = matrix_data[0].size();
+    _numRows = matrix_data.size();
+    _numCols = matrix_data[0].size();
 
-    _matrix.reserve( num_rows );
+    _width = _numCols*_tileWidth;
+    _height = _numRows*_tileHeight;
+
+    _matrix.reserve( _numRows );
 
     // Iterate through the rows
     for ( Json::ArrayIndex i = 0; i < matrix_data.size(); ++i )
@@ -55,17 +60,17 @@ namespace Regolith
       validateJsonArray( row_data, 0, JsonType::INTEGER );
 
       // Make sure everything's the same size
-      if ( row_data.size() != num_cols )
+      if ( row_data.size() != _numCols )
       {
         Exception ex( "TileSet::_configure()", "Number of columns in tile matrix is not consistent." );
-        ex.addDetail( "First Row", num_cols );
+        ex.addDetail( "First Row", _numCols );
         ex.addDetail( "Row Number", i );
         ex.addDetail( "Found Columns", row_data.size() );
         throw ex;
       }
       
       // Push a fresh row_data and reserve space
-      _matrix.push_back( TileRow( num_cols, 0 ) );
+      _matrix.push_back( TileRow( _numCols, 0 ) );
 
       // Iterate through the columns
       for ( Json::ArrayIndex j = 0; j < row_data.size(); ++j )
@@ -80,29 +85,14 @@ namespace Regolith
         value = std::abs( value );
 
         // Update the number of required cells if needed.
-        if ( value > _numCells ) _numCells = value;
+        if ( (unsigned)value > _numCells ) _numCells = value;
 
-        _matrix[i].push_back( value );
+        _matrix[i][j] = value;
       }
     }
 
+    DEBUG_STREAM << "TileSet::_configure : Configured : " << _numRows << "x" << _numCols << " => " << _width << "x" << _height << " Tiles: " << _tileWidth << "x" << _tileHeight;
   }
-
-
-  SDL_Surface* TileSet::buildSurface( RawTexture* texture )
-  {
-    if ( texture->cells < _numCells )
-    {
-      Exception ex( "TileSet::buldSurface()", "Provided texture does not have enough cells." );
-      ex.addDetail( "Number Provided", texture->cells );
-      ex.addDetail( "Number Required", _numCells );
-      throw ex;
-    }
-
-
-
-  }
-
 
 }
 

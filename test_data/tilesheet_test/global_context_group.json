@@ -63,7 +63,7 @@
       {
         "hit_boxes" :
         [
-          [ { "shape" : "polygon", "points" : [[-10, -7], [10, -7], [0, 5]], "type" : "basic" } ]
+          [ { "points" : [[-10, -7], [10, -7], [0, 5]], "type" : "basic" } ]
         ]
       }
     },
@@ -89,82 +89,8 @@
       },
       "texture" :
       {
-        "texture_name" : "coloured_boxes",
+        "texture_name" : "boxes",
         "start_number" : 0
-      },
-      "bonk" :
-      {
-        "sound_name" : "bonk"
-      },
-      "collision" :
-      {
-        "hit_boxes" :
-        [
-          [ { "position" : [ -10, -10 ], "width" : 20, "height" : 20, "type" : "basic" } ]
-        ]
-      }
-    },
-
-    "blue_box" :
-    {
-      "type" : "bonk_object",
-      "has_translatable" : true,
-      "has_rotatable" : true,
-      "has_physics" : true,
-      "mass" : 100.0,
-      "center" : [ 10.0, 10.0 ],
-      "elasticity" : 1.0,
-      "position" : [ 0.0, 0.0 ],
-      "velocity" : [ 0.0, 0.0 ],
-      "rotation" : 0.0,
-      "bounding_box" :
-      {
-        "position" : [-10, -10],
-        "width" : 20.0,
-        "height" : 20.0,
-        "collision_team" : "object"
-      },
-      "texture" :
-      {
-        "texture_name" : "coloured_boxes",
-        "start_number" : 3
-      },
-      "bonk" :
-      {
-        "sound_name" : "bonk"
-      },
-      "collision" :
-      {
-        "hit_boxes" :
-        [
-          [ { "position" : [ -10, -10 ], "width" : 20, "height" : 20, "type" : "basic" } ]
-        ]
-      }
-    },
-
-    "green_box" :
-    {
-      "type" : "bonk_object",
-      "has_translatable" : false,
-      "has_rotatable" : false,
-      "has_physics" : true,
-      "mass" : 0.0,
-      "center" : [10.0, 10.0],
-      "elasticity" : 1.0,
-      "position" : [ 0.0, 0.0 ],
-      "velocity" : [ 0.0, 0.0 ],
-      "rotation" : 0.0,
-      "bounding_box" :
-      {
-        "position" : [-10, -10],
-        "width" : 20.0,
-        "height" : 20.0,
-        "collision_team" : "object"
-      },
-      "texture" :
-      {
-        "texture_name" : "coloured_boxes",
-        "start_number" : 2
       },
       "bonk" :
       {
@@ -211,9 +137,19 @@
       "position" : [ 0.0, 0.0 ],
       "bounding_box" :
       {
-        "width" : 1024.0,
-        "height" : 768.0,
+        "width" : 500.0,
+        "height" : 500.0,
         "collision_team" : "object"
+      },
+      "collision" :
+      {
+        "collision_type" : "basic",
+        "tile_set" : "test_data/tilesheet_test/tileset.json"
+      },
+      "texture" :
+      {
+        "texture_name" : "tilesheet",
+        "tile_set" : "test_data/tilesheet_test/tileset.json"
       }
     }
   },
@@ -221,15 +157,13 @@
 
   "spawn_buffers" :
   {
-    "red_box" : 10,
-    "blue_box" : 10,
-    "green_triangle" : 10
+    "red_box" : 10
   },
 
 
   "contexts" :
   {
-    "the_context" : "test_data/physics_test/context_many.json"
+    "the_context" : "test_data/tilesheet_test/the_context.json"
   }
 
 }

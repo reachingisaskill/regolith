@@ -68,12 +68,8 @@ namespace Regolith
   }
 
 
-  void TiledObject::onCollision( Contact& contact, CollidableObject* /*other_object*/)
+  void TiledObject::onCollision( Contact& /*contact*/, CollidableObject* /*other_object*/)
   {
-    DEBUG_STREAM << "PhysicalObject::onCollision : " << contact.overlap << " | " << contact.impulse;
-    this->move( contact.inertiaRatio * contact.overlap * contact.normal );
-    this->kick( contact.impulse );
-    DEBUG_STREAM << "PhysicalObject::onCollision : Position : " << this->getPosition() << ", Vel : " << this->getVelocity();
   }
 
 }

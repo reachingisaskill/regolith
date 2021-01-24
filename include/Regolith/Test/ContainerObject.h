@@ -4,7 +4,7 @@
 
 #include "Regolith/Global/Global.h"
 #include "Regolith/ObjectInterfaces/CollidableObject.h"
-#include "Regolith/Collisions/Collision.h"
+#include "Regolith/Collisions/SpriteCollision.h"
 
 
 namespace Regolith
@@ -16,7 +16,7 @@ namespace Regolith
 ////////////////////////////////////////////////////////////////////////////////
     private:
       // Collision for the object
-      Collision _collision;
+      SpriteCollision _collision;
 
     protected :
       // Copy constructor - protected so only way to duplicate objects is through the "clone" function
