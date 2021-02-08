@@ -102,9 +102,12 @@ I personally have an interest in real time strategy games particularly as a (som
 - I would like to enable ContextGroup loading/unloading without using a load screen. Games would still be split into "rooms" but at least neighbouring areas could be loaded/unloaded on the fly, reducing the actual usage of loadscreens.
 - A map object. Contexts must currently self organise with each other as to which one loads next. Having a global map would allow the engine to figure out which one to load next and help facilitate the previous request ^.
 - Overhaul of threading. Although no use yet requires it, I am planning how to further improve the multithreaded the engine, particularly if AI-heavy objects are required. This is hopefully way off in the future as it may be quite a drastic change that will required extensive planning and testing.
+- Actually implement a spinlock. I'm using a bastardised unique\_lock (as I didn't know what a spinlock was until after I came up with the idea...) which has a lot of pit falls despite be considerably faster. I should do a proper implementation and profile on different hardware.
 
 ### Known Bugs
 
 None! I'm amazing!
 But probably because we just haven't found them yet...
+
+Potentially an issue with my awful spinlocks when thread usage is high.
 
