@@ -22,7 +22,7 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_complete.log" );
+  logtastic::setLogFile( "tests_complete.log" );
   logtastic::setPrintToScreenLimit( logtastic::error );
 
   testass::control::init( "Regolith", "Complete Integration Test" );

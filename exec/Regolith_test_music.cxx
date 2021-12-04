@@ -17,7 +17,7 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_music.log" );
+  logtastic::setLogFile( "tests_music.log" );
   logtastic::setPrintToScreenLimit( logtastic::error );
 
   testass::control::init( "Regolith", "Music Interface" );

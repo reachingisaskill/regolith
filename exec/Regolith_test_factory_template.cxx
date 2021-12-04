@@ -29,7 +29,7 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_factory_template.log" );
+  logtastic::setLogFile( "tests_factory_template.log" );
   logtastic::start( "Regolith - Factory Template Tests", REGOLITH_VERSION_NUMBER );
 
   testass::control::init( "Regolith", "Factory Template" );

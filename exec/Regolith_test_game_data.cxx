@@ -12,7 +12,7 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_game_data.log" );
+  logtastic::setLogFile( "tests_game_data.log" );
   logtastic::start( "Regolith - Game Data Tests", REGOLITH_VERSION_NUMBER );
 
   testass::control::init( "Regolith", "Game Data" );

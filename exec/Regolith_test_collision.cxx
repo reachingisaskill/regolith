@@ -31,7 +31,7 @@ int main( int, char** )
   // Configure the logger first
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_collision.log" );
+  logtastic::setLogFile( "tests_collision.log" );
   logtastic::setPrintToScreenLimit( logtastic::off );
 
   // Get link to the manager

@@ -20,7 +20,7 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_tilesheets.log" );
+  logtastic::setLogFile( "tests_tilesheets.log" );
   logtastic::setPrintToScreenLimit( logtastic::error );
 
   testass::control::init( "Regolith", "Tilesheet Simulation" );

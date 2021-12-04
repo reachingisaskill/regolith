@@ -15,7 +15,7 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_vector.log" );
+  logtastic::setLogFile( "tests_vector.log" );
   logtastic::start( "Regolith - Vector Tests", REGOLITH_VERSION_NUMBER );
 
   testass::control::init( "Regolith", "Vectors" );

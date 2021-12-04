@@ -19,7 +19,7 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_physics_simulation.log" );
+  logtastic::setLogFile( "tests_physics_simulation.log" );
   logtastic::setPrintToScreenLimit( logtastic::error );
 
   testass::control::init( "Regolith", "Physics Simulation" );

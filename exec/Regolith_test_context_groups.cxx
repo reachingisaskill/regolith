@@ -18,7 +18,7 @@ int main( int, char** )
 {
   logtastic::init();
   logtastic::setLogFileDirectory( "./test_data/logs/" );
-  logtastic::addLogFile( "tests_context_groups.log" );
+  logtastic::setLogFile( "tests_context_groups.log" );
   logtastic::setPrintToScreenLimit( logtastic::error );
 
   testass::control::init( "Regolith", "Context Group Management Test" );
